@@ -1,0 +1,38 @@
+Qué debería ir aqui:
+...
+├─ infra/
+│  ├─ docker/
+│  │  ├─ compose/
+│  │  │  ├─ docker-compose.dev.yml
+│  │  │  ├─ docker-compose.qa.yml
+│  │  │  └─ docker-compose.prod.yml
+│  │  ├─ images/
+│  │  │  ├─ gateway/
+│  │  │  ├─ services/
+│  │  │  └─ observability/
+│  │  └─ scripts/
+│  │     ├─ up.sh
+│  │     ├─ down.sh
+│  │     └─ reset-db.sh
+│  ├─ k8s/
+│  │  ├─ base/
+│  │  ├─ overlays/
+│  │  │  ├─ dev/
+│  │  │  ├─ qa/
+│  │  │  └─ prod/
+│  │  └─ helm/
+│  ├─ ci/
+│  │  ├─ jenkins/
+│  │  │  ├─ Jenkinsfile
+│  │  │  ├─ pipelines/
+│  │  │  └─ shared-libs/
+│  │  └─ scripts/
+│  │     ├─ build.sh
+│  │     ├─ test.sh
+│  │     └─ scan.sh
+│  └─ observability/
+│     ├─ otel/
+│     ├─ grafana/
+│     ├─ prometheus/
+│     └─ dashboards/
+...
