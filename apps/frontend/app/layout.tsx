@@ -1,17 +1,8 @@
+/* eslint-disable @next/next/no-page-custom-font */
+/* eslint-disable @next/next/google-font-display */
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import MUIWrapper from "./mui-wrapper";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import ProvidersWrapper from "./ProvidersWrappper";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -26,10 +17,16 @@ export default function RootLayout({
   return (
     <html
       lang="es-MX"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`h-full w-full antialiased`}
     >
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        />
+      </head>
       <body className="min-h-full flex flex-col">
-        <MUIWrapper>{children}</MUIWrapper>
+        <ProvidersWrapper>{children}</ProvidersWrapper>
       </body>
     </html>
   );

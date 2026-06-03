@@ -1,10 +1,14 @@
+"use client";
+import MainLayout from "@/shell/layout/MainLayout";
+import { useSidebar } from "@/shell/providers/SidebarProvider";
 import Button from "@mui/material/Button";
 import Image from "next/image";
 
-export default function Home() {
+function Home() {
+  const { showSidebar } = useSidebar();
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <div className="bg-black flex flex-col flex-1 items-center justify-center font-sans  h-full">
+      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between sm:items-start">
         <Image
           className="dark:invert"
           src="/next.svg"
@@ -61,8 +65,27 @@ export default function Home() {
             Documentation
           </a>
         </div>
-        <Button variant="contained" color="secondary">Click me</Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() =>
+            showSidebar({
+              title: "Sidebar Title",
+              children: <div>Sidebar Content</div>,
+            })
+          }
+        >
+          Click me
+        </Button>
       </main>
     </div>
+  );
+}
+
+export default function Hame() {
+  return (
+    <MainLayout>
+      <Home />
+    </MainLayout>
   );
 }

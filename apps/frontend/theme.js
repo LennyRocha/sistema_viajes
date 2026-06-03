@@ -34,6 +34,12 @@ const theme = createTheme({
                 },
                 success: {
                     main: "#008F5D",
+                },
+                actions: {
+                    main: "#4A6D80",
+                },
+                border: {
+                    main: "#222222",
                 }
             },
         },
@@ -68,6 +74,12 @@ const theme = createTheme({
                 },
                 success: {
                     main: "#008F5D",
+                },
+                actions: {
+                    main: "#D0EEFB"
+                },
+                border: {
+                    main: "#F0F0F0"
                 }
             },
         }
@@ -79,6 +91,28 @@ const theme = createTheme({
                     fontFamily: "Montserrat, sans-serif",
                 },
             },
+        },
+        MuiCssBaseline: {
+            styleOverrides: (theme) => ({
+                "*": {
+                    scrollbarWidth: "thin",
+                    scrollbarColor: `${theme.palette.background.paper} transparent`,
+                },
+
+                "*::-webkit-scrollbar": {
+                    width: "8px",
+                    height: "8px",
+                },
+
+                "*::-webkit-scrollbar-thumb": {
+                    backgroundColor: theme.palette.border.main,
+                    borderRadius: "8px",
+                },
+
+                "*::-webkit-scrollbar-thumb:hover": {
+                    backgroundColor: theme.palette.primary.dark,
+                },
+            }),
         },
     }
 });
