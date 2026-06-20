@@ -1,6 +1,6 @@
 import Icon from "@mui/material/Icon";
 
-type IconSize = "xs" | "sm" | "md" | "lg" | "xl";
+type IconSize = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 type IconColor =
   | "primary"
   | "secondary"
@@ -27,6 +27,7 @@ const sizes: Record<IconSize, number> = {
   md: 24,
   lg: 32,
   xl: 40,
+  xxl: 48,
 };
 
 //Lista de íconos: https://fonts.google.com/icons?selected=Material+Symbols+Rounded%3Ahome%3A

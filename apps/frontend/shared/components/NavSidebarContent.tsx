@@ -1,19 +1,17 @@
 import {
   Box,
   Typography,
-  IconButton,
   Avatar,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   ListItem,
-  Badge,
 } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import DynamicIcon from "../icons/DynamicIcon";
 import ListLinks from "@/core/constants/ListLinks";
+import DrawerOptionsMenu from "../drawers/DrawerOptionsMenu";
+import NotificationsButton from "../drawers/NotificationsButton";
 
 type Props = {
   isInDrawer?: boolean;
@@ -58,22 +56,8 @@ export default function NavSidebarContent({
               width: "fit-content",
             }}
           >
-            <Badge color="error" variant="dot">
-              <IconButton
-                aria-label="notifications"
-                size="small"
-                color="inherit"
-              >
-                <NotificationsIcon />
-              </IconButton>
-            </Badge>
-            <IconButton
-              aria-label="options"
-              size="small"
-              color="inherit"
-            >
-              <MoreVertIcon />
-            </IconButton>
+            <NotificationsButton />
+            <DrawerOptionsMenu />
           </Box>
         </Box>
       )}

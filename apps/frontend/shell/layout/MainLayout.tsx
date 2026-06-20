@@ -11,14 +11,14 @@ import {
 import React from "react";
 import { AnimatePresence, motion } from "motion/react";
 import MenuIcon from "@mui/icons-material/Menu";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Close } from "@mui/icons-material";
 import MotionPaper from "@/shared/components/MotionPaper";
 import { useSidebar } from "../providers/SidebarProvider";
 import NavDrawer from "@/shared/drawers/NavDrawer";
 import OptionsDrawer from "@/shared/drawers/OptionsDrawer";
 import NavSidebarContent from "@/shared/components/NavSidebarContent";
+import DrawerOptionsMenu from "@/shared/drawers/DrawerOptionsMenu";
+import NotificationsButton from "@/shared/drawers/NotificationsButton";
 
 export default function MainLayout({
   children,
@@ -74,21 +74,12 @@ export default function MainLayout({
             </IconButton>
             Nexoroute
           </Typography>
-          <Box component="div" sx={{ display: "inline" }}>
-            <IconButton
-              aria-label="options"
-              size="small"
-              color="inherit"
-            >
-              <MoreVertIcon />
-            </IconButton>
-            <IconButton
-              aria-label="notifications"
-              size="small"
-              color="inherit"
-            >
-              <NotificationsIcon />
-            </IconButton>
+          <Box
+            component="div"
+            sx={{ display: "inline-flex" }}
+          >
+            <DrawerOptionsMenu />
+            <NotificationsButton />
           </Box>
         </AppBar>
       )}
