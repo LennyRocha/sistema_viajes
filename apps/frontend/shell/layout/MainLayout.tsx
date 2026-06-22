@@ -85,20 +85,22 @@ export default function MainLayout({
       )}
       <motion.div id="main">
         {/* Sidebar de navegación */}
-        <aside className="sidebar">
+        <aside className="left_sidebar">
           <NavSidebarContent />
         </aside>
         {/* Contenido principal */}
         <AnimatePresence>
           <motion.section id="content">
-            {children}
+            <div className=" h-full overflow-y-auto w-full overflow-x-hidden flex flex-col gap-[10px]">
+              {children}
+            </div>
           </motion.section>
         </AnimatePresence>
         {/* Sidebar para navegación en mobile */}
         <AnimatePresence>
           {sidebar.rightSidebarOpen && !isLargeScreen && (
             <MotionPaper
-              className="sidebar"
+              className="right_sidebar"
               elevation={3}
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: 248, opacity: 1 }}
@@ -135,7 +137,7 @@ export default function MainLayout({
                 component={"div"}
                 sx={{
                   overflowY: "auto",
-                  height: "100%",
+                  flex: 1,
                 }}
               >
                 {sidebar.sidebarChildren}
