@@ -1,6 +1,7 @@
 "use client";
 import PaperBlock from "@/shared/components/PaperBlock";
 import PaperHeader from "@/shared/ui/PaperHeader";
+import Vehiculo3D from "@/shared/ui/Vehiculo3D";
 import MainLayout from "@/shell/layout/MainLayout";
 import { useSidebar } from "@/shell/providers/SidebarProvider";
 import { ChevronLeft } from "@mui/icons-material";
@@ -33,6 +34,7 @@ function Home() {
           title="Welcome to Next.js!"
           subtitle="This is a subtitle for the PaperBlock component."
         >
+          <Vehiculo3D tipo="volkswagen" aspectRatio="1/1" width={150} />
           <p className="text-center text-lg">
             This is a PaperBlock component. You can put any
             content you want here.
@@ -94,7 +96,14 @@ function Home() {
           onClick={() =>
             showSidebar({
               title: "Sidebar Title",
-              children: <div>Sidebar Content</div>,
+              children: (
+                <div>
+                  Sidebar Content
+                  <Vehiculo3D tipo="volkswagen" />
+                  <Vehiculo3D tipo="huyndai"  />
+                  <Vehiculo3D tipo="mercedes" />
+                </div>
+              ),
             })
           }
         >
