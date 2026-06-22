@@ -16,7 +16,7 @@ export default function PaperBlock({
 }: Readonly<PaperBlockProps>) {
   return (
     <MotionPaper
-      className={`flex flex-col items-start justify-center w-full p-[12px] max-sm:flex-col max-sm:items-start gap-4 w-full`}
+      className={`flex flex-col items-start justify-center p-[12px] max-sm:flex-col max-sm:items-start gap-4 w-full`}
       initial={{ opacity: 0, y: -15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
