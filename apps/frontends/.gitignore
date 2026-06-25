@@ -1,1 +1,4 @@
+**/.next/
 .next/
+commons/dist/**
+shell/.next/**
