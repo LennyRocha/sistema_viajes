@@ -1,0 +1,9 @@
+Qué debería ir aqui:
+...
+└─ scripts/
+   ├─ bootstrap.sh                  # instala + prepara repo
+   ├─ dev.sh                        # levanta dev (compose + apps)
+   ├─ lint.sh
+   ├─ test.sh
+   └─ release.sh
+...

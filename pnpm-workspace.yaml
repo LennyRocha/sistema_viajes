@@ -1,0 +1,9 @@
+packages:
+  - "apps/**"
+  - "apps/frontends/**"
+  - "packages/**"
+allowBuilds:
+  "@module-federation/nextjs-mf": false
+  esbuild: true
+  sharp: true
+  unrs-resolver: true

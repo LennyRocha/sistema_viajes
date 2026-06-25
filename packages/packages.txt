@@ -1,0 +1,7 @@
+Qué debería ir aqui:
+...
+├─ packages/                        # Shared cross-domain (opcional y explícito)
+│  ├─ shared-schemas/               # JSON Schema / OpenAPI fragments
+│  ├─ shared-protos/                # si usas gRPC
+│  └─ shared-devtools/              # configs, lint rules, generators
+...

@@ -1,0 +1,8 @@
+Qué debería ir aqui:
+...
+├─ .husky/
+│  ├─ pre-commit
+│  └─ commit-msg
+...
+
+Se supone es para realizar cosas antes de un commit

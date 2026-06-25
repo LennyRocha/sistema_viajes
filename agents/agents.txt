@@ -1,0 +1,33 @@
+Qué debería ir aqui:
+...
+├─ agents/  # IA para cumplir guía (prompts + reglas + plantillas) o gsd
+│  ├─ README.md
+│  ├─ rules/
+│  │  ├─ architecture-rules.md
+│  │  ├─ security-rules.md
+│  │  ├─ api-rules.md
+│  │  ├─ frontend-rules.md
+│  │  ├─ backend-rules.md
+│  │  └─ mobile-rules.md
+│  ├─ checklists/
+│  │  ├─ pr-checklist.md
+│  │  ├─ release-checklist.md
+│  │  ├─ module-readiness-checklist.md
+│  │  └─ threat-model-lite.md
+│  ├─ prompts/
+│  │  ├─ cursor/
+│  │  │  ├─ scan-changes-for-adr-compliance.md
+│  │  │  ├─ generate-module-skeleton.md
+│  │  │  └─ enforce-module-contract.md
+│  │  ├─ chatgpt/
+│  │  │  ├─ design-c4-diagrams.md
+│  │  │  ├─ create-openapi-first.md
+│  │  │  └─ generate-tests.md
+│  │  └─ sonar/
+│  │     └─ fix-security-findings.md
+│  └─ templates/
+│     ├─ ADR-template.md
+│     ├─ module-contract-template.md
+│     ├─ openapi-template.yaml
+│     └─ README-module-template.md
+...

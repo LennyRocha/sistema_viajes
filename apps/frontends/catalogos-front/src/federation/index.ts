@@ -1,0 +1,1 @@
+export { default as Vehiculo3D } from "../tipos_autobus/components/Vehiculo3D";

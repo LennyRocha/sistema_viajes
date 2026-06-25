@@ -1,0 +1,39 @@
+Qué debería ir aqui:
+...
+├─ docs/
+│  ├─ 00-overview/
+│  │  ├─ vision.md
+│  │  ├─ principles.md
+│  │  └─ glossary.md
+│  ├─ 01-architecture/
+│  │  ├─ c4/
+│  │  │  ├─ context.md
+│  │  │  ├─ container.md
+│  │  │  ├─ component.md
+│  │  │  └─ deployment.md
+│  │  ├─ decisions/
+│  │  │  ├─ ADR-0001-tenant-resolution.md
+│  │  │  ├─ ADR-0002-auth-oidc-jwks.md
+│  │  │  └─ ADR-0003-eventing-kafka-outbox.md
+│  │  └─ standards/
+│  │     ├─ module-contract.md
+│  │     ├─ api-guidelines.md
+│  │     ├─ security-baseline.md
+│  │     ├─ observability-baseline.md
+│  │     └─ branching-conventions.md
+│  ├─ 02-api/
+│  │  ├─ openapi/
+│  │  │  ├─ gateway.yaml
+│  │  │  └─ services/
+│  │  └─ postman/
+│  │     ├─ collections/
+│  │     └─ environments/
+│  ├─ 03-runbooks/
+│  │  ├─ local-dev.md
+│  │  ├─ qa-deploy.md
+│  │  └─ incident-response.md
+│  └─ 04-product/
+│     ├─ figma-links.md
+│     ├─ roadmap.md
+│     └─ tenants-strategy.md
+...

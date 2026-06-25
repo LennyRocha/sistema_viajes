@@ -1,0 +1,26 @@
+{
+  "name": "@nexoroute/commons",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "echo \"commons package\""
+  },
+  "peerDependencies": {
+    "@mui/icons-material": "^9.0.1",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "@mui/material": "^9",
+    "motion": "^12",
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tsup": "^8.5.1",
+    "typescript": "^5"
+  }
+}

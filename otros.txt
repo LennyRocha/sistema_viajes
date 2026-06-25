@@ -1,0 +1,21 @@
+Otras cosas que se pueden crear
+├─ .editorconfig # Hace que todos los IDEs usen la misma configuración. Ejemplo:
+Indentación de 2 espacios
+UTF-8
+Salto de línea LF
+├─ .gitattributes # Configura cómo Git maneja archivos.
+├─ .nvmrc # Define la versión de Node.js.
+├─ .npmrc # Configuración de npm/pnpm.
+├─ pnpm-workspace.yaml # Le dice a pnpm qué carpetas forman parte del monorepo.
+├─ package.json
+├─ turbo.json # Define tareas del monorepo.
+├─ tsconfig.base.json
+├─ biome.json  # Configuración de Biome.
+Biome es un reemplazo moderno de:
+ESLint
+Prettier
+Sirve para:
+formatear código
+detectar errores
+mantener estilo consistente
+├─ commitlint.config.cjs # Valida mensajes de commit.

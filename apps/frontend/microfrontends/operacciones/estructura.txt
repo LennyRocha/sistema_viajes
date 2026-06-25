@@ -1,0 +1,7 @@
+Estructura de ejemplo:
+catalogos/
+├─ autobuses/
+│   ├─ components/
+│   ├─ hooks/
+│   ├─ services/
+│   └─ pages/
