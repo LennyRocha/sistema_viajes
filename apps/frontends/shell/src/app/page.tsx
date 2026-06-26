@@ -13,7 +13,7 @@ import Image from "next/image";
 function Home() {
   const { showSidebar } = useSidebar();
   return (
-    <div className="bg-black flex flex-col flex-1 items-center justify-center font-sans  gap-10 ">
+    <div className="flex flex-col flex-1 items-center justify-center font-sans  gap-10 ">
       <PaperHeader
         title="Hola"
         subtitle="Esto es un PaperHeader"

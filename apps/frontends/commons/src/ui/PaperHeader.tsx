@@ -24,101 +24,111 @@ export default function PaperHeader({
   onButtonClick,
   leftIcon,
   buttonTitle,
-  paperProps,
+  paperProps = {},
 }: Readonly<PaperHeaderProps>) {
   return (
-    <MotionPaper
-      {...paperProps}
+    <Box
       sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: showButton
-          ? "space-between"
-          : "flex-start",
+        padding: "4px",
         width: "100%",
-        padding: "12px",
-        gap: "16px",
-        flexDirection: "row",
-        "@media (max-width: 640px)": {
-          flexDirection: "column",
-          alignItems: "flex-start",
-          gap: "8px",
-        },
       }}
-      initial={{ opacity: 0, y: -15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
-      transition={{ duration: 0.6, ease: "easeInOut" }}
     >
-      <Box
+      <MotionPaper
         sx={{
           display: "flex",
           alignItems: "center",
+          justifyContent: showButton
+            ? "space-between"
+            : "flex-start",
+          width: "100%",
+          padding: "12px",
           gap: "16px",
-          width: "auto",
+          flexDirection: "row",
+          "@media (max-width: 640px)": {
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: "8px",
+          },
+          ...paperProps?.sx,
         }}
+        initial={{ opacity: 0, y: -15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -15 }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
+        {...paperProps}
       >
-        <Box
-          component={"span"}
-          sx={{
-            backgroundColor: "primary.main",
-            padding: "4px",
-            borderRadius: "4px",
-            color: "white",
-          }}
-        >
-          <DynamicIcon
-            name={iconname}
-            size="xl"
-            color="inherit"
-          />
-        </Box>
         <Box
           sx={{
             display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            justifyContent: "center",
+            alignItems: "center",
+            gap: "16px",
+            width: "auto",
           }}
         >
-          <Typography
-            variant="h4"
+          <Box
+            component={"span"}
             sx={{
-              fontWeight: "bold",
-              mb: -1,
+              backgroundColor: "primary.main",
+              padding: "4px",
+              borderRadius: "4px",
+              color: "white",
             }}
-            className="font-headings"
           >
-            {title}
-          </Typography>
-          {subtitle && (
+            <DynamicIcon
+              name={iconname}
+              size="xl"
+              color="inherit"
+            />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              justifyContent: "center",
+            }}
+          >
             <Typography
-              variant="subtitle1"
+              variant="h4"
               sx={{
-                fontWeight: "semibold",
-                color: "text.secondary",
-                mt: 0,
+                fontWeight: "bold",
+                mb: -1,
               }}
+              className="font-headings"
             >
-              {subtitle}
+              {title}
             </Typography>
-          )}
+            {subtitle && (
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: "semibold",
+                  color: "text.secondary",
+                  mt: 0,
+                }}
+              >
+                {subtitle}
+              </Typography>
+            )}
+          </Box>
         </Box>
-      </Box>
-      {showButton && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={onButtonClick}
-          startIcon={leftIcon}
-          size="medium"
-          sx={{
-            "@media (max-width: 640px)": { width: "100%" },
-          }}
-        >
-          {buttonTitle || "Action"}
-        </Button>
-      )}
-    </MotionPaper>
+        {showButton && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onButtonClick}
+            startIcon={leftIcon}
+            size="medium"
+            sx={{
+              "@media (max-width: 640px)": {
+                width: "100%",
+              },
+            }}
+          >
+            {buttonTitle || "Action"}
+          </Button>
+        )}
+      </MotionPaper>
+    </Box>
   );
 }
