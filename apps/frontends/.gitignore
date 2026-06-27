@@ -2,3 +2,8 @@
 .next/
 commons/dist/**
 shell/.next/**
+.env
+.env.local
+.env.developmen
+.env.test
+.env.production
