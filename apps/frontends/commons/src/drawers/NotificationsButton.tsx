@@ -1,21 +1,24 @@
 "use client";
 
-import React from "react";
 import { IconButton, Badge } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
-export default function NotificationsButton() {
-  //Obtener el número de notificaciones no leídas desde el contexto o estado global
-  const notificationsCount = 5;
-  const handleClick = () =>
-    alert("Debería  abrir las notificaciones");
+interface NotificationsButtonProps {
+  onClick: () => void; //Al presionar el botón de notificaciones, se ejecutará esta función
+  notificationsCount?: number; // Número de notificaciones no leídas
+}
+
+export default function NotificationsButton({
+  onClick,
+  notificationsCount = 0,
+}: NotificationsButtonProps) {
   return notificationsCount > 0 ? (
     <Badge color="error" variant="dot">
       <IconButton
         aria-label="notifications"
         size="small"
         color="inherit"
-        onClick={handleClick}
+        onClick={onClick}
       >
         <NotificationsIcon />
       </IconButton>
@@ -25,7 +28,7 @@ export default function NotificationsButton() {
       aria-label="notifications"
       size="small"
       color="inherit"
-      onClick={handleClick}
+      onClick={onClick}
     >
       <NotificationsIcon />
     </IconButton>

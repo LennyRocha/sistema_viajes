@@ -21,6 +21,15 @@ type Props = {
   user: SidebarUserData;
   pathname?: string;
   LinkComponent: ElementType;
+  drawerCallbacks: {
+    onMiPerfilClick: () => void;
+    onAjustesClick: () => void;
+    onCerrarSesionClick: () => void;
+  };
+  notificationsProps?: {
+    notificationsCount?: number;
+    onNotificationsClick?: () => void;
+  };
 };
 
 export default function NavSidebarContent({
@@ -28,6 +37,12 @@ export default function NavSidebarContent({
   user,
   pathname,
   LinkComponent = "a",
+  drawerCallbacks = {
+    onMiPerfilClick: () => {},
+    onAjustesClick: () => {},
+    onCerrarSesionClick: () => {},
+  },
+  notificationsProps,
 }: Readonly<Props>) {
   const isActive = (path?: string, href?: string) =>
     path === href || path?.startsWith(href + "/");
@@ -67,8 +82,26 @@ export default function NavSidebarContent({
               width: "fit-content",
             }}
           >
-            <NotificationsButton />
-            <DrawerOptionsMenu />
+            <NotificationsButton
+              onClick={
+                notificationsProps?.onNotificationsClick ||
+                (() => {})
+              }
+              notificationsCount={
+                notificationsProps?.notificationsCount
+              }
+            />
+            <DrawerOptionsMenu
+              onMiPerfilClick={
+                drawerCallbacks?.onMiPerfilClick
+              }
+              onAjustesClick={
+                drawerCallbacks?.onAjustesClick
+              }
+              onCerrarSesionClick={
+                drawerCallbacks?.onCerrarSesionClick
+              }
+            />
           </Box>
         </Box>
       )}

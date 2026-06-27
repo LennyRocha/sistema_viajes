@@ -12,6 +12,11 @@ type Props = {
   user: SidebarUserData;
   LinkComponent: React.ElementType;
   pathname?: string;
+  drawerCallbacks: {
+    onMiPerfilClick: () => void;
+    onAjustesClick: () => void;
+    onCerrarSesionClick: () => void;
+  };
 };
 
 export default function NavDrawer({
@@ -21,6 +26,7 @@ export default function NavDrawer({
   user,
   LinkComponent,
   pathname,
+  drawerCallbacks,
 }: Readonly<Props>) {
   return (
     <Drawer
@@ -61,6 +67,7 @@ export default function NavDrawer({
           user={user}
           LinkComponent={LinkComponent}
           pathname={pathname}
+          drawerCallbacks={drawerCallbacks}
         />
       </Box>
     </Drawer>

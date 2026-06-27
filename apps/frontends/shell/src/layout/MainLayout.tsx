@@ -24,6 +24,7 @@ import { useSidebar } from "../providers/SidebarProvider";
 import sampleUserData from "../core/constants/sampleUserData";
 import { usePathname } from "next/navigation";
 import NextLinkForCommons from "../adapters/NextLinkForCommons";
+import DrawerMenuHandlers from "../core/constants/DrawerMenuHandlers";
 
 export default function MainLayout({
   children,
@@ -43,6 +44,11 @@ export default function MainLayout({
       closeLeftDrawer();
     }
   }, [isLargeScreen, leftDrawerOpen]);
+  // TODO:; Usar showSidebar de useSidebar enviando la vista de notificaciones como children del sidebar, y pasarle el onClick de NotificationsButton a showSidebar
+  const handleNotificationsClick = () =>
+    alert("Debería abrir las notificaciones");
+  //TODO: Obtener el número de notificaciones no leídas desde el contexto o estado global
+  const notificationsCount = 5;
   return (
     <main>
       {/* Header */}
@@ -84,8 +90,21 @@ export default function MainLayout({
             component="div"
             sx={{ display: "inline-flex" }}
           >
-            <DrawerOptionsMenu />
-            <NotificationsButton />
+            <DrawerOptionsMenu
+              onMiPerfilClick={
+                DrawerMenuHandlers.onMiPerfilClick
+              }
+              onAjustesClick={
+                DrawerMenuHandlers.onAjustesClick
+              }
+              onCerrarSesionClick={
+                DrawerMenuHandlers.onCerrarSesionClick
+              }
+            />
+            <NotificationsButton
+              onClick={handleNotificationsClick}
+              notificationsCount={notificationsCount}
+            />
           </Box>
         </AppBar>
       )}
@@ -93,9 +112,15 @@ export default function MainLayout({
         {/* Sidebar de navegación */}
         <aside className="left_sidebar">
           <NavSidebarContent
+            notificationsProps={{
+              onNotificationsClick:
+                handleNotificationsClick,
+              notificationsCount,
+            }}
             user={sampleUserData}
             LinkComponent={NextLinkForCommons as any}
             pathname={pathname}
+            drawerCallbacks={DrawerMenuHandlers}
           />
         </aside>
         {/* Contenido principal */}
@@ -164,6 +189,7 @@ export default function MainLayout({
         user={sampleUserData}
         LinkComponent={NextLinkForCommons}
         pathname={pathname}
+        drawerCallbacks={DrawerMenuHandlers}
       />
       {/* Drawer para sidebar dinámico en mobile */}
       <OptionsDrawer

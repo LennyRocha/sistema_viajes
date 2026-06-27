@@ -6,7 +6,17 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 
-export default function DrawerOptionsMenu() {
+interface DrawerOptionsMenuProps {
+  onMiPerfilClick: () => void;
+  onAjustesClick: () => void;
+  onCerrarSesionClick: () => void;
+}
+
+export default function DrawerOptionsMenu({
+  onMiPerfilClick,
+  onAjustesClick,
+  onCerrarSesionClick,
+}: Readonly<DrawerOptionsMenuProps>) {
   const id = React.useId();
   const buttonId = `${id}-button`;
   const menuId = `${id}-menu`;
@@ -47,9 +57,28 @@ export default function DrawerOptionsMenu() {
           },
         }}
       >
-        <MenuItem onClick={handleClose}>Mi Perfil</MenuItem>
-        <MenuItem onClick={handleClose}>Ajustes</MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem
+          onClick={() => {
+            handleClose();
+            onMiPerfilClick();
+          }}
+        >
+          Mi Perfil
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleClose();
+            onAjustesClick();
+          }}
+        >
+          Ajustes
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleClose();
+            onCerrarSesionClick();
+          }}
+        >
           Cerrar sesión
         </MenuItem>
       </Menu>
