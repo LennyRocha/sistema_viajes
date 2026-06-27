@@ -8,6 +8,15 @@ pnpm --filter @nexoroute/commons build
 
 Eso actualizará la carpeta <code>dist</code> y estará lista.
 
+Si agregaron nuevos componentes, agregen la exportación al <code>index.ts</code>
+
+```bash
+...
+export { default as NombreComponente } from "./carpeta/NombreComponente";
+```
+
+Y ejecuten el comando anterior nuevamente o si es que no lo han ejecutado
+
 ## 2. Hecho eso, reinstalar todo desde la carpeta raíz
 
 ```bash
