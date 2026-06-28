@@ -10,17 +10,20 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.12.0",
-    "next": "16.2.7",
+    "next": "15.3.4",
     "react": "^19",
     "react-dom": "^19",
     "@nexoroute/commons": "workspace:*"
   },
   "devDependencies": {
+    "@module-federation/nextjs-mf": "^8.8.69",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
-    "eslint-config-next": "16.2.7",
-    "typescript": "^5"
+    "eslint-config-next": "15.3.4",
+    "typescript": "^5",
+    "webpack": "^5.88.0"
   }
 }

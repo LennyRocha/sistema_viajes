@@ -1,5 +1,14 @@
 # Instrucciones de despliegue de microfront
 
+## ¡IMPORTANTE! Antes de continuar
+
+### Crea un archivo .env en la raíz del microfront que contenga las siguientes variables:
+
+```bash
+NEXT_PUBLIC_API_URL=url_del_backend
+NEXT_PRIVATE_LOCAL_WEBPACK=true
+```
+
 ## 1.Contenido de los microfronts
 
 <table border="1" style="border-collapse: collapse; width:100%">
