@@ -1,5 +1,7 @@
 # Instrucciones de despliegue de microfront
 
+<h6>Versión 3.0.0</h6>
+
 ## ¡IMPORTANTE! Antes de continuar
 
 ### Crea un archivo .env en la raíz del microfront que contenga las siguientes variables:
@@ -8,6 +10,9 @@
 NEXT_PUBLIC_API_URL=url_del_backend
 NEXT_PRIVATE_LOCAL_WEBPACK=true
 ```
+
+**NOTA TÉCNICA:** Los microfronts deben usar Next.js 15.3.4.
+No actualizar a versiones superiores hasta que Turbopack soporte Module Federation.
 
 ## 1.Contenido de los microfronts
 
