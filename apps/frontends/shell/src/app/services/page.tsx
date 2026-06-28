@@ -1,12 +1,21 @@
-import MainLayout from '@/src/layout/MainLayout'
-import React from 'react'
+"use client";
+import MainLayout from "@/src/layout/MainLayout";
+import { federatedComponent } from "@/src/lib/loadRemote";
+import { useRouter } from "next/navigation";
+const ServiciosIndex = federatedComponent(
+  "catalogos/ServiciosModule",
+  "ServiciosIndex",
+);
 
-type Props = {}
-
-export default function page({}: Props) {
+export default function Page() {
+  const router = useRouter();
   return (
     <MainLayout>
-    <div>page Servicios</div>
+      <ServiciosIndex
+        onHeaderButtonClick={() =>
+          router.push("/servicios/nuevo")
+        }
+      />
     </MainLayout>
-  )
+  );
 }

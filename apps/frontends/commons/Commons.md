@@ -1,4 +1,6 @@
-# Instrucciones de uso de la librería
+# Instrucciones de uso de la librería/carpeta commons
+
+<h6>Versión 2.0.0</h6>
 
 ## 1. Cada vez que hagan cambios en la carpeta <code>commons</code> ejecuten el siguiente comando:
 
@@ -8,7 +10,7 @@ pnpm --filter @nexoroute/commons build
 
 Eso actualizará la carpeta <code>dist</code> y estará lista.
 
-Si agregaron nuevos componentes, agregen la exportación al <code>index.ts</code>
+Si agregaron nuevos componentes, agregen la exportación al <code>src/index.ts</code>
 
 ```bash
 ...
