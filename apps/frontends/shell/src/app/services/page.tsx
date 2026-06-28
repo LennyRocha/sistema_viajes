@@ -13,7 +13,7 @@ export default function Page() {
     <MainLayout>
       <ServiciosIndex
         onHeaderButtonClick={() =>
-          router.push("/servicios/nuevo")
+          router.push("/services/nuevo")
         }
       />
     </MainLayout>
