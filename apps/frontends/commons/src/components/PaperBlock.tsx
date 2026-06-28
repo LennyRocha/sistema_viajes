@@ -22,7 +22,7 @@ export default function PaperBlock({
   return (
     <Box
       sx={{
-        padding: "4px",
+        padding: "2px",
         width: "100%",
       }}
     >

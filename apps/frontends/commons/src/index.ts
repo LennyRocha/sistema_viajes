@@ -8,9 +8,12 @@ export { default as NotificationsButton } from "./drawers/NotificationsButton";
 export { default as NavSidebarContent } from "./components/NavSidebarContent";
 export { default as MotionPaper } from "./components/MotionPaper";
 export { default as PaperBlock } from "./components/PaperBlock";
+export { default as Breadcrumb } from "./components/Breadcrumb";
 
 export { type SidebarConfig } from "./types/SidebarTypes";
 export { type SidebarProviderValues } from "./types/SidebarTypes";
 export { type SidebarProviderProps } from "./types/SidebarTypes";
+
+export { default as Tabla } from "./tables/Tabla";
 
 export { default as DynamicIcon } from "./icons/DynamicIcon";

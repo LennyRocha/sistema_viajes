@@ -29,7 +29,7 @@ export default function PaperHeader({
   return (
     <Box
       sx={{
-        padding: "4px",
+        padding: "2px",
         width: "100%",
       }}
     >
@@ -61,6 +61,7 @@ export default function PaperHeader({
           sx={{
             display: "flex",
             alignItems: "center",
+            justifyContent: "center",
             gap: "16px",
             width: "auto",
           }}
@@ -72,6 +73,9 @@ export default function PaperHeader({
               padding: "4px",
               borderRadius: "4px",
               color: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <DynamicIcon
@@ -92,7 +96,6 @@ export default function PaperHeader({
               variant="h4"
               sx={{
                 fontWeight: "bold",
-                mb: -1,
               }}
               className="font-headings"
             >
@@ -105,6 +108,10 @@ export default function PaperHeader({
                   fontWeight: "semibold",
                   color: "text.secondary",
                   mt: 0,
+                  lineHeight: 1.2,
+                  "@media (max-width: 640px)": {
+                    fontSize: "0.875rem",
+                  },
                 }}
               >
                 {subtitle}

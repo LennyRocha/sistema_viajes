@@ -9,9 +9,9 @@
     "dev": "echo \"commons package\""
   },
   "peerDependencies": {
-    "@mui/icons-material": "^9.0.1",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
+    "@mui/icons-material": "^9.0.1",
     "@mui/material": "^9",
     "motion": "^12",
     "react": "^19",
@@ -22,5 +22,9 @@
     "@types/react-dom": "^19",
     "tsup": "^8.5.1",
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@mui/x-data-grid": "^9.7.0",
+    "react-data-table-component": "^8.4.0"
   }
 }

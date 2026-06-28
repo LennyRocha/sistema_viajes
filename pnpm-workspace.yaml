@@ -4,6 +4,7 @@ packages:
   - "packages/**"
 allowBuilds:
   "@module-federation/nextjs-mf": false
+  core-js-pure: true
   esbuild: true
   sharp: true
   unrs-resolver: true
