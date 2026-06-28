@@ -13,6 +13,9 @@
     "next": "15.3.4",
     "react": "^19",
     "react-dom": "^19",
+    "@mui/icons-material": "^9.0.1",
+    "@mui/material": "^9.0.1",
+    "@mui/material-nextjs": "^9.0.1",
     "@nexoroute/commons": "workspace:*"
   },
   "devDependencies": {

@@ -17,6 +17,9 @@
     "react": "^19",
     "react-dom": "^19",
     "react-redux": "^9.3.0",
+    "@mui/icons-material": "^9.0.1",
+    "@mui/material": "^9.0.1",
+    "@mui/material-nextjs": "^9.0.1",
     "three": "^0.184.0",
     "three-stdlib": "^2.36.1"
   },
