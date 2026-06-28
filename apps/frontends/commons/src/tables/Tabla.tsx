@@ -33,7 +33,7 @@ interface TablaProps<
   pageSizeOptions?: number[];
   checkboxSelection?: boolean;
   disableSelectionOnClick?: boolean;
-  subHeaderComponent?: React.ReactElement | null;
+  subHeaderComponent?: React.ReactNode | null;
   tableSx?: object;
 }
 
@@ -48,6 +48,7 @@ export default function Tabla<T extends GridValidRowModel>({
   checkboxSelection = false,
   disableSelectionOnClick = true,
   tableSx = {},
+  subHeaderComponent,
   onEditClick,
   onDeleteClick,
   onToggleActiveClick,
@@ -73,19 +74,38 @@ export default function Tabla<T extends GridValidRowModel>({
         height: "fit-content",
         width: "100%",
       }}
+      initial={{ opacity: 0, y: -15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.6, ease: "easeInOut" }}
     >
       {titulo && (
         <Typography
-          variant="h5"
-          sx={{ fontWeight: "semibold" }}
+          variant="h6"
+          sx={{ fontWeight: 600, mb: 0 }}
         >
           {titulo}
         </Typography>
       )}
       {subtitulo && (
-        <Typography variant="body2" color="textSecondary">
+        <Typography
+          variant="caption"
+          color="textSecondary"
+          sx={{ lineHeight:   1.2 }}
+        >
           {subtitulo}
         </Typography>
+      )}
+      {subHeaderComponent && (
+        <Box
+          sx={{
+            width: "100%",
+            overflowX: "auto",
+            padding: "8px 0",
+          }}
+        >
+          {subHeaderComponent}
+        </Box>
       )}
       <DataGrid
         rows={data}

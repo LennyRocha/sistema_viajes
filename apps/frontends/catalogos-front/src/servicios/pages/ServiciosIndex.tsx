@@ -4,8 +4,18 @@ import {
   Tabla,
 } from "@nexoroute/commons";
 import React from "react";
-import { Add } from "@mui/icons-material";
+import {
+  Add,
+  FilterList,
+  Settings,
+} from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid";
+import {
+  Box,
+  Button,
+  IconButton,
+  TextField,
+} from "@mui/material";
 
 interface Props {
   onHeaderButtonClick: () => void;
@@ -40,6 +50,39 @@ export default function ServiciosIndex({
         onDeleteClick={console.log}
         onToggleActiveClick={console.log}
         onInfoClick={console.log}
+        subHeaderComponent={
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+            }}
+          >
+            <TextField
+              label="Buscar servicio"
+              variant="outlined"
+              size="small"
+              sx={{ flex: 1, minWidth: 200 }}
+            />
+            <TextField
+              label="Filtrar por categoría"
+              variant="outlined"
+              size="small"
+              sx={{ flex: 1, minWidth: 200 }}
+            />
+            <IconButton aria-label="Filtrar" size="small">
+              <FilterList />
+            </IconButton>
+            <Button variant="contained" size="small" color="secondary">
+              Aplicar filtros
+            </Button>
+            <Button variant="outlined" size="small" color="inherit">
+              Limpiar filtros
+            </Button>
+            <IconButton aria-label="Ajustes" size="small">
+              <Settings />
+            </IconButton>
+          </Box>
+        }
       />
     </>
   );
