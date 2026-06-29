@@ -2,6 +2,7 @@ import {
   PaperHeader,
   Breadcrumb,
   Tabla,
+  EmptyState,
 } from "@nexoroute/commons";
 import React from "react";
 import {
@@ -83,6 +84,19 @@ export default function ServiciosIndex({
             </IconButton>
           </Box>
         }
+      />
+      <EmptyState
+        variant="no-data"
+        title="No hay servicios disponibles"
+        description="Actualmente no hay servicios disponibles para mostrar. Por favor, agregue un nuevo servicio para continuar."
+        action={{
+          label: "Agregar servicio",
+          onClick: onHeaderButtonClick,
+        }}
+        imageSize={{
+          width: 200,
+          height: 200,
+        }}
       />
     </>
   );
