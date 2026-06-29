@@ -91,7 +91,7 @@ export default function Tabla<T extends GridValidRowModel>({
         <Typography
           variant="caption"
           color="textSecondary"
-          sx={{ lineHeight:   1.2 }}
+          sx={{ lineHeight: 1.2 }}
         >
           {subtitulo}
         </Typography>
@@ -194,6 +194,7 @@ const optionsColumn = <T extends GridValidRowModel>(
         {callbacks.onToggleActiveClick && (
           <Switch
             checked={params.row.estatus}
+            onClick={(e) => e.stopPropagation()}
             onChange={() =>
               callbacks.onToggleActiveClick?.(params.row)
             }
