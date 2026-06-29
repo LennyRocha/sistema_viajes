@@ -18,9 +18,18 @@ export function SidebarProvider({
   const [rightSidebarOpen, setRightSidebarOpen] =
     React.useState<boolean>(false);
   const showSidebar = (config: SidebarConfig) => {
-    setRightSidebarOpen(true);
-    setSidebarTitle(config.title);
-    setSidebarChildren(config.children);
+    if (rightSidebarOpen) {
+      setRightSidebarOpen(false);
+      setTimeout(() => {
+        setRightSidebarOpen(true);
+        setSidebarTitle(config.title);
+        setSidebarChildren(config.children);
+      }, 250);
+    } else {
+      setRightSidebarOpen(true);
+      setSidebarTitle(config.title);
+      setSidebarChildren(config.children);
+    }
   };
   const hideSidebar = () => setRightSidebarOpen(false);
   const [sidebarChildren, setSidebarChildren] =

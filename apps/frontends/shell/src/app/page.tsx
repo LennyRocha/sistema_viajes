@@ -3,7 +3,6 @@
 import {
   PaperBlock,
   PaperHeader,
-  Vehiculo3D,
 } from "@nexoroute/commons";
 import MainLayout from "../layout/MainLayout";
 import { useSidebar } from "../providers/SidebarProvider";
@@ -33,7 +32,6 @@ function Home() {
         height={20}
         priority
       />
-      <Vehiculo3D tipo="huyndai" />
       <PaperBlock
         title="Welcome to Next.js!"
         subtitle="This is a subtitle for the PaperBlock component."

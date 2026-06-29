@@ -137,38 +137,38 @@ importers:
     dependencies:
       '@mui/icons-material':
         specifier: ^9.0.1
-        version: 9.1.1(@mui/material@9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@types/react@19.2.17)(react@19.2.4)
+        version: 9.1.1(@mui/material@9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
       '@mui/material':
         specifier: ^9.0.1
-        version: 9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
       '@mui/material-nextjs':
         specifier: ^9.0.1
-        version: 9.1.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(next@15.3.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+        version: 9.1.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(next@15.3.4(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
       '@mui/x-data-grid':
         specifier: ^9.7.0
-        version: 9.7.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@mui/material@9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@mui/system@9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 9.7.0(c934b70aa9d11d9865bb52571f51843f)
       '@nexoroute/commons':
         specifier: workspace:*
         version: link:../commons
       '@reduxjs/toolkit':
         specifier: ^2.12.0
-        version: 2.12.0(react-redux@9.3.0(@types/react@19.2.17)(react@19.2.4)(redux@5.0.1))(react@19.2.4)
+        version: 2.12.0(react-redux@9.3.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)(redux@5.0.1))(react@19.3.0-canary-3f0b9e61-20260317)
       next:
         specifier: 15.3.4
-        version: 15.3.4(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 15.3.4(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
       react:
-        specifier: 19.2.4
-        version: 19.2.4
+        specifier: 19.3.0-canary-3f0b9e61-20260317
+        version: 19.3.0-canary-3f0b9e61-20260317
       react-dom:
-        specifier: 19.2.4
-        version: 19.2.4(react@19.2.4)
+        specifier: 19.3.0-canary-3f0b9e61-20260317
+        version: 19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317)
       react-redux:
         specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.17)(react@19.2.4)(redux@5.0.1)
+        version: 9.3.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)(redux@5.0.1)
     devDependencies:
       '@module-federation/nextjs-mf':
         specifier: ^8.8.69
-        version: 8.8.69(next@15.3.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(node-fetch@2.7.0(encoding@0.1.13))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(styled-jsx@5.1.6(react@19.2.4))(typescript@5.9.3)(webpack@5.88.0)
+        version: 8.8.69(next@15.3.4(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317))(node-fetch@2.7.0(encoding@0.1.13))(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)(styled-jsx@5.1.6(react@19.3.0-canary-3f0b9e61-20260317))(typescript@5.9.3)(webpack@5.88.0)
       '@types/node':
         specifier: ^20
         version: 20.19.43
@@ -211,12 +211,6 @@ importers:
       '@mui/x-data-grid':
         specifier: ^9.7.0
         version: 9.7.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@mui/material@9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@mui/system@9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@react-three/drei':
-        specifier: ^10.7.7
-        version: 10.7.7(@react-three/fiber@9.6.1(@types/react@19.2.17)(immer@11.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.184.0))(@types/react@19.2.17)(@types/three@0.185.0)(immer@11.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.184.0)
-      '@react-three/fiber':
-        specifier: ^9.6.1
-        version: 9.6.1(@types/react@19.2.17)(immer@11.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.184.0)
       motion:
         specifier: ^12
         version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -232,9 +226,6 @@ importers:
       three:
         specifier: ^0.184.0
         version: 0.184.0
-      three-stdlib:
-        specifier: ^2.36.1
-        version: 2.36.1(three@0.184.0)
     devDependencies:
       '@types/react':
         specifier: ^19
@@ -3663,6 +3654,11 @@ packages:
     peerDependencies:
       react: ^19.2.4
 
+  react-dom@19.3.0-canary-3f0b9e61-20260317:
+    resolution: {integrity: sha512-odYYMyPOgdfIkULz6qkeiOZSV2vtrB39kbM22YWDNA/a7vS1sSwfKaqGhP45GqCqJNcN63LgYhZo4R6waH91eQ==}
+    peerDependencies:
+      react: 19.3.0-canary-3f0b9e61-20260317
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -3698,6 +3694,10 @@ packages:
 
   react@19.2.4:
     resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
+    engines: {node: '>=0.10.0'}
+
+  react@19.3.0-canary-3f0b9e61-20260317:
+    resolution: {integrity: sha512-4fFnQmniMk6xEqNV5asOJNVrOutwU2070Gxtp8NnvGPTXSAHRAT+2ZafZ4IVIwrLUsy3kL53zaSwbPkypWWilw==}
     engines: {node: '>=0.10.0'}
 
   readdirp@4.1.2:
@@ -3793,6 +3793,9 @@ packages:
 
   scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
+
+  scheduler@0.28.0-canary-3f0b9e61-20260317:
+    resolution: {integrity: sha512-7fYCjemgN4NslGdhN2K/bab2TPkS74JK6UrGx1Kq7JpFfreUEMTLsaRFQ+2tAFCRCjPxLlXbe/vEp3Sjo1QG+w==}
 
   schema-utils@3.3.0:
     resolution: {integrity: sha512-pN/yOAvcC+5rQ5nERGuwrjLlYvLTbCibnZ1I7B1LaiAz9BRBlE9GMgE/eqV30P7aJQUf7Ddimy/RsbYO/GrVGg==}
@@ -4454,6 +4457,17 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.17
 
+  '@base-ui/utils@0.3.1(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@floating-ui/utils': 0.2.11
+      react: 19.3.0-canary-3f0b9e61-20260317
+      react-dom: 19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317)
+      reselect: 5.2.0
+      use-sync-external-store: 1.6.0(react@19.3.0-canary-3f0b9e61-20260317)
+    optionalDependencies:
+      '@types/react': 19.2.17
+
   '@dimforge/rapier3d-compat@0.12.0': {}
 
   '@emnapi/core@1.10.0':
@@ -4536,6 +4550,22 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@emotion/babel-plugin': 11.13.5
+      '@emotion/cache': 11.14.0
+      '@emotion/serialize': 1.3.3
+      '@emotion/use-insertion-effect-with-fallbacks': 1.2.0(react@19.3.0-canary-3f0b9e61-20260317)
+      '@emotion/utils': 1.4.2
+      '@emotion/weak-memoize': 0.4.0
+      hoist-non-react-statics: 3.3.2
+      react: 19.3.0-canary-3f0b9e61-20260317
+    optionalDependencies:
+      '@types/react': 19.2.17
+    transitivePeerDependencies:
+      - supports-color
+
   '@emotion/serialize@1.3.3':
     dependencies:
       '@emotion/hash': 0.9.2
@@ -4561,11 +4591,31 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@emotion/babel-plugin': 11.13.5
+      '@emotion/is-prop-valid': 1.4.0
+      '@emotion/react': 11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@emotion/serialize': 1.3.3
+      '@emotion/use-insertion-effect-with-fallbacks': 1.2.0(react@19.3.0-canary-3f0b9e61-20260317)
+      '@emotion/utils': 1.4.2
+      react: 19.3.0-canary-3f0b9e61-20260317
+    optionalDependencies:
+      '@types/react': 19.2.17
+    transitivePeerDependencies:
+      - supports-color
+    optional: true
+
   '@emotion/unitless@0.10.0': {}
 
   '@emotion/use-insertion-effect-with-fallbacks@1.2.0(react@19.2.4)':
     dependencies:
       react: 19.2.4
+
+  '@emotion/use-insertion-effect-with-fallbacks@1.2.0(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      react: 19.3.0-canary-3f0b9e61-20260317
 
   '@emotion/utils@1.4.2': {}
 
@@ -4976,6 +5026,29 @@ snapshots:
       - utf-8-validate
       - vue-tsc
 
+  '@module-federation/nextjs-mf@8.8.69(next@15.3.4(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317))(node-fetch@2.7.0(encoding@0.1.13))(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)(styled-jsx@5.1.6(react@19.3.0-canary-3f0b9e61-20260317))(typescript@5.9.3)(webpack@5.88.0)':
+    dependencies:
+      '@module-federation/enhanced': 2.6.0(node-fetch@2.7.0(encoding@0.1.13))(typescript@5.9.3)(webpack@5.88.0)
+      '@module-federation/node': 2.7.45(typescript@5.9.3)(webpack@5.88.0)
+      '@module-federation/runtime': 2.6.0(node-fetch@2.7.0(encoding@0.1.13))
+      '@module-federation/runtime-core': 2.6.0(node-fetch@2.7.0(encoding@0.1.13))
+      '@module-federation/sdk': 2.6.0(node-fetch@2.7.0(encoding@0.1.13))
+      '@module-federation/webpack-bundler-runtime': 2.6.0(node-fetch@2.7.0(encoding@0.1.13))
+      fast-glob: 3.3.1
+    optionalDependencies:
+      next: 15.3.4(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+      react: 19.3.0-canary-3f0b9e61-20260317
+      react-dom: 19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317)
+      styled-jsx: 5.1.6(react@19.3.0-canary-3f0b9e61-20260317)
+      webpack: 5.88.0
+    transitivePeerDependencies:
+      - '@rspack/core'
+      - bufferutil
+      - node-fetch
+      - typescript
+      - utf-8-validate
+      - vue-tsc
+
   '@module-federation/node@2.7.45(typescript@5.9.3)(webpack@5.88.0)':
     dependencies:
       '@module-federation/enhanced': 2.6.0(node-fetch@2.7.0(encoding@0.1.13))(typescript@5.9.3)(webpack@5.88.0)
@@ -5064,6 +5137,14 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.17
 
+  '@mui/icons-material@9.1.1(@mui/material@9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@mui/material': 9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+      react: 19.3.0-canary-3f0b9e61-20260317
+    optionalDependencies:
+      '@types/react': 19.2.17
+
   '@mui/material-nextjs@9.1.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(next@15.3.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -5080,6 +5161,16 @@ snapshots:
       '@emotion/react': 11.14.0(@types/react@19.2.17)(react@19.2.4)
       next: 16.2.7(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react: 19.2.4
+    optionalDependencies:
+      '@emotion/cache': 11.14.0
+      '@types/react': 19.2.17
+
+  '@mui/material-nextjs@9.1.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(next@15.3.4(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@emotion/react': 11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      next: 15.3.4(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+      react: 19.3.0-canary-3f0b9e61-20260317
     optionalDependencies:
       '@emotion/cache': 11.14.0
       '@types/react': 19.2.17
@@ -5105,12 +5196,42 @@ snapshots:
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4)
       '@types/react': 19.2.17
 
+  '@mui/material@9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@mui/core-downloads-tracker': 9.1.1
+      '@mui/system': 9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@mui/types': 9.1.1(@types/react@19.2.17)
+      '@mui/utils': 9.1.1(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@popperjs/core': 2.11.8
+      '@types/react-transition-group': 4.4.12(@types/react@19.2.17)
+      clsx: 2.1.1
+      csstype: 3.2.3
+      prop-types: 15.8.1
+      react: 19.3.0-canary-3f0b9e61-20260317
+      react-dom: 19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317)
+      react-is: 19.2.7
+      react-transition-group: 4.4.5(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+    optionalDependencies:
+      '@emotion/react': 11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@types/react': 19.2.17
+
   '@mui/private-theming@9.1.1(@types/react@19.2.17)(react@19.2.4)':
     dependencies:
       '@babel/runtime': 7.29.7
       '@mui/utils': 9.1.1(@types/react@19.2.17)(react@19.2.4)
       prop-types: 15.8.1
       react: 19.2.4
+    optionalDependencies:
+      '@types/react': 19.2.17
+
+  '@mui/private-theming@9.1.1(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@mui/utils': 9.1.1(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      prop-types: 15.8.1
+      react: 19.3.0-canary-3f0b9e61-20260317
     optionalDependencies:
       '@types/react': 19.2.17
 
@@ -5126,6 +5247,19 @@ snapshots:
     optionalDependencies:
       '@emotion/react': 11.14.0(@types/react@19.2.17)(react@19.2.4)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4)
+
+  '@mui/styled-engine@9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@emotion/cache': 11.14.0
+      '@emotion/serialize': 1.3.3
+      '@emotion/sheet': 1.4.0
+      csstype: 3.2.3
+      prop-types: 15.8.1
+      react: 19.3.0-canary-3f0b9e61-20260317
+    optionalDependencies:
+      '@emotion/react': 11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
 
   '@mui/system@9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4)':
     dependencies:
@@ -5143,6 +5277,22 @@ snapshots:
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4)
       '@types/react': 19.2.17
 
+  '@mui/system@9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@mui/private-theming': 9.1.1(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@mui/styled-engine': 9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+      '@mui/types': 9.1.1(@types/react@19.2.17)
+      '@mui/utils': 9.1.1(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      clsx: 2.1.1
+      csstype: 3.2.3
+      prop-types: 15.8.1
+      react: 19.3.0-canary-3f0b9e61-20260317
+    optionalDependencies:
+      '@emotion/react': 11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@types/react': 19.2.17
+
   '@mui/types@9.1.1(@types/react@19.2.17)':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -5157,6 +5307,18 @@ snapshots:
       clsx: 2.1.1
       prop-types: 15.8.1
       react: 19.2.4
+      react-is: 19.2.7
+    optionalDependencies:
+      '@types/react': 19.2.17
+
+  '@mui/utils@9.1.1(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@mui/types': 9.1.1(@types/react@19.2.17)
+      '@types/prop-types': 15.7.15
+      clsx: 2.1.1
+      prop-types: 15.8.1
+      react: 19.3.0-canary-3f0b9e61-20260317
       react-is: 19.2.7
     optionalDependencies:
       '@types/react': 19.2.17
@@ -5181,6 +5343,26 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
+  '@mui/x-data-grid@9.7.0(c934b70aa9d11d9865bb52571f51843f)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@base-ui/utils': 0.3.1(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+      '@mui/material': 9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+      '@mui/system': 9.1.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@mui/utils': 9.1.1(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@mui/x-internals': 9.7.0(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+      '@mui/x-virtualizer': 0.5.0(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+      clsx: 2.1.1
+      prop-types: 15.8.1
+      react: 19.3.0-canary-3f0b9e61-20260317
+      react-dom: 19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317)
+      use-sync-external-store: 1.6.0(react@19.3.0-canary-3f0b9e61-20260317)
+    optionalDependencies:
+      '@emotion/react': 11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+    transitivePeerDependencies:
+      - '@types/react'
+
   '@mui/x-internals@9.7.0(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -5194,6 +5376,19 @@ snapshots:
       - '@types/react'
       - react-dom
 
+  '@mui/x-internals@9.7.0(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@base-ui/utils': 0.3.1(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+      '@mui/utils': 9.1.1(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      core-js-pure: 3.49.0
+      react: 19.3.0-canary-3f0b9e61-20260317
+      reselect: 5.2.0
+      use-sync-external-store: 1.6.0(react@19.3.0-canary-3f0b9e61-20260317)
+    transitivePeerDependencies:
+      - '@types/react'
+      - react-dom
+
   '@mui/x-virtualizer@0.5.0(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -5202,6 +5397,17 @@ snapshots:
       '@mui/x-internals': 9.7.0(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
+    transitivePeerDependencies:
+      - '@types/react'
+
+  '@mui/x-virtualizer@0.5.0(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@base-ui/utils': 0.3.1(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+      '@mui/utils': 9.1.1(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
+      '@mui/x-internals': 9.7.0(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
+      react: 19.3.0-canary-3f0b9e61-20260317
+      react-dom: 19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317)
     transitivePeerDependencies:
       - '@types/react'
 
@@ -5361,6 +5567,18 @@ snapshots:
     optionalDependencies:
       react: 19.2.4
       react-redux: 9.3.0(@types/react@19.2.17)(react@19.2.4)(redux@5.0.1)
+
+  '@reduxjs/toolkit@2.12.0(react-redux@9.3.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)(redux@5.0.1))(react@19.3.0-canary-3f0b9e61-20260317)':
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      '@standard-schema/utils': 0.3.0
+      immer: 11.1.8
+      redux: 5.0.1
+      redux-thunk: 3.1.0(redux@5.0.1)
+      reselect: 5.2.0
+    optionalDependencies:
+      react: 19.3.0-canary-3f0b9e61-20260317
+      react-redux: 9.3.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)(redux@5.0.1)
 
   '@rollup/rollup-android-arm-eabi@4.62.2':
     optional: true
@@ -7459,6 +7677,31 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
+  next@15.3.4(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317):
+    dependencies:
+      '@next/env': 15.3.4
+      '@swc/counter': 0.1.3
+      '@swc/helpers': 0.5.15
+      busboy: 1.6.0
+      caniuse-lite: 1.0.30001799
+      postcss: 8.4.31
+      react: 19.3.0-canary-3f0b9e61-20260317
+      react-dom: 19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317)
+      styled-jsx: 5.1.6(react@19.3.0-canary-3f0b9e61-20260317)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 15.3.4
+      '@next/swc-darwin-x64': 15.3.4
+      '@next/swc-linux-arm64-gnu': 15.3.4
+      '@next/swc-linux-arm64-musl': 15.3.4
+      '@next/swc-linux-x64-gnu': 15.3.4
+      '@next/swc-linux-x64-musl': 15.3.4
+      '@next/swc-win32-arm64-msvc': 15.3.4
+      '@next/swc-win32-x64-msvc': 15.3.4
+      sharp: 0.34.5
+    transitivePeerDependencies:
+      - '@babel/core'
+      - babel-plugin-macros
+
   next@16.2.7(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@next/env': 16.2.7
@@ -7658,6 +7901,11 @@ snapshots:
       react: 19.2.4
       scheduler: 0.27.0
 
+  react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317):
+    dependencies:
+      react: 19.3.0-canary-3f0b9e61-20260317
+      scheduler: 0.28.0-canary-3f0b9e61-20260317
+
   react-is@16.13.1: {}
 
   react-is@19.2.7: {}
@@ -7667,6 +7915,16 @@ snapshots:
       '@types/use-sync-external-store': 0.0.6
       react: 19.2.4
       use-sync-external-store: 1.6.0(react@19.2.4)
+    optionalDependencies:
+      '@types/react': 19.2.17
+      redux: 5.0.1
+    optional: true
+
+  react-redux@9.3.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)(redux@5.0.1):
+    dependencies:
+      '@types/use-sync-external-store': 0.0.6
+      react: 19.3.0-canary-3f0b9e61-20260317
+      use-sync-external-store: 1.6.0(react@19.3.0-canary-3f0b9e61-20260317)
     optionalDependencies:
       '@types/react': 19.2.17
       redux: 5.0.1
@@ -7680,6 +7938,15 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
+  react-transition-group@4.4.5(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317):
+    dependencies:
+      '@babel/runtime': 7.29.7
+      dom-helpers: 5.2.1
+      loose-envify: 1.4.0
+      prop-types: 15.8.1
+      react: 19.3.0-canary-3f0b9e61-20260317
+      react-dom: 19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317)
+
   react-use-measure@2.1.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       react: 19.2.4
@@ -7687,6 +7954,8 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
 
   react@19.2.4: {}
+
+  react@19.3.0-canary-3f0b9e61-20260317: {}
 
   readdirp@4.1.2: {}
 
@@ -7816,6 +8085,8 @@ snapshots:
   safer-buffer@2.1.2: {}
 
   scheduler@0.27.0: {}
+
+  scheduler@0.28.0-canary-3f0b9e61-20260317: {}
 
   schema-utils@3.3.0:
     dependencies:
@@ -8035,6 +8306,11 @@ snapshots:
       react: 19.2.4
     optionalDependencies:
       '@babel/core': 7.29.7
+
+  styled-jsx@5.1.6(react@19.3.0-canary-3f0b9e61-20260317):
+    dependencies:
+      client-only: 0.0.1
+      react: 19.3.0-canary-3f0b9e61-20260317
 
   stylis@4.2.0: {}
 
@@ -8311,6 +8587,10 @@ snapshots:
   use-sync-external-store@1.6.0(react@19.2.4):
     dependencies:
       react: 19.2.4
+
+  use-sync-external-store@1.6.0(react@19.3.0-canary-3f0b9e61-20260317):
+    dependencies:
+      react: 19.3.0-canary-3f0b9e61-20260317
 
   utility-types@3.11.0: {}
 

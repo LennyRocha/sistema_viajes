@@ -44,6 +44,9 @@ export default function MainLayout({
       closeLeftDrawer();
     }
   }, [isLargeScreen, leftDrawerOpen]);
+  React.useEffect(() => {
+    sidebar.hideSidebar();
+  }, [pathname]);
   // TODO:; Usar showSidebar de useSidebar enviando la vista de notificaciones como children del sidebar, y pasarle el onClick de NotificationsButton a showSidebar
   const handleNotificationsClick = () =>
     alert("Debería abrir las notificaciones");
@@ -133,12 +136,16 @@ export default function MainLayout({
         </AnimatePresence>
         {/* Sidebar para navegación en mobile */}
         <AnimatePresence>
-          {sidebar.rightSidebarOpen && !isLargeScreen && (
+          {!isLargeScreen && (
             <MotionPaper
               className="right_sidebar"
               elevation={3}
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 248, opacity: 1 }}
+              animate={
+                sidebar.rightSidebarOpen
+                  ? { width: 248, opacity: 1 }
+                  : { width: 0, opacity: 0 }
+              }
               exit={{ width: 0, opacity: 0 }}
               transition={{
                 duration: 0.25,

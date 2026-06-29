@@ -3,7 +3,7 @@ import {
   PaperHeader,
   Breadcrumb,
   Tabla,
-  type SidebarConfig
+  type SidebarConfig,
 } from "@nexoroute/commons";
 import React from "react";
 import {
@@ -18,6 +18,18 @@ import {
   IconButton,
   TextField,
 } from "@mui/material";
+import dynamic from "next/dynamic";
+
+const Vehiculo3D = dynamic(
+  () =>
+    import("../../federation").then(
+      (mod) => mod.Vehiculo3D,
+    ),
+  {
+    ssr: false,
+    loading: () => <div>Cargando modelo 3D...</div>, // o un skeleton
+  },
+);
 
 interface Props {
   onHeaderButtonClick: () => void;
@@ -48,7 +60,12 @@ export default function AutobusesIndex({
         subtitulo="Listado de autobuses disponibles"
         columnas={columns}
         data={rows}
-        onEditClick={console.log}
+        onEditClick={() =>
+          openSidebar({
+            title: "Modificar autobús",
+            children: <div>Hola</div>,
+          })
+        }
         onDeleteClick={console.log}
         onToggleActiveClick={console.log}
         onInfoClick={() =>
@@ -57,6 +74,7 @@ export default function AutobusesIndex({
             children: (
               <div>
                 Sidebar Content{" "}
+                <Vehiculo3D tipo="huyndai"/>
               </div>
             ),
           })

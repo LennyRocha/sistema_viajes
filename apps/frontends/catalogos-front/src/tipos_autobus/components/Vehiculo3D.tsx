@@ -84,7 +84,7 @@ const Model = ({
 }: {
   tipo: Modelo3DName;
 }) => {
-  const { scene } = useGLTF(`/models/${tipo}.glb`);
+  const { scene } = useGLTF(`/assets/models/${tipo}.glb`);
   const clonedScene = React.useMemo(
     () => SkeletonUtils.clone(scene),
     [scene],

@@ -5,8 +5,6 @@ export { default as OptionsDrawer } from "./drawers/OptionsDrawer";
 export { default as DrawerOptionsMenu } from "./drawers/DrawerOptionsMenu";
 export { default as NotificationsButton } from "./drawers/NotificationsButton";
 
-export { default as Vehiculo3D } from "./3d/Vehiculo3D";
-
 export { default as NavSidebarContent } from "./components/NavSidebarContent";
 export { default as MotionPaper } from "./components/MotionPaper";
 export { default as PaperBlock } from "./components/PaperBlock";
