@@ -1,4 +1,5 @@
 export { default as PaperHeader } from "./ui/PaperHeader";
+export { default as EmptyState } from "./ui/PaperHeader";
 
 export { default as NavDrawer } from "./drawers/NavDrawer";
 export { default as OptionsDrawer } from "./drawers/OptionsDrawer";
