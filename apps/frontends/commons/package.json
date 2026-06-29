@@ -14,17 +14,22 @@
     "@mui/icons-material": "^9.0.1",
     "@mui/material": "^9",
     "motion": "^12",
-    "react": "^19",
-    "react-dom": "^19"
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.185.0",
     "tsup": "^8.5.1",
     "typescript": "^5"
   },
   "dependencies": {
     "@mui/x-data-grid": "^9.7.0",
-    "react-data-table-component": "^8.4.0"
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "react-data-table-component": "^8.4.0",
+    "three": "^0.184.0",
+    "three-stdlib": "^2.36.1"
   }
 }

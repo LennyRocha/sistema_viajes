@@ -1,9 +1,9 @@
-import PropiedadesServicio from "./PropiedadesServicio";
+import CampoServicio from "./CampoServicio";
 
 export default interface ServicioExterno {
   id?: number;
   nombre: string;
   icono_nombre: string;
   estatus: boolean;
-  propiedades: PropiedadesServicio;
+  propiedades: CampoServicio[];
 }

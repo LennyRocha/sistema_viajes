@@ -72,10 +72,18 @@ export default function ServiciosIndex({
             <IconButton aria-label="Filtrar" size="small">
               <FilterList />
             </IconButton>
-            <Button variant="contained" size="small" color="secondary">
+            <Button
+              variant="contained"
+              size="small"
+              color="secondary"
+            >
               Aplicar filtros
             </Button>
-            <Button variant="outlined" size="small" color="inherit">
+            <Button
+              variant="outlined"
+              size="small"
+              color="inherit"
+            >
               Limpiar filtros
             </Button>
             <IconButton aria-label="Ajustes" size="small">

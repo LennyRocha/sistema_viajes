@@ -1,5 +1,66 @@
 {
   "autobuses": [],
   "instituciones": [],
-  "servicios": []
+  "servicios": [
+    {
+      "id": 1,
+      "nombre": "Equipaje",
+      "icono_nombre": "trip",
+      "estatus": true,
+      "propiedades": [
+        {
+          "clave": "piezas_incluidas",
+          "label": "Piezas incluidas",
+          "tipo": "number",
+          "requerido": true,
+          "min": 0,
+          "max": 10
+        },
+        {
+          "clave": "peso_max_kg",
+          "label": "Peso máximo por pieza (kg)",
+          "tipo": "number",
+          "requerido": true,
+          "min": 0
+        },
+        {
+          "clave": "es_gratis",
+          "label": "¿El equipaje es gratis?",
+          "tipo": "boolean",
+          "requerido": true
+        },
+        {
+          "clave": "costo_extra_kg",
+          "label": "Costo por kg extra",
+          "tipo": "number",
+          "requerido": false,
+          "visible_si": {
+            "campo": "es_gratis",
+            "valor": false
+          },
+          "min": 0
+        }
+      ]
+    }
+  ],
+  "tipos_autobus": [
+    {
+      "id": 1,
+      "nombre": "Ejecutivo Premium",
+      "descripcion": "Autobús de lujo utilizado para viajes largos y servicios preferenciales.",
+      "linea": "Premium"
+    },
+    {
+      "id": 2,
+      "nombre": "Ejecutivo Estandar",
+      "descripcion": "Autobús operativo utilizado en la mayoría de rutas y salidas programadas.",
+      "linea": "Estándar"
+    },
+    {
+      "id": 3,
+      "nombre": "Shuttle ejecutivo",
+      "descripcion": "Unidad auxiliar para transporte ejecutivo, grupos reducidos o rutas cortas.",
+      "linea": "Shuttle"
+    }
+  ]
 }
