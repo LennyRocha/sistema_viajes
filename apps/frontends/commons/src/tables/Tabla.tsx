@@ -142,11 +142,21 @@ const optionsColumn = <T extends GridValidRowModel>(
       input: { "aria-label": "Cambiar estado" },
     },
   };
+  const actionsWidth =
+    20 +
+    [
+      callbacks.onEditClick,
+      callbacks.onDeleteClick,
+      callbacks.onInfoClick,
+      callbacks.onToggleActiveClick,
+    ].filter(Boolean).length *
+      40;
   return {
     field: "acciones",
     headerName: "Acciones",
     sortable: false,
-    width: 200,
+    disableColumnMenu: true,
+    width: Math.min(actionsWidth, 220),
     renderCell: (params) => (
       <Box
         sx={{

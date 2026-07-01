@@ -10,6 +10,7 @@ export { default as NavSidebarContent } from "./components/NavSidebarContent";
 export { default as MotionPaper } from "./components/MotionPaper";
 export { default as PaperBlock } from "./components/PaperBlock";
 export { default as Breadcrumb } from "./components/Breadcrumb";
+export { default as FormButtonsRow } from "./components/FormButtonsRow";
 
 export { type SidebarConfig } from "./types/SidebarTypes";
 export { type SidebarProviderValues } from "./types/SidebarTypes";
