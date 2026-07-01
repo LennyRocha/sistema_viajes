@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import {
   Environment,
@@ -24,7 +22,7 @@ const vehicleConfig = {
     scale: 1,
     fov: 65,
   },
-  huyndai: {
+  hyundai: {
     scale: 0.75,
     fov: 105,
   },
@@ -80,7 +78,7 @@ export default function Vehiculo3D({
 }
 
 const Model = ({
-  tipo = "huyndai",
+  tipo = "hyundai",
 }: {
   tipo: Modelo3DName;
 }) => {

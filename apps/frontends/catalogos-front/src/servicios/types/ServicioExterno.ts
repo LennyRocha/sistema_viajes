@@ -1,4 +1,5 @@
 import CampoServicio from "./CampoServicio";
+import ServicioTipoInstitucion from "./ServicioTipoInstitucion";
 
 export default interface ServicioExterno {
   id?: number;
@@ -6,4 +7,5 @@ export default interface ServicioExterno {
   icono_nombre: string;
   estatus: boolean;
   propiedades: CampoServicio[];
+  servicio_tipo_institucion: ServicioTipoInstitucion[];
 }

@@ -9,16 +9,21 @@ import React from "react";
 import {
   Add,
   FilterList,
-  Settings,
 } from "@mui/icons-material";
-import { GridColDef } from "@mui/x-data-grid";
 import {
   Box,
   Button,
   IconButton,
   TextField,
+  MenuItem,
 } from "@mui/material";
 import dynamic from "next/dynamic";
+import {
+  autobuses as data,
+  tiposAutobus,
+  instituciones,
+} from "../../data/constants";
+import buildAutobusesColumns from "../utils/buildBusesColumns";
 
 const Vehiculo3D = dynamic(
   () =>
@@ -40,6 +45,14 @@ export default function AutobusesIndex({
   onHeaderButtonClick,
   openSidebar,
 }: Readonly<Props>) {
+  React.useEffect(() => {
+    console.log("NuevoAutobus mounted");
+
+    return () => {
+      console.log("NuevoAutobus unmounted");
+    };
+  }, []);
+  const columnas = buildAutobusesColumns();
   return (
     <>
       <Breadcrumb
@@ -58,23 +71,21 @@ export default function AutobusesIndex({
       <Tabla
         titulo="Autobuses"
         subtitulo="Listado de autobuses disponibles"
-        columnas={columns}
-        data={rows}
+        columnas={columnas}
+        data={data}
         onEditClick={() =>
           openSidebar({
             title: "Modificar autobús",
             children: <div>Hola</div>,
           })
         }
-        onDeleteClick={console.log}
         onToggleActiveClick={console.log}
         onInfoClick={() =>
           openSidebar({
             title: "Detalles del autobús",
             children: (
               <div>
-                Sidebar Content{" "}
-                <Vehiculo3D tipo="huyndai"/>
+                <Vehiculo3D tipo="hyundai" />
               </div>
             ),
           })
@@ -87,97 +98,56 @@ export default function AutobusesIndex({
             }}
           >
             <TextField
-              label="Buscar autobús"
+              label="Buscar por código interno"
               variant="outlined"
               size="small"
               sx={{ flex: 1, minWidth: 200 }}
             />
             <TextField
-              label="Filtrar por categoría"
-              variant="outlined"
+              select
+              label="Tipo de autobús"
               size="small"
               sx={{ flex: 1, minWidth: 200 }}
-            />
+              onChange={(e) => console.log(e.target.value)}
+            >
+              {tiposAutobus.map((option) => (
+                <MenuItem
+                  key={option.id}
+                  value={option.nombre}
+                >
+                  {option.nombre}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              select
+              label="Institución"
+              size="small"
+              sx={{ flex: 1, minWidth: 200 }}
+              onChange={(e) => console.log(e.target.value)}
+            >
+              {instituciones.map((option) => (
+                <MenuItem
+                  key={option.id}
+                  value={option.nombre}
+                >
+                  {option.nombre}
+                </MenuItem>
+              ))}
+            </TextField>
             <IconButton aria-label="Filtrar" size="small">
               <FilterList />
             </IconButton>
             <Button
-              variant="contained"
+              variant="outlined"
               size="small"
               color="secondary"
             >
-              Aplicar filtros
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              color="inherit"
-            >
               Limpiar filtros
             </Button>
-            <IconButton aria-label="Ajustes" size="small">
-              <Settings />
-            </IconButton>
           </Box>
         }
       />
     </>
   );
 }
-
-type Persona = {
-  id: number;
-  firstName: string;
-  lastName: string;
-  age: number | null;
-  estatus: boolean;
-};
-
-const columns: GridColDef<Persona>[] = [
-  {
-    field: "id",
-    headerName: "ID",
-    width: 70,
-  },
-  {
-    field: "firstName",
-    headerName: "Nombre",
-    width: 130,
-  },
-  {
-    field: "lastName",
-    headerName: "Apellido",
-    width: 130,
-  },
-  {
-    field: "age",
-    headerName: "Edad",
-    type: "number",
-    width: 90,
-  },
-  {
-    field: "fullName",
-    headerName: "Nombre completo",
-    sortable: false,
-    width: 180,
-    valueGetter: (_, row) =>
-      `${row.firstName ?? ""} ${row.lastName ?? ""}`,
-  },
-];
-
-const rows: Persona[] = [
-  {
-    id: 1,
-    firstName: "Jon",
-    lastName: "Snow",
-    age: 35,
-    estatus: true,
-  },
-  {
-    id: 2,
-    firstName: "Cersei",
-    lastName: "Lannister",
-    age: 42,
-    estatus: false,
-  },
-];

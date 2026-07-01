@@ -5,6 +5,7 @@ import Link from "@mui/material/Link";
 type Breads = {
   nombre: string;
   href: string;
+  disabled?: boolean;
 };
 
 interface BreadcrumbProps {
@@ -27,6 +28,12 @@ export default function Breadcrumb({
           href={bread.href}
           color="inherit"
           underline="hover"
+          sx={{
+            pointerEvents: bread.disabled ? "none" : "auto",
+            ...(bread.disabled && {
+              color: "text.disabled",
+            }),
+          }}
         >
           {bread.nombre}
         </Link>

@@ -2,7 +2,13 @@
 
 import React from "react";
 import MotionPaper from "./MotionPaper";
-import { Box, Divider, Typography } from "@mui/material";
+import {
+  Box,
+  Divider,
+  Typography,
+  SxProps,
+  Theme,
+} from "@mui/material";
 
 interface PaperBlockProps {
   children: React.ReactNode;
@@ -10,6 +16,7 @@ interface PaperBlockProps {
   subtitle?: string;
   paperProps?: React.ComponentProps<typeof MotionPaper>;
   contentMaxHeight?: number | string;
+  contentWrapperSx?: SxProps<Theme>;
 }
 
 export default function PaperBlock({
@@ -18,6 +25,7 @@ export default function PaperBlock({
   subtitle,
   paperProps = {},
   contentMaxHeight,
+  contentWrapperSx = {},
 }: Readonly<PaperBlockProps>) {
   return (
     <Box
@@ -79,6 +87,7 @@ export default function PaperBlock({
                   overflowY: "auto",
                 }
               : {}),
+            ...contentWrapperSx,
           }}
         >
           {children}
