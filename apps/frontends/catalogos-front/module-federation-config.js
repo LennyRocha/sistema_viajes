@@ -13,6 +13,7 @@ module.exports = {
                     "./AutobusesModule": "./src/autobuses/pages",
                     "./TipoAutobusModule": "./src/tipo_autobus/pages",
                     "./ServiciosModule": "./src/servicios/pages",
+                    "./InstitucionesModule": "./src/instituciones/pages",
                     "./exports": "./src/federation/index",
                 },
 
