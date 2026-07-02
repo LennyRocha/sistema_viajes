@@ -4,6 +4,8 @@ import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "../../theme";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { SidebarProvider } from "./SidebarProvider";
+import { DialogProvider } from "./DialogProvider";
+import { SnackBox } from "@nexoroute/commons";
 
 export default function ProvidersWrapper({
   children,
@@ -14,8 +16,11 @@ export default function ProvidersWrapper({
     <AppRouterCacheProvider>
       <ThemeProvider theme={theme}>
         <SidebarProvider>
-          <CssBaseline />
-          {children}
+          <DialogProvider>
+            <CssBaseline />
+            {children}
+            <SnackBox />
+          </DialogProvider>
         </SidebarProvider>
       </ThemeProvider>
     </AppRouterCacheProvider>
