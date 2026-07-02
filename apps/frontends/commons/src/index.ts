@@ -11,10 +11,15 @@ export { default as MotionPaper } from "./components/MotionPaper";
 export { default as PaperBlock } from "./components/PaperBlock";
 export { default as Breadcrumb } from "./components/Breadcrumb";
 export { default as FormButtonsRow } from "./components/FormButtonsRow";
+export { SnackBox } from "./components/SnackBox";
+export { snack } from "./components/SnackBox";
 
 export { type SidebarConfig } from "./types/SidebarTypes";
 export { type SidebarProviderValues } from "./types/SidebarTypes";
 export { type SidebarProviderProps } from "./types/SidebarTypes";
+export { default as CommonPageProps } from "./types/CommonPageProps";
+export { type SnackbarPublicProps } from "./types/SnackbarProps";
+export { type SnackbarAlertPublicProps } from "./types/SnackbarProps";
 
 export { default as Tabla } from "./tables/Tabla";
 

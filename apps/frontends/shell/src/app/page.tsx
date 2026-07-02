@@ -3,15 +3,19 @@
 import {
   PaperBlock,
   PaperHeader,
+  snack,
 } from "@nexoroute/commons";
 import MainLayout from "../layout/MainLayout";
 import { useSidebar } from "../providers/SidebarProvider";
 import { ChevronLeft } from "@mui/icons-material";
 import Button from "@mui/material/Button";
 import Image from "next/image";
+import { useDialog } from "../providers/DialogProvider";
+import { DialogContentText } from "@mui/material";
 
 function Home() {
   const { showSidebar } = useSidebar();
+  const { showDialog } = useDialog();
   return (
     <div className="flex flex-col flex-1 items-center justify-center font-sans  gap-10 ">
       <PaperHeader
@@ -21,7 +25,11 @@ function Home() {
         showButton
         leftIcon={<ChevronLeft />}
         buttonTitle="Click me"
-        onButtonClick={() => alert("Button clicked!")}
+        onButtonClick={() =>
+          snack.success({
+            message: "Button clicked!",
+          })
+        }
       />
       <Image
         className="dark:invert"
@@ -97,6 +105,29 @@ function Home() {
           showSidebar({
             title: "Sidebar Title",
             children: <div>Sidebar Content</div>,
+          })
+        }
+      >
+        Click me
+      </Button>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() =>
+          showDialog({
+            title: "Dialog Title",
+            content: (
+              <DialogContentText>
+                {" "}
+                Let Google help apps determine location.
+                This means sending anonymous location data
+                to Google, even when no apps are running.
+              </DialogContentText>
+            ),
+            showCloseButton: true,
+            onConfirm: () =>
+              console.log("Dialog confirmed"),
+            onClose: () => console.log("Dialog closed"),
           })
         }
       >
