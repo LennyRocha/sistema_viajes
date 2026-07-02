@@ -25,3 +25,13 @@ export type SnackbarAlertPublicProps = Omit<
 export type Snack = SnackbarProps | SnackbarAlertProps;
 
 export default SnackbarProps;
+
+export type SnackFunctionProps = {
+  show: (
+    props: SnackbarPublicProps | SnackbarAlertPublicProps,
+  ) => void;
+  success: (props: SnackbarAlertPublicProps) => void;
+  error: (props: SnackbarAlertPublicProps) => void;
+  warning: (props: SnackbarAlertPublicProps) => void;
+  info: (props: SnackbarAlertPublicProps) => void;
+};

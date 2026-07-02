@@ -5,7 +5,11 @@ import {
   useGLTF,
 } from "@react-three/drei";
 import * as THREE from "three";
-import { useFrame, Canvas } from "@react-three/fiber";
+import {
+  useFrame,
+  Canvas,
+  useThree,
+} from "@react-three/fiber";
 import Modelo3DName from "../types/Modelo3DName";
 import { SkeletonUtils } from "three-stdlib";
 
@@ -32,6 +36,17 @@ const vehicleConfig = {
   },
 };
 
+function CameraUpdater({ fov }: { fov: number }) {
+  const { camera } = useThree();
+
+  React.useEffect(() => {
+    camera.fov = fov;
+    camera.updateProjectionMatrix();
+  }, [camera, fov]);
+
+  return null;
+}
+
 export default function Vehiculo3D({
   tipo,
   width,
@@ -41,18 +56,23 @@ export default function Vehiculo3D({
 }: Readonly<Props>) {
   const calcWidth =
     typeof width === "number" ? `${width}px` : width;
+  const fovMemo = React.useMemo(
+    () => vehicleConfig[tipo].fov,
+    [tipo],
+  );
   return (
     <Canvas
       camera={{
         position: cameraPosition,
-        fov: vehicleConfig[tipo].fov,
+        fov: fovMemo,
       }}
       style={{
         width: width ? `${calcWidth}` : "100%",
         aspectRatio,
-        overflow: "hidden"
+        overflow: "hidden",
       }}
     >
+      <CameraUpdater fov={vehicleConfig[tipo].fov} />
       <Environment preset="warehouse" background={false} />
 
       <ambientLight intensity={0.3} />
@@ -89,6 +109,11 @@ const Model = ({
   );
   const groupRef = React.useRef<THREE.Group>(null);
 
+  const scaleMemo = React.useMemo(
+    () => vehicleConfig[tipo].scale,
+    [tipo],
+  );
+
   React.useEffect(() => {
     const box = new THREE.Box3().setFromObject(clonedScene);
     const center = box.getCenter(new THREE.Vector3());
@@ -114,7 +139,7 @@ const Model = ({
   });
 
   return (
-    <group ref={groupRef} scale={vehicleConfig[tipo].scale}>
+    <group ref={groupRef} scale={scaleMemo}>
       <primitive object={clonedScene} />
     </group>
   );

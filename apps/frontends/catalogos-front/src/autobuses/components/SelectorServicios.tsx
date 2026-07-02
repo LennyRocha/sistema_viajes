@@ -2,15 +2,36 @@ import { Search } from "@mui/icons-material";
 import {
   Box,
   IconButton,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
   TextField,
   Typography,
 } from "@mui/material";
-import { EmptyState, PaperBlock } from "@nexoroute/commons";
+import {
+  DynamicIcon,
+  EmptyState,
+  PaperBlock,
+  type SidebarConfig,
+} from "@nexoroute/commons";
 import React from "react";
+import ServicioExterno from "../../servicios/types/ServicioExterno";
+import { servicios } from "../../data/constants";
+import Add from "@mui/icons-material/Add";
 
-type Props = {};
+type Props = {
+  existingServices?: ServicioExterno[];
+  openSidebar: (config: SidebarConfig) => void;
+};
 
-export default function SelectorServicios({}: Props) {
+export default function SelectorServicios({
+  existingServices,
+  openSidebar,
+}: Readonly<Props>) {
+  const [selectedServices, setSelectedServices] =
+    React.useState<ServicioExterno[]>(
+      existingServices ?? [],
+    );
   return (
     <PaperBlock
       title="Servicios disponibles"
@@ -42,15 +63,42 @@ export default function SelectorServicios({}: Props) {
           }}
           fullWidth
         />
+        <Box
+          sx={{
+            maxHeight: 320,
+            overflowY: "auto",
+            flex: 1,
+          }}
+        >
+          {servicios.map((servicio) => (
+            <ListItem
+              key={servicio.id}
+              secondaryAction={
+                <IconButton edge="end" aria-label="add_service" color="primary">
+                  <Add />
+                </IconButton>
+              }
+            >
+              <ListItemIcon>
+                <DynamicIcon name={servicio.icono_nombre} />
+              </ListItemIcon>
+              <ListItemText>{servicio.nombre}</ListItemText>
+            </ListItem>
+          ))}
+        </Box>
       </Box>
       <Box sx={{ flex: 1 }}>
         <Typography variant="caption" gutterBottom>
-          Servicios seleccionados
+          {selectedServices.length} servicios seleccionados
         </Typography>
-        <EmptyState
-          variant="no-results"
-          title="No hay servicios agregados"
-        />
+        {selectedServices.length === 0 ? (
+          <EmptyState
+            variant="no-results"
+            title="No hay servicios agregados"
+          />
+        ) : (
+          <></>
+        )}
       </Box>
     </PaperBlock>
   );

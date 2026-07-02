@@ -176,7 +176,7 @@ export default function MainLayout({
                 {sidebar.sidebarTitle}
               </Typography>
               <Box
-                component={"div"}
+                component={"article"}
                 sx={{
                   overflowY: "auto",
                   flex: 1,

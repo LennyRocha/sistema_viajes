@@ -1,15 +1,15 @@
 const tiposBus = [
   {
-    label: "Estándar",
-    model: "hyundai",
-    id: 1,
-    value: "ESTANDAR",
-  },
-  {
     label: "Premium",
     model: "volkswagen",
-    id: 2,
+    id: 1,
     value: "PREMIUM",
+  },
+  {
+    label: "Estándar",
+    model: "hyundai",
+    id: 2,
+    value: "ESTANDAR",
   },
   {
     label: "Shuttle",
@@ -17,6 +17,6 @@ const tiposBus = [
     id: 3,
     value: "SHUTTLE",
   },
-];
+] as const;
 
-export default tiposBus as const;
+export default tiposBus;

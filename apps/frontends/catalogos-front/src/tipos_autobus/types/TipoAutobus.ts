@@ -1,5 +1,5 @@
 export default interface TipoAutobus {
-  id?: number;
+  id: number;
   nombre: string;
   descripcion: string;
   linea: string;

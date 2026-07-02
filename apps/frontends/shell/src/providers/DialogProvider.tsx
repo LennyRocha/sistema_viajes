@@ -1,6 +1,5 @@
 "use client";
 
-import { createContext, type ReactNode } from "react";
 import React from "react";
 import {
   Dialog,
@@ -14,28 +13,13 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useSidebar } from "./SidebarProvider";
+import {
+  type DialogProps,
+  DialogProviderProps,
+  DialogProviderValues,
+} from "@nexoroute/commons";
 
-type DialogProps = {
-  title: string;
-  content: ReactNode;
-  onClose: () => void | Promise<void>;
-  onConfirm: () => void | Promise<void>;
-  confirmText?: string;
-  cancelText?: string;
-  showCancelButton?: boolean;
-  showCloseButton?: boolean;
-};
-
-interface DialogProviderValues {
-  showDialog: (props: DialogProps) => void;
-  hideDialog: () => void;
-}
-
-interface DialogProviderProps {
-  children: ReactNode;
-}
-
-const DialogContext = createContext<
+const DialogContext = React.createContext<
   DialogProviderValues | undefined
 >(undefined);
 

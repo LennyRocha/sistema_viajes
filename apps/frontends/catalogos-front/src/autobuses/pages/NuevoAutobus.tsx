@@ -4,26 +4,20 @@ import {
   Breadcrumb,
   PaperBlock,
   FormButtonsRow,
+  CommonPageProps,
 } from "@nexoroute/commons";
-import {
-  Box,
-  TextField,
-  MenuItem,
-} from "@mui/material";
+import { Box, TextField, MenuItem } from "@mui/material";
 import { ChevronLeft } from "@mui/icons-material";
 import tiposBus from "../../tipos_autobus/types/TiposBusMapper";
-import { type SidebarConfig } from "@nexoroute/commons";
 import VehiculoPreview from "../components/VehiculoPreview";
 import SelectorServicios from "../components/SelectorServicios";
 
-interface NuevoAutobusProps {
-  navigationFunction: () => void;
-  openSidenbar: (config: SidebarConfig) => void;
-}
+interface NuevoAutobusProps extends CommonPageProps {}
 
 export default function NuevoAutobus({
   navigationFunction,
-  openSidenbar,
+  openSidebar,
+  userPrivileges = [],
 }: Readonly<NuevoAutobusProps>) {
   const ref = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -224,11 +218,11 @@ export default function NuevoAutobus({
           fullWidth
         />
       </PaperBlock>
-      <SelectorServicios />
+      <SelectorServicios openSidebar={openSidebar} />
       <FormButtonsRow
         onSubmitClick={console.log}
         onResetClick={() =>
-          openSidenbar({
+          openSidebar({
             title: "Hola",
             children: <div>Hola</div>,
           })
