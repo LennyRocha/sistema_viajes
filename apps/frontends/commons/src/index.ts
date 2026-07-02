@@ -17,9 +17,13 @@ export { snack } from "./components/SnackBox";
 export { type SidebarConfig } from "./types/SidebarTypes";
 export { type SidebarProviderValues } from "./types/SidebarTypes";
 export { type SidebarProviderProps } from "./types/SidebarTypes";
+export { type DialogProps } from "./types/DialogTypes";
+export { type DialogProviderValues } from "./types/DialogTypes";
+export { type DialogProviderProps } from "./types/DialogTypes";
 export { default as CommonPageProps } from "./types/CommonPageProps";
 export { type SnackbarPublicProps } from "./types/SnackbarProps";
 export { type SnackbarAlertPublicProps } from "./types/SnackbarProps";
+export { type SnackFunctionProps } from "./types/SnackbarProps";
 
 export { default as Tabla } from "./tables/Tabla";
 

@@ -30,7 +30,11 @@ export default function ServiciosIndex({
       <Breadcrumb
         rolActual="Rol actual"
         breads={[
-          { nombre: "Servicios", href: "/services" },
+          {
+            nombre: "Servicios",
+            href: "/services",
+            disabled: true,
+          },
         ]}
       />
       <PaperHeader

@@ -3,21 +3,18 @@ import {
   PaperHeader,
   Breadcrumb,
   Tabla,
-  type SidebarConfig,
+  CommonPageProps,
 } from "@nexoroute/commons";
 import React from "react";
-import {
-  Add,
-  FilterList,
-} from "@mui/icons-material";
+import { Add, FilterList } from "@mui/icons-material";
 import {
   Box,
   Button,
   IconButton,
   TextField,
   MenuItem,
+  DialogContentText,
 } from "@mui/material";
-import dynamic from "next/dynamic";
 import {
   autobuses as data,
   tiposAutobus,
@@ -25,25 +22,16 @@ import {
 } from "../../data/constants";
 import buildAutobusesColumns from "../utils/buildBusesColumns";
 
-const Vehiculo3D = dynamic(
-  () =>
-    import("../../federation").then(
-      (mod) => mod.Vehiculo3D,
-    ),
-  {
-    ssr: false,
-    loading: () => <div>Cargando modelo 3D...</div>, // o un skeleton
-  },
-);
+import BusDetails from "../components/BusDetails";
 
-interface Props {
-  onHeaderButtonClick: () => void;
-  openSidebar: (config: SidebarConfig) => void;
-}
+interface Props extends CommonPageProps {}
 
 export default function AutobusesIndex({
-  onHeaderButtonClick,
+  navigationFunction,
   openSidebar,
+  showDialog = () => {},
+  snack,
+  userPrivileges = [],
 }: Readonly<Props>) {
   React.useEffect(() => {
     console.log("NuevoAutobus mounted");
@@ -57,14 +45,22 @@ export default function AutobusesIndex({
     <>
       <Breadcrumb
         rolActual="Rol actual"
-        breads={[{ nombre: "Autobuses", href: "/buses" }]}
+        breads={[
+          {
+            nombre: "Autobuses",
+            href: "/buses",
+            disabled: true,
+          },
+        ]}
       />
       <PaperHeader
         title="Autobuses"
         subtitle="Listado de autobuses disponibles"
         iconname="room_service"
         showButton
-        onButtonClick={onHeaderButtonClick}
+        onButtonClick={() =>
+          navigationFunction("/buses/nuevo")
+        }
         buttonTitle="Nuevo"
         leftIcon={<Add />}
       />
@@ -73,21 +69,35 @@ export default function AutobusesIndex({
         subtitulo="Listado de autobuses disponibles"
         columnas={columnas}
         data={data}
-        onEditClick={() =>
-          openSidebar({
-            title: "Modificar autobús",
-            children: <div>Hola</div>,
+        onEditClick={(row) =>
+          navigationFunction(
+            `/buses/editar/${row.codigo_interno}`,
+          )
+        }
+        onToggleActiveClick={() =>
+          showDialog({
+            title: "¿Cambiar estado del autobús?",
+            content: (
+              <DialogContentText>
+                {" "}
+                Let Google help apps determine location.
+                This means sending anonymous location data
+                to Google, even when no apps are running.
+              </DialogContentText>
+            ),
+            showCloseButton: true,
+            showCancelButton: true,
+            onConfirm: () =>
+              snack?.success({
+                message: "Autobus desactivado",
+              }),
+            onClose: () => console.log("Dialog closed"),
           })
         }
-        onToggleActiveClick={console.log}
-        onInfoClick={() =>
+        onInfoClick={(row) =>
           openSidebar({
             title: "Detalles del autobús",
-            children: (
-              <div>
-                <Vehiculo3D tipo="hyundai" />
-              </div>
-            ),
+            children: <BusDetails row={row} />,
           })
         }
         subHeaderComponent={
