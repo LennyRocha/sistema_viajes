@@ -24,6 +24,7 @@ module.exports = {
                     exposes: {
                         "./AutobusesModule": "./src/autobuses/pages",
                         "./ServiciosModule": "./src/servicios/pages",
+                        "./InstitucionesModule": "./src/instituciones/pages",
                         "./exports": "./src/federation/index",
                     },
                     shared,
