@@ -6,22 +6,29 @@ import { useSidebar } from "@/src/providers/SidebarProvider";
 import { snack } from "@nexoroute/commons";
 import { useRouter } from "next/navigation";
 
-const ViajesIndex = federatedComponent(
+const NuevoViaje = federatedComponent(
   "operaciones/ViajesModule",
-  "ViajesIndex",
+  "NuevoViaje",
 );
 
-export default function Page() {
+interface Props {
+  params: {
+    id: string;
+  };
+}
+
+export default function Page({ params }: Readonly<Props>) {
   const router = useRouter();
   const { showSidebar } = useSidebar();
 
   return (
     <MainLayout>
-      <ViajesIndex
+      <NuevoViaje
         navigationFunction={router.push}
         openSidebar={showSidebar}
         userPrivileges={[]}
         snack={snack}
+        viajeId={params.id}
       />
     </MainLayout>
   );
