@@ -1,11 +1,12 @@
 import CampoServicio from "./CampoServicio";
-import ServicioTipoInstitucion from "./ServicioTipoInstitucion";
+import DisponibilidadServicio from "./ServicioTipoInstitucion";
 
 export default interface ServicioExterno {
   id?: number;
   nombre: string;
+  descripcion: string;
   icono_nombre: string;
   estatus: boolean;
   propiedades: CampoServicio[];
-  servicio_tipo_institucion: ServicioTipoInstitucion[];
+  disponibilidad: DisponibilidadServicio[];
 }

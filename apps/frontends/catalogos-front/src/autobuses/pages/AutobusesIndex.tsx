@@ -33,13 +33,6 @@ export default function AutobusesIndex({
   snack,
   userPrivileges = [],
 }: Readonly<Props>) {
-  React.useEffect(() => {
-    console.log("NuevoAutobus mounted");
-
-    return () => {
-      console.log("NuevoAutobus unmounted");
-    };
-  }, []);
   const columnas = buildAutobusesColumns();
   return (
     <>
