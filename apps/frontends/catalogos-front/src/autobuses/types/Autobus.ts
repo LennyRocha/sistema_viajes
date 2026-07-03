@@ -2,8 +2,9 @@ import Institucion from "../../instituciones/types/Institucion";
 import TipoAutobus from "../../tipos_autobus/types/TipoAutobus";
 import AutobusServicio from "./AutobusServicio";
 import AutobusEstado from "./AutobusEstado";
+import { Auditory } from "@nexoroute/commons";
 
-export default interface Autobus {
+export default interface Autobus extends Auditory {
   id?: number;
   institucion: Institucion;
   tipo: TipoAutobus;

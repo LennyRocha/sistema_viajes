@@ -24,6 +24,7 @@ export { default as CommonPageProps } from "./types/CommonPageProps";
 export { type SnackbarPublicProps } from "./types/SnackbarProps";
 export { type SnackbarAlertPublicProps } from "./types/SnackbarProps";
 export { type SnackFunctionProps } from "./types/SnackbarProps";
+export {default as Auditory} from "./types/Auditory";
 
 export { default as Tabla } from "./tables/Tabla";
 

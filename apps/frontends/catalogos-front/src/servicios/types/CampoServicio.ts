@@ -1,9 +1,9 @@
-export default interface CampoConfig<T> {
+export default interface CampoConfig {
   clave: string;
 
   label: string;
 
-  tipo: "text" | "number" | "boolean";
+  tipo: "string" | "number" | "boolean";
 
   inputTipo?:
     | "text"
@@ -28,7 +28,7 @@ export default interface CampoConfig<T> {
 
   placeholder?: string;
 
-  defaultValue?: T;
+  defaultValue?: string | number | boolean;
 
   visible?: {
     campo: string;
