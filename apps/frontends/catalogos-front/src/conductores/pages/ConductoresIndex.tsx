@@ -62,6 +62,7 @@ export default function ConductoresIndex({
             children: <ConductorDetails row={row} />,
           })
         }
+        onToggleActiveClick={console.log}
         subHeaderComponent={
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField

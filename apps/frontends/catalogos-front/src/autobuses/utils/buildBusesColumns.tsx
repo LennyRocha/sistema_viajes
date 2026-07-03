@@ -7,15 +7,10 @@ const buildAutobusesColumns = () => {
   const columnas: GridColDef<Autobus>[] = [
     {
       field: "marca",
-      headerName: "Marca",
+      headerName: "Autobús",
       flex: 1,
-      minWidth: 100,
-    },
-    {
-      field: "modelo",
-      headerName: "Modelo",
-      flex: 1,
-      minWidth: 100,
+      minWidth: 200,
+      valueGetter: (_, row) => `${row.marca} ${row.modelo}`,
     },
     {
       field: "capacidad",
@@ -26,7 +21,7 @@ const buildAutobusesColumns = () => {
     {
       field: "tipo",
       headerName: "Tipo",
-      width: 100,
+      width: 110,
       sortable: false,
       disableColumnMenu: true,
       resizable: false,
@@ -43,23 +38,6 @@ const buildAutobusesColumns = () => {
       ),
     },
     {
-      field: "estado",
-      headerName: "Estado",
-      width: 155,
-      sortable: false,
-      resizable: false,
-      disableColumnMenu: true,
-      renderCell: (params) => {
-        return (
-          <Chip
-            label={params.row.estado}
-            color={estadoColorMap[params.row.estado]}
-            variant="outlined"
-          />
-        );
-      },
-    },
-    {
       field: "institucion",
       headerName: "Institución",
       flex: 1,
@@ -71,6 +49,32 @@ const buildAutobusesColumns = () => {
       headerName: "Código interno",
       flex: 1,
       minWidth: 100,
+    },
+    {
+      field: "estado",
+      headerName: "Estado",
+      width: 155,
+      sortable: false,
+      resizable: false,
+      disableColumnMenu: true,
+      renderCell: (params) => {
+        if (!params.row.estatus) {
+          return (
+            <Chip
+              label="Inactivo"
+              color="default"
+              variant="outlined"
+            />
+          );
+        }
+        return (
+          <Chip
+            label={params.row.estado}
+            color={estadoColorMap[params.row.estado]}
+            variant="outlined"
+          />
+        );
+      },
     },
   ];
 

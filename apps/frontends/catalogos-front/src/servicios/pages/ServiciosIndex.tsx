@@ -5,10 +5,7 @@ import {
   CommonPageProps,
 } from "@nexoroute/commons";
 import React from "react";
-import {
-  Add,
-  FilterList,
-} from "@mui/icons-material";
+import { Add, FilterList } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -18,13 +15,21 @@ import {
 } from "@mui/material";
 import { servicios as data } from "../../data/constants";
 import buildServicesColumns from "../utils/buildServicesColumns";
+import ServicioExterno from "../types/ServicioExterno";
+import PropiedadesServicio from "../components/PropiedadesServicio";
 
 interface Props extends CommonPageProps {}
 
 export default function ServiciosIndex({
   navigationFunction,
+  openSidebar,
 }: Readonly<Props>) {
-  const columnas = buildServicesColumns();
+  const dispatchSidebar = (servicio: ServicioExterno) =>
+    openSidebar({
+      title: servicio.nombre,
+      children: <PropiedadesServicio servicio={servicio} />,
+    });
+  const columnas = buildServicesColumns(dispatchSidebar);
   return (
     <>
       <Breadcrumb

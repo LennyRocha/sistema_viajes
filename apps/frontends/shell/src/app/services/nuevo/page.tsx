@@ -11,7 +11,7 @@ export default function Page() {
   const router = useRouter();
   return (
     <MainLayout>
-      <NuevoServicio />
+      <NuevoServicio navigationFunction = {router.push} />
     </MainLayout>
   );
 }

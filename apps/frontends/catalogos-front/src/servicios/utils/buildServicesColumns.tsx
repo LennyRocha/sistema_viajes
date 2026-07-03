@@ -1,10 +1,12 @@
 import React from "react";
 import { GridColDef } from "@mui/x-data-grid";
-import { Button, Chip } from "@mui/material";
+import { Button, Chip, Link, Tooltip } from "@mui/material";
 import ServicioExterno from "../types/ServicioExterno";
 import { DynamicIcon } from "@nexoroute/commons";
 
-const buildServicesColumns = () => {
+const buildServicesColumns = (
+  funct: (servicio: ServicioExterno) => void,
+) => {
   const columnas: GridColDef<ServicioExterno>[] = [
     {
       field: "icono_nombre",
@@ -26,12 +28,16 @@ const buildServicesColumns = () => {
     {
       field: "propiedades",
       headerName: "Propiedades",
-      width: 250,
+      width: 200,
       sortable: false,
       disableColumnMenu: true,
       resizable: false,
       renderCell: (params) => (
-        <Button variant="text" size="small">
+        <Button
+          variant="text"
+          size="small"
+          onClick={() => funct(params.row)}
+        >
           {params.row.propiedades.length} Propiedades
         </Button>
       ),
@@ -44,15 +50,30 @@ const buildServicesColumns = () => {
       disableColumnMenu: true,
       resizable: false,
       renderCell: (params) => (
-        <Chip
-          label={
-            params.row.disponibilidad
+        <Tooltip title={params.row.disponibilidad ? "Este servicio está disponible para todos los tipos de autobús en todas las instituciones." : "Este servicio tiene una disponibilidad personalizada, por lo que no está disponible para todos los tipos de autobús en todas las instituciones."}>
+          <Link
+            href={`services/${params.row.nombre}/disponibilidad`}
+            underline="hover"
+            color="secondary"
+          >
+            {params.row.disponibilidad
               ? "Predeterminada"
-              : "Personalizada"
-          }
-          color={
-            params.row.disponibilidad ? "success" : "info"
-          }
+              : "Personalizada"}
+          </Link>
+        </Tooltip>
+      ),
+    },
+    {
+      field: "estatus",
+      headerName: "Estado",
+      width: 100,
+      sortable: false,
+      disableColumnMenu: true,
+      resizable: false,
+      renderCell: (params) => (
+        <Chip
+          label={params.row.estatus ? "Activo" : "Inactivo"}
+          color={params.row.estatus ? "success" : "error"}
           variant="outlined"
         />
       ),

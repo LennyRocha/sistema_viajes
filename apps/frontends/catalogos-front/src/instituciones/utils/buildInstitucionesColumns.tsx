@@ -19,13 +19,14 @@ const buildInstitucionesColumns = () => {
     {
       field: "estatus",
       headerName: "Estado",
-      width: 140,
+      width: 100,
       sortable: false,
       disableColumnMenu: true,
+      resizable: false,
       renderCell: (params) => (
         <Chip
-          label={params.row.estatus ? "Activa" : "Inactiva"}
-          color={params.row.estatus ? "success" : "default"}
+          label={params.row.estatus ? "Activo" : "Inactivo"}
+          color={params.row.estatus ? "success" : "error"}
           variant="outlined"
         />
       ),

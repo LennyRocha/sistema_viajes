@@ -50,11 +50,6 @@ const ListLinks = [
     icon: "bug_report",
   },
   {
-    name: "Paradas",
-    href: "/stops",
-    icon: "pinboard",
-  },
-  {
     name: "Historial",
     href: "/history",
     icon: "history",

@@ -1,7 +1,7 @@
 import React from "react";
 import Conductor from "../typers/Conductor";
 import { GridColDef } from "@mui/x-data-grid";
-import { Chip, Typography } from "@mui/material";
+import { Chip } from "@mui/material";
 
 const buildConductoresColumns = () => {
   const columnas: GridColDef<Conductor>[] = [
@@ -10,7 +10,8 @@ const buildConductoresColumns = () => {
       headerName: "Nombre",
       flex: 1,
       minWidth: 120,
-      valueGetter: (_, row) => `${row.nombre} ${row.apellido}`,
+      valueGetter: (_, row) =>
+        `${row.nombre} ${row.apellido}`,
     },
     {
       field: "curp",
@@ -38,15 +39,16 @@ const buildConductoresColumns = () => {
       valueGetter: (_, row) => row.licencia.numeroLicencia,
     },
     {
-      field: "estado",
+      field: "estatus",
       headerName: "Estado",
-      width: 120,
+      width: 100,
       sortable: false,
       disableColumnMenu: true,
+      resizable: false,
       renderCell: (params) => (
         <Chip
-          label={params.row.estado}
-          color={estadoColorMap[params.row.estado]}
+          label={params.row.estado ? "Activo" : "Inactivo"}
+          color={params.row.estado ? "success" : "error"}
           variant="outlined"
         />
       ),
@@ -64,8 +66,3 @@ const buildConductoresColumns = () => {
 };
 
 export default buildConductoresColumns;
-
-const estadoColorMap = {
-  Activo: "success",
-  Inactivo: "error",
-} as const;
