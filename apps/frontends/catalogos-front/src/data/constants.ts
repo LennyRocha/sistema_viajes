@@ -4,6 +4,8 @@ import Institucion from "../instituciones/types/Institucion";
 import ServicioExterno from "../servicios/types/ServicioExterno";
 import TipoAutobus from "../tipos_autobus/types/TipoAutobus";
 import AutobusEstado from "../autobuses/types/AutobusEstado";
+import Conductor from "../conductores/typers/Conductor";
+import ConductorEstado from "../conductores/typers/ConductorEstado";
 
 export const instituciones: Institucion[] = [
   {
@@ -315,5 +317,92 @@ export const autobusServicios: AutobusServicio[] = [
       tipo: "number",
       min: 1,
     },
+  },
+];
+
+export const conductores: Conductor[] = [
+  {
+    id: 1,
+    institucion: instituciones[0],
+    nombre: "Carlos",
+    apellido: "González",
+    curp: "GOGC850315HDFNRS09",
+    telefono: "+34 612 345 678",
+    email: "carlos.gonzalez@transportes.com",
+    fecha_nacimiento: "1985-03-15",
+    licencia: {
+      id: 1,
+      numeroLicencia: "LIC-2024-001",
+      fechaExpedicion: new Date("2020-06-10"),
+      fechaVencimiento: new Date("2026-06-10"),
+      telefono: "+34 612 345 678",
+      estadoEmisor: "Madrid",
+      imagenLicencia: "https://example.com/licencia1.jpg",
+    },
+    estado: ConductorEstado.ACTIVO,
+    fotoPerfil: "https://example.com/foto1.jpg",
+  },
+  {
+    id: 2,
+    institucion: instituciones[1],
+    nombre: "María",
+    apellido: "López",
+    curp: "LOPM890722HDFNRS08",
+    telefono: "+34 612 345 679",
+    email: "maria.lopez@transportes.com",
+    fecha_nacimiento: "1989-07-22",
+    licencia: {
+      id: 2,
+      numeroLicencia: "LIC-2024-002",
+      fechaExpedicion: new Date("2021-03-05"),
+      fechaVencimiento: new Date("2027-03-05"),
+      telefono: "+34 612 345 679",
+      estadoEmisor: "Barcelona",
+      imagenLicencia: "https://example.com/licencia2.jpg",
+    },
+    estado: ConductorEstado.ACTIVO,
+    fotoPerfil: "https://example.com/foto2.jpg",
+  },
+  {
+    id: 3,
+    institucion: instituciones[2],
+    nombre: "Juan",
+    apellido: "Martínez",
+    curp: "MAJR810914HDFNRS07",
+    telefono: "+34 612 345 680",
+    email: "juan.martinez@transportes.com",
+    fecha_nacimiento: "1981-09-14",
+    licencia: {
+      id: 3,
+      numeroLicencia: "LIC-2024-003",
+      fechaExpedicion: new Date("2019-01-20"),
+      fechaVencimiento: new Date("2025-01-20"),
+      telefono: "+34 612 345 680",
+      estadoEmisor: "Valencia",
+      imagenLicencia: "https://example.com/licencia3.jpg",
+    },
+    estado: ConductorEstado.ACTIVO,
+    fotoPerfil: "https://example.com/foto3.jpg",
+  },
+  {
+    id: 4,
+    institucion: instituciones[3],
+    nombre: "Pedro",
+    apellido: "Rodríguez",
+    curp: "RORP920505HDFNRS06",
+    telefono: "+34 612 345 681",
+    email: "pedro.rodriguez@transportes.com",
+    fecha_nacimiento: "1992-05-05",
+    licencia: {
+      id: 4,
+      numeroLicencia: "LIC-2024-004",
+      fechaExpedicion: new Date("2022-11-15"),
+      fechaVencimiento: new Date("2028-11-15"),
+      telefono: "+34 612 345 681",
+      estadoEmisor: "Sevilla",
+      imagenLicencia: "https://example.com/licencia4.jpg",
+    },
+    estado: ConductorEstado.INACTIVO,
+    fotoPerfil: "https://example.com/foto4.jpg",
   },
 ];

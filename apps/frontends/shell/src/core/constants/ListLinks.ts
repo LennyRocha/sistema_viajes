@@ -20,6 +20,11 @@ const ListLinks = [
     icon: "room_service",
   },
   {
+    name: "Conductores",
+    href: "/conductores",
+    icon: "person",  // Material-UI icon
+  },
+  {
     name: "Bitácora",
     href: "/logs",
     icon: "book_4",
