@@ -1,4 +1,4 @@
-export default interface CampoConfig {
+export default interface CampoConfig<T> {
   clave: string;
 
   label: string;
@@ -28,7 +28,7 @@ export default interface CampoConfig {
 
   placeholder?: string;
 
-  defaultValue?: unknown;
+  defaultValue?: T;
 
   visible?: {
     campo: string;

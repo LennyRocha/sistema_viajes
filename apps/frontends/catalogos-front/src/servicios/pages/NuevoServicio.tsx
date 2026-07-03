@@ -87,7 +87,7 @@ export default function NuevoServicio({
               theme.palette.accent.main,
               0.08,
             ),
-            borderRadius: 4,
+            borderRadius: 2,
             width: 75,
             height: 75,
             display: "flex",
@@ -102,7 +102,14 @@ export default function NuevoServicio({
             filled
           />
         </Box>
-        <Box>
+        <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          justifyContent: "center"
+        }}
+        >
           <Typography
             variant="overline"
             gutterBottom

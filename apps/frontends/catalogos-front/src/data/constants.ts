@@ -76,7 +76,7 @@ export const servicios: ServicioExterno[] = [
       {
         clave: "nombre_red",
         label: "Nombre de red",
-        tipo: "text",
+        tipo: "string",
         requerido: true,
         placeholder: "Ej. Bus_Norte_01",
       },
@@ -152,7 +152,7 @@ export const servicios: ServicioExterno[] = [
       {
         clave: "contenido",
         label: "Contenido mostrado",
-        tipo: "text",
+        tipo: "string",
         inputTipo: "textarea",
       },
     ],
@@ -239,7 +239,7 @@ export const autobuses: Autobus[] = [
     capacidad: 36,
     color: "Gris",
     codigo_interno: "IR-008",
-    estado: AutobusEstado.DISPONIBLE,
+    estado: AutobusEstado.FUERASERVICIO,
     estatus: true,
   },
 
@@ -269,7 +269,7 @@ export const autobusServicios: AutobusServicio[] = [
     configuracion_servicio: {
       clave: "nombre_red",
       label: "Nombre de red",
-      tipo: "text",
+      tipo: "string",
       requerido: true,
       placeholder: "Ej. Autobus_WIFI",
     },
