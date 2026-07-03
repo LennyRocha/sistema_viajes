@@ -69,6 +69,8 @@ export const servicios: ServicioExterno[] = [
     id: 1,
     nombre: "WiFi",
     icono_nombre: "wifi",
+    descripcion:
+      "Servicio de conexión inalámbrica a internet para los pasajeros.",
     estatus: true,
     propiedades: [
       {
@@ -86,13 +88,15 @@ export const servicios: ServicioExterno[] = [
         max: 1000,
       },
     ],
-    servicio_tipo_institucion: [],
+    disponibilidad: [],
   },
 
   {
     id: 2,
     nombre: "Equipaje",
     icono_nombre: "luggage",
+    descripcion:
+      "Servicio de almacenamiento de equipaje para los pasajeros.",
     estatus: true,
     propiedades: [
       {
@@ -103,13 +107,15 @@ export const servicios: ServicioExterno[] = [
         min: 1,
       },
     ],
-    servicio_tipo_institucion: [],
+    disponibilidad: [],
   },
 
   {
     id: 3,
     nombre: "Aire acondicionado",
     icono_nombre: "ac_unit",
+    descripcion:
+      "Servicio de climatización para los pasajeros.",
     estatus: true,
     propiedades: [
       {
@@ -126,13 +132,15 @@ export const servicios: ServicioExterno[] = [
         inputTipo: "switch",
       },
     ],
-    servicio_tipo_institucion: [],
+    disponibilidad: [],
   },
 
   {
     id: 4,
     nombre: "Pantallas",
     icono_nombre: "tv",
+    descripcion:
+      "Servicio de visualización de contenido para los pasajeros.",
     estatus: true,
     propiedades: [
       {
@@ -148,13 +156,15 @@ export const servicios: ServicioExterno[] = [
         inputTipo: "textarea",
       },
     ],
-    servicio_tipo_institucion: [],
+    disponibilidad: [],
   },
 
   {
     id: 5,
     nombre: "Cargadores USB",
     icono_nombre: "usb",
+    descripcion:
+      "Servicio de carga de dispositivos electrónicos para los pasajeros.",
     estatus: true,
     propiedades: [
       {
@@ -164,7 +174,7 @@ export const servicios: ServicioExterno[] = [
         min: 1,
       },
     ],
-    servicio_tipo_institucion: [],
+    disponibilidad: [],
   },
 ];
 

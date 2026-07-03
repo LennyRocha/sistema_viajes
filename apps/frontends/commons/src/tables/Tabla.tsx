@@ -156,6 +156,7 @@ const optionsColumn = <T extends GridValidRowModel>(
     headerName: "Acciones",
     sortable: false,
     disableColumnMenu: true,
+    resizable: false,
     width: Math.min(actionsWidth, 220),
     renderCell: (params) => (
       <Box

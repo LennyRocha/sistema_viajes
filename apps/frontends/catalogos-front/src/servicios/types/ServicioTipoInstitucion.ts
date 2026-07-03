@@ -1,4 +1,4 @@
-export default interface ServicioTipoInstitucion {
+export default interface DisponibilidadServicio {
   id?: number;
   tipoId: number;
   institucionId: number;

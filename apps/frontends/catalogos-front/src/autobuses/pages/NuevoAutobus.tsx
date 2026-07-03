@@ -20,14 +20,6 @@ export default function NuevoAutobus({
   userPrivileges = [],
 }: Readonly<NuevoAutobusProps>) {
   const ref = React.useRef<HTMLDivElement>(null);
-  React.useEffect(() => {
-    if (ref.current) {
-      console.log(
-        ref.current.offsetWidth,
-        ref.current.offsetHeight,
-      );
-    }
-  }, [ref.current]);
   return (
     <>
       <Breadcrumb
@@ -46,7 +38,7 @@ export default function NuevoAutobus({
         subtitle="Agrega un nuevo autobús para que se pueda utilizar en los viajes"
         iconname="add"
         showButton
-        onButtonClick={navigationFunction}
+        onButtonClick={() => navigationFunction("/buses")}
         buttonTitle="Volver"
         leftIcon={<ChevronLeft />}
       />

@@ -12,22 +12,24 @@ const buildAutobusesColumns = () => {
       minWidth: 100,
     },
     {
-      field: "capacidad",
-      headerName: "Capacidad",
-      width: 90,
-    },
-    {
       field: "modelo",
       headerName: "Modelo",
       flex: 1,
       minWidth: 100,
     },
     {
+      field: "capacidad",
+      headerName: "Capacidad",
+      width: 90,
+      resizable: false,
+    },
+    {
       field: "tipo",
       headerName: "Tipo",
       width: 100,
       sortable: false,
-      disableColumnMenu: true,  
+      disableColumnMenu: true,
+      resizable: false,
       renderCell: (params) => (
         <Typography
           sx={{
@@ -43,8 +45,9 @@ const buildAutobusesColumns = () => {
     {
       field: "estado",
       headerName: "Estado",
-      width: 175,
+      width: 155,
       sortable: false,
+      resizable: false,
       disableColumnMenu: true,
       renderCell: (params) => {
         return (

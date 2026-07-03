@@ -11,11 +11,7 @@ export default function Page() {
   const router = useRouter();
   return (
     <MainLayout>
-      <ServiciosIndex
-        onHeaderButtonClick={() =>
-          router.push("/services/nuevo")
-        }
-      />
+      <ServiciosIndex navigationFunction={router.push} />
     </MainLayout>
   );
 }
