@@ -25,6 +25,8 @@ module.exports = {
                         "./AutobusesModule": "./src/autobuses/pages",
                         "./ServiciosModule": "./src/servicios/pages",
                         "./exports": "./src/federation/index",
+                        "./AutobusesModule": "./src/autobuses/pages",
+                        "./ConductoresModule": "./src/conductores/pages",
                     },
                     shared,
                     extraOptions: {
