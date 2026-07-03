@@ -10,7 +10,9 @@ module.exports = {
                 new NextFederationPlugin({
                     name: "auth",
                     filename: "static/chunks/remoteEntry.js",
-                    exposes: {},
+                    exposes: {
+                        "./UsuariosModule": "./src/usuarios/pages",
+                    },
                     shared,
                     extraOptions: {
                         enableImageLoaderFix: true,

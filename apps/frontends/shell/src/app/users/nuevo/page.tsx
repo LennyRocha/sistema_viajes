@@ -5,9 +5,9 @@ import { federatedComponent } from "@/src/lib/loadRemote";
 import { useSidebar } from "@/src/providers/SidebarProvider";
 import { useRouter } from "next/navigation";
 
-const UsuariosIndex = federatedComponent(
+const NuevoUsuario = federatedComponent(
   "auth/UsuariosModule",
-  "UsuariosIndex",
+  "NuevoUsuario",
 );
 
 export default function Page() {
@@ -15,7 +15,7 @@ export default function Page() {
   const router = useRouter();
   return (
     <MainLayout>
-      <UsuariosIndex
+      <NuevoUsuario
         openSidebar={showSidebar}
         navigationFunction={router.push}
       />
