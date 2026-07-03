@@ -22,7 +22,7 @@ export function initFederation() {
         entry: process.env.NEXT_PUBLIC_MF_AUTH!,
       },
       {
-        name: "dashboard",
+        name: "dashboard-reportes",
         entry: process.env.NEXT_PUBLIC_MF_DASHBOARD!,
       },
     ],
