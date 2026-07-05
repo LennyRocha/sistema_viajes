@@ -9,14 +9,17 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
+    "@mui/icons-material": "^9.0.1",
+    "@mui/material": "^9.0.1",
+    "@mui/material-nextjs": "^9.0.1",
+    "@nexoroute/commons": "workspace:*",
     "@reduxjs/toolkit": "^2.12.0",
     "next": "15.3.4",
     "react": "^19",
     "react-dom": "^19",
-    "@mui/icons-material": "^9.0.1",
-    "@mui/material": "^9.0.1",
-    "@mui/material-nextjs": "^9.0.1",
-    "@nexoroute/commons": "workspace:*"
+    "react-hook-form": "^7.80.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@module-federation/nextjs-mf": "^8.8.69",
