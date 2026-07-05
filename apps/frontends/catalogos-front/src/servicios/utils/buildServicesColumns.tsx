@@ -2,7 +2,7 @@ import React from "react";
 import { GridColDef } from "@mui/x-data-grid";
 import { Button, Chip, Link, Tooltip } from "@mui/material";
 import ServicioExterno from "../types/ServicioExterno";
-import { DynamicIcon } from "@nexoroute/commons";
+import { ServicioIcon } from "@nexoroute/commons";
 
 const buildServicesColumns = (
   funct: (servicio: ServicioExterno) => void,
@@ -16,7 +16,7 @@ const buildServicesColumns = (
       resizable: false,
       disableColumnMenu: true,
       renderCell: (params) => (
-        <DynamicIcon name={params.row.icono_nombre} />
+        <ServicioIcon name={params.row.icono_nombre} />
       ),
     },
     {
@@ -50,7 +50,13 @@ const buildServicesColumns = (
       disableColumnMenu: true,
       resizable: false,
       renderCell: (params) => (
-        <Tooltip title={params.row.disponibilidad ? "Este servicio está disponible para todos los tipos de autobús en todas las instituciones." : "Este servicio tiene una disponibilidad personalizada, por lo que no está disponible para todos los tipos de autobús en todas las instituciones."}>
+        <Tooltip
+          title={
+            params.row.disponibilidad
+              ? "Este servicio está disponible para todos los tipos de autobús en todas las instituciones."
+              : "Este servicio tiene una disponibilidad personalizada, por lo que no está disponible para todos los tipos de autobús en todas las instituciones."
+          }
+        >
           <Link
             href={`services/${params.row.nombre}/disponibilidad`}
             underline="hover"

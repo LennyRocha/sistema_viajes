@@ -78,7 +78,7 @@ export function DialogProvider({
         }}
         sx={{
           "& .MuiDialog-paper": {
-            minWidth: 300,
+            minWidth: 350,
           },
         }}
         fullScreen={fullScreen}
@@ -118,7 +118,11 @@ export function DialogProvider({
               {dialogProps?.cancelText || "Cancelar"}
             </Button>
           )}
-          <Button autoFocus onClick={confirmDialog}>
+          <Button
+            autoFocus
+            onClick={confirmDialog}
+            disabled={dialogProps?.confirmDisabled}
+          >
             {dialogProps?.confirmText || "Confirmar"}
           </Button>
         </DialogActions>
