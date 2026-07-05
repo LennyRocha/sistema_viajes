@@ -9,6 +9,7 @@ export type DialogProps = {
   cancelText?: string;
   showCancelButton?: boolean;
   showCloseButton?: boolean;
+  confirmDisabled?: boolean;
 };
 
 export interface DialogProviderValues {

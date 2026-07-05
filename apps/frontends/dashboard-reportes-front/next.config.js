@@ -3,14 +3,16 @@ const shared = require("./shared-mf-config");
 
 module.exports = {
     pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
-    assetPrefix: 'http://localhost:3002',
+    assetPrefix: 'http://localhost:3003',
     webpack(config, { isServer }) {
         if (!isServer) {
             config.plugins.push(
                 new NextFederationPlugin({
                     name: "dashboard-reportes",
                     filename: "static/chunks/remoteEntry.js",
-                    exposes: {},
+                    exposes: {
+                        "./HistorialModule": "./src/historial/pages",
+                    },
                     shared,
                     extraOptions: {
                         enableImageLoaderFix: true,

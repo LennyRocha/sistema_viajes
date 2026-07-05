@@ -96,6 +96,7 @@ export default function ViajesIndex({
                     selectedViaje.id === viaje.id
                       ? "primary.main"
                       : undefined,
+                      padding: "12px",
                 },
               }}
               contentWrapperSx={{

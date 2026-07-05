@@ -1,8 +1,9 @@
 import Institucion from "../../instituciones/types/Institucion";
 import Licencia from "./Licencia";
 import ConductorEstado from "./ConductorEstado";
+import { Auditory } from "@nexoroute/commons";
 
-export default interface Conductor {
+export default interface Conductor extends Auditory {
   id?: number;
   institucion: Institucion;
   nombre: string;

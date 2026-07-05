@@ -1,5 +1,5 @@
 import React from "react";
-import Conductor from "../typers/Conductor";
+import Conductor from "../types/Conductor";
 import { Box, Divider, Typography } from "@mui/material";
 
 type Props = {

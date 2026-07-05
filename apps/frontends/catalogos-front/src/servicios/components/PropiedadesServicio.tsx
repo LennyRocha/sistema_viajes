@@ -64,8 +64,7 @@ export default function PropiedadesServicio({
             variant="caption"
             color="textSecondary"
           >
-            Valor por defecto:{" "}
-            {defValue(propiedad)}
+            Valor por defecto: {defValue(propiedad)}
           </Typography>
           <Typography
             variant="caption"
@@ -109,7 +108,7 @@ export default function PropiedadesServicio({
               >
                 Formato personalizado:{" "}
                 {propiedad.regex
-                  ? propiedad.regex
+                  ? propiedad.regex.toString()
                   : "No aplica"}
               </Typography>
             </>

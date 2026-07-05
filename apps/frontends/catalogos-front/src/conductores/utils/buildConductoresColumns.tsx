@@ -1,5 +1,5 @@
 import React from "react";
-import Conductor from "../typers/Conductor";
+import Conductor from "../types/Conductor";
 import { GridColDef } from "@mui/x-data-grid";
 import { Chip } from "@mui/material";
 

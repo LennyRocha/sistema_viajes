@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Nebulas";
+  src: url('../fonts/Nebula.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   min-height: 100vh;
   font-family: "Inter", 'Roboto', sans-serif;
@@ -85,7 +92,7 @@ b {
 }
 
 .font-brand {
-  font-family: "Nebula", sans-serif !important;
+  font-family: "Nebulas", sans-serif !important;
 }
 
 #main {

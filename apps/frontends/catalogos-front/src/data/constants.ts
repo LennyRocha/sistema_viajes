@@ -4,8 +4,8 @@ import Institucion from "../instituciones/types/Institucion";
 import ServicioExterno from "../servicios/types/ServicioExterno";
 import TipoAutobus from "../tipos_autobus/types/TipoAutobus";
 import AutobusEstado from "../autobuses/types/AutobusEstado";
-import Conductor from "../conductores/typers/Conductor";
-import ConductorEstado from "../conductores/typers/ConductorEstado";
+import Conductor from "../conductores/types/Conductor";
+import ConductorEstado from "../conductores/types/ConductorEstado";
 
 export const instituciones: Institucion[] = [
   {

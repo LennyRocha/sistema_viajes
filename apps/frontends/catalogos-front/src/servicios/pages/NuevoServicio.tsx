@@ -5,8 +5,8 @@ import {
   PaperBlock,
   FormButtonsRow,
   CommonPageProps,
-  DynamicIcon,
   EmptyState,
+  ServicioIcon,
 } from "@nexoroute/commons";
 import {
   Box,
@@ -16,23 +16,53 @@ import {
   alpha,
 } from "@mui/material";
 import { Add, ChevronLeft } from "@mui/icons-material";
+import CustomIconPicker from "../components/CustomIconPicker";
 interface NuevoServicioProps extends CommonPageProps {}
 
 export default function NuevoServicio({
   navigationFunction,
   openSidebar,
+  showDialog = () => {},
+  snack,
   userPrivileges = [],
 }: Readonly<NuevoServicioProps>) {
+  const [icon_name, setIcon_name] =
+    React.useState("room-service");
+  const pendingIconRef = React.useRef(icon_name);
+
+  const handleOpenIconPicker = () => {
+    pendingIconRef.current = icon_name; // arranca desde el valor actual
+    showDialog({
+      title: "Elegir un icono",
+      content: (
+        <CustomIconPicker
+          value={icon_name}
+          onChange={(newIcon) => {
+            pendingIconRef.current = newIcon;
+          }}
+        />
+      ),
+      showCloseButton: true,
+      showCancelButton: true,
+      onClose: () => {},
+      onConfirm: () => {
+        setIcon_name(pendingIconRef.current);
+      },
+      confirmText: "Seleccionar",
+      confirmDisabled: false,
+    });
+  };
+
   return (
     <>
       {" "}
       <Breadcrumb
         rolActual="Rol actual"
         breads={[
-          { nombre: "Servicios", href: "/servicios" },
+          { nombre: "Servicios", href: "/services" },
           {
             nombre: "Nuevo",
-            href: "/servicios/nuevo",
+            href: "/services/nuevo",
             disabled: true,
           },
         ]}
@@ -95,34 +125,38 @@ export default function NuevoServicio({
             justifyContent: "center",
           })}
         >
-          <DynamicIcon
-            name="room_service"
+          <ServicioIcon
+            name={icon_name}
             size="xxxl"
             color="accent"
-            filled
           />
         </Box>
         <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          justifyContent: "center"
-        }}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
+          }}
         >
           <Typography
             variant="overline"
             gutterBottom
             sx={{ fontWeight: "bold" }}
           >
-            Icono actual
+            Icono actual: {icon_name}
           </Typography>
-          <Button variant="contained">Cambiar icono</Button>
+          <Button
+            variant="contained"
+            onClick={handleOpenIconPicker}
+          >
+            Cambiar icono
+          </Button>
         </Box>
       </PaperBlock>
       <PaperBlock
-        title="Icono representativo"
-        subtitle="Selecciona un ícono que representará este servicio o puedes dejar el ícono que se muestra por defecto"
+        title="Propiedades del servicio"
+        subtitle="Define caracerísticas especificas de este servicio para se deben establecer en el registro de un autobús. Agrega al menos una propiedad para continuar, máximo 12 propiedades"
         contentWrapperSx={{
           display: "flex",
           flexDirection: "column",
@@ -140,7 +174,16 @@ export default function NuevoServicio({
             {" "}
             0 propiedades definidas
           </Typography>
-          <Button startIcon={<Add />} variant="contained">
+          <Button
+            startIcon={<Add />}
+            variant="contained"
+            onClick={() =>
+              openSidebar({
+                title: "Nueva propiedad de servicio",
+                children: <div>Hola</div>,
+              })
+            }
+          >
             Agregar
           </Button>
         </Box>
