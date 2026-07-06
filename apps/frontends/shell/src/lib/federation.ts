@@ -31,12 +31,27 @@ export function initFederation() {
         version: "19.2.4",
         scope: "default",
         lib: () => require("react"),
-        shareConfig: { singleton: true, requiredVersion: false },
+        shareConfig: {
+          singleton: true,
+          requiredVersion: false,
+        },
       },
       "react-dom": {
         version: "19.2.4",
         scope: "default",
         lib: () => require("react-dom"),
+        shareConfig: {
+          singleton: true,
+          requiredVersion: false,
+        },
+      },
+      konva: {
+        shareConfig: {
+          singleton: true,
+          requiredVersion: false,
+        },
+      },
+      "react-konva": {
         shareConfig: {
           singleton: true,
           requiredVersion: false,

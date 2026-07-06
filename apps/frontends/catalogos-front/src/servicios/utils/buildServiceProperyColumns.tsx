@@ -32,7 +32,7 @@ const buildServicesColumns = () => {
     {
       field: "requerido",
       headerName: "Requerido",
-      minWidth: 200,
+      minWidth: 75,
       flex: 1,
       renderCell: (params) => {
         return params.row.requerido ? "Sí" : "No";
@@ -41,7 +41,7 @@ const buildServicesColumns = () => {
     {
       field: "visible",
       headerName: "Visible condicionalmente",
-      minWidth: 250,
+      minWidth: 150,
       flex: 1,
       renderCell: (params) => {
         return params.row.visible ? "Sí" : "No";

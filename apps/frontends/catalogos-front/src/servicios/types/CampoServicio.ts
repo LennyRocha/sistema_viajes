@@ -1,4 +1,6 @@
 export default interface CampoConfig {
+  uuid?: string;
+
   clave: string;
 
   label: string;

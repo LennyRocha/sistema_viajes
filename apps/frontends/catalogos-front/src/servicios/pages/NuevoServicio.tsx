@@ -7,6 +7,7 @@ import {
   CommonPageProps,
   EmptyState,
   ServicioIcon,
+  Tabla,
 } from "@nexoroute/commons";
 import {
   Box,
@@ -40,6 +41,7 @@ export default function NuevoServicio({
     getValues,
     trigger,
     setValue,
+    watch,
     formState: { errors, isDirty, isValid },
   } = useForm({
     defaultValues: servicioTemplate,
@@ -80,8 +82,12 @@ export default function NuevoServicio({
     });
   };
 
+  const propiedades = watch("propiedades");
   const columnas = buildServiceProperyColumns();
-
+  const rows = propiedades.map((propiedad, index) => ({
+    ...propiedad,
+    id: propiedad.clave || index,
+  }));
   return (
     <>
       {" "}
@@ -213,8 +219,7 @@ export default function NuevoServicio({
         >
           <Typography variant="body2" gutterBottom>
             {" "}
-            {getValues("propiedades")?.length ?? 0}{" "}
-            propiedades definidas
+            {propiedades?.length ?? 0} propiedades definidas
           </Typography>
           <Button
             startIcon={<Add />}
@@ -224,7 +229,7 @@ export default function NuevoServicio({
                 title: "Nueva propiedad de servicio",
                 children: (
                   <PropiedadServicioContent
-                    propiedades={getValues("propiedades")}
+                    propiedades={propiedades}
                     setValue={setValue}
                     closeSidebar={closeSidebar}
                     readonly={false}
@@ -232,17 +237,46 @@ export default function NuevoServicio({
                 ),
               })
             }
-            disabled={
-              (getValues("propiedades")?.length ?? 0) >= 12
-            }
+            disabled={(propiedades?.length ?? 0) >= 12}
           >
             Agregar
           </Button>
         </Box>
-        <EmptyState
-          variant="no-data"
-          title="Sin propiedades definidas"
-        />
+        {rows.length === 0 ? (
+          <EmptyState
+            variant="no-data"
+            title="Sin propiedades definidas"
+          />
+        ) : (
+          <Tabla
+            columnas={columnas}
+            data={rows}
+            onEditClick={(row) =>
+              openSidebar({
+                title: "Editar propiedad de servicio",
+                children: (
+                  <PropiedadServicioContent
+                    propiedades={propiedades}
+                    setValue={setValue}
+                    closeSidebar={closeSidebar}
+                    readonly={false}
+                    propiedad={row}
+                  />
+                ),
+              })
+            }
+            onDeleteClick={(row) => {
+              closeSidebar();
+              const remaining = rows.filter(
+                (prop: any) => prop.uuid !== row.uuid,
+              );
+              setValue("propiedades", remaining, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+            }}
+          />
+        )}
       </PaperBlock>
       <FormButtonsRow
         onSubmitClick={handleSubmit(doSubmit)}
