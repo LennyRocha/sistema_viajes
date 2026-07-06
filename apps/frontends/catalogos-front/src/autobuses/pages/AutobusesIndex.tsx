@@ -49,7 +49,7 @@ export default function AutobusesIndex({
       <PaperHeader
         title="Autobuses"
         subtitle="Listado de autobuses disponibles"
-        iconname="room_service"
+        iconname="directions_bus"
         showButton
         onButtonClick={() =>
           navigationFunction("/buses/nuevo")

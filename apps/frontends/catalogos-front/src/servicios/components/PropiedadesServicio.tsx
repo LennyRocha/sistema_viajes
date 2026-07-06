@@ -142,7 +142,7 @@ export default function PropiedadesServicio({
 }
 
 const typeDato = {
-  string: "Alfanumérico",
+  string: "Cadena de texto",
   number: "Numérico",
   boolean: "Condicional",
 };

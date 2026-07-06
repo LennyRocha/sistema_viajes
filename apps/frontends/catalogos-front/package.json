@@ -9,6 +9,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
     "@iconify-json/material-symbols": "^1.2.82",
     "@mui/icons-material": "^9.0.1",
     "@mui/material": "^9.0.1",
@@ -22,7 +23,9 @@
     "next": "15.3.4",
     "react": "19.3.0-canary-3f0b9e61-20260317",
     "react-dom": "19.3.0-canary-3f0b9e61-20260317",
-    "react-redux": "^9.3.0"
+    "react-hook-form": "^7.80.0",
+    "react-redux": "^9.3.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@module-federation/nextjs-mf": "^8.8.69",

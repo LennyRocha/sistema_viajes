@@ -47,6 +47,7 @@ export const tiposAutobus: TipoAutobus[] = [
     descripcion:
       "Autobús de lujo utilizado para viajes largos y servicios preferenciales.",
     linea: "Premium",
+    capacidad: 36,
   },
   {
     id: 2,
@@ -54,6 +55,7 @@ export const tiposAutobus: TipoAutobus[] = [
     descripcion:
       "Autobús operativo utilizado en la mayoría de rutas y salidas programadas.",
     linea: "Estándar",
+    capacidad: 44,
   },
   {
     id: 3,
@@ -61,6 +63,7 @@ export const tiposAutobus: TipoAutobus[] = [
     descripcion:
       "Unidad auxiliar para transporte ejecutivo, grupos reducidos o rutas cortas.",
     linea: "Shuttle",
+    capacidad: 24,
   },
 ];
 

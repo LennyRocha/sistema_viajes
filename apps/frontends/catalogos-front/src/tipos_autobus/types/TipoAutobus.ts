@@ -3,4 +3,5 @@ export default interface TipoAutobus {
   nombre: string;
   descripcion: string;
   linea: string;
+  capacidad: number;
 }
