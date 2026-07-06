@@ -21,6 +21,7 @@ import { servicioTemplate } from "../utils/servicioTemplate";
 import { useForm } from "react-hook-form";
 import onSubmit from "../forms/onNewServicioSubmit";
 import PropiedadServicioContent from "../components/PropiedadServicioContent";
+import buildServiceProperyColumns from "../utils/buildServiceProperyColumns";
 
 interface NuevoServicioProps extends CommonPageProps {}
 
@@ -78,6 +79,8 @@ export default function NuevoServicio({
       confirmDisabled: false,
     });
   };
+
+  const columnas = buildServiceProperyColumns();
 
   return (
     <>
