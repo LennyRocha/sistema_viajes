@@ -22,9 +22,13 @@ body,
   box-sizing: border-box !important;
 }
 
+
 main {
   height: 100svh;
   width: 100dvw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 h1 {
@@ -96,16 +100,13 @@ b {
 }
 
 #main {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   width: 100%;
-  height: 100%;
   margin: 0 auto;
-}
-
-#main>* {
-  min-width: 0;
 }
 
 .left_sidebar,

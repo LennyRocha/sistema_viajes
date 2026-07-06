@@ -56,8 +56,21 @@ export default function PropiedadServicioContent({
       (p) => p.clave === propiedad.visible?.campo,
     );
   }, [propiedades, propiedad.visible?.campo]);
+  let newArray;
   const appendPropiedad = () => {
-    const newArray = [...propiedades, propiedad];
+    if (propiedadInicial) {
+      newArray = [...propiedades];
+      newArray[
+        newArray.findIndex(
+          (p) => p.uuid === propiedadInicial.uuid,
+        )
+      ] = propiedad;
+    } else {
+      newArray = [
+        ...propiedades,
+        { ...propiedad, uuid: crypto.randomUUID() },
+      ];
+    }
     setValue("propiedades", newArray);
     closeSidebar();
   };
@@ -470,7 +483,11 @@ export default function PropiedadServicioContent({
           variant="outlined"
           color="primary"
           onClick={appendPropiedad}
-          disabled={!isFormValid || readonly}
+          disabled={
+            !isFormValid ||
+            readonly ||
+            propiedades.length >= 12
+          }
         >
           {propiedadInicial ? "Actualizar" : "Agregar"}
         </Button>

@@ -6,6 +6,7 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { SidebarProvider } from "./SidebarProvider";
 import { DialogProvider } from "./DialogProvider";
 import { SnackBox } from "@nexoroute/commons";
+import "@/src/lib/federation";
 
 export default function ProvidersWrapper({
   children,
