@@ -20,7 +20,13 @@ type Props = {
 
 const BusDetails = ({ row }: Props) => {
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+      }}
+    >
       {" "}
       <Box
         sx={{
@@ -79,6 +85,7 @@ const BusDetails = ({ row }: Props) => {
           color="textSecondary"
           sx={{
             fontStyle: "italic",
+            fontSize: "0.75rem",
           }}
         >
           <b>NOTA:</b> No representa el modelo real del
@@ -151,7 +158,7 @@ const BusDetails = ({ row }: Props) => {
           <Divider />
         </Box>
       )}
-    </>
+    </Box>
   );
 };
 

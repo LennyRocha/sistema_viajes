@@ -44,7 +44,9 @@ const CustomIconPicker = ({
   const sorted = React.useMemo(() => {
     if (!query) return iconNames;
     return iconNames.filter((icon) =>
-      icon.toLowerCase().includes(query.toLowerCase()),
+      normalizeIconName(icon)
+        .toLowerCase()
+        .includes(query.toLowerCase()),
     );
   }, [query]);
 

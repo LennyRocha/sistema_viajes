@@ -5,6 +5,7 @@ import { SnackFunctionProps } from "./SnackbarProps";
 export default interface CommonPageProps {
   navigationFunction: (href: string, options?: any) => void;
   openSidebar: (config: SidebarConfig) => void;
+  closeSidebar?: () => void;
   userPrivileges: string[];
   showDialog?: (config: DialogProps) => void;
   snack?: SnackFunctionProps;

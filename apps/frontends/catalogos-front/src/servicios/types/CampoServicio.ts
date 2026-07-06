@@ -35,5 +35,5 @@ export default interface CampoConfig {
     valor: string | number | boolean;
   };
 
-  opciones?: string | number[];
+  opciones?: Array<string | number>;
 }

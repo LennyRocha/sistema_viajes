@@ -17,17 +17,42 @@ import {
 } from "@mui/material";
 import { Add, ChevronLeft } from "@mui/icons-material";
 import CustomIconPicker from "../components/CustomIconPicker";
+import { servicioTemplate } from "../utils/servicioTemplate";
+import { useForm } from "react-hook-form";
+import onSubmit from "../forms/onNewServicioSubmit";
+import PropiedadServicioContent from "../components/PropiedadServicioContent";
+
 interface NuevoServicioProps extends CommonPageProps {}
 
 export default function NuevoServicio({
   navigationFunction,
   openSidebar,
+  closeSidebar = () => {},
   showDialog = () => {},
   snack,
   userPrivileges = [],
 }: Readonly<NuevoServicioProps>) {
-  const [icon_name, setIcon_name] =
-    React.useState("room-service");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    getValues,
+    trigger,
+    setValue,
+    formState: { errors, isDirty, isValid },
+  } = useForm({
+    defaultValues: servicioTemplate,
+  });
+
+  const doSubmit = async (data: any) => {
+    return await onSubmit(data, {
+      snack,
+      navigationFunction,
+    });
+  };
+
+  const icon_name =
+    getValues("icono_nombre") ?? "room-service";
   const pendingIconRef = React.useRef(icon_name);
 
   const handleOpenIconPicker = () => {
@@ -46,7 +71,8 @@ export default function NuevoServicio({
       showCancelButton: true,
       onClose: () => {},
       onConfirm: () => {
-        setIcon_name(pendingIconRef.current);
+        setValue("icono_nombre", pendingIconRef.current);
+        trigger("icono_nombre");
       },
       confirmText: "Seleccionar",
       confirmDisabled: false,
@@ -91,12 +117,21 @@ export default function NuevoServicio({
           label="Nombre del servicio *"
           variant="outlined"
           size="small"
+          {...register("nombre", {
+            required: "El nombre del servicio es requerido",
+          })}
+          error={!!errors.nombre}
           fullWidth
         />
         <TextField
           label="Descripción *"
           variant="outlined"
           size="small"
+          {...register("descripcion", {
+            required:
+              "La descripción del servicio es requerida",
+          })}
+          error={!!errors.descripcion}
           fullWidth
           multiline
           rows={4}
@@ -126,7 +161,9 @@ export default function NuevoServicio({
           })}
         >
           <ServicioIcon
-            name={icon_name}
+            name={
+              getValues("icono_nombre") ?? "room-service"
+            }
             size="xxxl"
             color="accent"
           />
@@ -144,7 +181,8 @@ export default function NuevoServicio({
             gutterBottom
             sx={{ fontWeight: "bold" }}
           >
-            Icono actual: {icon_name}
+            Icono actual:{" "}
+            {getValues("icono_nombre") ?? "room-service"}
           </Typography>
           <Button
             variant="contained"
@@ -172,7 +210,8 @@ export default function NuevoServicio({
         >
           <Typography variant="body2" gutterBottom>
             {" "}
-            0 propiedades definidas
+            {getValues("propiedades")?.length ?? 0}{" "}
+            propiedades definidas
           </Typography>
           <Button
             startIcon={<Add />}
@@ -180,8 +219,18 @@ export default function NuevoServicio({
             onClick={() =>
               openSidebar({
                 title: "Nueva propiedad de servicio",
-                children: <div>Hola</div>,
+                children: (
+                  <PropiedadServicioContent
+                    propiedades={getValues("propiedades")}
+                    setValue={setValue}
+                    closeSidebar={closeSidebar}
+                    readonly={false}
+                  />
+                ),
               })
+            }
+            disabled={
+              (getValues("propiedades")?.length ?? 0) >= 12
             }
           >
             Agregar
@@ -193,14 +242,10 @@ export default function NuevoServicio({
         />
       </PaperBlock>
       <FormButtonsRow
-        onSubmitClick={console.log}
+        onSubmitClick={handleSubmit(doSubmit)}
         hasRequiredFields
-        onResetClick={() =>
-          openSidebar({
-            title: "Hola",
-            children: <div>Hola</div>,
-          })
-        }
+        onResetClick={reset}
+        submitDisabled={!isDirty || !isValid}
       />
     </>
   );

@@ -1,6 +1,10 @@
 "use client";
 
-import { createContext, type ReactNode } from "react";
+import {
+  createContext,
+  useEffect,
+  type ReactNode,
+} from "react";
 import React from "react";
 import {
   type SidebarConfig,
@@ -36,6 +40,19 @@ export function SidebarProvider({
     React.useState<ReactNode>(null);
   const [sidebarTitle, setSidebarTitle] =
     React.useState<string>("");
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") hideSidebar();
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, []);
   const contextValue = React.useMemo(
     () => ({
       rightSidebarOpen,

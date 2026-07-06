@@ -13,7 +13,7 @@ const NuevoServicio = federatedComponent(
 export default function Page() {
   const router = useRouter();
   const { showDialog } = useDialog();
-  const { showSidebar } = useSidebar();
+  const { showSidebar, hideSidebar } = useSidebar();
   return (
     <MainLayout>
       <NuevoServicio
@@ -21,6 +21,7 @@ export default function Page() {
         showDialog={showDialog}
         snack={snack}
         openSidebar={showSidebar}
+        closeSidebar={hideSidebar}
       />
     </MainLayout>
   );
