@@ -291,7 +291,12 @@ export default function PropiedadServicioContent({
               onChange={(e) =>
                 setVisibleChecked(e.target.checked)
               }
-              disabled={propiedades.length === 0}
+              disabled={
+                propiedades.length === 0 ||
+                propiedades.filter(
+                  (p) => p.uuid !== propiedad.uuid,
+                ).length === 0
+              }
               sx={{
                 margin: 0,
                 padding: -4,
@@ -337,7 +342,17 @@ export default function PropiedadServicioContent({
               })
             }
             fullWidth
-          />
+            select
+          >
+            {propiedades.map((p) => {
+              if (p.uuid === propiedad.uuid) return null;
+              return (
+                <MenuItem key={p.uuid} value={p.clave}>
+                  {p.label}
+                </MenuItem>
+              );
+            })}
+          </TextField>
           {propiedadDependiente?.tipo === "boolean" ? (
             <FormControlLabel
               control={

@@ -1,7 +1,7 @@
 import React from "react";
 import Autobus from "../types/Autobus";
 import { Box, Divider, Typography } from "@mui/material";
-import tiposBus from "../../tipos_autobus/types/TiposBusMapper";
+import tiposBus from "../../tipos_autobus/constants/TiposBusMapper";
 import dynamic from "next/dynamic";
 const Vehiculo3D = dynamic(
   () =>

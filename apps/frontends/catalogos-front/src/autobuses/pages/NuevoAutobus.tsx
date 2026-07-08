@@ -8,7 +8,7 @@ import {
 } from "@nexoroute/commons";
 import { Box, TextField, MenuItem } from "@mui/material";
 import { ChevronLeft } from "@mui/icons-material";
-import tiposBus from "../../tipos_autobus/types/TiposBusMapper";
+import tiposBus from "../../tipos_autobus/constants/TiposBusMapper";
 import VehiculoPreview from "../components/VehiculoPreview";
 import SelectorServicios from "../components/SelectorServicios";
 
