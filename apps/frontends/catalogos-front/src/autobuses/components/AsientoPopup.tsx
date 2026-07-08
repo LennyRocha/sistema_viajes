@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { useTheme } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
 import Asiento from "../types/Asiento";
 
 type Props = {
@@ -28,17 +28,24 @@ export default function AsientoPopup({
       transition={{ duration: 0.2 }}
       style={{
         position: "absolute",
-        top: position.y + 10 +"px",
+        top: position.y + 10 + "px",
         left: position.x + 10 + "px",
         padding: "10px",
-        borderRadius: "3px",
-        boxShadow: "0 0 5px grey",
+        borderRadius: "4px",
+        boxShadow: `0 0 5px ${theme.palette.divider}`,
         zIndex: 10,
         backgroundColor: theme.palette.background.paper,
       }}
     >
-      <div>Asiento {seat.label}</div>
-      <div>{stateText[seat.estado]}</div>
+      <Typography
+        variant="body2"
+        sx={{ fontWeight: "bold" }}
+      >
+        Asiento {seat.label}
+      </Typography>
+      <Typography variant="caption" color="textSecondary">
+        {stateText[seat.estado]}
+      </Typography>
     </motion.div>
   );
 }

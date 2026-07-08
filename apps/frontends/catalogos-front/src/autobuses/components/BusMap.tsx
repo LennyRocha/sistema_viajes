@@ -14,13 +14,13 @@ import tiposBus from "../../tipos_autobus/constants/TiposBusMapper";
 import Asiento from "../types/Asiento";
 import { Vector2d } from "konva/lib/types";
 import AsientoPopup from "./AsientoPopup";
-import Asiento from "../types/Asiento";
 
 interface BusMapProps {
   idTipo?: number;
   asientos?: Asiento[];
   onSelectAsiento?: (seat: Asiento) => void;
   scale?: Vector2d;
+  readonly?: boolean;
 }
 
 const BusMap = ({
@@ -28,6 +28,7 @@ const BusMap = ({
   asientos,
   onSelectAsiento = (seat: Asiento) => {},
   scale = { x: 1, y: 1 },
+  readonly = false,
 }: BusMapProps) => {
   const theme = useTheme();
   const [popup, setPopup] = React.useState<{
@@ -95,6 +96,7 @@ const BusMap = ({
                   asiento={asiento}
                   onSelectAsiento={onSelectAsiento}
                   onHoverAsiento={onHover}
+                  showPopup
                 />
               ) : (
                 <AsientoBus
@@ -107,6 +109,7 @@ const BusMap = ({
                   }}
                   onSelectAsiento={onSelectAsiento}
                   onHoverAsiento={onHover}
+                  showPopup
                 />
               );
             })}

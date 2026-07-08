@@ -12,6 +12,8 @@ interface AsientoProps {
     asiento: Asiento | null,
     position: { x: number; y: number } | null,
   ) => void;
+  readonly?: boolean;
+  showPopup?: boolean;
 }
 
 const AsientoBus = ({
@@ -22,6 +24,8 @@ const AsientoBus = ({
     asiento: Asiento | null,
     position: { x: number; y: number } | null,
   ) => {},
+  readonly = false,
+  showPopup = true,
 }: AsientoProps) => {
   const estado = asiento.estado || AsientoEstado.AVAILABLE;
   const [isHovered, setIsHovered] = React.useState(false);
@@ -64,6 +68,8 @@ const AsientoBus = ({
           ?.container()
           .style.setProperty("cursor", "pointer");
 
+        if (!showPopup) return;
+
         const stage = e.target.getStage();
 
         if (!stage) return;
@@ -87,6 +93,7 @@ const AsientoBus = ({
           .getStage()
           ?.container()
           .style.setProperty("cursor", "default");
+        if (!showPopup) return;
         onHoverAsiento(null, null);
       }}
       rotation={verticalRotation ? 0 : 90}
@@ -96,11 +103,13 @@ const AsientoBus = ({
       }}
       onClick={() => {
         if (estado === AsientoEstado.OUT_OF_SERVICE) return;
+        if (readonly) return;
         setIsHovered(false);
         onSelectAsiento(asiento);
       }}
       onTap={() => {
         if (estado === AsientoEstado.OUT_OF_SERVICE) return;
+        if (readonly) return;
         onSelectAsiento(asiento);
       }}
     >
@@ -117,9 +126,9 @@ const AsientoBus = ({
       <Text
         text={asiento.label}
         fontSize={10}
-        x={2}
+        x={0}
         y={5}
-        width={30}
+        width={34}
         fontFamily="Nebulas"
         fill={fillText}
         align="center"
