@@ -27,6 +27,7 @@
     "react-hook-form": "^7.80.0",
     "react-konva": "^19.2.5",
     "react-redux": "^9.3.0",
+    "use-image": "^1.1.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {

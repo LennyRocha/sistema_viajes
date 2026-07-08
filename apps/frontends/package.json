@@ -8,6 +8,14 @@
       "react-dom": "19.3.0"
     }
   },
+  "scripts": {
+    "dev:shell": "pnpm --filter @nexoroute/shell dev",
+    "dev:operaciones": "pnpm --filter @nexoroute/operaciones-front dev",
+    "dev:dashboard": "pnpm --filter @nexoroute/dashboard-reportes-front dev",
+    "dev:catalogos": "pnpm --filter @nexoroute/catalogos-front dev",
+    "dev:auth": "pnpm --filter @nexoroute/auth-front dev ",
+    "build:commons": "pnpm --filter @nexoroute/commons build"
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
     "react-hook-form": "^7.80.0",
