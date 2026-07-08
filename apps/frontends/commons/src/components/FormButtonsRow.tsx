@@ -9,6 +9,7 @@ type Props = {
   resetText?: string;
   submitDisabled?: boolean;
   resetDisabled?: boolean;
+  isLoading?: boolean;
 };
 
 const FormButtonsRow = ({
@@ -19,6 +20,7 @@ const FormButtonsRow = ({
   resetText,
   submitDisabled,
   resetDisabled,
+  isLoading = false,
 }: Props) => {
   return (
     <MotionPaper
@@ -58,6 +60,7 @@ const FormButtonsRow = ({
               flex: 1,
             },
           }}
+          loading={isLoading}
         >
           {resetText || "Restablecer"}
         </Button>
@@ -71,6 +74,7 @@ const FormButtonsRow = ({
               flex: 1,
             },
           }}
+          loading={isLoading}
         >
           {submitText || "Enviar"}
         </Button>

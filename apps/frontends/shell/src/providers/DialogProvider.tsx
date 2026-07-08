@@ -114,7 +114,10 @@ export function DialogProvider({
         </DialogContent>
         <DialogActions>
           {dialogProps?.showCancelButton && (
-            <Button onClick={hideDialog}>
+            <Button
+              onClick={hideDialog}
+              loading={dialogProps?.isLoading}
+            >
               {dialogProps?.cancelText || "Cancelar"}
             </Button>
           )}
@@ -122,6 +125,7 @@ export function DialogProvider({
             autoFocus
             onClick={confirmDialog}
             disabled={dialogProps?.confirmDisabled}
+            loading={dialogProps?.isLoading}
           >
             {dialogProps?.confirmText || "Confirmar"}
           </Button>

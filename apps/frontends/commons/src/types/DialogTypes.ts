@@ -10,6 +10,7 @@ export type DialogProps = {
   showCancelButton?: boolean;
   showCloseButton?: boolean;
   confirmDisabled?: boolean;
+  isLoading?: boolean;
 };
 
 export interface DialogProviderValues {
