@@ -14,6 +14,7 @@ interface PaperHeaderProps {
   leftIcon?: React.ReactNode;
   buttonTitle?: string;
   paperProps?: React.ComponentProps<typeof MotionPaper>;
+  isLoading?: boolean;
 }
 
 export default function PaperHeader({
@@ -25,6 +26,7 @@ export default function PaperHeader({
   leftIcon,
   buttonTitle,
   paperProps = {},
+  isLoading = false,
 }: Readonly<PaperHeaderProps>) {
   return (
     <Box
@@ -125,6 +127,7 @@ export default function PaperHeader({
             color="primary"
             onClick={onButtonClick}
             startIcon={leftIcon}
+            loading={isLoading}
             size="medium"
             sx={{
               "@media (max-width: 640px)": {

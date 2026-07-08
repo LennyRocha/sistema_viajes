@@ -1,5 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
+import MainSkeleton from "../layout/MainSkeleton";
 
 let initialized = false;
 
@@ -112,6 +113,6 @@ export function federatedComponent<
         await loadRemote<Record<string, T>>(remote);
       return { default: mod![exportName] };
     },
-    { ssr: false },
+    { ssr: false, loading: () => <MainSkeleton /> },
   );
 }

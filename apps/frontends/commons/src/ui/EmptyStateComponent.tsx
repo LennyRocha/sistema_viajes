@@ -25,6 +25,7 @@ interface EmptyStateProps {
     height: number;
   };
   sx?: SxProps<Theme>;
+  isLoading?: boolean;
 }
 export default function EmptyState({
   variant,
@@ -35,6 +36,7 @@ export default function EmptyState({
   imageAlt = "",
   sx = {},
   imageSize,
+  isLoading = false,
 }: Readonly<EmptyStateProps>) {
   return (
     <Box
@@ -60,7 +62,9 @@ export default function EmptyState({
         loading="lazy"
       />
 
-      <Typography variant="h5" sx={{ fontWeight: 600 }}>{title}</Typography>
+      <Typography variant="h5" sx={{ fontWeight: 600 }}>
+        {title}
+      </Typography>
 
       {description && (
         <Typography
@@ -75,6 +79,7 @@ export default function EmptyState({
         <Button
           variant="contained"
           onClick={action.onClick}
+          loading={isLoading}
         >
           {action.label}
         </Button>

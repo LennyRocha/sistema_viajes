@@ -1,6 +1,11 @@
 import React from "react";
 import Autobus from "../types/Autobus";
-import { Box, Divider, Typography } from "@mui/material";
+import {
+  Box,
+  Divider,
+  Skeleton,
+  Typography,
+} from "@mui/material";
 import tiposBus from "../../tipos_autobus/constants/TiposBusMapper";
 import dynamic from "next/dynamic";
 const Vehiculo3D = dynamic(
@@ -10,7 +15,13 @@ const Vehiculo3D = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <div>Cargando modelo 3D...</div>, // o un skeleton
+    loading: () => (
+      <Skeleton
+        variant="rounded"
+        width="100%"
+        height={100}
+      />
+    ), // o un skeleton
   },
 );
 
