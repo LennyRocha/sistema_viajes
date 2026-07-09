@@ -14,6 +14,7 @@ interface AsientoProps {
   ) => void;
   readonly?: boolean;
   showPopup?: boolean;
+  disableHover?: boolean;
 }
 
 const AsientoBus = ({
@@ -26,6 +27,7 @@ const AsientoBus = ({
   ) => {},
   readonly = false,
   showPopup = true,
+  disableHover = false,
 }: AsientoProps) => {
   const estado = asiento.estado || AsientoEstado.AVAILABLE;
   const [isHovered, setIsHovered] = React.useState(false);
@@ -61,7 +63,11 @@ const AsientoBus = ({
       y={asiento.y}
       draggable={false}
       onMouseEnter={(e) => {
-        if (estado === AsientoEstado.OUT_OF_SERVICE) return;
+        if (
+          estado === AsientoEstado.OUT_OF_SERVICE ||
+          disableHover
+        )
+          return;
         setIsHovered(true);
         e.target
           .getStage()
@@ -87,7 +93,11 @@ const AsientoBus = ({
         });
       }}
       onMouseLeave={(e) => {
-        if (estado === AsientoEstado.OUT_OF_SERVICE) return;
+        if (
+          estado === AsientoEstado.OUT_OF_SERVICE ||
+          disableHover
+        )
+          return;
         setIsHovered(false);
         e.target
           .getStage()

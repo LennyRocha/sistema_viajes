@@ -5,12 +5,15 @@ import {
   PaperBlock,
   FormButtonsRow,
   CommonPageProps,
+  getYearsList,
 } from "@nexoroute/commons";
 import { Box, TextField, MenuItem } from "@mui/material";
 import { ChevronLeft } from "@mui/icons-material";
 import tiposBus from "../../tipos_autobus/constants/TiposBusMapper";
 import VehiculoPreview from "../components/VehiculoPreview";
 import SelectorServicios from "../components/SelectorServicios";
+import BusMap from "../components/BusMap";
+import AsientoSimbología from "../components/AsientoSimbología";
 
 interface NuevoAutobusProps extends CommonPageProps {}
 
@@ -176,12 +179,7 @@ export default function NuevoAutobus({
             defaultValue={"2026"}
             select
           >
-            {[
-              2000, 2001, 2002, 2003, 2004, 2005, 2006,
-              2007, 2008, 2009, 2010, 2011, 2012, 2013,
-              2014, 2015, 2016, 2017, 2018, 2019, 2020,
-              2021, 2022, 2023, 2024, 2025, 2026,
-            ].map((option) => (
+            {getYearsList().map((option) => (
               <MenuItem key={option} value={option}>
                 {option}
               </MenuItem>
@@ -209,6 +207,23 @@ export default function NuevoAutobus({
           }}
           fullWidth
         />
+      </PaperBlock>
+      <PaperBlock
+        title="Distribución de asientos"
+        subtitle="Define la distribución de asientos de la unidad, selecciona al menos un asiento"
+        contentWrapperSx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+        }}
+      >
+        <BusMap
+          idTipo={2}
+          onSelectAsiento={(asiento) =>
+            console.log(asiento)
+          }
+        />
+        <AsientoSimbología />
       </PaperBlock>
       <SelectorServicios openSidebar={openSidebar} />
       <FormButtonsRow

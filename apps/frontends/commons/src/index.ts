@@ -35,3 +35,4 @@ export {
   normalizeIconName,
   denormalizeIconName,
 } from "./utils/normalizeIconName";
+export { default as getYearsList } from "./utils/getYearsList";
