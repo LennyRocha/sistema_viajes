@@ -3,7 +3,7 @@ const shared = require("./shared-mf-config");
 
 module.exports = {
     pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
-    assetPrefix: 'http://localhost:3003',
+    assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || 'http://localhost:3003',
     webpack(config, { isServer }) {
         if (!isServer) {
             config.plugins.push(

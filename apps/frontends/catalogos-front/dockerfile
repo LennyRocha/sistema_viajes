@@ -1,0 +1,43 @@
+FROM node:20-alpine AS base
+RUN npm install -g pnpm
+
+# Instalar dependencias
+FROM base AS deps
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY packages/commons/package.json ./packages/commons/
+COPY apps/frontends/catalogos-front/package.json ./apps/frontends/catalogos-front/
+RUN pnpm install --frozen-lockfile
+
+# Build
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages/commons/node_modules ./packages/commons/node_modules
+COPY --from=deps /app/apps/frontends/catalogos-front/node_modules ./apps/frontends/catalogos-front/node_modules
+COPY . .
+
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_ASSET_PREFIX
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_ASSET_PREFIX=$NEXT_ASSET_PREFIX
+ENV NEXT_PRIVATE_LOCAL_WEBPACK=true
+
+RUN pnpm --filter @nexoroute/catalogos-front build --webpack
+
+# Runner
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder /app/apps/frontends/catalogos-front/.next ./apps/frontends/catalogos-front/.next
+COPY --from=builder /app/apps/frontends/catalogos-front/public ./apps/frontends/catalogos-front/public
+COPY --from=builder /app/apps/frontends/catalogos-front/package.json ./apps/frontends/catalogos-front/
+COPY --from=builder /app/apps/frontends/catalogos-front/next.config.js ./apps/frontends/catalogos-front/
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+
+EXPOSE 3002
+
+WORKDIR /app/apps/frontends/catalogos-front
+CMD ["pnpm", "start"]

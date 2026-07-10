@@ -1,0 +1,43 @@
+FROM node:20-alpine AS base
+RUN npm install -g pnpm
+
+# Instalar dependencias
+FROM base AS deps
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY packages/commons/package.json ./packages/commons/
+COPY apps/frontends/dashboard-reportes-front/package.json ./apps/frontends/dashboard-reportes-front/
+RUN pnpm install --frozen-lockfile
+
+# Build
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages/commons/node_modules ./packages/commons/node_modules
+COPY --from=deps /app/apps/frontends/dashboard-reportes-front/node_modules ./apps/frontends/dashboard-reportes-front/node_modules
+COPY . .
+
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_ASSET_PREFIX
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_ASSET_PREFIX=$NEXT_ASSET_PREFIX
+ENV NEXT_PRIVATE_LOCAL_WEBPACK=true
+
+RUN pnpm --filter @nexoroute/dashboard-reportes-front build --webpack
+
+# Runner
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder /app/apps/frontends/dashboard-reportes-front/.next ./apps/frontends/dashboard-reportes-front/.next
+COPY --from=builder /app/apps/frontends/dashboard-reportes-front/public ./apps/frontends/dashboard-reportes-front/public
+COPY --from=builder /app/apps/frontends/dashboard-reportes-front/package.json ./apps/frontends/dashboard-reportes-front/
+COPY --from=builder /app/apps/frontends/dashboard-reportes-front/next.config.js ./apps/frontends/dashboard-reportes-front/
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+
+EXPOSE 3003
+
+WORKDIR /app/apps/frontends/dashboard-reportes-front
+CMD ["pnpm", "start"]

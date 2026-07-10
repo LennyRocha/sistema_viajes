@@ -1,0 +1,48 @@
+FROM node:20-alpine AS base
+RUN npm install -g pnpm
+
+FROM base AS deps
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY packages/commons/package.json ./packages/commons/
+COPY apps/frontends/shell/package.json ./apps/frontends/shell/
+COPY apps/frontends/catalogos-front/package.json ./apps/frontends/catalogos-front/
+COPY apps/frontends/operaciones-front/package.json ./apps/frontends/operaciones-front/
+COPY apps/frontends/auth-front/package.json ./apps/frontends/auth-front/
+COPY apps/frontends/dashboard-front/package.json ./apps/frontends/dashboard-front/
+RUN pnpm install --frozen-lockfile
+
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages/commons/node_modules ./packages/commons/node_modules
+COPY --from=deps /app/apps/frontends/shell/node_modules ./apps/frontends/shell/node_modules
+COPY . .
+
+ARG NEXT_PUBLIC_MF_CATALOGOS
+ARG NEXT_PUBLIC_MF_OPERACIONES
+ARG NEXT_PUBLIC_MF_AUTH
+ARG NEXT_PUBLIC_MF_DASHBOARD
+
+ENV NEXT_PUBLIC_MF_CATALOGOS=$NEXT_PUBLIC_MF_CATALOGOS
+ENV NEXT_PUBLIC_MF_OPERACIONES=$NEXT_PUBLIC_MF_OPERACIONES
+ENV NEXT_PUBLIC_MF_AUTH=$NEXT_PUBLIC_MF_AUTH
+ENV NEXT_PUBLIC_MF_DASHBOARD=$NEXT_PUBLIC_MF_DASHBOARD
+
+RUN pnpm --filter @nexoroute/shell build
+
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder /app/apps/frontends/shell/.next ./apps/frontends/shell/.next
+COPY --from=builder /app/apps/frontends/shell/public ./apps/frontends/shell/public
+COPY --from=builder /app/apps/frontends/shell/package.json ./apps/frontends/shell/
+COPY --from=builder /app/apps/frontends/shell/next.config.js ./apps/frontends/shell/
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+
+EXPOSE 3000
+
+WORKDIR /app/apps/frontends/shell
+CMD ["pnpm", "start"]

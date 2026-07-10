@@ -4,7 +4,12 @@ const path = require("path");
 
 module.exports = {
     pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
-    assetPrefix: 'http://localhost:3002',
+    assetPrefix: process.env.NEXT_ASSET_PREFIX || 'http://localhost:3002',
+    experimental: {
+        allowedDevOrigins: [
+            "*"
+        ],
+    },
     webpack(config, { isServer }) {
         if (!isServer) {
             config.resolve.alias = {
