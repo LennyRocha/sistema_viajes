@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "build:all": "pnpm --filter @commons/contracts build && pnpm --filter @commons/decorators build && pnpm --filter @commons/types build"
+  }
+}

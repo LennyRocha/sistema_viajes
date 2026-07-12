@@ -1,10 +1,14 @@
 packages:
   - "apps/**"
   - "apps/frontends/**"
+  - "apps/backend/**"
   - "packages/**"
 allowBuilds:
   "@module-federation/nextjs-mf": false
+  '@prisma/engines': true
+  '@scarf/scarf': true
   core-js-pure: true
   esbuild: true
+  prisma: true
   sharp: true
   unrs-resolver: true

@@ -1,0 +1,35 @@
+export default interface CampoConfig {
+  uuid?: string;
+
+  clave: string;
+
+  label: string;
+
+  tipo: 'string' | 'number' | 'boolean';
+
+  inputTipo?:
+    'text' | 'textarea' | 'number' | 'checkbox' | 'select' | 'radio' | 'switch';
+
+  requerido?: boolean;
+
+  min?: number;
+
+  max?: number;
+
+  minLength?: number;
+
+  maxLength?: number;
+
+  regex?: RegExp;
+
+  placeholder?: string;
+
+  defaultValue?: string | number | boolean;
+
+  visible?: {
+    campo: string;
+    valor: string | number | boolean;
+  };
+
+  opciones?: Array<string | number>;
+}
