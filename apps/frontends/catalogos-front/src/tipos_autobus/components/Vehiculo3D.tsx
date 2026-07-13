@@ -21,6 +21,12 @@ type Props = {
   aspectRatio?: string;
 };
 
+type SceneProps = {
+  tipo: Modelo3DName;
+  cameraPosition: [number, number, number];
+  canRotate: boolean;
+};
+
 const vehicleConfig = {
   volkswagen: {
     scale: 1,
@@ -47,7 +53,7 @@ function CameraUpdater({ fov }: { fov: number }) {
   return null;
 }
 
-export default function Vehiculo3D({
+function Vehiculo3D({
   tipo,
   width,
   cameraPosition = [0, 0, -6],
@@ -56,23 +62,74 @@ export default function Vehiculo3D({
 }: Readonly<Props>) {
   const calcWidth =
     typeof width === "number" ? `${width}px` : width;
-  const fovMemo = React.useMemo(
-    () => vehicleConfig[tipo].fov,
-    [tipo],
-  );
   return (
-    <Canvas
-      camera={{
-        position: cameraPosition,
-        fov: fovMemo,
-      }}
+    <div
       style={{
         width: width ? `${calcWidth}` : "100%",
         aspectRatio,
         overflow: "hidden",
       }}
     >
-      <CameraUpdater fov={vehicleConfig[tipo].fov} />
+      <Kanvas>
+        <Scene
+          tipo={tipo}
+          cameraPosition={cameraPosition}
+          canRotate={canRotate}
+        />
+      </Kanvas>
+    </div>
+  );
+}
+
+const Kanvas = React.memo(function Kanvas({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Canvas
+      style={{
+        width: "100%",
+        height: "100%",
+      }}
+      gl={{ preserveDrawingBuffer: true }}
+      onCreated={({ gl }) => {
+        gl.getContext().canvas.addEventListener(
+          "webglcontextlost",
+          (e) => {
+            e.preventDefault();
+            console.warn(
+              "WebGL context lost, preventing default.",
+            );
+          },
+        );
+      }}
+    >
+      {children}
+    </Canvas>
+  );
+});
+
+function Scene({
+  tipo,
+  cameraPosition,
+  canRotate,
+}: Readonly<SceneProps>) {
+  const { camera } = useThree();
+
+  const fovMemo = React.useMemo(
+    () => vehicleConfig[tipo].fov,
+    [tipo],
+  );
+
+  React.useLayoutEffect(() => {
+    camera.position.set(...cameraPosition);
+    camera.fov = fovMemo;
+    camera.updateProjectionMatrix();
+  }, [cameraPosition, fovMemo, camera]);
+
+  return (
+    <>
       <Environment preset="warehouse" background={false} />
 
       <ambientLight intensity={0.3} />
@@ -93,9 +150,11 @@ export default function Vehiculo3D({
         minPolarAngle={Math.PI / 2}
         maxPolarAngle={Math.PI / 2}
       />
-    </Canvas>
+    </>
   );
 }
+
+export default React.memo(Vehiculo3D);
 
 const Model = ({
   tipo = "hyundai",

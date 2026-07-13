@@ -6,6 +6,8 @@ export function initFederation() {
   if (initialized) return;
   initialized = true;
 
+  console.log("Initializing module federation runtime...");
+
   init({
     name: "shell",
     remotes: [

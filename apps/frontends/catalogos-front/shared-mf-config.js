@@ -2,13 +2,13 @@ module.exports = {
     react: {
         singleton: true,
         eager: false,
-        requiredVersion: "^19.3.0"
+        requiredVersion: false, 
     },
 
     "react-dom": {
         singleton: true,
         eager: false,
-        requiredVersion: "^19.3.0"
+        requiredVersion: false,
     },
 
     "@react-three/fiber": {

@@ -6,10 +6,12 @@ import Modelo3DName from "../../tipos_autobus/types/Modelo3DName";
 
 type Props = {
   model: Modelo3DName;
+  paperProps?: React.ComponentProps<typeof MotionPaper>;
 };
 
-export default function VehiculoPreview({
+function VehiculoPreview({
   model = "hyundai",
+  paperProps = {},
 }: Readonly<Props>) {
   return (
     <Box
@@ -31,6 +33,7 @@ export default function VehiculoPreview({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -15 }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
+        {...paperProps}
       >
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           Previsualización
@@ -64,3 +67,5 @@ export default function VehiculoPreview({
     </Box>
   );
 }
+
+export default React.memo(VehiculoPreview);

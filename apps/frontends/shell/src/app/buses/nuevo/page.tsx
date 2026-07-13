@@ -8,6 +8,7 @@ import { useSidebar } from "@/src/providers/SidebarProvider";
 const NuevoAutobus = federatedComponent(
   "catalogos/AutobusesModule",
   "NuevoAutobus",
+  "form"
 );
 
 const Page = () => {

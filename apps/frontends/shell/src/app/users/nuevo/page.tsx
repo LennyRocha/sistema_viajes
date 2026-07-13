@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 const NuevoUsuario = federatedComponent(
   "auth/UsuariosModule",
   "NuevoUsuario",
+  "form"
 );
 
 export default function Page() {

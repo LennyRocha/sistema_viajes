@@ -10,6 +10,7 @@ type Props = {
   submitDisabled?: boolean;
   resetDisabled?: boolean;
   isLoading?: boolean;
+  paperProps?: React.ComponentProps<typeof MotionPaper>;
 };
 
 const FormButtonsRow = ({
@@ -21,6 +22,7 @@ const FormButtonsRow = ({
   submitDisabled,
   resetDisabled,
   isLoading = false,
+  paperProps = {},
 }: Props) => {
   return (
     <MotionPaper
@@ -37,6 +39,7 @@ const FormButtonsRow = ({
         padding: "12px",
         width: "100%",
       }}
+      {...paperProps}
     >
       {hasRequiredFields && (
         <Typography variant="caption" color="error">

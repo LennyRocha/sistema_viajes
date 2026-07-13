@@ -15,8 +15,8 @@ const theme = createTheme({
                     contrastText: "#FDFDFD",
                 },
                 background: {
-                    default: "#0a0a0a",
-                    paper: "#0c0c0c",
+                    default: "#05070A",
+                    paper: "#05070A",
                 },
                 text: {
                     primary: "#F3F4F6",
@@ -38,9 +38,6 @@ const theme = createTheme({
                 actions: {
                     main: "#4A6D80",
                 },
-                border: {
-                    main: "#222222",
-                }
             },
         },
         light: {
@@ -56,7 +53,7 @@ const theme = createTheme({
                     contrastText: "#FFFFFF",
                 },
                 background: {
-                    default: "#FDFDFD",
+                    default: "#FFFFFF",
                     paper: "#FFFFFF",
                 },
                 text: {
@@ -78,9 +75,6 @@ const theme = createTheme({
                 actions: {
                     main: "#D0EEFB"
                 },
-                border: {
-                    main: "#F0F0F0"
-                }
             },
         }
     },
@@ -92,11 +86,19 @@ const theme = createTheme({
                 },
             },
         },
+        MuiTextField: {
+            styleOverrides: {
+                root: {
+                    fontFamily: "Montserrat, sans-serif",
+                },
+            },
+        },
         MuiCssBaseline: {
             styleOverrides: (theme) => ({
                 "*": {
                     scrollbarWidth: "thin",
                     scrollbarColor: `${theme.palette.background.paper} transparent`,
+                    fontFamily: "Inter, sans-serif",
                 },
 
                 "*::-webkit-scrollbar": {
@@ -105,7 +107,7 @@ const theme = createTheme({
                 },
 
                 "*::-webkit-scrollbar-thumb": {
-                    backgroundColor: theme.palette.border.main,
+                    backgroundColor: theme.palette.divider,
                     borderRadius: "8px",
                 },
 

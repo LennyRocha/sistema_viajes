@@ -1,13 +1,6 @@
 {
   "name": "sistema_viajes",
   "private": true,
-  "pnpm": {
-    "overrides": {
-      "webpack": "5.88.0",
-      "react": "19.3.0",
-      "react-dom": "19.3.0"
-    }
-  },
   "scripts": {
     "dev:shell": "pnpm --filter @nexoroute/shell dev",
     "dev:operaciones": "pnpm --filter @nexoroute/operaciones-front dev",
