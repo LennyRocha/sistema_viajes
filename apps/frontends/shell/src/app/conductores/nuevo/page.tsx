@@ -7,6 +7,7 @@ import { useSidebar } from "@/src/providers/SidebarProvider";
 const NuevoConductor = federatedComponent(
   "catalogos/ConductoresModule",
   "NuevoConductor",
+  "form"
 );
 
 export default function Page() {

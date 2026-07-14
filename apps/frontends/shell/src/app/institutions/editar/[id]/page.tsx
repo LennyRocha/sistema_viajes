@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 const NuevaInstitucion = federatedComponent(
   "catalogos/InstitucionesModule",
   "NuevaInstitucion",
+  "form"
 );
 
 interface Props {

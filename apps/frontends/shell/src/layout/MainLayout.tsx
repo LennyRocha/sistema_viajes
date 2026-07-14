@@ -129,7 +129,7 @@ export default function MainLayout({
         {/* Contenido principal */}
         <AnimatePresence>
           <motion.section id="content">
-            <div className=" h-full overflow-y-auto w-full overflow-x-hidden flex flex-col gap-[10px]">
+            <div className=" h-full overflow-y-auto w-full overflow-x-hidden flex flex-col gap-[10px] p-[4px]">
               {children}
             </div>
           </motion.section>
@@ -140,13 +140,29 @@ export default function MainLayout({
             <MotionPaper
               className="right_sidebar"
               elevation={3}
-              initial={{ width: 0, opacity: 0 }}
+              initial={{
+                display: "none",
+                width: 0,
+                opacity: 0,
+              }}
               animate={
                 sidebar.rightSidebarOpen
-                  ? { width: 248, opacity: 1 }
-                  : { width: 0, opacity: 0 }
+                  ? {
+                      display: "block",
+                      width: 248,
+                      opacity: 1,
+                    }
+                  : {
+                      display: "none",
+                      width: 0,
+                      opacity: 0,
+                    }
               }
-              exit={{ width: 0, opacity: 0 }}
+              exit={{
+                display: "none",
+                width: 0,
+                opacity: 0,
+              }}
               transition={{
                 duration: 0.25,
                 ease: "easeInOut",

@@ -35,6 +35,7 @@ interface TablaProps<
   disableSelectionOnClick?: boolean;
   subHeaderComponent?: React.ReactNode | null;
   tableSx?: object;
+  paperProps?: React.ComponentProps<typeof MotionPaper>;
 }
 
 export default function Tabla<T extends GridValidRowModel>({
@@ -53,6 +54,7 @@ export default function Tabla<T extends GridValidRowModel>({
   onDeleteClick,
   onToggleActiveClick,
   onInfoClick,
+  paperProps = {},
 }: Readonly<TablaProps<T>>) {
   const paginationModel = React.useMemo(
     () => ({ pageSize, page }),
@@ -78,6 +80,7 @@ export default function Tabla<T extends GridValidRowModel>({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.6, ease: "easeInOut" }}
+      {...paperProps}
     >
       {titulo && (
         <Typography
@@ -204,7 +207,9 @@ const optionsColumn = <T extends GridValidRowModel>(
 
         {callbacks.onToggleActiveClick && (
           <Switch
-            checked={params.row.estatus || params.row.estado}
+            checked={
+              params.row.estatus || params.row.estado
+            }
             onClick={(e) => e.stopPropagation()}
             onChange={() =>
               callbacks.onToggleActiveClick?.(params.row)

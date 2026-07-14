@@ -31,7 +31,6 @@ export default function PaperHeader({
   return (
     <Box
       sx={{
-        padding: "2px",
         width: "100%",
       }}
     >
