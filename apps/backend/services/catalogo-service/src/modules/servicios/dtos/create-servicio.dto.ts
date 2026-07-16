@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
 import { CreateCampoConfigDto } from './create-campo-config.dto';
@@ -15,8 +14,8 @@ export class CreateServicioDto {
   @MinLength(5, {
     message: 'El nombre del servicio debe tener al menos 5 caracteres',
   })
-  @MaxLength(100, {
-    message: 'El nombre del servicio no puede exceder los 100 caracteres',
+  @MaxLength(50, {
+    message: 'El nombre del servicio no puede exceder los 50 caracteres',
   })
   nombre!: string;
 

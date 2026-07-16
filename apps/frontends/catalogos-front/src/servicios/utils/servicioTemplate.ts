@@ -1,10 +1,8 @@
-import ServicioExterno from "../types/ServicioExterno";
+import { ServicioSchema } from "../validations/servicioZod";
 
-export const servicioTemplate: ServicioExterno = {
+export const servicioTemplate: ServicioSchema = {
   nombre: "",
   descripcion: "",
   icono_nombre: "room-service",
-  estatus: true,
   propiedades: [],
-  disponibilidad: [],
 };

@@ -1,8 +1,9 @@
 import { GridColDef } from "@mui/x-data-grid";
-import CampoConfig from "../types/CampoServicio";
+import { CampoConfigSchema } from "../validations/campoZod";
+import { Simplify } from "@nexoroute/commons";
 
 const buildServicesColumns = () => {
-  const columnas: GridColDef<CampoConfig>[] = [
+  const columnas: GridColDef<PropiedadRow>[] = [
     {
       field: "tipo",
       headerName: "Tipo",
@@ -53,3 +54,5 @@ const buildServicesColumns = () => {
 };
 
 export default buildServicesColumns;
+
+export type PropiedadRow = Simplify<CampoConfigSchema>;
