@@ -52,6 +52,7 @@ model Servicio {
   id           Int    @id @default(autoincrement())
   nombre       String @unique @db.VarChar(100)
   icono_nombre String @db.VarChar(50)
+  descripcion  String @db.VarChar(500)
   propiedades  Json
 
   createdAt DateTime @default(now())

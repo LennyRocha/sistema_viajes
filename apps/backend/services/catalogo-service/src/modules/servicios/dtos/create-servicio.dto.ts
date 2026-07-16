@@ -1,14 +1,19 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
 import { CreateCampoConfigDto } from './create-campo-config.dto';
-import { IsUniqueObjectArray } from '@commons/decorators';
+import {
+  IsUniqueObjectArray,
+  MaxArraySize,
+  MinArraySize,
+} from '@commons/decorators';
 
 export class CreateServicioDto {
   @ApiProperty({ example: 'Wi-Fi' })
   @IsString()
   @IsNotEmpty({ message: 'El nombre del servicio es obligatorio' })
-  @MinLength(20, {
-    message: 'El nombre del servicio debe tener al menos 20 caracteres',
+  @MinLength(5, {
+    message: 'El nombre del servicio debe tener al menos 5 caracteres',
   })
   @MaxLength(100, {
     message: 'El nombre del servicio no puede exceder los 100 caracteres',
@@ -43,5 +48,7 @@ export class CreateServicioDto {
   @IsUniqueObjectArray<CreateCampoConfigDto>('clave', {
     message: 'Las propiedades del servicio deben ser únicas entre sí',
   })
+  @MinArraySize(1, { message: 'Debe haber al menos una opción' })
+  @MaxArraySize(20, { message: 'No puede haber más de 20 opciones' })
   propiedades!: CreateCampoConfigDto[];
 }
