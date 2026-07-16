@@ -16,11 +16,15 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { Add, Remove } from "@mui/icons-material";
+import { CampoConfigSchema } from "../validations/campoZod";
 type Props = {
-  propiedades: CampoConfig[];
-  setValue: (field: string, value: CampoConfig[]) => void;
+  propiedades: CampoConfigSchema[];
+  setValue: (
+    field: string,
+    value: CampoConfigSchema[],
+  ) => void;
   closeSidebar: () => void;
-  propiedad?: CampoConfig;
+  propiedad?: CampoConfigSchema;
   readonly: boolean;
 };
 
@@ -31,18 +35,17 @@ export default function PropiedadServicioContent({
   propiedad: propiedadInicial,
   readonly = false,
 }: Readonly<Props>) {
-  const [isReseting, setIsResetting] =
-    React.useState(false);
+  const [isReseting, setIsReseting] = React.useState(false);
   const reset = () => {
-    setIsResetting(true);
+    setIsReseting(true);
     setTimeout(() => {
-      setIsResetting(false);
+      setIsReseting(false);
     }, 1000);
   };
   const defaultPropiedad =
-    propiedadInicial || ({} as CampoConfig);
+    propiedadInicial || ({} as CampoConfigSchema);
   const [propiedad, setPropiedad] =
-    React.useState<CampoConfig>(defaultPropiedad);
+    React.useState<CampoConfigSchema>(defaultPropiedad);
   const [visibleChecked, setVisibleChecked] =
     React.useState(false);
   React.useEffect(() => {
@@ -56,8 +59,28 @@ export default function PropiedadServicioContent({
       (p) => p.clave === propiedad.visible?.campo,
     );
   }, [propiedades, propiedad.visible?.campo]);
-  let newArray;
+  React.useEffect(() => {
+    if (propiedad.tipo) {
+      let tipo = "";
+      switch (propiedad.tipo) {
+        case "string":
+          tipo = "text";
+          break;
+        case "number":
+          tipo = "number";
+          break;
+        case "boolean":
+          tipo = "checkbox";
+          break;
+      }
+      setPropiedad((prev) => ({
+        ...prev,
+        inputTipo: tipo as CampoConfigSchema["inputTipo"],
+      }));
+    }
+  }, [propiedad.tipo]);
   const appendPropiedad = () => {
+    let newArray: CampoConfigSchema[] = [];
     if (propiedadInicial) {
       newArray = [...propiedades];
       newArray[
@@ -126,7 +149,8 @@ export default function PropiedadServicioContent({
           onChange={(e) =>
             setPropiedad({
               ...propiedad,
-              tipo: e.target.value as CampoConfig["tipo"],
+              tipo: e.target
+                .value as CampoConfigSchema["tipo"],
               // Al cambiar de tipo, limpiamos los campos específicos
               // del tipo anterior para no arrastrar datos "basura".
               opciones: undefined,
@@ -180,7 +204,8 @@ export default function PropiedadServicioContent({
           onChange={(e) =>
             setPropiedad({
               ...propiedad,
-              label: e.target.value as CampoConfig["label"],
+              label: e.target
+                .value as CampoConfigSchema["label"],
               clave: e.target.value
                 .toLowerCase()
                 .normalize("NFD")
@@ -192,6 +217,12 @@ export default function PropiedadServicioContent({
           }
           variant="outlined"
           fullWidth
+          slotProps={{
+            htmlInput: {
+              min: 3,
+              max: 50,
+            },
+          }}
         />
       </Box>
       <Box
@@ -223,10 +254,16 @@ export default function PropiedadServicioContent({
             setPropiedad({
               ...propiedad,
               placeholder: e.target
-                .value as CampoConfig["placeholder"],
+                .value as CampoConfigSchema["placeholder"],
             })
           }
           variant="outlined"
+          slotProps={{
+            htmlInput: {
+              min: 5,
+              max: 50,
+            },
+          }}
           fullWidth
         />
       </Box>
@@ -511,6 +548,64 @@ export default function PropiedadServicioContent({
   );
 }
 
+function reset(
+  setPropiedad: React.Dispatch<
+    React.SetStateAction<CampoConfig>
+  >,
+) {
+  setPropiedad((prev) => ({
+    ...prev,
+    opciones: undefined,
+  }));
+}
+
+// Sincroniza los valores de la lista con la propiedad cada vez
+// que cambian, filtrando los que fueron eliminados (null).
+const updateList = (
+  index: number,
+  value: string,
+  listValues: Array<string | null>,
+  setListValues: React.Dispatch<
+    React.SetStateAction<Array<string | null>>
+  >,
+  setPropiedad: React.Dispatch<
+    React.SetStateAction<CampoConfig>
+  >,
+  propiedad: CampoConfig,
+) => {
+  const newValues = [...listValues];
+  newValues[index] = value;
+  setListValues(newValues);
+  setPropiedad({
+    ...propiedad,
+    opciones: newValues.filter(
+      (v): v is string => v !== null && v !== "",
+    ),
+  });
+};
+
+const removeInput = (
+  index: number,
+  listValues: Array<string | null>,
+  setListValues: React.Dispatch<
+    React.SetStateAction<Array<string | null>>
+  >,
+  setPropiedad: React.Dispatch<
+    React.SetStateAction<CampoConfig>
+  >,
+  propiedad: CampoConfig,
+) => {
+  const newValues = [...listValues];
+  newValues[index] = null;
+  setListValues(newValues);
+  setPropiedad({
+    ...propiedad,
+    opciones: newValues.filter(
+      (v): v is string => v !== null && v !== "",
+    ),
+  });
+};
+
 const NumberTypeSection = ({
   setPropiedad,
   propiedad,
@@ -578,37 +673,8 @@ const NumberTypeSection = ({
     }
   }, [listChecked]);
 
-  // Sincroniza los valores de la lista con la propiedad cada vez
-  // que cambian, filtrando los que fueron eliminados (null).
-  const updateListValue = (
-    index: number,
-    value: string,
-  ) => {
-    const newValues = [...listValues];
-    newValues[index] = value;
-    setListValues(newValues);
-    setPropiedad({
-      ...propiedad,
-      opciones: newValues.filter(
-        (v): v is string => v !== null && v !== "",
-      ),
-    });
-  };
-
   const addListInput = () => {
     setInputCount((prev) => prev + 1);
-  };
-
-  const removeListInput = (index: number) => {
-    const newValues = [...listValues];
-    newValues[index] = null;
-    setListValues(newValues);
-    setPropiedad({
-      ...propiedad,
-      opciones: newValues.filter(
-        (v): v is string => v !== null && v !== "",
-      ),
-    });
   };
 
   return (
@@ -679,7 +745,14 @@ const NumberTypeSection = ({
                   value={listValues[index] || ""}
                   disabled={readOnly}
                   onChange={(e) =>
-                    updateListValue(index, e.target.value)
+                    updateList(
+                      index,
+                      e.target.value,
+                      listValues,
+                      setListValues,
+                      setPropiedad,
+                      propiedad,
+                    )
                   }
                   slotProps={{
                     input: {
@@ -689,7 +762,13 @@ const NumberTypeSection = ({
                           onClick={() =>
                             index === 0
                               ? addListInput()
-                              : removeListInput(index)
+                              : removeInput(
+                                  index,
+                                  listValues,
+                                  setListValues,
+                                  setPropiedad,
+                                  propiedad,
+                                )
                           }
                           disabled={readOnly}
                         >
@@ -958,10 +1037,7 @@ const TextTypeSection = ({
   isReseting,
 }) => {
   function resetListValues() {
-    setPropiedad((prev) => ({
-      ...prev,
-      opciones: undefined,
-    }));
+    reset(setPropiedad);
     setListValues([]);
     setInputCount(1);
     setListChecked(false);
@@ -976,10 +1052,7 @@ const TextTypeSection = ({
     setMaxRangeChecked(false);
   }
   function resetDefaultValue() {
-    setPropiedad((prev) => ({
-      ...prev,
-      defaultValue: undefined,
-    }));
+    reset(setPropiedad);
     setDefaultValueChecked(false);
   }
   function resetRegexValue() {
@@ -1041,35 +1114,8 @@ const TextTypeSection = ({
     }
   }, [listChecked]);
 
-  const updateListValue = (
-    index: number,
-    value: string,
-  ) => {
-    const newValues = [...listValues];
-    newValues[index] = value;
-    setListValues(newValues);
-    setPropiedad({
-      ...propiedad,
-      opciones: newValues.filter(
-        (v): v is string => v !== null && v !== "",
-      ),
-    });
-  };
-
   const addListInput = () => {
     setInputCount((prev) => prev + 1);
-  };
-
-  const removeListInput = (index: number) => {
-    const newValues = [...listValues];
-    newValues[index] = null;
-    setListValues(newValues);
-    setPropiedad({
-      ...propiedad,
-      opciones: newValues.filter(
-        (v): v is string => v !== null && v !== "",
-      ),
-    });
   };
 
   // El select guarda "custom" cuando corresponde a una regex propia,
@@ -1148,7 +1194,14 @@ const TextTypeSection = ({
                   disabled={readOnly}
                   fullWidth
                   onChange={(e) =>
-                    updateListValue(index, e.target.value)
+                    updateList(
+                      index,
+                      e.target.value,
+                      listValues,
+                      setListValues,
+                      setPropiedad,
+                      propiedad,
+                    )
                   }
                   slotProps={{
                     input: {
@@ -1158,7 +1211,13 @@ const TextTypeSection = ({
                           onClick={() =>
                             index === 0
                               ? addListInput()
-                              : removeListInput(index)
+                              : removeInput(
+                                  index,
+                                  listValues,
+                                  setListValues,
+                                  setPropiedad,
+                                  propiedad,
+                                )
                           }
                           disabled={readOnly}
                         >
@@ -1538,10 +1597,7 @@ const BooleanTypeSection = ({
   isReseting,
 }) => {
   function resetDefaultValue() {
-    setPropiedad((prev) => ({
-      ...prev,
-      defaultValue: undefined,
-    }));
+    reset(setPropiedad);
     setDefaultValueChecked(false);
   }
   const [defaultValueChecked, setDefaultValueChecked] =

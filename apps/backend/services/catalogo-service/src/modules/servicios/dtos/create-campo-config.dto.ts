@@ -8,7 +8,7 @@ import {
   IsNumber,
   IsBoolean,
 } from 'class-validator';
-import { IsUniquePrimitiveArray } from '@commons/decorators';
+import { IsUniquePrimitiveArray, MinArraySize } from '@commons/decorators';
 
 export class CreateCampoConfigDto {
   @IsOptional()
@@ -109,5 +109,9 @@ export class CreateCampoConfigDto {
   @ApiProperty({ example: ['opcion1', 'opcion2'] })
   @IsOptional()
   @IsUniquePrimitiveArray({ message: 'Las opciones deben ser únicas' })
+  @MinArraySize(1, {
+    message:
+      'Debe haber al menos una opción, si estableciste como opcion de lista, de lo contrario no es necesario',
+  })
   opciones?: Array<string | number>;
 }

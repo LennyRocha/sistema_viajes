@@ -3,6 +3,7 @@ import {
   Breadcrumb,
   Tabla,
   CommonPageProps,
+  Simplify,
 } from "@nexoroute/commons";
 import React from "react";
 import { Add, FilterList } from "@mui/icons-material";
@@ -53,11 +54,12 @@ export default function ServiciosIndex({
         buttonTitle="Nuevo"
         leftIcon={<Add />}
       />
-      <Tabla
+      <Tabla<ServicioRow>
         titulo="Servicios"
         subtitulo="Listado de servicios ofrecidos en los distintos viajes"
         columnas={columnas}
         data={data}
+        isLoading={false}
         onEditClick={console.log}
         onToggleActiveClick={console.log}
         subHeaderComponent={
@@ -117,3 +119,5 @@ export default function ServiciosIndex({
     </>
   );
 }
+
+type ServicioRow = Simplify<ServicioExterno>;

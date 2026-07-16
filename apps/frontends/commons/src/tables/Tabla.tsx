@@ -10,6 +10,7 @@ import {
   Box,
   IconButton,
   Switch,
+  Skeleton,
 } from "@mui/material";
 import { Edit, Delete, Info } from "@mui/icons-material";
 import { esES } from "@mui/x-data-grid/locales";
@@ -36,6 +37,7 @@ interface TablaProps<
   subHeaderComponent?: React.ReactNode | null;
   tableSx?: object;
   paperProps?: React.ComponentProps<typeof MotionPaper>;
+  isLoading?: boolean;
 }
 
 export default function Tabla<T extends GridValidRowModel>({
@@ -55,6 +57,7 @@ export default function Tabla<T extends GridValidRowModel>({
   onToggleActiveClick,
   onInfoClick,
   paperProps = {},
+  isLoading = false,
 }: Readonly<TablaProps<T>>) {
   const paginationModel = React.useMemo(
     () => ({ pageSize, page }),
@@ -87,7 +90,7 @@ export default function Tabla<T extends GridValidRowModel>({
           variant="h6"
           sx={{ fontWeight: 600, mb: 0 }}
         >
-          {titulo}
+          {isLoading ? <Skeleton /> : titulo}
         </Typography>
       )}
       {subtitulo && (
@@ -96,7 +99,7 @@ export default function Tabla<T extends GridValidRowModel>({
           color="textSecondary"
           sx={{ lineHeight: 1.2 }}
         >
-          {subtitulo}
+          {isLoading ? <Skeleton /> : subtitulo}
         </Typography>
       )}
       {subHeaderComponent && (
@@ -107,32 +110,42 @@ export default function Tabla<T extends GridValidRowModel>({
             padding: "8px 0",
           }}
         >
-          {subHeaderComponent}
+          {isLoading ? (
+            <Skeleton variant="rounded" height={75} />
+          ) : (
+            subHeaderComponent
+          )}
         </Box>
       )}
-      <DataGrid
-        rows={data}
-        columns={cols}
-        initialState={{ pagination: { paginationModel } }}
-        pageSizeOptions={pageSizeOptions}
-        checkboxSelection={checkboxSelection}
-        disableRowSelectionOnClick={disableSelectionOnClick}
-        sx={{
-          border: "none",
-          width: "100%",
-          backgroundColor: "transparent",
-          "& .MuiDataGrid-cell": {
-            display: "flex",
-            alignItems: "center",
-          },
-          ...tableSx,
-        }}
-        autoHeight
-        localeText={
-          esES.components.MuiDataGrid.defaultProps
-            .localeText
-        }
-      />
+      {isLoading ? (
+        <Skeleton variant="rounded" height={400} />
+      ) : (
+        <DataGrid
+          rows={data}
+          columns={cols}
+          initialState={{ pagination: { paginationModel } }}
+          pageSizeOptions={pageSizeOptions}
+          checkboxSelection={checkboxSelection}
+          disableRowSelectionOnClick={
+            disableSelectionOnClick
+          }
+          sx={{
+            border: "none",
+            width: "100%",
+            backgroundColor: "transparent",
+            "& .MuiDataGrid-cell": {
+              display: "flex",
+              alignItems: "center",
+            },
+            ...tableSx,
+          }}
+          autoHeight
+          localeText={
+            esES.components.MuiDataGrid.defaultProps
+              .localeText
+          }
+        />
+      )}
     </MotionPaper>
   );
 }

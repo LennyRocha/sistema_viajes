@@ -8,6 +8,7 @@ import {
   EmptyState,
   ServicioIcon,
   Tabla,
+  Simplify,
 } from "@nexoroute/commons";
 import {
   Box,
@@ -23,6 +24,15 @@ import { useForm } from "react-hook-form";
 import onSubmit from "../forms/onNewServicioSubmit";
 import PropiedadServicioContent from "../components/PropiedadServicioContent";
 import buildServiceProperyColumns from "../utils/buildServiceProperyColumns";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  servicioSchema,
+  ServicioSchema,
+} from "../validations/servicioZod";
+import {
+  CampoConfigSchema,
+  campoConfigSchema,
+} from "../validations/campoZod";
 
 interface NuevoServicioProps extends CommonPageProps {}
 
@@ -43,11 +53,12 @@ export default function NuevoServicio({
     setValue,
     watch,
     formState: { errors, isDirty, isValid },
-  } = useForm({
+  } = useForm<ServicioSchema>({
+    resolver: zodResolver(servicioSchema),
     defaultValues: servicioTemplate,
   });
 
-  const doSubmit = async (data: any) => {
+  const doSubmit = async (data: ServicioSchema) => {
     return await onSubmit(data, {
       snack,
       navigationFunction,
@@ -82,7 +93,9 @@ export default function NuevoServicio({
     });
   };
 
-  const propiedades = watch("propiedades");
+  const propiedades = watch("propiedades") ?? [
+    campoConfigSchema.parse({}),
+  ];
   const columnas = buildServiceProperyColumns();
   const rows = propiedades.map((propiedad, index) => ({
     ...propiedad,
@@ -248,9 +261,10 @@ export default function NuevoServicio({
             title="Sin propiedades definidas"
           />
         ) : (
-          <Tabla
+          <Tabla<PropiedadRow>
             columnas={columnas}
             data={rows}
+            isLoading={false}
             onEditClick={(row) =>
               openSidebar({
                 title: "Editar propiedad de servicio",
@@ -281,9 +295,11 @@ export default function NuevoServicio({
       <FormButtonsRow
         onSubmitClick={handleSubmit(doSubmit)}
         hasRequiredFields
-        onResetClick={reset}
+        onResetClick={() => reset(servicioTemplate)}
         submitDisabled={!isDirty || !isValid}
       />
     </>
   );
 }
+
+export type PropiedadRow = Simplify<CampoConfigSchema>;
