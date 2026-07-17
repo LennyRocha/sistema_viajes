@@ -1,4 +1,3 @@
-// mfe-servicios/providers/withProviders.tsx
 "use client";
 
 import { Provider } from "react-redux";
