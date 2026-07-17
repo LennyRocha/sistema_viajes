@@ -69,7 +69,7 @@ export function SnackBox() {
       <Snackbar
         key={snack.id}
         open
-        autoHideDuration={6000}
+        autoHideDuration={snack.duration ?? 6000}
         onClose={handleClose}
         anchorOrigin={snack.anchorOrigin || DEFAULT_ANCHOR}
         sx={{
@@ -89,7 +89,7 @@ export function SnackBox() {
       <Snackbar
         key={snack.id}
         open
-        autoHideDuration={6000}
+        autoHideDuration={snack.duration ?? 6000}
         onClose={handleClose}
         anchorOrigin={snack.anchorOrigin || DEFAULT_ANCHOR}
         message={snack.message}
@@ -109,6 +109,7 @@ export const snack = {
     showCloseButton,
     onUndoClick,
     anchorOrigin,
+    duration,
   }: SnackbarPublicProps) {
     const snack: SnackbarProps = {
       message,
@@ -116,6 +117,7 @@ export const snack = {
       showCloseButton,
       onUndoClick,
       anchorOrigin,
+      duration,
     };
     addSnack(snack);
   },

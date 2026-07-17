@@ -8,6 +8,7 @@ type SnackbarProps = {
     vertical: "top" | "bottom";
     horizontal: "left" | "center" | "right";
   };
+  duration?: number;
 };
 
 export type SnackbarAlertProps = SnackbarProps & {

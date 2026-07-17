@@ -301,7 +301,7 @@ importers:
         version: 9.2.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@mui/material-nextjs':
         specifier: ^9.0.1
-        version: 9.1.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(next@15.3.4(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+        version: 9.1.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(next@15.3.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       '@nexoroute/commons':
         specifier: workspace:*
         version: link:../commons
@@ -310,7 +310,7 @@ importers:
         version: 2.12.0(react-redux@9.3.0(@types/react@19.2.17)(react@19.2.4)(redux@5.0.1))(react@19.2.4)
       next:
         specifier: 15.3.4
-        version: 15.3.4(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 15.3.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react:
         specifier: ^19
         version: 19.2.4
@@ -326,7 +326,7 @@ importers:
     devDependencies:
       '@module-federation/nextjs-mf':
         specifier: ^8.8.69
-        version: 8.8.70(next@15.3.4(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(styled-jsx@5.1.6(react@19.2.4))(typescript@5.9.3)(webpack@5.108.4)
+        version: 8.8.70(next@15.3.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(styled-jsx@5.1.6(react@19.2.4))(typescript@5.9.3)(webpack@5.108.4)
       '@types/node':
         specifier: ^20
         version: 20.19.43
@@ -369,9 +369,6 @@ importers:
       '@mui/material-nextjs':
         specifier: ^9.0.1
         version: 9.1.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(next@15.3.4(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
-      '@mui/x-data-grid':
-        specifier: ^9.7.0
-        version: 9.9.0(5c77f72171969472c4a99afa4f2df2bb)
       '@nexoroute/commons':
         specifier: workspace:*
         version: link:../commons
@@ -511,7 +508,7 @@ importers:
         version: 2.12.0(react-redux@9.3.0(@types/react@19.2.17)(react@19.2.4)(redux@5.0.1))(react@19.2.4)
       next:
         specifier: 15.3.4
-        version: 15.3.4(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 15.3.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -587,7 +584,7 @@ importers:
         version: 2.12.0(react-redux@9.3.0(@types/react@19.2.17)(react@19.2.4)(redux@5.0.1))(react@19.2.4)
       next:
         specifier: 15.3.4
-        version: 15.3.4(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 15.3.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -7202,17 +7199,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.17
 
-  '@base-ui/utils@0.3.1(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)':
-    dependencies:
-      '@babel/runtime': 7.29.7
-      '@floating-ui/utils': 0.2.12
-      react: 19.3.0-canary-3f0b9e61-20260317
-      react-dom: 19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317)
-      reselect: 5.2.0
-      use-sync-external-store: 1.6.0(react@19.3.0-canary-3f0b9e61-20260317)
-    optionalDependencies:
-      '@types/react': 19.2.17
-
   '@bcoe/v8-coverage@0.2.3': {}
 
   '@borewit/text-codec@0.2.2': {}
@@ -8252,28 +8238,6 @@ snapshots:
       - utf-8-validate
       - vue-tsc
 
-  '@module-federation/nextjs-mf@8.8.70(next@15.3.4(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(styled-jsx@5.1.6(react@19.2.4))(typescript@5.9.3)(webpack@5.108.4)':
-    dependencies:
-      '@module-federation/enhanced': 2.7.0(typescript@5.9.3)(webpack@5.108.4)
-      '@module-federation/node': 2.7.46(typescript@5.9.3)(webpack@5.108.4)
-      '@module-federation/runtime': 2.7.0
-      '@module-federation/runtime-core': 2.7.0
-      '@module-federation/sdk': 2.7.0
-      '@module-federation/webpack-bundler-runtime': 2.7.0
-      fast-glob: 3.3.3
-    optionalDependencies:
-      next: 15.3.4(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.4)
-      webpack: 5.108.4
-    transitivePeerDependencies:
-      - '@rspack/core'
-      - bufferutil
-      - typescript
-      - utf-8-validate
-      - vue-tsc
-
   '@module-federation/nextjs-mf@8.8.70(next@15.3.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(styled-jsx@5.1.6(react@19.2.4))(typescript@5.9.3)(webpack@5.108.4)':
     dependencies:
       '@module-federation/enhanced': 2.7.0(typescript@5.9.3)(webpack@5.108.4)
@@ -8401,16 +8365,6 @@ snapshots:
       '@mui/material': 9.2.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
       react: 19.3.0-canary-3f0b9e61-20260317
     optionalDependencies:
-      '@types/react': 19.2.17
-
-  '@mui/material-nextjs@9.1.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(next@15.3.4(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
-    dependencies:
-      '@babel/runtime': 7.29.7
-      '@emotion/react': 11.14.0(@types/react@19.2.17)(react@19.2.4)
-      next: 15.3.4(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      react: 19.2.4
-    optionalDependencies:
-      '@emotion/cache': 11.14.0
       '@types/react': 19.2.17
 
   '@mui/material-nextjs@9.1.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(next@15.3.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
@@ -8591,26 +8545,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.17
 
-  '@mui/x-data-grid@9.9.0(5c77f72171969472c4a99afa4f2df2bb)':
-    dependencies:
-      '@babel/runtime': 7.29.7
-      '@base-ui/utils': 0.3.1(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
-      '@mui/material': 9.2.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
-      '@mui/system': 9.2.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
-      '@mui/utils': 9.2.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
-      '@mui/x-internals': 9.9.0(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
-      '@mui/x-virtualizer': 0.6.0(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
-      clsx: 2.1.1
-      prop-types: 15.8.1
-      react: 19.3.0-canary-3f0b9e61-20260317
-      react-dom: 19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317)
-      use-sync-external-store: 1.6.0(react@19.3.0-canary-3f0b9e61-20260317)
-    optionalDependencies:
-      '@emotion/react': 11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
-      '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317))(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
-    transitivePeerDependencies:
-      - '@types/react'
-
   '@mui/x-data-grid@9.9.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@mui/material@9.2.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@mui/system@9.2.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react@19.2.4))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -8643,18 +8577,6 @@ snapshots:
       - '@types/react'
       - react-dom
 
-  '@mui/x-internals@9.9.0(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)':
-    dependencies:
-      '@babel/runtime': 7.29.7
-      '@base-ui/utils': 0.3.1(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
-      '@mui/utils': 9.2.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
-      react: 19.3.0-canary-3f0b9e61-20260317
-      reselect: 5.2.0
-      use-sync-external-store: 1.6.0(react@19.3.0-canary-3f0b9e61-20260317)
-    transitivePeerDependencies:
-      - '@types/react'
-      - react-dom
-
   '@mui/x-virtualizer@0.6.0(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -8663,17 +8585,6 @@ snapshots:
       '@mui/x-internals': 9.9.0(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-    transitivePeerDependencies:
-      - '@types/react'
-
-  '@mui/x-virtualizer@0.6.0(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)':
-    dependencies:
-      '@babel/runtime': 7.29.7
-      '@base-ui/utils': 0.3.1(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
-      '@mui/utils': 9.2.0(@types/react@19.2.17)(react@19.3.0-canary-3f0b9e61-20260317)
-      '@mui/x-internals': 9.9.0(@types/react@19.2.17)(react-dom@19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317))(react@19.3.0-canary-3f0b9e61-20260317)
-      react: 19.3.0-canary-3f0b9e61-20260317
-      react-dom: 19.3.0-canary-3f0b9e61-20260317(react@19.3.0-canary-3f0b9e61-20260317)
     transitivePeerDependencies:
       - '@types/react'
 
@@ -10720,7 +10631,7 @@ snapshots:
       '@typescript-eslint/parser': 8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
       eslint: 9.39.5(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.5(jiti@2.7.0))
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.5(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.39.5(jiti@2.7.0))
@@ -10764,21 +10675,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)):
-    dependencies:
-      '@nolyfill/is-core-module': 1.0.39
-      debug: 4.4.3
-      eslint: 9.39.5(jiti@2.7.0)
-      get-tsconfig: 4.14.0
-      is-bun-module: 2.0.0
-      stable-hash: 0.0.5
-      tinyglobby: 0.2.17
-      unrs-resolver: 1.12.2
-    optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0))
-    transitivePeerDependencies:
-      - supports-color
-
   eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
@@ -10794,14 +10690,29 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.5(jiti@2.7.0)):
+    dependencies:
+      '@nolyfill/is-core-module': 1.0.39
+      debug: 4.4.3
+      eslint: 9.39.5(jiti@2.7.0)
+      get-tsconfig: 4.14.0
+      is-bun-module: 2.0.0
+      stable-hash: 0.0.5
+      tinyglobby: 0.2.17
+      unrs-resolver: 1.12.2
+    optionalDependencies:
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0))
+    transitivePeerDependencies:
+      - supports-color
+
+  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
       eslint: 9.39.5(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.5(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -10826,7 +10737,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.5(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0)))(eslint@9.39.5(jiti@2.7.0))
+      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0))
       hasown: 2.0.4
       is-core-module: 2.16.2
       is-glob: 4.0.3
@@ -12394,31 +12305,6 @@ snapshots:
   negotiator@1.0.0: {}
 
   neo-async@2.6.2: {}
-
-  next@15.3.4(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
-    dependencies:
-      '@next/env': 15.3.4
-      '@swc/counter': 0.1.3
-      '@swc/helpers': 0.5.15
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001805
-      postcss: 8.4.31
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.4)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 15.3.4
-      '@next/swc-darwin-x64': 15.3.4
-      '@next/swc-linux-arm64-gnu': 15.3.4
-      '@next/swc-linux-arm64-musl': 15.3.4
-      '@next/swc-linux-x64-gnu': 15.3.4
-      '@next/swc-linux-x64-musl': 15.3.4
-      '@next/swc-win32-arm64-msvc': 15.3.4
-      '@next/swc-win32-x64-msvc': 15.3.4
-      sharp: 0.34.5
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
 
   next@15.3.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:

@@ -148,7 +148,7 @@ export default function MainLayout({
               animate={
                 sidebar.rightSidebarOpen
                   ? {
-                      display: "block",
+                      display: "flex",
                       width: 248,
                       opacity: 1,
                     }
@@ -196,6 +196,7 @@ export default function MainLayout({
                 sx={{
                   overflowY: "auto",
                   flex: 1,
+                  minHeight: 0,
                 }}
               >
                 {sidebar.sidebarChildren}

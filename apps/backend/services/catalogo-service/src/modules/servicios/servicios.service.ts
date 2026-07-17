@@ -49,6 +49,14 @@ export class ServiciosService {
     return servicio;
   }
 
+  async findOneName(nombre: string) {
+    const servicio = await this.prisma.servicio.findUnique({
+      where: { nombre },
+    });
+    if (!servicio) throw new NotFoundException(`Servicio ${nombre} no existe`);
+    return servicio;
+  }
+
   async update(id: number, dto: UpdateServicioDto) {
     const parsed = Number(id);
     await this.findOne(parsed); // 404 si no existe

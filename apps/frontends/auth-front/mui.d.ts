@@ -1,0 +1,13 @@
+import "@mui/material/styles";
+
+declare module "@mui/material/styles" {
+  interface Palette {
+    accent: Palette["primary"];
+    actions: Palette["primary"];
+  }
+
+  interface PaletteOptions {
+    accent?: PaletteOptions["primary"];
+    actions?: PaletteOptions["primary"];
+  }
+}

@@ -1,13 +1,16 @@
 import React from "react";
-import { GridColDef } from "@mui/x-data-grid";
 import { Button, Chip, Link, Tooltip } from "@mui/material";
 import ServicioExterno from "../types/ServicioExterno";
-import { ServicioIcon } from "@nexoroute/commons";
+import {
+  ServicioIcon,
+  Simplify,
+  GridColDef,
+} from "@nexoroute/commons";
 
 const buildServicesColumns = (
-  funct: (servicio: ServicioExterno) => void,
-) => {
-  const columnas: GridColDef<ServicioExterno>[] = [
+  funct: (servicio: ServicioRow) => void,
+): GridColDef<ServicioRow>[] => {
+  const columnas: GridColDef<ServicioRow>[] = [
     {
       field: "icono_nombre",
       headerName: "Icono representativo",
@@ -52,9 +55,9 @@ const buildServicesColumns = (
       renderCell: (params) => (
         <Tooltip
           title={
-            params.row.disponibilidad
-              ? "Este servicio está disponible para todos los tipos de autobús en todas las instituciones."
-              : "Este servicio tiene una disponibilidad personalizada, por lo que no está disponible para todos los tipos de autobús en todas las instituciones."
+            params.row.disponibilidad?.length > 0
+              ? "Este servicio tiene una disponibilidad personalizada, por lo que no está disponible para todos los tipos de autobús en todas las instituciones."
+              : "Este servicio está disponible para todos los tipos de autobús en todas las instituciones."
           }
         >
           <Link
@@ -62,9 +65,9 @@ const buildServicesColumns = (
             underline="hover"
             color="secondary"
           >
-            {params.row.disponibilidad
-              ? "Predeterminada"
-              : "Personalizada"}
+            {params.row.disponibilidad?.length > 0
+              ? "Personalizada"
+              : "Predeterminada"}
           </Link>
         </Tooltip>
       ),
@@ -88,5 +91,7 @@ const buildServicesColumns = (
 
   return columnas;
 };
+
+type ServicioRow = Simplify<ServicioExterno>;
 
 export default buildServicesColumns;

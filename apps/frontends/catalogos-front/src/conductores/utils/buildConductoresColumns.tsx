@@ -1,6 +1,6 @@
 import React from "react";
 import Conductor from "../types/Conductor";
-import { GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "@nexoroute/commons";
 import { Chip } from "@mui/material";
 
 const buildConductoresColumns = () => {

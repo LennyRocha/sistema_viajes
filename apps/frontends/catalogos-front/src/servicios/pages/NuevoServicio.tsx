@@ -33,6 +33,7 @@ import {
   CampoConfigSchema,
   campoConfigSchema,
 } from "../validations/campoZod";
+import { useCreateServicioMutation } from "../api/serviciosApi";
 
 interface NuevoServicioProps extends CommonPageProps {}
 
@@ -56,12 +57,17 @@ export default function NuevoServicio({
   } = useForm<ServicioSchema>({
     resolver: zodResolver(servicioSchema),
     defaultValues: servicioTemplate,
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
+
+  const [mutate, res] = useCreateServicioMutation();
 
   const doSubmit = async (data: ServicioSchema) => {
     return await onSubmit(data, {
       snack,
       navigationFunction,
+      mutate,
     });
   };
 
@@ -107,7 +113,11 @@ export default function NuevoServicio({
       <Breadcrumb
         rolActual="Rol actual"
         breads={[
-          { nombre: "Servicios", href: "/services" },
+          {
+            nombre: "Servicios",
+            href: "/services",
+            disabled: res.isLoading,
+          },
           {
             nombre: "Nuevo",
             href: "/services/nuevo",
@@ -125,6 +135,7 @@ export default function NuevoServicio({
         }
         buttonTitle="Volver"
         leftIcon={<ChevronLeft />}
+        isLoading={res.isLoading}
       />
       <PaperBlock
         title="Datos generales del servicio"
@@ -136,17 +147,19 @@ export default function NuevoServicio({
         }}
       >
         <TextField
-          label="Nombre del servicio *"
+          label="Nombre del servicio"
           variant="outlined"
           size="small"
           {...register("nombre", {
             required: "El nombre del servicio es requerido",
           })}
           error={!!errors.nombre}
+          helperText={errors.nombre?.message}
           fullWidth
+          required
         />
         <TextField
-          label="Descripción *"
+          label="Descripción"
           variant="outlined"
           size="small"
           {...register("descripcion", {
@@ -154,9 +167,11 @@ export default function NuevoServicio({
               "La descripción del servicio es requerida",
           })}
           error={!!errors.descripcion}
+          helperText={errors.descripcion?.message}
           fullWidth
           multiline
           rows={4}
+          required
         />
       </PaperBlock>
       <PaperBlock
@@ -209,6 +224,7 @@ export default function NuevoServicio({
           <Button
             variant="contained"
             onClick={handleOpenIconPicker}
+            loading={res.isLoading}
           >
             Cambiar icono
           </Button>
@@ -242,6 +258,7 @@ export default function NuevoServicio({
                 title: "Nueva propiedad de servicio",
                 children: (
                   <PropiedadServicioContent
+                    key={`nueva-${Date.now()}`}
                     propiedades={propiedades}
                     setValue={setValue}
                     closeSidebar={closeSidebar}
@@ -270,6 +287,7 @@ export default function NuevoServicio({
                 title: "Editar propiedad de servicio",
                 children: (
                   <PropiedadServicioContent
+                    key={row.uuid}
                     propiedades={propiedades}
                     setValue={setValue}
                     closeSidebar={closeSidebar}
@@ -297,6 +315,7 @@ export default function NuevoServicio({
         hasRequiredFields
         onResetClick={() => reset(servicioTemplate)}
         submitDisabled={!isDirty || !isValid}
+        isLoading={res.isLoading}
       />
     </>
   );

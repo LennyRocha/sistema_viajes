@@ -95,6 +95,8 @@ model DisponibiilidadServicio {
   servicio_id     Int
   institucion_id  Int
 
+  activo Boolean @default(true)
+
   tipo_autobus TipoAutobus @relation(fields: [tipo_autobus_id], references: [id])
   servicio     Servicio    @relation(fields: [servicio_id], references: [id])
   institucion  Institucion @relation(fields: [institucion_id], references: [id])

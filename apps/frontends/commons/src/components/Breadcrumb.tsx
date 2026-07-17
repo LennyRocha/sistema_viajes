@@ -15,7 +15,7 @@ interface BreadcrumbProps {
 
 export default function Breadcrumb({
   rolActual = "Rol actual",
-  breads = [],
+  breads = [] as Breads[],
 }: Readonly<BreadcrumbProps>) {
   return (
     <Breadcrumbs>
