@@ -18,6 +18,7 @@ import { servicios as data } from "../../data/constants";
 import buildServicesColumns from "../utils/buildServicesColumns";
 import ServicioExterno from "../types/ServicioExterno";
 import PropiedadesServicio from "../components/PropiedadesServicio";
+import { useGetServiciosQuery } from "../api/serviciosApi";
 
 interface Props extends CommonPageProps {}
 
@@ -31,6 +32,7 @@ export default function ServiciosIndex({
       children: <PropiedadesServicio servicio={servicio} />,
     });
   const columnas = buildServicesColumns(dispatchSidebar);
+  const query = useGetServiciosQuery();
   return (
     <>
       <Breadcrumb
@@ -53,13 +55,14 @@ export default function ServiciosIndex({
         }
         buttonTitle="Nuevo"
         leftIcon={<Add />}
+        isLoading={query.isLoading || query.isFetching}
       />
       <Tabla<ServicioRow>
         titulo="Servicios"
         subtitulo="Listado de servicios ofrecidos en los distintos viajes"
         columnas={columnas}
         data={data}
-        isLoading={false}
+        isLoading={query.isLoading || query.isFetching}
         onEditClick={console.log}
         onToggleActiveClick={console.log}
         subHeaderComponent={

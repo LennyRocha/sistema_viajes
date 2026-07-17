@@ -11,6 +11,7 @@ import {
   IconButton,
   Switch,
   Skeleton,
+  Grid,
 } from "@mui/material";
 import { Edit, Delete, Info } from "@mui/icons-material";
 import { esES } from "@mui/x-data-grid/locales";
@@ -87,19 +88,19 @@ export default function Tabla<T extends GridValidRowModel>({
     >
       {titulo && (
         <Typography
-          variant="h6"
+          variant="h3"
           sx={{ fontWeight: 600, mb: 0 }}
         >
-          {isLoading ? <Skeleton /> : titulo}
+          {isLoading ? <Skeleton width={80} /> : titulo}
         </Typography>
       )}
       {subtitulo && (
         <Typography
-          variant="caption"
+          variant="h6"
           color="textSecondary"
           sx={{ lineHeight: 1.2 }}
         >
-          {isLoading ? <Skeleton /> : subtitulo}
+          {isLoading ? <Skeleton width={150} /> : subtitulo}
         </Typography>
       )}
       {subHeaderComponent && (
@@ -111,14 +112,14 @@ export default function Tabla<T extends GridValidRowModel>({
           }}
         >
           {isLoading ? (
-            <Skeleton variant="rounded" height={75} />
+            <Skeleton variant="rounded" height={40} />
           ) : (
             subHeaderComponent
           )}
         </Box>
       )}
       {isLoading ? (
-        <Skeleton variant="rounded" height={400} />
+        <TablaSkeleton />
       ) : (
         <DataGrid
           rows={data}
@@ -235,3 +236,55 @@ const optionsColumn = <T extends GridValidRowModel>(
     ),
   };
 };
+
+const FilaGrid = () => {
+  return Array.from({ length: 6 }).map((_, index) => (
+    <Grid size={2} key={index + 1}>
+      <Typography variant="subtitle2">
+        <Skeleton />
+      </Typography>
+    </Grid>
+  ));
+};
+
+const TablaSkeleton = () => (
+  <Box
+    sx={{
+      display: "flex",
+      minHeight: 0,
+      width: "100%",
+      overflow: "auto",
+    }}
+  >
+    <Grid
+      container
+      spacing={3.5}
+      columnSpacing={2}
+      sx={{
+        flex: 1,
+        minWidth: 750,
+        flexShrink: 0,
+      }}
+    >
+      {Array.from({ length: 6 }).map((_, index) => (
+        <Grid size={2} key={index + 1}>
+          <Typography variant="h4">
+            <Skeleton width={75} />
+          </Typography>
+        </Grid>
+      ))}
+      {Array.from({ length: 5 }).map((_, index) => (
+        <FilaGrid key={index + 1} />
+      ))}
+      <Grid size={2.4}></Grid>
+      <Grid size={2.4}></Grid>
+      <Grid size={2.4}></Grid>
+      <Grid size={2.4}></Grid>
+      <Grid size={2.4}>
+        <Typography variant="h6">
+          <Skeleton />
+        </Typography>
+      </Grid>
+    </Grid>
+  </Box>
+);
