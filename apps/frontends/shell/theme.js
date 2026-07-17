@@ -65,6 +65,7 @@ const theme = createTheme({
                 },
                 warning: {
                     main: "#F68524",
+                    contrastText: "#FFFFFF"
                 },
                 info: {
                     main: "#3892F3",
@@ -92,6 +93,13 @@ const theme = createTheme({
                     fontFamily: "Montserrat, sans-serif",
                 },
             },
+        },
+        MuiFormLabel: {
+            styleOverrides: (theme) => ({
+                asterisk: {
+                    color: theme.palette.error.main,
+                },
+            }),
         },
         MuiCssBaseline: {
             styleOverrides: (theme) => ({

@@ -3,6 +3,7 @@ import MotionPaper from "../components/MotionPaper";
 import {
   DataGrid,
   GridColDef,
+  GridRenderCellParams,
   GridValidRowModel,
 } from "@mui/x-data-grid";
 import {
@@ -153,7 +154,7 @@ export default function Tabla<T extends GridValidRowModel>({
 
 const optionsColumn = <T extends GridValidRowModel>(
   callbacks: Callbacks<T>,
-): GridColDef => {
+): GridColDef<T> => {
   const label = {
     slotProps: {
       input: { "aria-label": "Cambiar estado" },
@@ -175,7 +176,7 @@ const optionsColumn = <T extends GridValidRowModel>(
     disableColumnMenu: true,
     resizable: false,
     width: Math.min(actionsWidth, 220),
-    renderCell: (params) => (
+    renderCell: (params: GridRenderCellParams<T>) => (
       <Box
         sx={{
           display: "flex",

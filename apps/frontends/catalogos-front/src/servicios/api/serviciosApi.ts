@@ -15,10 +15,42 @@ export const serviciosApi = api.injectEndpoints({
       },
     ),
 
+    getServicioByName: builder.query<
+      ServicioExterno,
+      string
+    >({
+      query: (nombre: string) => `/servicios/${nombre}`,
+      providesTags: ["Servicio"],
+    }),
+
     createServicio: builder.mutation({
       query: (body: Omit<ServicioExterno, "id">) => ({
         url: "/servicios",
         method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Servicio"],
+    }),
+
+    patchServicio: builder.mutation({
+      query: ({
+        id,
+        ...body
+      }: Partial<ServicioExterno>) => ({
+        url: `/servicios/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Servicio"],
+    }),
+
+    changeStatusServicio: builder.mutation({
+      query: ({
+        id,
+        ...body
+      }: Partial<ServicioExterno>) => ({
+        url: `/servicios/${id}/status`,
+        method: "DELETE",
         body,
       }),
       invalidatesTags: ["Servicio"],
@@ -29,5 +61,8 @@ export const serviciosApi = api.injectEndpoints({
 export const {
   useGetServiciosQuery,
   useGetServicioByIdQuery,
+  useGetServicioByNameQuery,
   useCreateServicioMutation,
+  usePatchServicioMutation,
+  useChangeStatusServicioMutation,
 } = serviciosApi;

@@ -3,6 +3,8 @@ import MainLayout from "@/src/layout/MainLayout";
 import { federatedComponent } from "@/src/lib/loadRemote";
 import { useSidebar } from "@/src/providers/SidebarProvider";
 import { useRouter } from "next/navigation";
+import { snack } from "@nexoroute/commons";
+import { useDialog } from "@/src/providers/DialogProvider";
 const ServiciosIndex = federatedComponent(
   "catalogos/ServiciosModule",
   "ServiciosIndex",
@@ -11,9 +13,16 @@ const ServiciosIndex = federatedComponent(
 export default function Page() {
   const router = useRouter();
   const { showSidebar } = useSidebar();
+  const { showDialog } = useDialog();
   return (
     <MainLayout>
-      <ServiciosIndex navigationFunction={router.push}  openSidebar={showSidebar} />
+      <ServiciosIndex
+        navigationFunction={router.push}
+        openSidebar={showSidebar}
+        snack={snack}
+        showDialog={showDialog}
+        userPrivileges={[]}
+      />
     </MainLayout>
   );
 }

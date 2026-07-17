@@ -1,5 +1,5 @@
 import { Chip } from "@mui/material";
-import { GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "@nexoroute/commons";
 import Institucion from "../types/Institucion";
 
 const buildInstitucionesColumns = () => {

@@ -37,3 +37,5 @@ export {
 } from "./utils/normalizeIconName";
 export { default as getYearsList } from "./utils/getYearsList";
 export { type Simplify } from "./utils/simplify";
+
+export { GridColDef } from "@mui/x-data-grid";

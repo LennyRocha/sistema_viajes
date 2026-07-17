@@ -1,6 +1,6 @@
 import React from "react";
 import Autobus from "../types/Autobus";
-import { GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "@nexoroute/commons";
 import { Chip, Typography } from "@mui/material";
 
 const buildAutobusesColumns = () => {

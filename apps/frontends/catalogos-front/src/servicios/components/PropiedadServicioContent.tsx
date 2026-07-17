@@ -22,6 +22,10 @@ type Props = {
   setValue: (
     field: string,
     value: CampoConfigSchema[],
+    options?: {
+      shouldValidate?: boolean;
+      shouldDirty?: boolean;
+    },
   ) => void;
   closeSidebar: () => void;
   propiedad?: CampoConfigSchema;
@@ -94,7 +98,10 @@ export default function PropiedadServicioContent({
         { ...propiedad, uuid: crypto.randomUUID() },
       ];
     }
-    setValue("propiedades", newArray);
+    setValue("propiedades", newArray, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
     closeSidebar();
   };
   const isFormValid = React.useMemo(() => {
@@ -142,7 +149,7 @@ export default function PropiedadServicioContent({
         </Typography>
         <TextField
           select
-          label="Tipo de propiedad *"
+          label="Tipo de propiedad "
           placeholder="Selecciona un  tipo"
           value={propiedad.tipo || ""}
           size="small"
@@ -164,6 +171,10 @@ export default function PropiedadServicioContent({
           }
           variant="outlined"
           fullWidth
+          required
+          sx={{
+            mt: "8px",
+          }}
         >
           <MenuItem value="" disabled>
             Selecciona un tipo
@@ -197,7 +208,7 @@ export default function PropiedadServicioContent({
           Ingresa el nombre de la propiedad.
         </Typography>
         <TextField
-          label="Nombre de la propiedad *"
+          label="Nombre "
           placeholder="Ej. Piezas incluidas"
           value={propiedad.label || ""}
           size="small"
@@ -223,6 +234,10 @@ export default function PropiedadServicioContent({
               max: 50,
             },
           }}
+          required
+          sx={{
+            mt: "8px",
+          }}
         />
       </Box>
       <Box
@@ -246,7 +261,7 @@ export default function PropiedadServicioContent({
           propósito de la propiedad.
         </Typography>
         <TextField
-          label="Texto de ayuda *"
+          label="Texto de ayuda "
           placeholder="Ej. Ingresa x piezas"
           value={propiedad.placeholder || ""}
           size="small"
@@ -265,6 +280,10 @@ export default function PropiedadServicioContent({
             },
           }}
           fullWidth
+          required
+          sx={{
+            mt: "8px",
+          }}
         />
       </Box>
       <Box
@@ -365,7 +384,7 @@ export default function PropiedadServicioContent({
           }}
         >
           <TextField
-            label="Propiedad dependiente *"
+            label="Propiedad dependiente "
             placeholder="Propiedad dependiente"
             value={propiedad.visible?.campo || ""}
             size="small"
@@ -380,6 +399,10 @@ export default function PropiedadServicioContent({
             }
             fullWidth
             select
+            required
+            sx={{
+              mt: "8px",
+            }}
           >
             {propiedades.map((p) => {
               if (p.uuid === propiedad.uuid) return null;
@@ -417,7 +440,7 @@ export default function PropiedadServicioContent({
             />
           ) : (
             <TextField
-              label="Valor dependiente *"
+              label="Valor dependiente "
               placeholder="Ej. 5"
               size="small"
               value={propiedad.visible?.valor || ""}
@@ -436,6 +459,10 @@ export default function PropiedadServicioContent({
                 })
               }
               fullWidth
+              required
+              sx={{
+                mt: "8px",
+              }}
             />
           )}
         </motion.div>
@@ -821,7 +848,7 @@ const NumberTypeSection = ({
               disabled={readOnly}
             />
           }
-          label="Agregar un valor mínimo"
+          label="Valor mínimo"
           sx={{
             color: "text.secondary",
             fontSize: "0.75rem",
@@ -845,7 +872,7 @@ const NumberTypeSection = ({
           }}
         >
           <TextField
-            label={`Agregar valor mínimo`}
+            label={`Valor mínimo`}
             type="number"
             value={propiedad.min}
             disabled={readOnly}
@@ -880,7 +907,7 @@ const NumberTypeSection = ({
               disabled={readOnly}
             />
           }
-          label="Agregar un valor máximo"
+          label="Valor máximo"
           sx={{
             color: "text.secondary",
             fontSize: "0.75rem",
@@ -904,7 +931,7 @@ const NumberTypeSection = ({
           }}
         >
           <TextField
-            label={`Agregar valor máximo`}
+            label={`Valor máximo`}
             type="number"
             value={propiedad.max}
             disabled={readOnly}
@@ -956,7 +983,7 @@ const NumberTypeSection = ({
               disabled={readOnly}
             />
           }
-          label="Agregar un valor por defecto"
+          label="Valor por defecto"
           sx={{
             color: "text.secondary",
             fontSize: "0.75rem",
@@ -982,7 +1009,7 @@ const NumberTypeSection = ({
           {propiedad.opciones &&
           propiedad.opciones.length > 0 ? (
             <TextField
-              label={`Agregar valor por defecto`}
+              label={`Valor por defecto`}
               type="number"
               value={propiedad.defaultValue}
               disabled={readOnly}
@@ -1004,7 +1031,7 @@ const NumberTypeSection = ({
             </TextField>
           ) : (
             <TextField
-              label={`Agregar valor por defecto`}
+              label={`Valor por defecto`}
               type="number"
               value={propiedad.defaultValue}
               disabled={readOnly}
@@ -1269,7 +1296,7 @@ const TextTypeSection = ({
               disabled={readOnly}
             />
           }
-          label="Agregar una longitud mínima"
+          label="Longitud mínima"
           sx={{
             color: "text.secondary",
             fontSize: "0.75rem",
@@ -1293,7 +1320,7 @@ const TextTypeSection = ({
           }}
         >
           <TextField
-            label={`Agregar longitud  mínima`}
+            label={`Longitud  mínima`}
             type="number"
             value={propiedad.minLength}
             disabled={readOnly}
@@ -1328,7 +1355,7 @@ const TextTypeSection = ({
               disabled={readOnly}
             />
           }
-          label="Agregar una longitud máxima"
+          label="Longitud máxima"
           sx={{
             color: "text.secondary",
             fontSize: "0.75rem",
@@ -1352,7 +1379,7 @@ const TextTypeSection = ({
           }}
         >
           <TextField
-            label={`Agregar longitud  máxima`}
+            label={`Longitud  máxima`}
             type="number"
             value={propiedad.maxLength}
             disabled={readOnly}
@@ -1404,7 +1431,7 @@ const TextTypeSection = ({
               disabled={readOnly}
             />
           }
-          label="Agregar un valor por defecto"
+          label="Valor por defecto"
           sx={{
             color: "text.secondary",
             fontSize: "0.75rem",
@@ -1430,7 +1457,7 @@ const TextTypeSection = ({
           {propiedad.opciones &&
           propiedad.opciones.length > 0 ? (
             <TextField
-              label={`Agregar valor por defecto`}
+              label={`Valor por defecto`}
               type="text"
               value={propiedad.defaultValue}
               disabled={readOnly}
@@ -1452,7 +1479,7 @@ const TextTypeSection = ({
             </TextField>
           ) : (
             <TextField
-              label={`Agregar valor por defecto`}
+              label={`Valor por defecto`}
               type="text"
               value={propiedad.defaultValue}
               disabled={readOnly}
@@ -1534,7 +1561,7 @@ const TextTypeSection = ({
           }}
         >
           <TextField
-            label={`Agregar un formato de texto (expresión regular)`}
+            label={`Formato de texto (expresión regular)`}
             type="text"
             value={regexSelectValue}
             disabled={readOnly}
@@ -1640,7 +1667,7 @@ const BooleanTypeSection = ({
             disabled={readOnly}
           />
         }
-        label="Agregar un valor por defecto"
+        label="Valor por defecto"
         sx={{
           color: "text.secondary",
           fontSize: "0.75rem",
