@@ -1,11 +1,17 @@
 # Instrucciones de uso de la librería/carpeta commons
 
-<h6>Versión 2.0.0</h6>
+<h6>Versión 2.0.1</h6>
 
 ## 1. Cada vez que hagan cambios en la carpeta <code>commons</code> ejecuten el siguiente comando:
 
 ```bash
 pnpm --filter @nexoroute/commons build
+```
+
+O desde la raíz de microfrontends:
+
+```bash
+pnpm build:commons
 ```
 
 Eso actualizará la carpeta <code>dist</code> y estará lista.
