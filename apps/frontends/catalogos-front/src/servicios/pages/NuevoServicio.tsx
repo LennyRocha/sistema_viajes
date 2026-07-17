@@ -99,9 +99,8 @@ export default function NuevoServicio({
     });
   };
 
-  const propiedades = watch("propiedades") ?? [
-    campoConfigSchema.parse({}),
-  ];
+  const propiedades = watch("propiedades") ?? [];
+
   const columnas = buildServiceProperyColumns();
   const rows = propiedades.map((propiedad, index) => ({
     ...propiedad,
