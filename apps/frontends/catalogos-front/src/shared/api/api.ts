@@ -8,6 +8,7 @@ export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: env.api_url,
+    timeout: 10000, // 10 segundos, pero serán 30 en producción
   }),
   endpoints: () => ({}),
   tagTypes: ["Autobus", "Servicio", "TipoAutobus"],

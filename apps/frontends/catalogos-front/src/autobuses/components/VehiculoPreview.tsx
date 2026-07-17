@@ -1,5 +1,5 @@
 import { MotionPaper } from "@nexoroute/commons";
-import { Box, Typography } from "@mui/material";
+import { Box, Skeleton, Typography } from "@mui/material";
 import React from "react";
 import Vehiculo3D from "../../tipos_autobus/components/Vehiculo3D";
 import Modelo3DName from "../../tipos_autobus/types/Modelo3DName";
@@ -13,6 +13,22 @@ function VehiculoPreview({
   model = "hyundai",
   paperProps = {},
 }: Readonly<Props>) {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
+  React.useLayoutEffect(() => {
+    let mounted = true;
+    setIsLoaded(false);
+
+    const timeout = setTimeout(() => {
+      if (mounted) setIsLoaded(true);
+    }, 300);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeout);
+    };
+  }, [model]);
+
   return (
     <Box
       sx={{
@@ -49,7 +65,19 @@ function VehiculoPreview({
             justifyContent: "center",
           }}
         >
-          <Vehiculo3D tipo={model} width={300} canRotate />
+          {isLoaded ? (
+            <Vehiculo3D
+              tipo={model}
+              width={300}
+              canRotate
+            />
+          ) : (
+            <Skeleton
+              variant="rounded"
+              width={300}
+              height={200}
+            />
+          )}
         </Box>
 
         <Typography
