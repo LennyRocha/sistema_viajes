@@ -87,6 +87,13 @@ const theme = createTheme({
                 },
             },
         },
+        MuiTab: {
+            styleOverrides: {
+                root: {
+                    fontFamily: "Montserrat, sans-serif",
+                },
+            },
+        },
         MuiTextField: {
             styleOverrides: {
                 root: {
