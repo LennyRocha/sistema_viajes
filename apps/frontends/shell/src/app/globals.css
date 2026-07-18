@@ -140,3 +140,9 @@ b {
 .MuiFormLabel-asterisk {
   color: #EA3829 !important;
 }
+
+@media (max-width: 1084px) {
+  .hero-image {
+    object-position: 60% center !important;
+  }
+}
