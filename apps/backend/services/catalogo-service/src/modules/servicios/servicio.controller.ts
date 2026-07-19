@@ -3,7 +3,9 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -19,6 +21,7 @@ export class ServiciosController {
   constructor(private readonly servicios: ServiciosService) {}
 
   @Post()
+  @HttpCode(201)
   @ApiOperation({ summary: 'Crear servicio' })
   create(@Body() dto: CreateServicioDto) {
     return this.servicios.create(dto);
@@ -33,7 +36,7 @@ export class ServiciosController {
   @Get(':id')
   @ApiOperation({ summary: 'Obtener servicio por id' })
   @ApiParam({ name: 'id', example: '1' })
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.servicios.findOne(id);
   }
 
@@ -47,21 +50,26 @@ export class ServiciosController {
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar servicio' })
   @ApiParam({ name: 'id', example: '1' })
-  update(@Param('id') id: number, @Body() dto: UpdateServicioDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateServicioDto,
+  ) {
     return this.servicios.update(id, dto);
   }
 
   @Delete('/status/:id')
+  @HttpCode(204)
   @ApiOperation({ summary: 'Cambiar estado de un  servicio' })
   @ApiParam({ name: 'id', example: '1' })
-  shutdown(@Param('id') id: number) {
+  shutdown(@Param('id', ParseIntPipe) id: number) {
     return this.servicios.shutdown(id);
   }
 
   @Delete(':id')
+  @HttpCode(204)
   @ApiOperation({ summary: 'Eliminar servicio' })
   @ApiParam({ name: 'id', example: '1' })
-  remove(@Param('id') id: number) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.servicios.remove(id);
   }
 
@@ -79,7 +87,7 @@ export class ServiciosController {
   @Get('/disponibilidad/:id')
   @ApiOperation({ summary: 'Verificar disponibilidad del servicio' })
   @ApiParam({ name: 'id', example: '1' })
-  checkAvailability(@Param('id') id: number) {
+  checkAvailability(@Param('id', ParseIntPipe) id: number) {
     return {
       id,
       message:
@@ -88,6 +96,7 @@ export class ServiciosController {
   }
 
   @Post('/disponibilidad')
+  @HttpCode(201)
   @ApiOperation({
     summary: 'Límitar disponibilidad de un servicio dentro de una institución',
   })
@@ -100,12 +109,13 @@ export class ServiciosController {
   }
 
   @Delete('/disponibilidad/:id')
+  @HttpCode(204)
   @ApiOperation({
     summary:
       'Activar/desactivar disponibilidad de un servicio para una institución',
   })
   @ApiParam({ name: 'id', example: '1' })
-  shutdownAvailability(@Param('id') id: number) {
+  shutdownAvailability(@Param('id', ParseIntPipe) id: number) {
     return {
       id,
       message:
