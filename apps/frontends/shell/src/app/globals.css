@@ -23,12 +23,19 @@ body,
 }
 
 
-main {
+main:has(#main) main {
   height: 100svh;
   width: 100dvw;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+
+* {
+  scroll-behavior: smooth !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1 {
