@@ -1,0 +1,22 @@
+    #hero {
+        height: 100dvh;
+
+        @media(min-width: 1084px) {
+            height: 800px;
+        }
+    }
+
+    #hero img {
+        object-fit: cover;
+        object-position: center bottom;
+
+        @media(max-width: 1084px) {
+            object-position: 60% bottom !important;
+        }
+    }
+
+    #motion-header {
+        @media (min-width: 900px) and (max-width: 1084px) {
+            backdrop-filter: blur(10px);
+        }
+    }

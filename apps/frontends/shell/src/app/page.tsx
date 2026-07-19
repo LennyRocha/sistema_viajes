@@ -18,65 +18,67 @@ import {
   useScroll,
   useTransform,
   motion,
-  useMotionValueEvent,
 } from "framer-motion";
 import Image from "next/image";
+import "@/src/css/landing.css";
+import { useRouter } from "next/navigation";
+import React from "react";
 
-const MotionText = motion(Typography);
+const MotionText = motion.create(Typography);
 
 export default function Page() {
   const theme = useTheme();
-  const breakpoints = {
-    heroHeight: useMediaQuery("(min-width: 1084px)", {
-      noSsr: true,
-    })
-      ? "800px"
-      : "100dvh",
-    ghostBoxDisplay: useMediaQuery("(min-width: 1084px)", {
-      noSsr: true,
-    })
-      ? "block"
-      : "none",
-    belowTablet: useMediaQuery("(max-width: 900px)", {
-      noSsr: true,
-    }),
-    isMobile: useMediaQuery("(max-width: 600px)", {
-      noSsr: true,
-    }),
-    isDesktop: useMediaQuery("(min-width: 1084px)", {
-      noSsr: true,
-    }),
+  const isDesktopScreen = useMediaQuery(
+    "(min-width: 1084px)",
+  );
+  const ref = React.useRef<HTMLElement>(null);
+
+  const refs = React.useRef({
+    hero: null as HTMLDivElement | null,
+    search: null as HTMLDivElement | null,
+    navbar: null as HTMLDivElement | null,
+  });
+
+  const scrollToRef = (name: keyof typeof refs.current) => {
+    const element = refs.current[name];
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
   };
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end end"],
+  });
+
+  const y = useTransform(
+    scrollYProgress,
+    [0, 1],
+    ["0%", "-25%"],
+  );
   return (
     <Box
+      component={"main"}
       sx={{
         display: "flex",
         flexDirection: "column",
         gap: "16px",
         minHeight: "100dvh",
         scrollbarColor: "transparent transparent",
+        position: "relative",
       }}
     >
       <Box
+        ref={ref}
         component={"section"}
+        id="hero"
         sx={{
           position: "relative",
           width: "100%",
-          height: breakpoints.heroHeight,
           flexShrink: 0,
         }}
       >
-        <Image
-          src="/landing.png"
-          alt="hero"
-          fill
-          style={{
-            objectFit: "cover",
-            objectPosition: "center bottom",
-          }}
-          className="hero-image"
-          priority
-        />
+        <Hero />
         <Box
           sx={{
             position: "absolute",
@@ -110,117 +112,7 @@ export default function Page() {
             },
           }}
         >
-          <motion.header
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-            initial={{ y: -4, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 1, delay: 0.2 }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-              }}
-            >
-              <Image
-                src={"/assets/logo_white_sf.png"}
-                alt="logo"
-                width={75}
-                height={50}
-              />
-              <Box
-                sx={{
-                  display: {
-                    xs: "flex",
-                    md: "none",
-                    lg: "flex",
-                  },
-                  gap: 0,
-                  flexDirection: "column",
-                }}
-              >
-                <Typography
-                  variant="subtitle2"
-                  className="font-brand"
-                  sx={{ margin: 0 }}
-                >
-                  Nexoroute
-                </Typography>
-                <Typography variant="caption">
-                  Viaja mejor
-                </Typography>
-              </Box>
-            </Box>
-
-            {breakpoints.belowTablet ? null : (
-              <Box
-                component={"nav"}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 2,
-                  flexWrap: "wrap",
-                }}
-              >
-                <Link
-                  className="font-brand"
-                  href={"/login"}
-                  color="inherit"
-                  underline="hover"
-                >
-                  Destinos
-                </Link>
-                <Link
-                  className="font-brand"
-                  href={"/login"}
-                  color="inherit"
-                  underline="hover"
-                >
-                  Viajes
-                </Link>
-                <Link
-                  className="font-brand"
-                  href={"/login"}
-                  color="inherit"
-                  underline="hover"
-                >
-                  Amenidades
-                </Link>
-                <Link
-                  className="font-brand"
-                  href={"/login"}
-                  color="inherit"
-                  underline="hover"
-                >
-                  Ayuda
-                </Link>
-              </Box>
-            )}
-
-            {breakpoints.belowTablet ? (
-              <IconButton color="primary">
-                <Menu />
-              </IconButton>
-            ) : (
-              <Box sx={{ display: "flex", gap: 1 }}>
-                <Button variant="text" color="inherit">
-                  Iniciar sesión
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                >
-                  Registrate
-                </Button>
-              </Box>
-            )}
-          </motion.header>
+          <Nav />
 
           <Box
             sx={{
@@ -257,9 +149,15 @@ export default function Page() {
                 padding: "6px 0",
                 fontWeight: 700,
                 textTransform: "uppercase",
+                color: "white",
               }}
-              initial={{ x: 40 }}
-              animate={{ x: 0 }}
+              style={{ y }}
+              initial={
+                isDesktopScreen ? { x: 40 } : { y: 40 }
+              }
+              animate={
+                isDesktopScreen ? { x: 0 } : { y: 0 }
+              }
               transition={{
                 duration: 0.667,
                 ease: [0.16, 1, 0.29, 0.99],
@@ -269,8 +167,14 @@ export default function Page() {
             </MotionText>
             <MotionText
               variant="h4"
-              initial={{ x: 40 }}
-              animate={{ x: 0 }}
+              initial={
+                isDesktopScreen ? { x: 40 } : { y: 40 }
+              }
+              animate={
+                isDesktopScreen ? { x: 0 } : { y: 0 }
+              }
+              sx={{ color: "white" }}
+              style={{ y }}
               transition={{
                 duration: 0.667,
                 ease: [0.16, 1, 0.29, 0.99],
@@ -281,95 +185,7 @@ export default function Page() {
             </MotionText>
           </Box>
 
-          <MotionPaper
-            sx={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "start",
-              padding: "16px",
-              gap: "16px",
-              flexDirection: "column",
-              "@media (max-width: 1084px)": {
-                position: "absolute",
-                left: 0,
-                bottom: "-175px",
-                margin: "0 8px",
-                width: "calc(100% - 16px)",
-              },
-            }}
-          >
-            <Tabs
-              aria-label="tipo de viaje"
-              value={0}
-              sx={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <Tab
-                label="Ida y vuelta"
-                sx={{
-                  "@media (max-width: 768px)": {
-                    flex: 1,
-                  },
-                }}
-              />
-              <Tab
-                label="Solo ida"
-                sx={{
-                  "@media (max-width: 768px)": {
-                    flex: 1,
-                  },
-                }}
-              />
-            </Tabs>
-            <Box
-              sx={{
-                display: "flex",
-                gap: "16px",
-                width: "100%",
-                "@media (max-width: 1084px)": {
-                  flexDirection: "column",
-                },
-              }}
-            >
-              <TextField
-                label="Origen"
-                variant="outlined"
-                size="small"
-                sx={{ flex: 1 }}
-              />
-              <TextField
-                label="Destino"
-                variant="outlined"
-                size="small"
-                sx={{ flex: 1 }}
-              />
-              <TextField
-                label="Fecha"
-                variant="outlined"
-                size="small"
-                type="date"
-                sx={{ flex: 1 }}
-              />
-              <TextField
-                label="Pasajeros"
-                variant="outlined"
-                size="small"
-                type="number"
-                sx={{ flex: 1 }}
-              />
-              <Button
-                variant="contained"
-                color="secondary"
-                sx={{ flex: 1 }}
-              >
-                Buscar viajes
-              </Button>
-            </Box>
-          </MotionPaper>
+          <Buscador />
         </Box>
       </Box>
       <Box
@@ -396,13 +212,17 @@ export default function Page() {
             width: "100%",
           }}
         ></Box>
-        <Typography
+        <MotionText
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ ease: "easeInOut", duration: 1 }}
           className="font-brand"
           variant="h5"
           sx={{ margin: "0 auto", textAlign: "center" }}
         >
           ¿Por qué viajar con nosotros?
-        </Typography>
+        </MotionText>
         <Button
           variant="outlined"
           color="accent"
@@ -416,37 +236,49 @@ export default function Page() {
         >
           Ver todos los destinos
         </Button>
-        <Typography
+        <MotionText
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ ease: "easeInOut", duration: 1 }}
           className="font-brand"
           variant="h5"
           sx={{ margin: "0 auto", textAlign: "center" }}
         >
           Destinos populares
-        </Typography>
+        </MotionText>
         <Typography>deojdo</Typography>
         <Typography>deojdo</Typography>
         <Typography>deojdo</Typography>
         <Typography>deojdo</Typography>
         <Typography>deojdo</Typography>
-        <Typography
+        <MotionText
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ ease: "easeInOut", duration: 1 }}
           className="font-brand"
           variant="h5"
           sx={{ margin: "0 auto", textAlign: "center" }}
         >
           Viaja como tu prefieras
-        </Typography>
+        </MotionText>
         <Typography>deojdo</Typography>
         <Typography>deojdo</Typography>
         <Typography>deojdo</Typography>
         <Typography>deojdo</Typography>
         <Typography>deojdo</Typography>
-        <Typography
+        <MotionText
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ ease: "easeInOut", duration: 1 }}
           className="font-brand"
           variant="h5"
           sx={{ margin: "0 auto", textAlign: "center" }}
         >
           Nuestras amenidades
-        </Typography>
+        </MotionText>
         <Button
           variant="outlined"
           color="accent"
@@ -484,3 +316,309 @@ export default function Page() {
     </Box>
   );
 }
+
+function Hero() {
+  const container = React.useRef(null);
+
+  const { scrollYProgress } = useScroll({
+    target: container,
+
+    offset: ["start start", "end start"],
+  });
+
+  const y = useTransform(
+    scrollYProgress,
+    [0, 1],
+    ["-10vh", "10vh"],
+  );
+
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: "100dvh",
+        position: "absolute",
+        inset: 0,
+        zIndex: 0,
+        overflow: "hidden",
+      }}
+      id="hero"
+    >
+      <div
+        ref={container}
+        className="relative w-full flex items-center justify-center overflow-hidden h-full"
+        style={{
+          clipPath:
+            "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)",
+        }}
+      >
+        <div className="fixed top-[-10vh] left-0 h-[120vh] w-full">
+          <motion.div
+            style={{ y }}
+            className="relative w-full h-full"
+          >
+            <Image
+              src={"/landing.png"}
+              fill
+              alt="image"
+              style={{
+                objectFit: "cover",
+                objectPosition: "center bottom",
+              }}
+              priority
+            />
+          </motion.div>
+        </div>
+      </div>
+    </Box>
+  );
+}
+
+const Buscador = () => {
+  return (
+    <MotionPaper
+      sx={{
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "start",
+        padding: "16px",
+        gap: "16px",
+        flexDirection: "column",
+        "@media (max-width: 1084px)": {
+          position: "absolute",
+          left: 0,
+          bottom: "-175px",
+          margin: "0 8px",
+          width: "calc(100% - 16px)",
+        },
+      }}
+    >
+      <Tabs
+        aria-label="tipo de viaje"
+        value={0}
+        sx={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <Tab
+          label="Ida y vuelta"
+          sx={{
+            "@media (max-width: 768px)": {
+              flex: 1,
+            },
+          }}
+        />
+        <Tab
+          label="Solo ida"
+          sx={{
+            "@media (max-width: 768px)": {
+              flex: 1,
+            },
+          }}
+        />
+      </Tabs>
+      <Box
+        sx={{
+          display: "flex",
+          gap: "16px",
+          width: "100%",
+          "@media (max-width: 1084px)": {
+            flexDirection: "column",
+          },
+        }}
+      >
+        <TextField
+          label="Origen"
+          variant="outlined"
+          size="small"
+          sx={{ flex: 1 }}
+        />
+        <TextField
+          label="Destino"
+          variant="outlined"
+          size="small"
+          sx={{ flex: 1 }}
+        />
+        <TextField
+          label="Fecha"
+          variant="outlined"
+          size="small"
+          type="date"
+          sx={{ flex: 1 }}
+        />
+        <TextField
+          label="Pasajeros"
+          variant="outlined"
+          size="small"
+          type="number"
+          sx={{ flex: 1 }}
+        />
+        <Button
+          variant="contained"
+          color="secondary"
+          sx={{ flex: 1 }}
+        >
+          Buscar viajes
+        </Button>
+      </Box>
+    </MotionPaper>
+  );
+};
+
+const Nav = () => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+  const isLargeScreen = useMediaQuery("(min-width: 900px)");
+  const betweenDesktopAndLargeScreen = useMediaQuery(
+    "(min-width: 900px) and (max-width: 1084px)",
+  );
+  const router = useRouter();
+  return (
+    <motion.header
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        width: "100%",
+        backgroundColor: betweenDesktopAndLargeScreen
+          ? alpha(theme.palette.secondary.main, 0.2)
+          : "transparent",
+        borderRadius: "8px",
+        padding: "4px 8px",
+      }}
+      initial={{ y: -4, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -4, opacity: 0 }}
+      transition={{ duration: 1, delay: 0.2 }}
+      id="motion-header"
+    >
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+        }}
+      >
+        <Image
+          src={
+            isDark
+              ? "/assets/logo_white_sf.png"
+              : "/assets/logo_black_sf.png"
+          }
+          alt="logo"
+          width={75}
+          height={50}
+        />
+        <Box
+          sx={{
+            display: {
+              xs: "flex",
+              md: "none",
+              lg: "flex",
+            },
+            gap: 0,
+            flexDirection: "column",
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            className="font-brand"
+            sx={{ margin: 0 }}
+          >
+            Nexoroute
+          </Typography>
+          <Typography variant="caption">
+            Viaja mejor
+          </Typography>
+        </Box>
+      </Box>
+
+      {!isLargeScreen ? null : (
+        <Box
+          component={"nav"}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "16px",
+            flexWrap: "wrap",
+          }}
+        >
+          <Link
+            className="font-brand"
+            href={"/login"}
+            color="inherit"
+            underline="hover"
+            sx={{
+              "&:hover": {
+                color: theme.palette.accent.main,
+              },
+            }}
+          >
+            Destinos
+          </Link>
+          <Link
+            className="font-brand"
+            href={"/login"}
+            color="inherit"
+            underline="hover"
+            sx={{
+              "&:hover": {
+                color: theme.palette.accent.main,
+              },
+            }}
+          >
+            Viajes
+          </Link>
+          <Link
+            className="font-brand"
+            href={"/login"}
+            color="inherit"
+            underline="hover"
+            sx={{
+              "&:hover": {
+                color: theme.palette.accent.main,
+              },
+            }}
+          >
+            Amenidades
+          </Link>
+          <Link
+            className="font-brand"
+            href={"/login"}
+            color="inherit"
+            underline="hover"
+            sx={{
+              "&:hover": {
+                color: theme.palette.accent.main,
+              },
+            }}
+          >
+            Ayuda
+          </Link>
+        </Box>
+      )}
+
+      {!isLargeScreen ? (
+        <IconButton color="primary">
+          <Menu />
+        </IconButton>
+      ) : (
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button
+            variant="text"
+            color="inherit"
+            onClick={() => router.push("/dashboard")}
+          >
+            Iniciar sesión
+          </Button>
+          <Button variant="contained" color="secondary">
+            Registrate
+          </Button>
+        </Box>
+      )}
+    </motion.header>
+  );
+};
