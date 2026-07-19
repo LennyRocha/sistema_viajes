@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { TiposAutobusService } from './tipo_bus.service';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
@@ -16,7 +16,7 @@ export class TiposAutobusController {
   @ApiOperation({ summary: 'Obtener tipo de autobús por id' })
   @ApiParam({ name: 'id', example: '1' })
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.tiposAutobusService.findOne(id);
   }
 }

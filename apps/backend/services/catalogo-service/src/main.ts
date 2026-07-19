@@ -1,13 +1,33 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'; // ← NUEVO
 import { apiReference } from '@scalar/nestjs-api-reference'; // ← NUEVO
 import { AppModule } from './app.module';
+import { formatErrors, ErrorOrigin } from '@commons/utils';
+import { ValidationError } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.PORT ?? 3001;
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      exceptionFactory: (errors: ValidationError[]) => {
+        return new BadRequestException({
+          statusCode: 400,
+          message: 'Error de validación',
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          errors: formatErrors(errors),
+          errorOrigin: ErrorOrigin.VALIDATION,
+        });
+      },
+    }),
+  );
 
   // ← NUEVO: generar documento OpenAPI
   const config = new DocumentBuilder()

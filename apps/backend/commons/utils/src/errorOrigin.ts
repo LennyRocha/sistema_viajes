@@ -1,0 +1,8 @@
+export enum ErrorOrigin {
+  VALIDATION = "VALIDATION",
+  DATABASE = "DATABASE",
+  BUSINESS = "BUSINESS",
+  AUTH = "AUTH",
+  GATEWAY = "GATEWAY",
+  INTERNAL = "INTERNAL",
+}

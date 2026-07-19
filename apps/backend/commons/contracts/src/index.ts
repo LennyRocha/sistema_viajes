@@ -1,1 +1,1 @@
-export * from "./ApiResponse";
+export { default as ApiResponse } from "./ApiResponse";

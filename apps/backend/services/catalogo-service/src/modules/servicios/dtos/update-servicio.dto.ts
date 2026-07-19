@@ -1,6 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MinLength, MaxLength, IsOptional } from 'class-validator';
+import {
+  IsString,
+  MinLength,
+  MaxLength,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { CreateCampoConfigDto } from './create-campo-config.dto';
 import {
   IsUniqueObjectArray,
@@ -50,5 +56,7 @@ export class UpdateServicioDto {
   })
   @MinArraySize(1, { message: 'Debe haber al menos una opción' })
   @MaxArraySize(20, { message: 'No puede haber más de 20 opciones' })
+  @ValidateNested({ each: true })
+  @Type(() => CreateCampoConfigDto)
   propiedades?: CreateCampoConfigDto[];
 }
