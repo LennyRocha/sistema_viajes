@@ -7,6 +7,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: "Nebulas-Hollow";
+  src: url('../fonts/Nebula-Hollow.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   min-height: 100vh;
   font-family: "Inter", 'Roboto', sans-serif;

@@ -508,6 +508,7 @@ const Nav = () => {
               : "/assets/logo_black_sf.png"
           }
           alt="logo"
+          style={{ width: 75, height: 50, objectFit: "contain" }}
           width={75}
           height={50}
         />

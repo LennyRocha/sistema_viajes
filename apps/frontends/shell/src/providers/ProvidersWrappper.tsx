@@ -7,6 +7,7 @@ import { SidebarProvider } from "./SidebarProvider";
 import { DialogProvider } from "./DialogProvider";
 import { SnackBox } from "@nexoroute/commons";
 import { initFederation } from "@/src/lib/federation";
+import PrintSaludo from "../utils/saludo";
 
 initFederation();
 
@@ -22,6 +23,7 @@ export default function ProvidersWrapper({
           <DialogProvider>
             <CssBaseline />
             {children}
+            <PrintSaludo />
             <SnackBox />
           </DialogProvider>
         </SidebarProvider>

@@ -39,9 +39,9 @@ const children = [];
 function banner() {
     let art;
     try {
-        art = figlet.textSync('BACKEND', { font: 'ANSI Shadow' });
+        art = figlet.textSync('MICROSERVICIOS', { font: 'ANSI Shadow' });
     } catch {
-        art = 'BACKEND';
+        art = 'MICROSERVICIOS';
     }
     console.log(chalk.green(art));
     console.log(chalk.bold('  Panel de arranque de microservicios\n'));
