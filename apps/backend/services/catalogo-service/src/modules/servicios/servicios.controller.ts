@@ -13,7 +13,6 @@ import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ServiciosService } from './servicios.service';
 import { CreateServicioDto } from './dtos/create-servicio.dto';
 import { UpdateServicioDto } from './dtos/update-servicio.dto';
-import { SetDisponibilidadDto } from './dtos/set-disponibildad.dto';
 
 @ApiTags('servicios')
 @Controller('servicios')
@@ -71,55 +70,5 @@ export class ServiciosController {
   @ApiParam({ name: 'id', example: '1' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.servicios.remove(id);
-  }
-
-  //Disponibilidad de servicios
-
-  @Get('/disponibilidad')
-  @ApiOperation({ summary: 'Consultar disponibilidad de servicios' })
-  checkAvailabilityAll() {
-    return {
-      message:
-        'Aquí se veran que instituciones tienen cada servicio disponible',
-    };
-  }
-
-  @Get('/disponibilidad/:id')
-  @ApiOperation({ summary: 'Verificar disponibilidad del servicio' })
-  @ApiParam({ name: 'id', example: '1' })
-  checkAvailability(@Param('id', ParseIntPipe) id: number) {
-    return {
-      id,
-      message:
-        'Aquí se veran que instituciones tienen este servicio disponible',
-    };
-  }
-
-  @Post('/disponibilidad')
-  @HttpCode(201)
-  @ApiOperation({
-    summary: 'Límitar disponibilidad de un servicio dentro de una institución',
-  })
-  updateAvailability(@Body() dto: SetDisponibilidadDto) {
-    return {
-      dto,
-      message:
-        'Se limitó la disponibilidad de este servicio para la institución correspondiente',
-    };
-  }
-
-  @Delete('/disponibilidad/:id')
-  @HttpCode(204)
-  @ApiOperation({
-    summary:
-      'Activar/desactivar disponibilidad de un servicio para una institución',
-  })
-  @ApiParam({ name: 'id', example: '1' })
-  shutdownAvailability(@Param('id', ParseIntPipe) id: number) {
-    return {
-      id,
-      message:
-        'Se desactivara la disponibilidad de este servicio para la institución correspondiente',
-    };
   }
 }

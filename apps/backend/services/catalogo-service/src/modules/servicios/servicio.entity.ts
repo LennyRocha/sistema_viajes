@@ -1,6 +1,6 @@
 import { Auditory } from '@commons/types';
 import CampoConfig from './types/CampoConfig';
-import DisponibilidadServicio from './types/ServicioTipoInstitucion';
+import DisponibilidadServicio from '../disponibilidad-servicios/disponibilidad-servicio.entity';
 
 export default interface ServicioExterno extends Auditory {
   id?: number;

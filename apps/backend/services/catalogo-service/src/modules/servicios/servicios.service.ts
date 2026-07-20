@@ -6,6 +6,7 @@ import { CreateServicioDto } from './dtos/create-servicio.dto';
 import { UpdateServicioDto } from './dtos/update-servicio.dto';
 import { Prisma } from '@prisma/client';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
+import ServicioExterno from './servicio.entity';
 
 const LIST_CACHE_KEY = 'servicios:list';
 
@@ -87,9 +88,9 @@ export class ServiciosService {
       orderBy: { createdAt: 'desc' },
     });
 
-    // 3) guarda para la próxima (1 día)
+    // 3) guarda para la próxima (30 minutos)
     try {
-      await this.redis.set(LIST_CACHE_KEY, servicios, 86400); // 1 día
+      await this.redis.set(LIST_CACHE_KEY, servicios, 30 * 60); // 30 minutos
     } catch (error) {
       this.logger.error(
         {
@@ -259,5 +260,74 @@ export class ServiciosService {
     }
 
     return { deleted: true };
+  }
+
+  async allExists(ids: number[]) {
+    this.logger.debug({ ids }, 'Verificando existencia de servicios por IDs');
+
+    try {
+      const cached = await this.redis.get<ServicioExterno[]>(LIST_CACHE_KEY);
+      if (cached) {
+        this.logger.debug(
+          {
+            key: LIST_CACHE_KEY,
+            source: 'caché',
+            count: cached.length,
+          },
+          'Servicios obtenidos desde caché',
+        );
+
+        const cachedIds = new Set(cached.map((s) => s.id));
+        const allExist = ids.every((id) => cachedIds.has(id));
+
+        if (allExist)
+          return {
+            valid: true,
+            missing: [],
+          };
+
+        return {
+          valid: false,
+          missing: ids.filter((id) => !cachedIds.has(id)),
+        };
+      }
+    } catch (error) {
+      this.logger.error(
+        {
+          key: LIST_CACHE_KEY,
+          err: error,
+        },
+        'Error al obtener servicios desde caché',
+      );
+    }
+
+    const servicios = await this.prisma.servicio.findMany({
+      where: { id: { in: ids } },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    this.logger.debug(
+      {
+        source: 'database',
+        ids,
+        count: servicios.length,
+      },
+      'Servicios recuperados desde base de datos',
+    );
+
+    const allExist = servicios.length === ids.length;
+    if (allExist) {
+      return {
+        valid: true,
+        missing: [],
+      };
+    }
+
+    const foundIds = new Set(servicios.map((s) => s.id));
+
+    return {
+      valid: false,
+      missing: ids.filter((id) => !foundIds.has(id)),
+    };
   }
 }
