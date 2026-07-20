@@ -5,6 +5,7 @@ import {
   CommonPageProps,
   Simplify,
   EmptyState,
+  HandleResponseError,
 } from "@nexoroute/commons";
 import React from "react";
 import { Add, FilterList } from "@mui/icons-material";
@@ -18,8 +19,12 @@ import {
 import buildServicesColumns from "../utils/buildServicesColumns";
 import ServicioExterno from "../types/ServicioExterno";
 import PropiedadesServicio from "../components/PropiedadesServicio";
-import { useGetServiciosQuery } from "../api/serviciosApi";
+import {
+  useChangeStatusServicioMutation,
+  useGetServiciosQuery,
+} from "../api/serviciosApi";
 import useServicesFilter from "../hooks/useServicesFilter";
+import onChangeStatus from "../forms/onChangeStatusSubmit";
 
 interface Props extends CommonPageProps {}
 
@@ -28,6 +33,8 @@ export default function ServiciosIndex({
   openSidebar,
   showDialog = () => {},
   snack,
+  pathname = "/dashboard/services",
+  router,
   userPrivileges = [],
 }: Readonly<Props>) {
   const dispatchSidebar = (servicio: ServicioExterno) =>
@@ -38,6 +45,9 @@ export default function ServiciosIndex({
   const columnas = buildServicesColumns(dispatchSidebar);
   const query = useGetServiciosQuery();
 
+  const [dispatch, { isLoading }] =
+    useChangeStatusServicioMutation();
+
   const {
     list,
     query: serviceQuery,
@@ -46,6 +56,17 @@ export default function ServiciosIndex({
     option,
     setOption,
   } = useServicesFilter(query.data ?? []);
+
+  if (query.error) {
+    return (
+      <HandleResponseError
+        error={query.error}
+        router={router}
+        path={pathname}
+        onRetry={query.refetch}
+      />
+    );
+  }
   return (
     <>
       <Breadcrumb
@@ -94,10 +115,10 @@ export default function ServiciosIndex({
           isLoading={query.isLoading || query.isFetching}
           onEditClick={(row) =>
             navigationFunction(
-              `/services/${row.nombre}/editar`,
+              `/dashboard/services/${row.nombre}/editar`,
             )
           }
-          onToggleActiveClick={() =>
+          onToggleActiveClick={(row) =>
             showDialog({
               title: "¿Cambiar estado del servicio?",
               content: (
@@ -110,11 +131,12 @@ export default function ServiciosIndex({
               showCloseButton: true,
               showCancelButton: true,
               onConfirm: () =>
-                snack?.success({
-                  message: "Servicio desactivado",
-                  duration: 3000,
+                onChangeStatus(row.id ?? -1, {
+                  snack,
+                  mutate: dispatch,
                 }),
               onClose: () => {},
+              isLoading: isLoading,
             })
           }
           subHeaderComponent={

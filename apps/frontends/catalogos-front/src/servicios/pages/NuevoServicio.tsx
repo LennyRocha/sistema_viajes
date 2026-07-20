@@ -29,10 +29,7 @@ import {
   servicioSchema,
   ServicioSchema,
 } from "../validations/servicioZod";
-import {
-  CampoConfigSchema,
-  campoConfigSchema,
-} from "../validations/campoZod";
+import { CampoConfigSchema } from "../validations/campoZod";
 import { useCreateServicioMutation } from "../api/serviciosApi";
 
 interface NuevoServicioProps extends CommonPageProps {}
@@ -49,7 +46,6 @@ export default function NuevoServicio({
     register,
     handleSubmit,
     reset,
-    getValues,
     trigger,
     setValue,
     watch,
@@ -71,8 +67,7 @@ export default function NuevoServicio({
     });
   };
 
-  const icon_name =
-    getValues("icono_nombre") ?? "room-service";
+  const icon_name = watch("icono_nombre") ?? "room-service";
   const pendingIconRef = React.useRef(icon_name);
 
   const handleOpenIconPicker = () => {
@@ -197,9 +192,7 @@ export default function NuevoServicio({
           })}
         >
           <ServicioIcon
-            name={
-              getValues("icono_nombre") ?? "room-service"
-            }
+            name={watch("icono_nombre") ?? "room-service"}
             size="xxxl"
             color="accent"
           />
@@ -218,7 +211,7 @@ export default function NuevoServicio({
             sx={{ fontWeight: "bold" }}
           >
             Icono actual:{" "}
-            {getValues("icono_nombre") ?? "room-service"}
+            {watch("icono_nombre") ?? "room-service"}
           </Typography>
           <Button
             variant="contained"
@@ -257,7 +250,7 @@ export default function NuevoServicio({
                 title: "Nueva propiedad de servicio",
                 children: (
                   <PropiedadServicioContent
-                    key={`nueva-${Date.now()}`}
+                    key={`nueva-${crypto.randomUUID()}`}
                     propiedades={propiedades}
                     setValue={setValue}
                     closeSidebar={closeSidebar}

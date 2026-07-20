@@ -1,4 +1,5 @@
 import { DialogProps } from "./DialogTypes";
+import { Router } from "./NextRouterProps";
 import { type SidebarConfig } from "./SidebarTypes";
 import { SnackFunctionProps } from "./SnackbarProps";
 
@@ -9,4 +10,6 @@ export default interface CommonPageProps {
   userPrivileges: string[];
   showDialog?: (config: DialogProps) => void;
   snack?: SnackFunctionProps;
+  pathname?: string;
+  router?: Router;
 }

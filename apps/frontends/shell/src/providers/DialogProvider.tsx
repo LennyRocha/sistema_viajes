@@ -47,17 +47,15 @@ export function DialogProvider({
   const current = dialogProps;
 
   const hideDialog = async () => {
+    await current?.onClose?.();
     setDialogOpen(false);
     setDialogProps(null);
-
-    await current?.onClose?.();
   };
 
   const confirmDialog = async () => {
+    await current?.onConfirm?.();
     setDialogOpen(false);
     setDialogProps(null);
-
-    await current?.onConfirm?.();
   };
 
   const contextValue = React.useMemo(

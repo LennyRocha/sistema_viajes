@@ -44,14 +44,13 @@ export const serviciosApi = api.injectEndpoints({
       invalidatesTags: ["Servicio"],
     }),
 
-    changeStatusServicio: builder.mutation({
-      query: ({
-        id,
-        ...body
-      }: Partial<ServicioExterno>) => ({
-        url: `/servicios/${id}/status`,
+    changeStatusServicio: builder.mutation<
+      void,
+      { id: number }
+    >({
+      query: ({ id }: { id: number }) => ({
+        url: `/servicios/status/${id}`,
         method: "DELETE",
-        body,
       }),
       invalidatesTags: ["Servicio"],
     }),

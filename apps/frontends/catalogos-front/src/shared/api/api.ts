@@ -11,5 +11,11 @@ export const api = createApi({
     timeout: 10000, // 10 segundos, pero serán 30 en producción
   }),
   endpoints: () => ({}),
-  tagTypes: ["Autobus", "Servicio", "TipoAutobus"],
+  tagTypes: [
+    "Autobus",
+    "Servicio",
+    "TipoAutobus",
+    "Institucion",
+    "Conductor",
+  ],
 });

@@ -1,5 +1,6 @@
 export { default as PaperHeader } from "./ui/PaperHeader";
 export { default as EmptyState } from "./ui/EmptyStateComponent";
+export { default as HandleResponseError } from "./ui/HandleResponseError";
 
 export { default as NavDrawer } from "./drawers/NavDrawer";
 export { default as OptionsDrawer } from "./drawers/OptionsDrawer";
@@ -39,3 +40,9 @@ export { default as getYearsList } from "./utils/getYearsList";
 export { type Simplify } from "./utils/simplify";
 
 export { GridColDef } from "@mui/x-data-grid";
+
+export {
+  ErrorOrigin,
+  ApiErrorBody,
+  StatusCode,
+} from "./types/Api-Error";
