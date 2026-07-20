@@ -3,8 +3,8 @@ import { TiposAutobusService } from './tipo_bus.service';
 import { TiposAutobusController } from './tipo_bus.controller';
 
 @Module({
-  imports: [],
   controllers: [TiposAutobusController],
   providers: [TiposAutobusService],
+  exports: [TiposAutobusService],
 })
 export class TiposAutobusModule {}

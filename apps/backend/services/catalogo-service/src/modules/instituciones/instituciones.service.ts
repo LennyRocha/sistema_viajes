@@ -2,26 +2,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
-import { TipoAutobus } from './tipo_bus.entity';
+import { Institucion } from './institucion.entity';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
-const LIST_CACHE_KEY = 'tipos_bus:list';
+const LIST_CACHE_KEY = 'instituciones:list';
 
 @Injectable()
-export class TiposAutobusService {
+export class InstitucionesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
-    @InjectPinoLogger(TiposAutobusService.name)
+    @InjectPinoLogger(InstitucionesService.name)
     private readonly logger: PinoLogger,
   ) {}
 
   async findAll() {
-    this.logger.debug('Obteniendo todos los tipos de autobuses');
+    this.logger.debug('Obteniendo todas las instituciones');
 
     // 1) ¿está en caché?
     try {
-      const cached = await this.redis.get<TipoAutobus[]>(LIST_CACHE_KEY);
+      const cached = await this.redis.get<Institucion[]>(LIST_CACHE_KEY);
       if (cached) {
         this.logger.debug(
           {
@@ -29,7 +29,7 @@ export class TiposAutobusService {
             source: 'caché',
             count: cached.length,
           },
-          'Tipos de autobuses obtenidos desde caché',
+          'Instituciones obtenidas desde caché',
         );
         return cached;
       }
@@ -39,62 +39,62 @@ export class TiposAutobusService {
           key: LIST_CACHE_KEY,
           err: error,
         },
-        'Error al obtener tipos de autobuses desde caché',
+        'Error al obtener instituciones desde caché',
       );
     }
 
     // 2) no está → base de datos
-    const tiposBuses = await this.prisma.tipoAutobus.findMany({
+    const instituciones = await this.prisma.institucion.findMany({
       orderBy: { createdAt: 'desc' },
     });
 
-    // 3) guarda para la próxima (10 días)
+    // 3) guarda para la próxima (1 hora = 3600 segundos)
     try {
-      await this.redis.set(LIST_CACHE_KEY, tiposBuses, 86400 * 10); // 10 días
+      await this.redis.set(LIST_CACHE_KEY, instituciones, 60 * 60); // 1 hora
     } catch (error) {
       this.logger.error(
         {
           key: LIST_CACHE_KEY,
           err: error,
         },
-        'Error al guardar tipos de autobuses en caché',
+        'Error al guardar instituciones en caché',
       );
     }
 
     this.logger.debug(
       {
         source: 'database',
-        count: tiposBuses.length,
+        count: instituciones.length,
       },
-      'Tipos de autobuses obtenidos desde base de datos y guardados en caché',
+      'Instituciones obtenidas desde base de datos y guardadas en caché',
     );
-    return tiposBuses;
+    return instituciones;
   }
 
   async findOne(id: number) {
-    this.logger.debug({ id }, 'Obteniendo tipo de autobús por ID');
+    this.logger.debug({ id }, 'Obteniendo institución por ID');
 
-    const tipoBus = await this.prisma.tipoAutobus.findUnique({
+    const institucion = await this.prisma.institucion.findUnique({
       where: { id },
     });
 
-    if (!tipoBus) {
+    if (!institucion) {
       this.logger.warn(
         {
           id,
         },
-        'Tipo de autobús no encontrado',
+        'Institución no encontrada',
       );
-      throw new NotFoundException(`Tipo de autobús ${id} no existe`);
+      throw new NotFoundException(`Institución ${id} no existe`);
     }
 
     this.logger.info(
       {
         id,
-        nombre: tipoBus.nombre,
+        nombre: institucion.nombre,
       },
-      'Tipo de autobús encontrado',
+      'Institución encontrada',
     );
-    return tipoBus;
+    return institucion;
   }
 }

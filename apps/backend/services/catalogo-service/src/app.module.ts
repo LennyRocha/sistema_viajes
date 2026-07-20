@@ -8,6 +8,9 @@ import { ServiciosModule } from './modules/servicios/servicios.module';
 import { PrismaExceptionFilter } from 'prisma/primsa-exception.filter';
 import { APP_FILTER } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
+import { AutobusesModule } from './modules/autobuses/autobuses.module';
+import { DisponibilidadServiciosModule } from './modules/disponibilidad-servicios/disponibilidad-servicios.module';
+import { InstitucionesModule } from './modules/instituciones/instituciones.module';
 
 @Module({
   imports: [
@@ -17,6 +20,9 @@ import { LoggerModule } from 'nestjs-pino';
     RedisModule,
     TiposAutobusModule,
     ServiciosModule,
+    AutobusesModule,
+    InstitucionesModule,
+    DisponibilidadServiciosModule,
   ],
   providers: [
     {

@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { tiposAutobusSeeds } from '../seeds/tiposAutobusSeeds';
+import { institucionesSeeds } from '../seeds/institucionesSeed';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -16,6 +15,12 @@ async function main() {
   // Inserción de datos de prueba
   const buses = await prisma.tipoAutobus.createMany({
     data: tiposAutobusSeeds,
+  });
+
+  //Temporal en lo que está el módulo de instituciones
+  await prisma.institucion.deleteMany();
+  await prisma.institucion.createMany({
+    data: institucionesSeeds,
   });
 
   console.log(`✅ Seed completado: ${buses.count} registros creados`);
