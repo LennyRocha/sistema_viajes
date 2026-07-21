@@ -1,6 +1,6 @@
 # Instrucciones de uso del shell
 
-<h6>Versión 3.0.0</h6>
+<h6>Versión 3.0.1</h6>
 
 ## ¡IMPORTANTE! Antes de continuar
 
@@ -67,7 +67,7 @@ export default function EjemploPage({ params }:Props) {
 }
 ```
 
-En <code>app/services/page.tsx</code> se encuentra un ejemplo de uso
+En <code>app/dashboard/services/page.tsx</code> se encuentra un ejemplo de uso
 
 Cabe aclarar que para utilizar la navegación se debe utilizar el router del shell, pasando las funciones de su hook como props
 

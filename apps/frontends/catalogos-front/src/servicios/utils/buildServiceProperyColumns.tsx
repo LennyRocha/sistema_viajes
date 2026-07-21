@@ -55,4 +55,4 @@ const buildServicesColumns =
 
 export default buildServicesColumns;
 
-export type PropiedadRow = Simplify<CampoConfigSchema>;
+type PropiedadRow = Simplify<CampoConfigSchema>;

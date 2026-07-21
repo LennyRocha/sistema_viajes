@@ -30,7 +30,7 @@ body,
 }
 
 
-main:has(#main) main {
+#layout_main {
   height: 100svh;
   width: 100dvw;
   display: flex;

@@ -2,8 +2,10 @@ import { SnackFunctionProps } from "@nexoroute/commons";
 import { ServicioSchema } from "../validations/servicioZod";
 import ServicioExterno from "../types/ServicioExterno";
 import CampoConfig from "../types/CampoServicio";
+import { PatchServicioArgs } from "../api/serviciosApi";
 export default async function onSubmit(
   data: ServicioSchema,
+  id: number,
   {
     snack,
     navigationFunction,
@@ -21,6 +23,11 @@ export default async function onSubmit(
     >;
   },
 ) {
+  console.log(
+    "onUpdateServicioSubmit data:",
+    data,
+    data.propiedades,
+  );
   const payload: Omit<
     ServicioExterno,
     "id" | "estatus" | "disponibilidad"
@@ -35,16 +42,15 @@ export default async function onSubmit(
   };
 
   try {
-    await mutate(payload).unwrap();
+    await mutate({ id, ...payload }).unwrap();
     navigationFunction("/dashboard/services", {
       replace: true,
     });
     snack?.success({
-      message: "Servicio creado correctamente",
+      message: "Servicio actualizado correctamente",
       duration: 3000,
     });
   } catch (error) {
-    console.error("Error al crear el servicio:", error);
     if (error.errors) {
       setErrores(error.errors);
     }
@@ -59,10 +65,7 @@ export default async function onSubmit(
 }
 
 type MutateFn<TResult = unknown> = (
-  args: Omit<
-    ServicioExterno,
-    "id" | "estatus" | "disponibilidad"
-  >,
+  args: PatchServicioArgs,
 ) => {
   unwrap: () => Promise<TResult>;
 };

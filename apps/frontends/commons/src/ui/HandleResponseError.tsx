@@ -151,6 +151,7 @@ const HandleResponseError = ({
       variant={config.variant}
       title={error.data.message}
       action={action}
+      fullHeight
     />
   );
 };

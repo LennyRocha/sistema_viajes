@@ -12,6 +12,7 @@ import { Add, FilterList } from "@mui/icons-material";
 import {
   Box,
   Button,
+  DialogContentText,
   IconButton,
   MenuItem,
   TextField,
@@ -33,13 +34,13 @@ export default function ServiciosIndex({
   openSidebar,
   showDialog = () => {},
   snack,
-  pathname = "/dashboard/services",
+  pathname,
   router,
   userPrivileges = [],
 }: Readonly<Props>) {
   const dispatchSidebar = (servicio: ServicioExterno) =>
     openSidebar({
-      title: servicio.nombre,
+      title: `Propiedades de: ${servicio.nombre}`,
       children: <PropiedadesServicio servicio={servicio} />,
     });
   const columnas = buildServicesColumns(dispatchSidebar);
@@ -60,8 +61,8 @@ export default function ServiciosIndex({
   if (query.error) {
     return (
       <HandleResponseError
-        error={query.error}
-        router={router}
+        error={query.error as any}
+        router={router as any}
         path={pathname}
         onRetry={query.refetch}
       />
@@ -74,7 +75,7 @@ export default function ServiciosIndex({
         breads={[
           {
             nombre: "Servicios",
-            href: "/services",
+            href: "/dashboard/services",
             disabled: true,
           },
         ]}
@@ -85,7 +86,7 @@ export default function ServiciosIndex({
         iconname="room_service"
         showButton
         onButtonClick={() =>
-          navigationFunction("/services/nuevo")
+          navigationFunction("/dashboard/services/nuevo")
         }
         buttonTitle="Nuevo"
         leftIcon={<Add />}
@@ -99,7 +100,9 @@ export default function ServiciosIndex({
           action={{
             label: "Agregar servicio",
             onClick: () =>
-              navigationFunction("/services/nuevo"),
+              navigationFunction(
+                "/dashboard/services/nuevo",
+              ),
           }}
           imageSize={{
             width: 200,
@@ -122,11 +125,12 @@ export default function ServiciosIndex({
             showDialog({
               title: "¿Cambiar estado del servicio?",
               content: (
-                <>
-                  Let Google help apps determine location.
-                  This means sending anonymous location data
-                  to Google, even when no apps are running.
-                </>
+                <DialogContentText>
+                  ¿Desea cambiar el estado del servicio "
+                  {row.nombre}" de{" "}
+                  {row.estatus ? "activo" : "inactivo"} a{" "}
+                  {row.estatus ? "inactivo" : "activo"}?
+                </DialogContentText>
               ),
               showCloseButton: true,
               showCancelButton: true,

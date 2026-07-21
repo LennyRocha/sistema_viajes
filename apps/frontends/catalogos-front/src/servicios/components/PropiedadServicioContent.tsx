@@ -108,6 +108,9 @@ export default function PropiedadServicioContent({
     if (!propiedad.tipo) return false;
     if (!propiedad.label?.trim()) return false;
     if (!propiedad.placeholder?.trim()) return false;
+    if (propiedad.placeholder?.trim().length < 5)
+      return false;
+    if (propiedad.label?.trim().length < 3) return false;
     if (visibleChecked) {
       if (!propiedad.visible?.campo) return false;
       if (
@@ -118,6 +121,13 @@ export default function PropiedadServicioContent({
     }
     return true;
   }, [propiedad, visibleChecked]);
+  const lengths = React.useMemo(() => {
+    return {
+      label: propiedad.label?.trim().length ?? 0,
+      placeholder:
+        propiedad.placeholder?.trim().length ?? 0,
+    };
+  }, [propiedad.label, propiedad.placeholder]);
   return (
     <Box
       sx={{
@@ -227,6 +237,7 @@ export default function PropiedadServicioContent({
             })
           }
           variant="outlined"
+          helperText={`${lengths.label}/50`}
           fullWidth
           slotProps={{
             htmlInput: {
@@ -279,6 +290,7 @@ export default function PropiedadServicioContent({
               max: 50,
             },
           }}
+          helperText={`${lengths.placeholder}/50`}
           fullWidth
           required
           sx={{

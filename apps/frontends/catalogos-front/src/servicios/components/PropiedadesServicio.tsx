@@ -18,6 +18,7 @@ export default function PropiedadesServicio({
       ? isObject.length
       : "No aplica";
   };
+  const valor = (value) => (value ? "Sí" : "No");
   return (
     <>
       {servicio.propiedades.map((propiedad) => (
@@ -57,7 +58,7 @@ export default function PropiedadesServicio({
           >
             Visible condicionalmente:{" "}
             {propiedad.visible
-              ? `Sí, cuando ${propiedad.visible.campo} es ${propiedad.visible.valor}`
+              ? `Sí, cuando ${propiedad.visible.campo} es ${valor(propiedad.visible.valor)}`
               : "No"}
           </Typography>
           <Typography

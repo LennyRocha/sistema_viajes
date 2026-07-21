@@ -7,6 +7,9 @@ const PrintSaludo = () => {
   const theme = useTheme();
   React.useEffect(() => {
     //console.clear();
+    figlet.defaults({
+      fontPath: "/fonts",
+    });
     banner(theme);
   }, []);
   return null;
