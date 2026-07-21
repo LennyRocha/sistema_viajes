@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Module } from '@nestjs/common';
 import { TiposAutobusModule } from './modules/tipos_autobus/tipo_bus.module';
 import { HealthController } from './health/health.controller';
@@ -11,6 +12,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { AutobusesModule } from './modules/autobuses/autobuses.module';
 import { DisponibilidadServiciosModule } from './modules/disponibilidad-servicios/disponibilidad-servicios.module';
 import { InstitucionesModule } from './modules/instituciones/instituciones.module';
+import { HttpExceptionFilter } from '@commons/filters';
 
 @Module({
   imports: [
@@ -25,6 +27,10 @@ import { InstitucionesModule } from './modules/instituciones/instituciones.modul
     DisponibilidadServiciosModule,
   ],
   providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
     {
       provide: APP_FILTER,
       useClass: PrismaExceptionFilter,

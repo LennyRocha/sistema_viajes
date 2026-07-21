@@ -53,7 +53,7 @@ export default function MainLayout({
   //TODO: Obtener el número de notificaciones no leídas desde el contexto o estado global
   const notificationsCount = 5;
   return (
-    <main>
+    <main id="layout_main">
       {/* Header */}
       {isLargeScreen && (
         <AppBar

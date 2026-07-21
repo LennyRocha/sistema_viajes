@@ -5,12 +5,14 @@ import {
   CommonPageProps,
   Simplify,
   EmptyState,
+  HandleResponseError,
 } from "@nexoroute/commons";
 import React from "react";
 import { Add, FilterList } from "@mui/icons-material";
 import {
   Box,
   Button,
+  DialogContentText,
   IconButton,
   MenuItem,
   TextField,
@@ -18,8 +20,12 @@ import {
 import buildServicesColumns from "../utils/buildServicesColumns";
 import ServicioExterno from "../types/ServicioExterno";
 import PropiedadesServicio from "../components/PropiedadesServicio";
-import { useGetServiciosQuery } from "../api/serviciosApi";
+import {
+  useChangeStatusServicioMutation,
+  useGetServiciosQuery,
+} from "../api/serviciosApi";
 import useServicesFilter from "../hooks/useServicesFilter";
+import onChangeStatus from "../forms/onChangeStatusSubmit";
 
 interface Props extends CommonPageProps {}
 
@@ -28,15 +34,20 @@ export default function ServiciosIndex({
   openSidebar,
   showDialog = () => {},
   snack,
+  pathname,
+  router,
   userPrivileges = [],
 }: Readonly<Props>) {
   const dispatchSidebar = (servicio: ServicioExterno) =>
     openSidebar({
-      title: servicio.nombre,
+      title: `Propiedades de: ${servicio.nombre}`,
       children: <PropiedadesServicio servicio={servicio} />,
     });
   const columnas = buildServicesColumns(dispatchSidebar);
   const query = useGetServiciosQuery();
+
+  const [dispatch, { isLoading }] =
+    useChangeStatusServicioMutation();
 
   const {
     list,
@@ -46,6 +57,17 @@ export default function ServiciosIndex({
     option,
     setOption,
   } = useServicesFilter(query.data ?? []);
+
+  if (query.error) {
+    return (
+      <HandleResponseError
+        error={query.error as any}
+        router={router as any}
+        path={pathname}
+        onRetry={query.refetch}
+      />
+    );
+  }
   return (
     <>
       <Breadcrumb
@@ -53,7 +75,7 @@ export default function ServiciosIndex({
         breads={[
           {
             nombre: "Servicios",
-            href: "/services",
+            href: "/dashboard/services",
             disabled: true,
           },
         ]}
@@ -64,7 +86,7 @@ export default function ServiciosIndex({
         iconname="room_service"
         showButton
         onButtonClick={() =>
-          navigationFunction("/services/nuevo")
+          navigationFunction("/dashboard/services/nuevo")
         }
         buttonTitle="Nuevo"
         leftIcon={<Add />}
@@ -78,7 +100,9 @@ export default function ServiciosIndex({
           action={{
             label: "Agregar servicio",
             onClick: () =>
-              navigationFunction("/services/nuevo"),
+              navigationFunction(
+                "/dashboard/services/nuevo",
+              ),
           }}
           imageSize={{
             width: 200,
@@ -94,27 +118,29 @@ export default function ServiciosIndex({
           isLoading={query.isLoading || query.isFetching}
           onEditClick={(row) =>
             navigationFunction(
-              `/services/${row.nombre}/editar`,
+              `/dashboard/services/${row.nombre}/editar`,
             )
           }
-          onToggleActiveClick={() =>
+          onToggleActiveClick={(row) =>
             showDialog({
               title: "¿Cambiar estado del servicio?",
               content: (
-                <>
-                  Let Google help apps determine location.
-                  This means sending anonymous location data
-                  to Google, even when no apps are running.
-                </>
+                <DialogContentText>
+                  ¿Desea cambiar el estado del servicio "
+                  {row.nombre}" de{" "}
+                  {row.estatus ? "activo" : "inactivo"} a{" "}
+                  {row.estatus ? "inactivo" : "activo"}?
+                </DialogContentText>
               ),
               showCloseButton: true,
               showCancelButton: true,
               onConfirm: () =>
-                snack?.success({
-                  message: "Servicio desactivado",
-                  duration: 3000,
+                onChangeStatus(row.id ?? -1, {
+                  snack,
+                  mutate: dispatch,
                 }),
               onClose: () => {},
+              isLoading: isLoading,
             })
           }
           subHeaderComponent={

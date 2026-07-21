@@ -14,6 +14,7 @@ import {
 import {
   Box,
   Button,
+  CircularProgress,
   TextField,
   Typography,
   alpha,
@@ -22,7 +23,7 @@ import { Add, ChevronLeft } from "@mui/icons-material";
 import CustomIconPicker from "../components/CustomIconPicker";
 import { servicioTemplate } from "../utils/servicioTemplate";
 import { useForm } from "react-hook-form";
-import onSubmit from "../forms/onNewServicioSubmit";
+import onSubmit from "../forms/onUpdateServicioSubmit";
 import PropiedadServicioContent from "../components/PropiedadServicioContent";
 import buildServiceProperyColumns from "../utils/buildServiceProperyColumns";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,12 +32,18 @@ import {
   ServicioSchema,
 } from "../validations/servicioZod";
 import { CampoConfigSchema } from "../validations/campoZod";
-import { useCreateServicioMutation } from "../api/serviciosApi";
+import {
+  useGetServicioByNameQuery,
+  usePatchServicioMutation,
+} from "../api/serviciosApi";
+import { skipToken } from "@reduxjs/toolkit/query";
 import CampoConfig from "../types/CampoServicio";
 
-interface NuevoServicioProps extends CommonPageProps {}
+interface EditarServicioProps extends CommonPageProps {
+  servicioName?: string;
+}
 
-export default function NuevoServicio({
+export default function EditarServicio({
   navigationFunction,
   openSidebar,
   closeSidebar = () => {},
@@ -44,8 +51,117 @@ export default function NuevoServicio({
   snack,
   router,
   userPrivileges = [],
+  servicioName,
   pathname,
-}: Readonly<NuevoServicioProps>) {
+}: Readonly<EditarServicioProps>) {
+  const query = useGetServicioByNameQuery(
+    servicioName ?? skipToken,
+  );
+
+  if (!servicioName) {
+    return (
+      <EmptyState
+        variant="warning"
+        title="Parámetro de servicio no definido"
+        description="No se ha especificado un servicio para editar"
+        action={{
+          label: "volver atrás",
+          onClick() {
+            router?.replace("/dashboard/services");
+          },
+        }}
+        fullHeight
+      />
+    );
+  }
+
+  if (query.isLoading || query.isFetching) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress
+          size="3rem"
+          aria-label="Loading…"
+        />
+      </Box>
+    );
+  }
+
+  if (!query.data) {
+    return (
+      <EmptyState
+        variant="no-data"
+        title="Servicio no encontrado"
+        description="El servicio especificado no existe"
+        fullHeight
+        action={{
+          label: "volver atrás",
+          onClick() {
+            router?.replace("/dashboard/services");
+          },
+        }}
+      />
+    );
+  }
+
+  if (query.error) {
+    return (
+      <HandleResponseError
+        error={query.error as any}
+        router={router as any}
+        path={pathname}
+        onRetry={query.refetch}
+      />
+    );
+  }
+  return (
+    <Form
+      query={query}
+      servicioName={servicioName}
+      navigationFunction={navigationFunction}
+      openSidebar={openSidebar}
+      closeSidebar={closeSidebar}
+      showDialog={showDialog}
+      snack={snack}
+      router={router}
+      userPrivileges={userPrivileges}
+      pathname={pathname}
+    />
+  );
+}
+
+type PropiedadRow = Simplify<CampoConfigSchema>;
+
+const Form = ({
+  query,
+  navigationFunction,
+  openSidebar,
+  closeSidebar = () => {},
+  showDialog = () => {},
+  snack,
+  router,
+  userPrivileges,
+  pathname,
+  servicioName,
+}: EditarServicioProps & {
+  query: any;
+}) => {
+  const data = {
+    ...query.data,
+    propiedades: query.data.propiedades?.map((p: any) => ({
+      ...p,
+      uuid: String(p.uuid),
+    })) as unknown as CampoConfigSchema[],
+  };
+  const template: ServicioSchema =
+    servicioSchema.parse(data);
   const {
     register,
     handleSubmit,
@@ -56,19 +172,19 @@ export default function NuevoServicio({
     formState: { errors, isDirty, isValid },
   } = useForm<ServicioSchema>({
     resolver: zodResolver(servicioSchema),
-    defaultValues: servicioTemplate,
+    defaultValues: template,
     mode: "onChange",
     reValidateMode: "onChange",
   });
+
+  const [mutate, res] = usePatchServicioMutation();
 
   const [errores, setErrores] = React.useState<
     Record<string, string[]>
   >({});
 
-  const [mutate, res] = useCreateServicioMutation();
-
   const doSubmit = async (data: ServicioSchema) => {
-    return await onSubmit(data, {
+    return await onSubmit(data, query.data?.id ?? -1, {
       snack,
       navigationFunction,
       mutate,
@@ -111,14 +227,13 @@ export default function NuevoServicio({
     id: propiedad.clave || index,
   }));
 
-  React.useEffect(() => {
-    console.log(errors.propiedades);
-  }, [errors.propiedades]);
-
   const errs = res.error as any;
   const propertyErrors = Object.entries(
     errs?.data?.errors ?? {},
   ).filter(([field]) => field.startsWith("propiedades."));
+
+  const loading =
+    query.isLoading || query.isFetching || res.isLoading;
 
   if (
     res.error &&
@@ -144,26 +259,26 @@ export default function NuevoServicio({
           {
             nombre: "Servicios",
             href: "/dashboard/services",
-            disabled: res.isLoading,
+            disabled: loading,
           },
           {
-            nombre: "Nuevo",
-            href: "/dashboard/services/nuevo",
+            nombre: servicioName ?? "Editar",
+            href: `/dashboard/services/${servicioName}`,
             disabled: true,
           },
         ]}
       />
       <PaperHeader
-        title="Nuevo servicio"
-        subtitle="Agrega un nuevo servicio para que se pueda utilizar en los viajes"
-        iconname="add"
+        title="Actualizar servicio"
+        subtitle="Modifica los datos de un servicio existente"
+        iconname="edit"
         showButton
         onButtonClick={() =>
           navigationFunction("/dashboard/services")
         }
         buttonTitle="Volver"
         leftIcon={<ChevronLeft />}
-        isLoading={res.isLoading}
+        isLoading={loading}
       />
       <PaperBlock
         title="Datos generales del servicio"
@@ -189,7 +304,6 @@ export default function NuevoServicio({
           }
           fullWidth
           required
-          disabled={res.isLoading}
         />
         <TextField
           label="Descripción"
@@ -211,7 +325,6 @@ export default function NuevoServicio({
           multiline
           rows={4}
           required
-          disabled={res.isLoading}
         />
       </PaperBlock>
       <PaperBlock
@@ -262,7 +375,7 @@ export default function NuevoServicio({
           <Button
             variant="contained"
             onClick={handleOpenIconPicker}
-            loading={res.isLoading}
+            loading={loading}
           >
             Cambiar icono
           </Button>
@@ -307,7 +420,7 @@ export default function NuevoServicio({
               })
             }
             disabled={(propiedades?.length ?? 0) >= 12}
-            loading={res.isLoading}
+            loading={loading}
           >
             Agregar
           </Button>
@@ -321,7 +434,7 @@ export default function NuevoServicio({
           <Tabla<PropiedadRow>
             columnas={columnas}
             data={rows}
-            isLoading={res.isLoading}
+            isLoading={loading}
             onEditClick={(row) =>
               openSidebar({
                 title: "Editar propiedad de servicio",
@@ -383,10 +496,8 @@ export default function NuevoServicio({
         hasRequiredFields
         onResetClick={() => reset(servicioTemplate)}
         submitDisabled={!isDirty || !isValid}
-        isLoading={res.isLoading}
+        isLoading={loading}
       />
     </>
   );
-}
-
-type PropiedadRow = Simplify<CampoConfigSchema>;
+};

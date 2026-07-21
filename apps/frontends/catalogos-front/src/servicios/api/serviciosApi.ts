@@ -19,11 +19,15 @@ export const serviciosApi = api.injectEndpoints({
       ServicioExterno,
       string
     >({
-      query: (nombre: string) => `/servicios/${nombre}`,
+      query: (nombre: string) =>
+        `/servicios/nombre/${nombre}`,
       providesTags: ["Servicio"],
     }),
 
-    createServicio: builder.mutation({
+    createServicio: builder.mutation<
+      ServicioExterno,
+      Omit<ServicioExterno, "id">
+    >({
       query: (body: Omit<ServicioExterno, "id">) => ({
         url: "/servicios",
         method: "POST",
@@ -32,11 +36,11 @@ export const serviciosApi = api.injectEndpoints({
       invalidatesTags: ["Servicio"],
     }),
 
-    patchServicio: builder.mutation({
-      query: ({
-        id,
-        ...body
-      }: Partial<ServicioExterno>) => ({
+    patchServicio: builder.mutation<
+      ServicioExterno,
+      PatchServicioArgs
+    >({
+      query: ({ id, ...body }: PatchServicioArgs) => ({
         url: `/servicios/${id}`,
         method: "PATCH",
         body,
@@ -44,19 +48,22 @@ export const serviciosApi = api.injectEndpoints({
       invalidatesTags: ["Servicio"],
     }),
 
-    changeStatusServicio: builder.mutation({
-      query: ({
-        id,
-        ...body
-      }: Partial<ServicioExterno>) => ({
-        url: `/servicios/${id}/status`,
+    changeStatusServicio: builder.mutation<
+      void,
+      { id: number }
+    >({
+      query: ({ id }: { id: number }) => ({
+        url: `/servicios/status/${id}`,
         method: "DELETE",
-        body,
       }),
       invalidatesTags: ["Servicio"],
     }),
   }),
 });
+
+export type PatchServicioArgs = { id: number } & Partial<
+  Omit<ServicioExterno, "id">
+>;
 
 export const {
   useGetServiciosQuery,

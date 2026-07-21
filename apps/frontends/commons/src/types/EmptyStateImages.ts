@@ -14,6 +14,11 @@ export const emptyStateImages = {
   forbidden: "/assets/canvas/forbiddenfile.png",
   "access-denied": "/assets/canvas/shallnotpass.png",
   warning: "/assets/canvas/warningvvault.png",
+  "not-allowed": "/assets/canvas/mapfail.png",
+  "not-implemented": "/assets/canvas/unknownfile.png",
+  "service-unavailable": "/assets/canvas/fireserver.png",
+  "bad-request": "/assets/canvas/filewhat.png",
+  "gateway-timeout": "/assets/canvas/error408.png",
 } as const;
 
 export type EmptyStateImageKey =
