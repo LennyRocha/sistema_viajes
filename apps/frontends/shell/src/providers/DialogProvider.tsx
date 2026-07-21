@@ -85,6 +85,33 @@ export function DialogProvider({
     };
   }, [dialogOpen, dialogProps?.isLoading, hideDialog]);
 
+  React.useEffect(() => {
+    //Hacer el submit del dialogo con la tecla Enter
+    if (
+      !dialogOpen ||
+      !dialogProps?.closeDialogOnBackdropClick
+    )
+      return;
+
+    async function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Enter" && !dialogProps?.isLoading)
+        await confirmDialog();
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [
+    dialogOpen,
+    dialogProps?.isLoading,
+    confirmDialog,
+    dialogProps?.closeDialogOnBackdropClick,
+  ]);
+
   return (
     <DialogContext.Provider value={contextValue}>
       <Dialog

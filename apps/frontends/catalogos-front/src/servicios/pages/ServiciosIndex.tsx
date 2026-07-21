@@ -118,7 +118,7 @@ export default function ServiciosIndex({
           isLoading={query.isLoading || query.isFetching}
           onEditClick={(row) =>
             navigationFunction(
-              `/dashboard/services/${row.nombre}/editar`,
+              `/dashboard/services/${row.slug}/editar`,
             )
           }
           onToggleActiveClick={(row) =>

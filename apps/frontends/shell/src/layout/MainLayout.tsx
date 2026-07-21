@@ -52,6 +52,7 @@ export default function MainLayout({
     alert("Debería abrir las notificaciones");
   //TODO: Obtener el número de notificaciones no leídas desde el contexto o estado global
   const notificationsCount = 5;
+  const sidebarRef = React.useRef<HTMLDivElement>(null);
   return (
     <main id="layout_main">
       {/* Header */}
@@ -140,6 +141,9 @@ export default function MainLayout({
             <MotionPaper
               className="right_sidebar"
               elevation={3}
+              sx={{
+                height: "100%",
+              }}
               initial={{
                 display: "none",
                 width: 0,
@@ -166,6 +170,17 @@ export default function MainLayout({
               transition={{
                 duration: 0.25,
                 ease: "easeInOut",
+              }}
+              onAnimationComplete={() => {
+                if (
+                  sidebar.rightSidebarOpen &&
+                  sidebarRef.current
+                ) {
+                  sidebarRef.current.scrollTo({
+                    top: 0,
+                    behavior: "instant",
+                  });
+                }
               }}
             >
               <Box component={"div"}>
@@ -198,6 +213,7 @@ export default function MainLayout({
                   flex: 1,
                   minHeight: 0,
                 }}
+                ref={sidebarRef}
               >
                 {sidebar.sidebarChildren}
               </Box>

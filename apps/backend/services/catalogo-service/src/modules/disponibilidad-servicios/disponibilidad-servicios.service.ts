@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -40,7 +43,7 @@ export class DisponibilidadServiciosService {
     this.logger.debug('Buscando si existe el servicio'); //404 si no existe
     await this.servicios.findOne(dto.servicioId);
 
-    const disp = await this.prisma.disponibiilidadServicio.create({
+    const disp = await this.prisma.disponibilidadServicio.create({
       data: {
         tipo_autobus_id: dto.tipoId,
         institucion_id: dto.institucionId,
@@ -97,12 +100,12 @@ export class DisponibilidadServiciosService {
       );
     }
 
-    const tiposBuses = await this.prisma.tipoAutobus.findMany({
+    const disponibilidades = await this.prisma.disponibilidadServicio.findMany({
       orderBy: { createdAt: 'desc' },
     });
 
     try {
-      await this.redis.set(LIST_CACHE_KEY, tiposBuses, 60 * 10); // 10 minutos
+      await this.redis.set(LIST_CACHE_KEY, disponibilidades, 60 * 10); // 10 minutos
     } catch (error) {
       this.logger.error(
         {
@@ -116,21 +119,19 @@ export class DisponibilidadServiciosService {
     this.logger.debug(
       {
         source: 'database',
-        count: tiposBuses.length,
+        count: disponibilidades.length,
       },
       'Disponibilidades de servicios obtenidas desde base de datos y guardadas en caché',
     );
-    return tiposBuses;
+    return disponibilidades;
   }
 
   async findOne(id: number) {
     this.logger.debug({ id }, 'Obteniendo disponibilidad de servicio por ID');
 
-    const disponibilidad = await this.prisma.disponibiilidadServicio.findUnique(
-      {
-        where: { id },
-      },
-    );
+    const disponibilidad = await this.prisma.disponibilidadServicio.findUnique({
+      where: { id },
+    });
 
     if (!disponibilidad) {
       this.logger.warn(
