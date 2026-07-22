@@ -88,6 +88,9 @@ export class ServiciosService {
     // 2) no está → base de datos
     const servicios = await this.prisma.servicio.findMany({
       orderBy: { createdAt: 'desc' },
+      include: {
+        serviciosPorTipos: true,
+      },
     });
 
     // 3) guarda para la próxima (30 minutos)

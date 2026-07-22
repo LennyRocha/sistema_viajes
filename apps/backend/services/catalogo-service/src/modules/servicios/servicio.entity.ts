@@ -10,5 +10,5 @@ export default interface ServicioExterno extends Auditory {
   estatus: boolean;
   propiedades: CampoConfig[];
   slug: string;
-  disponibilidad: DisponibilidadServicio[];
+  serviciosPorTipos: DisponibilidadServicio[];
 }
