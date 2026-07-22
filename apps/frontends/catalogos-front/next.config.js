@@ -23,6 +23,7 @@ module.exports = {
                     filename: "static/chunks/remoteEntry.js",
                     exposes: {
                         "./AutobusesModule": "./src/autobuses/pages",
+                        "./DisponibilidadModule": "./src/disponibilidad-servicios/pages",
                         "./ServiciosModule": "./src/servicios/pages",
                         "./InstitucionesModule": "./src/instituciones/pages",
                         "./exports": "./src/federation/index",

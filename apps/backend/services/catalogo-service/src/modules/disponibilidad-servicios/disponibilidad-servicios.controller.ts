@@ -7,8 +7,9 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { DisponibilidadServiciosService } from './disponibilidad-servicios.service';
 import { SetDisponibilidadDto } from './dto/set-disponibildad.dto';
 
@@ -25,11 +26,57 @@ export class DisponibilidadServiciosController {
     return this.disponibilidades.findAll();
   }
 
+  @Get('disponibles')
+  @ApiOperation({
+    summary:
+      'Obtener servicios disponibles para una institución y un tipo de autobús',
+  })
+  @ApiQuery({ name: 'tipoBusId', example: '1' })
+  @ApiQuery({ name: 'institucionId', example: '1' })
+  findServiciosDisponibles(
+    @Query('tipoBusId', ParseIntPipe) tipoBusId: number,
+    @Query('institucionId', ParseIntPipe) institucionId: number,
+  ) {
+    return this.disponibilidades.findServiciosDisponibles(
+      tipoBusId,
+      institucionId,
+    );
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Verificar disponibilidad del servicio' })
   @ApiParam({ name: 'id', example: '1' })
   checkAvailability(@Param('id', ParseIntPipe) id: number) {
     return this.disponibilidades.findOne(id);
+  }
+
+  @Get('/servicio/:id')
+  @ApiOperation({
+    summary: 'Verificar disponibilidad del servicio por  institución',
+  })
+  @ApiParam({ name: 'id', example: '1' })
+  checkByServicio(@Param('id', ParseIntPipe) id: number) {
+    return this.disponibilidades.findAllByServicio(id);
+  }
+
+  @Get('/institucion/:id')
+  @ApiOperation({
+    summary:
+      'Verificar disponibilidad de servicios por institución en distintos tipos de autobuses',
+  })
+  @ApiParam({ name: 'id', example: '1' })
+  checkByInstitucion(@Param('id', ParseIntPipe) id: number) {
+    return this.disponibilidades.findAllByInstitucion(id);
+  }
+
+  @Get('/autobus/:id')
+  @ApiOperation({
+    summary:
+      'Verificar disponibilidad de servicios  por tipo de autobús en distintas instituciones',
+  })
+  @ApiParam({ name: 'id', example: '1' })
+  checkByTipo(@Param('id', ParseIntPipe) id: number) {
+    return this.disponibilidades.findAllByTipo(id);
   }
 
   @Post()

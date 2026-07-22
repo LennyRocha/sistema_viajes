@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -11,6 +8,11 @@ import DisponibilidadServicio from './disponibilidad-servicio.entity';
 import { InstitucionesService } from '../instituciones/instituciones.service';
 import { TiposAutobusService } from '../tipos_autobus/tipo_bus.service';
 import { ServiciosService } from '../servicios/servicios.service';
+import {
+  DisponibilidadPorInstitucion,
+  DisponibilidadPorServicio,
+  DisponibilidadPorTipo,
+} from './types/disponibilidad-responses';
 
 const LIST_CACHE_KEY = 'disponibilidad_servicios:list';
 
@@ -188,5 +190,223 @@ export class DisponibilidadServiciosService {
     }
 
     return { updated: true };
+  }
+
+  async findAllByInstitucion(institucionId: number) {
+    this.logger.debug(
+      { institucionId },
+      'Obteniendo disponibilidades de servicios por institución',
+    );
+
+    const institucion = await this.instituciones.findOne(institucionId); // 404 si no existe
+
+    const list = await this.prisma.disponibilidadServicio.findMany({
+      where: { institucion_id: institucionId, activo: true },
+      include: {
+        servicio: true,
+        tipo_autobus: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const data: DisponibilidadPorInstitucion[] = [];
+
+    const serviciosUnicos = new Map(
+      list.map((d) => [d.servicio.id, d.servicio]),
+    );
+    for (const value of serviciosUnicos.values()) {
+      data.push({
+        servicio: value,
+        tipos: list
+          .filter((d) => d.servicio_id === value.id)
+          .map((d) => d.tipo_autobus),
+      });
+    }
+
+    this.logger.info(
+      {
+        institucionId,
+        institucionNombre: institucion.nombre,
+        count: serviciosUnicos.size,
+      },
+      'Disponibilidades de servicios obtenidas por institución',
+    );
+    return data;
+  }
+
+  async findAllByServicio(servicioId: number) {
+    this.logger.debug(
+      { servicioId },
+      'Obteniendo disponibilidades de servicios por servicio',
+    );
+
+    const servicio = await this.servicios.findOne(servicioId); // 404 si no existe
+
+    const list = await this.prisma.disponibilidadServicio.findMany({
+      where: { servicio_id: servicioId, activo: true },
+      include: {
+        institucion: true,
+        tipo_autobus: true,
+        servicio: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const data: DisponibilidadPorServicio[] = [];
+
+    const institucionesUnicas = new Map(
+      list.map((d) => [d.institucion.id, d.institucion]),
+    );
+
+    for (const value of institucionesUnicas.values()) {
+      data.push({
+        institucion: value,
+        tipos: list
+          .filter((d) => d.institucion_id === value.id)
+          .map((d) => d.tipo_autobus), // fix del campo
+      });
+    }
+
+    this.logger.info(
+      {
+        servicioId,
+        servicioNombre: servicio.nombre,
+        count: institucionesUnicas.size,
+      },
+      'Disponibilidades de servicios obtenidas por servicio',
+    );
+    return data;
+  }
+
+  async findAllByTipo(tipoBusId: number) {
+    this.logger.debug(
+      { tipoBusId },
+      'Obteniendo disponibilidades de servicios por tipo de autobús',
+    );
+
+    const tipoAutobus = await this.tipos.findOne(tipoBusId); // 404 si no existe
+
+    const list = await this.prisma.disponibilidadServicio.findMany({
+      where: { tipo_autobus_id: tipoBusId, activo: true },
+      include: {
+        servicio: true,
+        institucion: true,
+        tipo_autobus: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const data: DisponibilidadPorTipo[] = [];
+
+    const institucionesUnicas = new Map(
+      list.map((d) => [d.institucion.id, d.institucion]),
+    );
+
+    for (const value of institucionesUnicas.values()) {
+      data.push({
+        institucion: value,
+        servicios: list
+          .filter((d) => d.institucion_id === value.id)
+          .map((d) => d.servicio),
+      });
+    }
+
+    this.logger.info(
+      {
+        tipoBusId,
+        tipoBusNombre: tipoAutobus.nombre,
+        count: institucionesUnicas.size,
+      },
+      'Disponibilidades de servicios obtenidas por tipo de autobús',
+    );
+    return data;
+  }
+
+  async findServiciosDisponibles(tipoBusId: number, institucionId: number) {
+    this.logger.debug(
+      { tipoBusId, institucionId },
+      'Obteniendo servicios disponibles por tipo de autobús e institución',
+    );
+
+    if (!tipoBusId || !institucionId) {
+      return await this.servicios.findAll();
+    }
+
+    // 404 si no existen
+    const [tipoAutobus, institucion] = await Promise.all([
+      this.tipos.findOne(tipoBusId),
+      this.instituciones.findOne(institucionId),
+    ]);
+
+    const [todosLosServicios, disponibilidades] = await Promise.all([
+      this.prisma.servicio.findMany({ where: { estatus: true } }),
+      this.prisma.disponibilidadServicio.findMany({
+        where: { activo: true },
+        select: {
+          servicio_id: true,
+          tipo_autobus_id: true,
+          institucion_id: true,
+        },
+      }),
+    ]);
+
+    // ¿existe alguna restricción configurada exactamente para esta combinación tipo+institución?
+    const combinacionTieneRestricciones = disponibilidades.some(
+      (d) =>
+        d.tipo_autobus_id === tipoBusId && d.institucion_id === institucionId,
+    );
+
+    // si nadie configuró restricciones para esta combinación específica, no hay exclusividad que aplicar
+    if (!combinacionTieneRestricciones) {
+      this.logger.info(
+        {
+          tipoBusId,
+          institucionId,
+          tipoBusNombre: tipoAutobus.nombre,
+          institucionNombre: institucion.nombre,
+          count: todosLosServicios.length,
+        },
+        'Sin restricciones configuradas para esta combinación, devolviendo todos los servicios',
+      );
+      return todosLosServicios;
+    }
+
+    // servicios que tienen ALGUNA restricción de exclusividad (en cualquier combinación)
+    const serviciosConRestriccion = new Set(
+      disponibilidades.map((d) => d.servicio_id),
+    );
+
+    // servicios sin ninguna restricción configurada (disponibles siempre)
+    const serviciosSinRestriccion = todosLosServicios.filter(
+      (s) => !serviciosConRestriccion.has(s.id),
+    );
+
+    // servicios cuya restricción coincide exactamente con este tipo + institución
+    const serviciosCoincidentes = new Set(
+      disponibilidades
+        .filter(
+          (d) =>
+            d.tipo_autobus_id === tipoBusId &&
+            d.institucion_id === institucionId,
+        )
+        .map((d) => d.servicio_id),
+    );
+
+    const data = todosLosServicios.filter((s) =>
+      serviciosCoincidentes.has(s.id),
+    );
+
+    this.logger.info(
+      {
+        tipoBusId,
+        institucionId,
+        tipoBusNombre: tipoAutobus.nombre,
+        institucionNombre: institucion.nombre,
+        count: data.length + serviciosSinRestriccion.length,
+      },
+      'Servicios disponibles obtenidos por tipo de autobús e institución',
+    );
+
+    return [...serviciosSinRestriccion, ...data].sort((a, b) => a.id - b.id);
   }
 }
