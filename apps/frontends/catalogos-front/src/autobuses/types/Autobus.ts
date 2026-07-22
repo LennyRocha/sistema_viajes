@@ -18,5 +18,6 @@ export default interface Autobus extends Auditory {
   codigo_interno: string;
   estado: AutobusEstado;
   estatus: boolean;
+  slug: string;
   servicios?: AutobusServicio[];
 }

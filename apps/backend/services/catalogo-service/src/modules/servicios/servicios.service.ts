@@ -7,6 +7,7 @@ import { UpdateServicioDto } from './dtos/update-servicio.dto';
 import { Prisma } from '@prisma/client';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import ServicioExterno from './servicio.entity';
+import slugify from 'slugify';
 
 const LIST_CACHE_KEY = 'servicios:list';
 
@@ -30,6 +31,7 @@ export class ServiciosService {
     const servicio = await this.prisma.servicio.create({
       data: {
         ...dto,
+        slug: slugify(dto.nombre, { lower: true }),
         propiedades: dto.propiedades as unknown as Prisma.InputJsonValue,
       },
     });
@@ -86,6 +88,9 @@ export class ServiciosService {
     // 2) no está → base de datos
     const servicios = await this.prisma.servicio.findMany({
       orderBy: { createdAt: 'desc' },
+      include: {
+        serviciosPorTipos: true,
+      },
     });
 
     // 3) guarda para la próxima (30 minutos)
@@ -142,13 +147,13 @@ export class ServiciosService {
     this.logger.debug({ nombre }, 'Obteniendo servicio por nombre');
 
     const servicio = await this.prisma.servicio.findUnique({
-      where: { nombre },
+      where: { slug: slugify(nombre, { lower: true }) },
     });
 
     if (!servicio) {
       this.logger.warn(
         {
-          nombre,
+          slugify: slugify(nombre, { lower: true }),
         },
         'Servicio no encontrado por nombre',
       );
@@ -174,12 +179,13 @@ export class ServiciosService {
       'Actualizando servicio',
     );
 
-    await this.findOne(id); // 404 si no existe
+    const { slug } = await this.findOne(id); // 404 si no existe
 
     const servicio = await this.prisma.servicio.update({
       where: { id },
       data: {
         ...dto,
+        slug: dto.nombre ? slugify(dto.nombre, { lower: true }) : slug,
         propiedades: dto.propiedades as unknown as Prisma.InputJsonValue,
       },
     });

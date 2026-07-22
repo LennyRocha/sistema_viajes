@@ -23,15 +23,12 @@ export default async function onSubmit(
 ) {
   const payload: Omit<
     ServicioExterno,
-    "id" | "estatus" | "disponibilidad"
+    "id" | "estatus" | "disponibilidad" | "slug"
   > = {
-    nombre: data.nombre.trim().toLocaleLowerCase(),
+    nombre: data.nombre.trim(),
     descripcion: data.descripcion.trim(),
     icono_nombre: data.icono_nombre,
-    propiedades: data.propiedades?.map((p) => ({
-      ...p,
-      uuid: Number.parseInt(p.uuid),
-    })) as unknown as CampoConfig[],
+    propiedades: data.propiedades as CampoConfig[],
   };
 
   try {
@@ -44,7 +41,6 @@ export default async function onSubmit(
       duration: 3000,
     });
   } catch (error) {
-    console.error("Error al crear el servicio:", error);
     if (error.errors) {
       setErrores(error.errors);
     }
@@ -61,7 +57,7 @@ export default async function onSubmit(
 type MutateFn<TResult = unknown> = (
   args: Omit<
     ServicioExterno,
-    "id" | "estatus" | "disponibilidad"
+    "id" | "estatus" | "disponibilidad" | "slug"
   >,
 ) => {
   unwrap: () => Promise<TResult>;

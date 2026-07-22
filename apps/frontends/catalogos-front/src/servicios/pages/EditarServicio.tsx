@@ -251,6 +251,8 @@ const Form = ({
     );
   }
 
+  const now = new Date().toISOString();
+
   return (
     <>
       <Breadcrumb
@@ -440,12 +442,13 @@ const Form = ({
                 title: "Editar propiedad de servicio",
                 children: (
                   <PropiedadServicioContent
-                    key={row.uuid}
+                    key={`editar-${row.uuid}-${now}`}
                     propiedades={propiedades}
                     setValue={setValue}
                     closeSidebar={closeSidebar}
                     readonly={false}
                     propiedad={row}
+                    editMode={true}
                   />
                 ),
               })

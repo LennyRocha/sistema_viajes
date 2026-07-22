@@ -26,9 +26,9 @@
   "dependencies": {
     "@commons/contracts": "workspace:*",
     "@commons/decorators": "workspace:*",
+    "@commons/filters": "workspace:*",
     "@commons/types": "workspace:*",
     "@commons/utils": "workspace:*",
-    "@commons/filters": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
@@ -45,7 +45,8 @@
     "pg": "^8.22.0",
     "pino-http": "^11.0.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "slugify": "^1.6.9"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

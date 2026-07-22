@@ -100,6 +100,8 @@ export default function NuevoServicio({
       },
       confirmText: "Seleccionar",
       confirmDisabled: false,
+      submitOnEnter: true,
+      closeDialogOnBackdropClick: true,
     });
   };
 
@@ -110,10 +112,6 @@ export default function NuevoServicio({
     ...propiedad,
     id: propiedad.clave || index,
   }));
-
-  React.useEffect(() => {
-    console.log(errors.propiedades);
-  }, [errors.propiedades]);
 
   const errs = res.error as any;
   const propertyErrors = Object.entries(
@@ -333,6 +331,7 @@ export default function NuevoServicio({
                     closeSidebar={closeSidebar}
                     readonly={false}
                     propiedad={row}
+                    editMode={true}
                   />
                 ),
               })

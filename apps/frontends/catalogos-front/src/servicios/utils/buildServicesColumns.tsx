@@ -55,7 +55,7 @@ const buildServicesColumns = (
       renderCell: (params) => (
         <Tooltip
           title={
-            params.row.disponibilidad?.length > 0
+            params.row.serviciosPorTipos?.length > 0
               ? "Este servicio tiene una disponibilidad personalizada, por lo que no está disponible para todos los tipos de autobús en todas las instituciones."
               : "Este servicio está disponible para todos los tipos de autobús en todas las instituciones."
           }
@@ -65,7 +65,7 @@ const buildServicesColumns = (
             underline="hover"
             color="secondary"
           >
-            {params.row.disponibilidad?.length > 0
+            {params.row.serviciosPorTipos?.length > 0
               ? "Personalizada"
               : "Predeterminada"}
           </Link>

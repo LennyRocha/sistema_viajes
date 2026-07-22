@@ -11,6 +11,8 @@ export type DialogProps = {
   showCloseButton?: boolean;
   confirmDisabled?: boolean;
   isLoading?: boolean;
+  closeDialogOnBackdropClick?: boolean;
+  submitOnEnter?: boolean;
 };
 
 export interface DialogProviderValues {

@@ -9,5 +9,6 @@ export default interface ServicioExterno extends Auditory {
   icono_nombre: string;
   estatus: boolean;
   propiedades: CampoConfig[];
-  disponibilidad: DisponibilidadServicio[];
+  slug: string;
+  serviciosPorTipos: DisponibilidadServicio[];
 }

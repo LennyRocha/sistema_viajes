@@ -62,17 +62,64 @@ export function DialogProvider({
     () => ({
       showDialog,
       hideDialog,
+      confirmDialog,
     }),
     [],
   );
+
+  React.useEffect(() => {
+    //Cerrar el dialogo con la tecla Esc
+    if (!dialogOpen) return;
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Esc" && !dialogProps?.isLoading)
+        hideDialog();
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [dialogOpen, dialogProps?.isLoading, hideDialog]);
+
+  React.useEffect(() => {
+    //Hacer el submit del dialogo con la tecla Enter
+    if (!dialogOpen || !dialogProps?.submitOnEnter) return;
+
+    async function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Enter" && !dialogProps?.isLoading)
+        await confirmDialog();
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [
+    dialogOpen,
+    dialogProps?.isLoading,
+    confirmDialog,
+    dialogProps?.submitOnEnter,
+  ]);
 
   return (
     <DialogContext.Provider value={contextValue}>
       <Dialog
         open={dialogOpen}
         onClose={(_, reason) => {
-          if (reason === "backdropClick") return;
-          hideDialog();
+          if (
+            reason === "backdropClick" &&
+            dialogProps?.closeDialogOnBackdropClick &&
+            !dialogProps?.isLoading
+          ) {
+            hideDialog();
+          }
         }}
         sx={{
           "& .MuiDialog-paper": {
