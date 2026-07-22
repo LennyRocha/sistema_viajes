@@ -7,13 +7,14 @@ import {
   IsOptional,
   IsNumber,
   IsBoolean,
+  IsUUID,
 } from 'class-validator';
 import { IsUniquePrimitiveArray, MinArraySize } from '@commons/decorators';
 
 export class CreateCampoConfigDto {
   @IsOptional()
-  @IsNumber()
-  uuid?: number;
+  @IsUUID(undefined, { message: 'El uuid debe ser un UUID válido' })
+  uuid?: string;
 
   @ApiProperty({ example: 'velocidad' })
   @IsString()

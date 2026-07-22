@@ -87,11 +87,7 @@ export function DialogProvider({
 
   React.useEffect(() => {
     //Hacer el submit del dialogo con la tecla Enter
-    if (
-      !dialogOpen ||
-      !dialogProps?.closeDialogOnBackdropClick
-    )
-      return;
+    if (!dialogOpen || !dialogProps?.submitOnEnter) return;
 
     async function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Enter" && !dialogProps?.isLoading)
@@ -109,7 +105,7 @@ export function DialogProvider({
     dialogOpen,
     dialogProps?.isLoading,
     confirmDialog,
-    dialogProps?.closeDialogOnBackdropClick,
+    dialogProps?.submitOnEnter,
   ]);
 
   return (

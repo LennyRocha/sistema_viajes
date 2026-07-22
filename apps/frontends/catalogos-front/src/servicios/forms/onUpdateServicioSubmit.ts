@@ -30,10 +30,7 @@ export default async function onSubmit(
     nombre: data.nombre.trim(),
     descripcion: data.descripcion.trim(),
     icono_nombre: data.icono_nombre,
-    propiedades: data.propiedades?.map((p) => ({
-      ...p,
-      uuid: Number.parseInt(p.uuid),
-    })) as unknown as CampoConfig[],
+    propiedades: data.propiedades as CampoConfig[],
   };
 
   try {

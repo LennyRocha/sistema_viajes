@@ -30,6 +30,7 @@ type Props = {
   closeSidebar: () => void;
   propiedad?: CampoConfigSchema;
   readonly: boolean;
+  editMode?: boolean;
 };
 
 export default function PropiedadServicioContent({
@@ -38,6 +39,7 @@ export default function PropiedadServicioContent({
   closeSidebar,
   propiedad: propiedadInicial,
   readonly = false,
+  editMode = false,
 }: Readonly<Props>) {
   const [isReseting, setIsReseting] = React.useState(false);
   const reset = () => {
@@ -51,10 +53,11 @@ export default function PropiedadServicioContent({
   const [propiedad, setPropiedad] =
     React.useState<CampoConfigSchema>(defaultPropiedad);
   const [visibleChecked, setVisibleChecked] =
-    React.useState(false);
+    React.useState(propiedad.visible?.campo !== undefined);
   React.useEffect(() => {
     if (isReseting) {
-      setPropiedad(defaultPropiedad);
+      setPropiedad(propiedadInicial ?? defaultPropiedad);
+      if (editMode) return;
       setVisibleChecked(false);
     }
   }, [isReseting]);
@@ -128,6 +131,29 @@ export default function PropiedadServicioContent({
         propiedad.placeholder?.trim().length ?? 0,
     };
   }, [propiedad.label, propiedad.placeholder]);
+  const wasEdited = React.useMemo(
+    () =>
+      JSON.stringify(propiedadInicial) ===
+      JSON.stringify(propiedad),
+    [
+      propiedadInicial,
+      propiedad,
+      propiedad.clave,
+      propiedad.label,
+      propiedad.placeholder,
+      propiedad.tipo,
+      propiedad.requerido,
+      propiedad.visible,
+      propiedad.opciones,
+      propiedad.min,
+      propiedad.max,
+      propiedad.minLength,
+      propiedad.maxLength,
+      propiedad.regex,
+      propiedad.defaultValue,
+      propiedad.inputTipo,
+    ],
+  );
   return (
     <Box
       sx={{
@@ -161,7 +187,7 @@ export default function PropiedadServicioContent({
           select
           label="Tipo de propiedad "
           placeholder="Selecciona un  tipo"
-          value={propiedad.tipo || ""}
+          value={propiedad.tipo ?? ""}
           size="small"
           onChange={(e) =>
             setPropiedad({
@@ -220,7 +246,7 @@ export default function PropiedadServicioContent({
         <TextField
           label="Nombre "
           placeholder="Ej. Piezas incluidas"
-          value={propiedad.label || ""}
+          value={propiedad.label ?? ""}
           size="small"
           onChange={(e) =>
             setPropiedad({
@@ -274,7 +300,7 @@ export default function PropiedadServicioContent({
         <TextField
           label="Texto de ayuda "
           placeholder="Ej. Ingresa x piezas"
-          value={propiedad.placeholder || ""}
+          value={propiedad.placeholder ?? ""}
           size="small"
           onChange={(e) =>
             setPropiedad({
@@ -317,7 +343,11 @@ export default function PropiedadServicioContent({
         <FormControlLabel
           control={
             <Checkbox
-              checked={propiedad.requerido || false}
+              checked={
+                propiedad.requerido
+                  ? propiedad.requerido
+                  : false
+              }
               onChange={(e) =>
                 setPropiedad({
                   ...propiedad,
@@ -393,6 +423,7 @@ export default function PropiedadServicioContent({
             display: "flex",
             flexDirection: "column",
             gap: "4px",
+            width: "100%",
           }}
         >
           <TextField
@@ -451,31 +482,67 @@ export default function PropiedadServicioContent({
               }
             />
           ) : (
-            <TextField
-              label="Valor dependiente "
-              placeholder="Ej. 5"
-              size="small"
-              value={propiedad.visible?.valor || ""}
-              type={
-                propiedad.tipo === "number"
-                  ? "number"
-                  : "text"
-              }
-              onChange={(e) =>
-                setPropiedad({
-                  ...propiedad,
-                  visible: {
-                    campo: propiedad.visible?.campo ?? "",
-                    valor: e.target.value,
-                  },
-                })
-              }
-              fullWidth
-              required
-              sx={{
-                mt: "8px",
-              }}
-            />
+            <>
+              {propiedadDependiente?.opciones?.length ? (
+                <TextField
+                  label="Valor dependiente "
+                  placeholder="Ej. 5"
+                  size="small"
+                  value={propiedad.visible?.valor || ""}
+                  select
+                  onChange={(e) =>
+                    setPropiedad({
+                      ...propiedad,
+                      visible: {
+                        campo:
+                          propiedad.visible?.campo ?? "",
+                        valor: e.target.value,
+                      },
+                    })
+                  }
+                  fullWidth
+                  required
+                  sx={{
+                    mt: "8px",
+                  }}
+                >
+                  {propiedadDependiente?.opciones?.map(
+                    (opcion) => (
+                      <MenuItem key={opcion} value={opcion}>
+                        {opcion}
+                      </MenuItem>
+                    ),
+                  )}
+                </TextField>
+              ) : (
+                <TextField
+                  label="Valor dependiente "
+                  placeholder="Ej. 5"
+                  size="small"
+                  value={propiedad.visible?.valor || ""}
+                  type={
+                    propiedad.tipo === "number"
+                      ? "number"
+                      : "text"
+                  }
+                  onChange={(e) =>
+                    setPropiedad({
+                      ...propiedad,
+                      visible: {
+                        campo:
+                          propiedad.visible?.campo ?? "",
+                        valor: e.target.value,
+                      },
+                    })
+                  }
+                  fullWidth
+                  required
+                  sx={{
+                    mt: "8px",
+                  }}
+                />
+              )}
+            </>
           )}
         </motion.div>
       </Box>
@@ -500,6 +567,7 @@ export default function PropiedadServicioContent({
           propiedad={propiedad}
           readOnly={readonly}
           isReseting={isReseting}
+          editMode={editMode}
         />
       </motion.div>
       {/*Sección para propiedades de tipo number */}
@@ -522,6 +590,7 @@ export default function PropiedadServicioContent({
           propiedad={propiedad}
           readOnly={readonly}
           isReseting={isReseting}
+          editMode={editMode}
         />
       </motion.div>
       {/*Sección para propiedades de tipo boolean */}
@@ -544,6 +613,7 @@ export default function PropiedadServicioContent({
           propiedad={propiedad}
           readOnly={readonly}
           isReseting={isReseting}
+          editMode={editMode}
         />
       </motion.div>
       {propiedad.tipo && <Divider />}
@@ -565,6 +635,7 @@ export default function PropiedadServicioContent({
           variant="outlined"
           color="secondary"
           onClick={() => reset()}
+          disabled={readonly || wasEdited}
         >
           Limpiar
         </Button>
@@ -650,12 +721,10 @@ const NumberTypeSection = ({
   propiedad,
   readOnly,
   isReseting,
+  editMode,
 }) => {
   function resetListValues() {
-    setPropiedad((prev) => ({
-      ...prev,
-      opciones: undefined,
-    }));
+    reset(setPropiedad);
     setListValues([]);
     setInputCount(1);
     setListChecked(false);
@@ -668,13 +737,6 @@ const NumberTypeSection = ({
     }));
     setMinValueChecked(false);
     setMaxValueChecked(false);
-  }
-  function resetDefaultValue() {
-    setPropiedad((prev) => ({
-      ...prev,
-      defaultValue: undefined,
-    }));
-    setDefaultValueChecked(false);
   }
   const [listChecked, setListChecked] = React.useState(
     propiedad.opciones?.length > 0 || false,
@@ -693,24 +755,50 @@ const NumberTypeSection = ({
     React.useState(propiedad.max !== undefined);
   React.useEffect(() => {
     if (isReseting) {
+      if (editMode) return;
       resetListValues();
       resetMinMaxValue();
-      resetDefaultValue();
+      resetDefaultValue(
+        setPropiedad,
+        setDefaultValueChecked,
+      );
     }
   }, [isReseting]);
 
   React.useEffect(() => {
+    if (propiedad.tipo !== "number") return;
     if (maxValueChecked || minValueChecked) {
       resetListValues();
-      resetDefaultValue();
+      resetDefaultValue(
+        setPropiedad,
+        setDefaultValueChecked,
+      );
     }
   }, [maxValueChecked, minValueChecked]);
   React.useEffect(() => {
+    if (propiedad.tipo !== "number") return;
     if (listChecked) {
       resetMinMaxValue();
-      resetDefaultValue();
+      resetDefaultValue(
+        setPropiedad,
+        setDefaultValueChecked,
+      );
+    } else {
+      resetListValues();
+      resetDefaultValue(
+        setPropiedad,
+        setDefaultValueChecked,
+      );
     }
   }, [listChecked]);
+  React.useEffect(() => {
+    if (!defaultValueChecked) {
+      setPropiedad((prev) => ({
+        ...prev,
+        defaultValue: undefined,
+      }));
+    }
+  }, [defaultValueChecked]);
 
   const addListInput = () => {
     setInputCount((prev) => prev + 1);
@@ -793,6 +881,9 @@ const NumberTypeSection = ({
                       propiedad,
                     )
                   }
+                  sx={{
+                    mt: "8px",
+                  }}
                   slotProps={{
                     input: {
                       endAdornment: (
@@ -828,147 +919,173 @@ const NumberTypeSection = ({
           )}
         </motion.div>
       </Box>
-      <Box
-        sx={{
+      <motion.div
+        initial={{ opacity: 0, display: "none", y: -10 }}
+        animate={
+          !listChecked
+            ? { opacity: 1, display: "flex", y: 0 }
+            : { opacity: 0, display: "none", y: -10 }
+        }
+        exit={{ opacity: 0, display: "none", y: -10 }}
+        style={{
           display: "flex",
           flexDirection: "column",
           gap: "4px",
-          alignItems: "flex-start",
-          justifyContent: "center",
         }}
       >
-        <Typography
-          variant="h6"
-          color="secondary"
-          sx={{ fontWeight: "600" }}
-        >
-          Rango de valores
-        </Typography>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={minValueChecked}
-              onChange={(e) => {
-                setMinValueChecked(e.target.checked);
-                if (!e.target.checked) {
-                  setPropiedad({
-                    ...propiedad,
-                    min: undefined,
-                  });
-                }
-              }}
-              disabled={readOnly}
-            />
-          }
-          label="Valor mínimo"
+        <Box
           sx={{
-            color: "text.secondary",
-            fontSize: "0.75rem",
-            "& .MuiFormControlLabel-label": {
-              fontSize: "0.75rem",
-            },
-          }}
-        />
-        <motion.div
-          initial={{ opacity: 0, height: 0, y: -10 }}
-          animate={
-            minValueChecked
-              ? { opacity: 1, height: "auto", y: 0 }
-              : { opacity: 0, height: 0, y: -10 }
-          }
-          exit={{ opacity: 0, height: 0, y: -10 }}
-          style={{
             display: "flex",
             flexDirection: "column",
             gap: "4px",
+            alignItems: "flex-start",
+            justifyContent: "center",
           }}
         >
-          <TextField
-            label={`Valor mínimo`}
-            type="number"
-            value={propiedad.min}
-            disabled={readOnly}
-            onChange={(e) => {
-              setPropiedad({
-                ...propiedad,
-                min: e.target.value,
-              });
-            }}
-            slotProps={{
-              htmlInput: {
-                min: 0,
-              },
-            }}
-            fullWidth
-            size="small"
-          />
-        </motion.div>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={maxValueChecked}
-              onChange={(e) => {
-                setMaxValueChecked(e.target.checked);
-                if (!e.target.checked) {
-                  setPropiedad({
-                    ...propiedad,
-                    max: undefined,
-                  });
-                }
-              }}
-              disabled={readOnly}
-            />
-          }
-          label="Valor máximo"
-          sx={{
-            color: "text.secondary",
-            fontSize: "0.75rem",
-            "& .MuiFormControlLabel-label": {
+          <Typography
+            variant="h6"
+            color="secondary"
+            sx={{ fontWeight: "600" }}
+          >
+            Rango de valores
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={minValueChecked}
+                onChange={(e) => {
+                  setMinValueChecked(e.target.checked);
+                  if (!e.target.checked) {
+                    setPropiedad({
+                      ...propiedad,
+                      min: undefined,
+                    });
+                  }
+                }}
+                disabled={readOnly}
+              />
+            }
+            label="Valor mínimo"
+            sx={{
+              color: "text.secondary",
               fontSize: "0.75rem",
-            },
-          }}
-        />
-        <motion.div
-          initial={{ opacity: 0, height: 0, y: -10 }}
-          animate={
-            maxValueChecked
-              ? { opacity: 1, height: "auto", y: 0 }
-              : { opacity: 0, height: 0, y: -10 }
-          }
-          exit={{ opacity: 0, height: 0, y: -10 }}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "4px",
-          }}
-        >
-          <TextField
-            label={`Valor máximo`}
-            type="number"
-            value={propiedad.max}
-            disabled={readOnly}
-            onChange={(e) => {
-              setPropiedad({
-                ...propiedad,
-                max: e.target.value,
-              });
-            }}
-            slotProps={{
-              htmlInput: {
-                min: 0,
+              "& .MuiFormControlLabel-label": {
+                fontSize: "0.75rem",
               },
             }}
-            fullWidth
-            size="small"
           />
-        </motion.div>
-      </Box>
+          <motion.div
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={
+              minValueChecked
+                ? { opacity: 1, height: "auto", y: 0 }
+                : { opacity: 0, height: 0, y: -10 }
+            }
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+            }}
+          >
+            <TextField
+              label={`Valor mínimo`}
+              type="number"
+              value={propiedad.min ?? ""}
+              disabled={readOnly}
+              onChange={(e) => {
+                const parsed = Number.parseInt(
+                  e.target.value,
+                  10,
+                );
+                setPropiedad({
+                  ...propiedad,
+                  min: Number.isNaN(parsed)
+                    ? undefined
+                    : parsed,
+                });
+              }}
+              slotProps={{
+                htmlInput: {
+                  min: 0,
+                },
+              }}
+              fullWidth
+              size="small"
+            />
+          </motion.div>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={maxValueChecked}
+                onChange={(e) => {
+                  setMaxValueChecked(e.target.checked);
+                  if (!e.target.checked) {
+                    setPropiedad({
+                      ...propiedad,
+                      max: undefined,
+                    });
+                  }
+                }}
+                disabled={readOnly}
+              />
+            }
+            label="Valor máximo"
+            sx={{
+              color: "text.secondary",
+              fontSize: "0.75rem",
+              "& .MuiFormControlLabel-label": {
+                fontSize: "0.75rem",
+              },
+            }}
+          />
+          <motion.div
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={
+              maxValueChecked
+                ? { opacity: 1, height: "auto", y: 0 }
+                : { opacity: 0, height: 0, y: -10 }
+            }
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+            }}
+          >
+            <TextField
+              label={`Valor máximo`}
+              type="number"
+              value={propiedad.max ?? ""}
+              disabled={readOnly}
+              onChange={(e) => {
+                const parsed = Number.parseInt(
+                  e.target.value,
+                  10,
+                );
+                setPropiedad({
+                  ...propiedad,
+                  max: Number.isNaN(parsed)
+                    ? undefined
+                    : parsed,
+                });
+              }}
+              slotProps={{
+                htmlInput: {
+                  min: 0,
+                },
+              }}
+              fullWidth
+              size="small"
+            />
+          </motion.div>
+        </Box>
+      </motion.div>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           gap: "4px",
-          alignItems: "flex-start",
           justifyContent: "center",
         }}
       >
@@ -1020,37 +1137,53 @@ const NumberTypeSection = ({
         >
           {propiedad.opciones &&
           propiedad.opciones.length > 0 ? (
-            <TextField
-              label={`Valor por defecto`}
-              type="number"
-              value={propiedad.defaultValue}
-              disabled={readOnly}
-              onChange={(e) => {
-                setPropiedad({
-                  ...propiedad,
-                  defaultValue: e.target.value,
-                });
+            <Box
+              sx={{
+                width: "100%",
               }}
-              select
-              size="small"
-              fullWidth
             >
-              {propiedad.opciones.map((opcion) => (
-                <MenuItem key={opcion} value={opcion}>
-                  {opcion}
-                </MenuItem>
-              ))}
-            </TextField>
+              <TextField
+                label={`Valor por defecto`}
+                type="number"
+                value={propiedad.defaultValue ?? ""}
+                disabled={readOnly || !listChecked}
+                onChange={(e) => {
+                  const parsed = Number.parseFloat(
+                    e.target.value,
+                  );
+                  setPropiedad({
+                    ...propiedad,
+                    defaultValue: Number.isNaN(parsed)
+                      ? undefined
+                      : parsed,
+                  });
+                }}
+                select
+                size="small"
+                fullWidth
+              >
+                {propiedad.opciones.map((opcion) => (
+                  <MenuItem key={opcion} value={opcion}>
+                    {opcion}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
           ) : (
             <TextField
               label={`Valor por defecto`}
               type="number"
-              value={propiedad.defaultValue}
+              value={propiedad.defaultValue ?? ""}
               disabled={readOnly}
               onChange={(e) => {
+                const parsed = Number.parseFloat(
+                  e.target.value,
+                );
                 setPropiedad({
                   ...propiedad,
-                  defaultValue: e.target.value,
+                  defaultValue: Number.isNaN(parsed)
+                    ? undefined
+                    : parsed,
                 });
               }}
               slotProps={{
@@ -1074,6 +1207,7 @@ const TextTypeSection = ({
   propiedad,
   readOnly,
   isReseting,
+  editMode,
 }) => {
   function resetListValues() {
     reset(setPropiedad);
@@ -1089,10 +1223,6 @@ const TextTypeSection = ({
     }));
     setMinRangeChecked(false);
     setMaxRangeChecked(false);
-  }
-  function resetDefaultValue() {
-    reset(setPropiedad);
-    setDefaultValueChecked(false);
   }
   function resetRegexValue() {
     setPropiedad((prev) => ({
@@ -1131,27 +1261,55 @@ const TextTypeSection = ({
     React.useState(propiedad.maxLength !== undefined);
   React.useEffect(() => {
     if (isReseting) {
+      if (editMode) return;
       resetListValues();
       resetMinMaxValue();
-      resetDefaultValue();
+      resetDefaultValue(
+        setPropiedad,
+        setDefaultValueChecked,
+      );
       resetRegexValue();
     }
   }, [isReseting]);
 
   React.useEffect(() => {
+    if (propiedad.tipo !== "string") return;
     if (maxRangeChecked || minRangeChecked) {
       resetListValues();
-      resetDefaultValue();
+      if (!editMode) {
+        resetDefaultValue(
+          setPropiedad,
+          setDefaultValueChecked,
+        );
+      }
       resetRegexValue();
     }
   }, [maxRangeChecked, minRangeChecked]);
   React.useEffect(() => {
+    if (propiedad.tipo !== "string") return;
     if (listChecked) {
       resetMinMaxValue();
-      resetDefaultValue();
+      resetDefaultValue(
+        setPropiedad,
+        setDefaultValueChecked,
+      );
       resetRegexValue();
+    } else {
+      resetListValues();
+      resetDefaultValue(
+        setPropiedad,
+        setDefaultValueChecked,
+      );
     }
   }, [listChecked]);
+  React.useEffect(() => {
+    if (!defaultValueChecked) {
+      setPropiedad((prev) => ({
+        ...prev,
+        defaultValue: undefined,
+      }));
+    }
+  }, [defaultValueChecked]);
 
   const addListInput = () => {
     setInputCount((prev) => prev + 1);
@@ -1242,6 +1400,9 @@ const TextTypeSection = ({
                       propiedad,
                     )
                   }
+                  sx={{
+                    mt: "8px",
+                  }}
                   slotProps={{
                     input: {
                       endAdornment: (
@@ -1276,147 +1437,173 @@ const TextTypeSection = ({
           )}
         </motion.div>
       </Box>
-      <Box
-        sx={{
+      <motion.div
+        initial={{ opacity: 0, display: "none", y: -10 }}
+        animate={
+          !listChecked
+            ? { opacity: 1, display: "flex", y: 0 }
+            : { opacity: 0, display: "none", y: -10 }
+        }
+        exit={{ opacity: 0, display: "none", y: -10 }}
+        style={{
           display: "flex",
           flexDirection: "column",
           gap: "4px",
-          alignItems: "flex-start",
-          justifyContent: "center",
         }}
       >
-        <Typography
-          variant="h6"
-          color="secondary"
-          sx={{ fontWeight: "600" }}
-        >
-          Rango de longitud (carácteres)
-        </Typography>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={minRangeChecked}
-              onChange={(e) => {
-                setMinRangeChecked(e.target.checked);
-                if (!e.target.checked) {
-                  setPropiedad({
-                    ...propiedad,
-                    minLength: undefined,
-                  });
-                }
-              }}
-              disabled={readOnly}
-            />
-          }
-          label="Longitud mínima"
+        <Box
           sx={{
-            color: "text.secondary",
-            fontSize: "0.75rem",
-            "& .MuiFormControlLabel-label": {
-              fontSize: "0.75rem",
-            },
-          }}
-        />
-        <motion.div
-          initial={{ opacity: 0, height: 0, y: -10 }}
-          animate={
-            minRangeChecked
-              ? { opacity: 1, height: "auto", y: 0 }
-              : { opacity: 0, height: 0, y: -10 }
-          }
-          exit={{ opacity: 0, height: 0, y: -10 }}
-          style={{
             display: "flex",
             flexDirection: "column",
             gap: "4px",
+            alignItems: "flex-start",
+            justifyContent: "center",
           }}
         >
-          <TextField
-            label={`Longitud  mínima`}
-            type="number"
-            value={propiedad.minLength}
-            disabled={readOnly}
-            onChange={(e) => {
-              setPropiedad({
-                ...propiedad,
-                minLength: e.target.value,
-              });
-            }}
-            slotProps={{
-              htmlInput: {
-                min: 0,
-              },
-            }}
-            fullWidth
-            size="small"
-          />
-        </motion.div>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={maxRangeChecked}
-              onChange={(e) => {
-                setMaxRangeChecked(e.target.checked);
-                if (!e.target.checked) {
-                  setPropiedad({
-                    ...propiedad,
-                    maxLength: undefined,
-                  });
-                }
-              }}
-              disabled={readOnly}
-            />
-          }
-          label="Longitud máxima"
-          sx={{
-            color: "text.secondary",
-            fontSize: "0.75rem",
-            "& .MuiFormControlLabel-label": {
+          <Typography
+            variant="h6"
+            color="secondary"
+            sx={{ fontWeight: "600" }}
+          >
+            Rango de longitud (carácteres)
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={minRangeChecked}
+                onChange={(e) => {
+                  setMinRangeChecked(e.target.checked);
+                  if (!e.target.checked) {
+                    setPropiedad({
+                      ...propiedad,
+                      minLength: undefined,
+                    });
+                  }
+                }}
+                disabled={readOnly}
+              />
+            }
+            label="Longitud mínima"
+            sx={{
+              color: "text.secondary",
               fontSize: "0.75rem",
-            },
-          }}
-        />
-        <motion.div
-          initial={{ opacity: 0, height: 0, y: -10 }}
-          animate={
-            maxRangeChecked
-              ? { opacity: 1, height: "auto", y: 0 }
-              : { opacity: 0, height: 0, y: -10 }
-          }
-          exit={{ opacity: 0, height: 0, y: -10 }}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "4px",
-          }}
-        >
-          <TextField
-            label={`Longitud  máxima`}
-            type="number"
-            value={propiedad.maxLength}
-            disabled={readOnly}
-            onChange={(e) => {
-              setPropiedad({
-                ...propiedad,
-                maxLength: e.target.value,
-              });
-            }}
-            slotProps={{
-              htmlInput: {
-                min: 0,
+              "& .MuiFormControlLabel-label": {
+                fontSize: "0.75rem",
               },
             }}
-            fullWidth
-            size="small"
           />
-        </motion.div>
-      </Box>
+          <motion.div
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={
+              minRangeChecked
+                ? { opacity: 1, height: "auto", y: 0 }
+                : { opacity: 0, height: 0, y: -10 }
+            }
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+            }}
+          >
+            <TextField
+              label={`Longitud  mínima`}
+              type="number"
+              value={propiedad.minLength ?? ""}
+              disabled={readOnly}
+              onChange={(e) => {
+                const parsed = Number.parseInt(
+                  e.target.value,
+                  10,
+                );
+                setPropiedad({
+                  ...propiedad,
+                  minLength: Number.isNaN(parsed)
+                    ? undefined
+                    : parsed,
+                });
+              }}
+              slotProps={{
+                htmlInput: {
+                  min: 0,
+                },
+              }}
+              fullWidth
+              size="small"
+            />
+          </motion.div>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={maxRangeChecked}
+                onChange={(e) => {
+                  setMaxRangeChecked(e.target.checked);
+                  if (!e.target.checked) {
+                    setPropiedad({
+                      ...propiedad,
+                      maxLength: undefined,
+                    });
+                  }
+                }}
+                disabled={readOnly}
+              />
+            }
+            label="Longitud máxima"
+            sx={{
+              color: "text.secondary",
+              fontSize: "0.75rem",
+              "& .MuiFormControlLabel-label": {
+                fontSize: "0.75rem",
+              },
+            }}
+          />
+          <motion.div
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={
+              maxRangeChecked
+                ? { opacity: 1, height: "auto", y: 0 }
+                : { opacity: 0, height: 0, y: -10 }
+            }
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+            }}
+          >
+            <TextField
+              label={`Longitud  máxima`}
+              type="number"
+              value={propiedad.maxLength ?? ""}
+              disabled={readOnly}
+              onChange={(e) => {
+                const parsed = Number.parseInt(
+                  e.target.value,
+                  10,
+                );
+                setPropiedad({
+                  ...propiedad,
+                  maxLength: Number.isNaN(parsed)
+                    ? undefined
+                    : parsed,
+                });
+              }}
+              slotProps={{
+                htmlInput: {
+                  min: 0,
+                },
+              }}
+              fullWidth
+              size="small"
+            />
+          </motion.div>
+        </Box>
+      </motion.div>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           gap: "4px",
-          alignItems: "flex-start",
           justifyContent: "center",
         }}
       >
@@ -1468,32 +1655,38 @@ const TextTypeSection = ({
         >
           {propiedad.opciones &&
           propiedad.opciones.length > 0 ? (
-            <TextField
-              label={`Valor por defecto`}
-              type="text"
-              value={propiedad.defaultValue}
-              disabled={readOnly}
-              onChange={(e) => {
-                setPropiedad({
-                  ...propiedad,
-                  defaultValue: e.target.value,
-                });
+            <Box
+              sx={{
+                width: "100%",
               }}
-              select
-              size="small"
-              fullWidth
             >
-              {propiedad.opciones.map((opcion) => (
-                <MenuItem key={opcion} value={opcion}>
-                  {opcion}
-                </MenuItem>
-              ))}
-            </TextField>
+              <TextField
+                label={`Valor por defecto`}
+                type="text"
+                value={propiedad.defaultValue ?? ""}
+                disabled={readOnly}
+                onChange={(e) => {
+                  setPropiedad({
+                    ...propiedad,
+                    defaultValue: e.target.value,
+                  });
+                }}
+                select
+                size="small"
+                fullWidth
+              >
+                {propiedad.opciones.map((opcion) => (
+                  <MenuItem key={opcion} value={opcion}>
+                    {opcion}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
           ) : (
             <TextField
               label={`Valor por defecto`}
               type="text"
-              value={propiedad.defaultValue}
+              value={propiedad.defaultValue ?? ""}
               disabled={readOnly}
               onChange={(e) => {
                 setPropiedad({
@@ -1569,7 +1762,6 @@ const TextTypeSection = ({
             flexDirection: "column",
             gap: "8px",
             width: "100%",
-            marginTop: "4px",
           }}
         >
           <TextField
@@ -1593,6 +1785,9 @@ const TextTypeSection = ({
                 });
               }
             }}
+            sx={{
+              mt: "8px",
+            }}
             size="small"
             fullWidth
             select
@@ -1610,7 +1805,7 @@ const TextTypeSection = ({
             <TextField
               label={`Formato (expresión regular)`}
               type="text"
-              value={customRegex.trim()}
+              value={customRegex.trim() ?? ""}
               disabled={readOnly}
               onChange={(e) => {
                 setCustomRegex(e.target.value);
@@ -1618,6 +1813,9 @@ const TextTypeSection = ({
                   ...propiedad,
                   regex: e.target.value,
                 });
+              }}
+              sx={{
+                mt: "8px",
               }}
               size="small"
               fullWidth
@@ -1634,18 +1832,35 @@ const BooleanTypeSection = ({
   propiedad,
   readOnly,
   isReseting,
+  editMode,
 }) => {
-  function resetDefaultValue() {
-    reset(setPropiedad);
-    setDefaultValueChecked(false);
-  }
   const [defaultValueChecked, setDefaultValueChecked] =
     React.useState(propiedad.defaultValue !== undefined);
   React.useEffect(() => {
     if (isReseting) {
-      resetDefaultValue();
+      if (editMode) return;
+      resetDefaultValue(
+        setPropiedad,
+        setDefaultValueChecked,
+      );
     }
   }, [isReseting]);
+  React.useEffect(() => {
+    if (!defaultValueChecked) {
+      setPropiedad((prev) => ({
+        ...prev,
+        defaultValue: undefined,
+      }));
+    }
+  }, [defaultValueChecked]);
+  const isTrueOrFalse = React.useMemo(
+    () =>
+      propiedad.defaultValue === true ||
+      propiedad.defaultValue === "true"
+        ? "true"
+        : "false",
+    [propiedad.defaultValue],
+  );
   return (
     <Box
       sx={{
@@ -1703,11 +1918,17 @@ const BooleanTypeSection = ({
         }}
       >
         <RadioGroup
-          value={propiedad.defaultValue || ""}
+          value={
+            propiedad.defaultValue === undefined
+              ? ""
+              : isTrueOrFalse
+          }
           onChange={(e) =>
             setPropiedad({
               ...propiedad,
-              defaultValue: e.target.value,
+              defaultValue: Boolean(
+                e.target.value === "true",
+              ),
             })
           }
         >
@@ -1736,3 +1957,14 @@ const regexOptions = [
   },
   { label: "Personalizado", value: "custom" },
 ];
+
+function resetDefaultValue(
+  setPropiedad,
+  setDefaultValueChecked,
+) {
+  setPropiedad((prev) => ({
+    ...prev,
+    defaultValue: undefined,
+  }));
+  setDefaultValueChecked(false);
+}
