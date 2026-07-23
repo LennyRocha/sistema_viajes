@@ -1,4 +1,4 @@
-export default interface AutobusServicio {
+export interface AutobusServicio {
   id?: number;
   autobusId: number;
   servicioId: number;

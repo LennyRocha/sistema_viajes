@@ -44,7 +44,9 @@ export default function DisponibilidadIndex({
     servicio ?? skipToken,
   );
   const tiposQuery = useGetTiposAutobusQuery();
-  const institucionesQuery = useGetInstitucionesQuery();
+  const institucionesQuery = useGetInstitucionesQuery({
+    active: true,
+  });
   const query =
     useGetDisponibilidadServiciosByServicioQuery(
       nameQuery.data?.id

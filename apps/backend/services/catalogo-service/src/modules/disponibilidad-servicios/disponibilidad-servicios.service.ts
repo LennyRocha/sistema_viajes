@@ -208,6 +208,7 @@ export class DisponibilidadServiciosService {
 
     const where: Prisma.DisponibilidadServicioWhereInput = {
       institucion_id: institucionId,
+      servicio: { estatus: true },
     };
 
     if (showActiveOnly) {
@@ -268,6 +269,9 @@ export class DisponibilidadServiciosService {
 
     const where: Prisma.DisponibilidadServicioWhereInput = {
       servicio_id: servicioId,
+      institucion: {
+        estatus: true,
+      },
     };
 
     if (showActiveOnly) {
@@ -330,6 +334,12 @@ export class DisponibilidadServiciosService {
 
     const where: Prisma.DisponibilidadServicioWhereInput = {
       tipo_autobus_id: tipoBusId,
+      institucion: {
+        estatus: true,
+      },
+      servicio: {
+        estatus: true,
+      },
     };
 
     if (showActiveOnly) {

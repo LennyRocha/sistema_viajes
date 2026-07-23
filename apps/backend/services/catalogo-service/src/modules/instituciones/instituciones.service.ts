@@ -16,7 +16,7 @@ export class InstitucionesService {
     private readonly logger: PinoLogger,
   ) {}
 
-  async findAll() {
+  async findAll(active: boolean) {
     this.logger.debug('Obteniendo todas las instituciones');
 
     // 1) ¿está en caché?
@@ -31,7 +31,7 @@ export class InstitucionesService {
           },
           'Instituciones obtenidas desde caché',
         );
-        return cached;
+        return active ? cached.filter((i) => i.estatus) : cached;
       }
     } catch (error) {
       this.logger.error(
