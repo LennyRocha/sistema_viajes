@@ -5,19 +5,25 @@ export default async function onChangeStatus(
   {
     snack,
     mutate,
+    closeSidebar,
+    refetch,
   }: {
     snack?: SnackFunctionProps;
     mutate: MutateFn;
+    closeSidebar?: () => void;
+    refetch: () => void;
   },
 ) {
   try {
-    await mutate({ id }).unwrap();
+    await mutate(id).unwrap();
     snack?.success({
       message: activo
         ? "Disponibilidad activada correctamente"
         : "Disponibilidad desactivada correctamente",
       duration: 3000,
     });
+    refetch();
+    closeSidebar?.();
   } catch (error) {
     snack?.error({
       message:
@@ -29,8 +35,6 @@ export default async function onChangeStatus(
   }
 }
 
-type MutateFn<TResult = unknown> = (args: {
-  id: number;
-}) => {
+type MutateFn<TResult = unknown> = (id: number) => {
   unwrap: () => Promise<TResult>;
 };

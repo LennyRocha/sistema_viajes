@@ -110,6 +110,7 @@ export default function DisponibilidadIndex({
       ids: DisponibilidadServicioResponse[];
     },
   ) => {
+    const operacion = row.ids.some((id) => id.activo);
     showDialog({
       title: row.ids.some((id) => id.activo)
         ? "¿Liberar disponibilidad del servicio?"
@@ -126,9 +127,9 @@ export default function DisponibilidadIndex({
       onConfirm: async () => {
         try {
           await Promise.all(
-            row.ids.map((id) =>
-              mutateStatus(id.id).unwrap(),
-            ),
+            row.ids
+              .filter((id) => id.activo === operacion)
+              .map((id) => mutateStatus(id.id).unwrap()),
           );
           snack?.success({
             message: row.ids.some((id) => id.activo)
@@ -234,7 +235,25 @@ export default function DisponibilidadIndex({
           onEditClick={(row) =>
             openSidebar({
               title: `Disponibilidad de servicio para ${row.institucion.nombre}`,
-              children: <DisponibilidadDetails />,
+              children: (
+                <DisponibilidadDetails
+                  key={crypto.randomUUID()}
+                  row={row}
+                  tiposBus={tiposQuery.data ?? []}
+                  refetch={query.refetch}
+                  snack={snack}
+                  closeSidebar={closeSidebar}
+                  submitMutate={mutateNew}
+                  changeStatusMutate={mutateStatus as any}
+                  servicio_nombre={
+                    nameQuery.data?.nombre ?? ""
+                  }
+                  servicio_id={nameQuery.data?.id ?? 0}
+                  isLoading={
+                    resNew.isLoading || resStatus.isLoading
+                  }
+                />
+              ),
             })
           }
           onToggleActiveClick={(row) =>

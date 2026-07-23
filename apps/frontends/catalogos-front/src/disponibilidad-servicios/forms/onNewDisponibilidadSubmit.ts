@@ -23,6 +23,8 @@ export default async function onSubmit(
       message: mensaje,
       duration: 3000,
     });
+    refetch();
+    closeSidebar?.();
   } catch (error) {
     snack?.error({
       message:
@@ -32,8 +34,6 @@ export default async function onSubmit(
       duration: 3000,
     });
   }
-  refetch();
-  closeSidebar?.();
 }
 
 type MutateFn<TResult = unknown> = (

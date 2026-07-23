@@ -25,10 +25,22 @@ const buildDisponibilidadColumns = (
       disableColumnMenu: true,
       sortable: false,
       renderCell: (params) => {
-        const disponibilidad = params.row.tipos[index];
+        let disponibilidad;
+        params.row.ids.map((id) => {
+          if (id.linea === tipo.linea) {
+            disponibilidad = id;
+          }
+        });
+        console.log("\n");
+        //const disponibilidad = params.row.tipos[index];
+        let bob:
+          | DisponibilidadServicioResponse
+          | undefined = params.row.ids.find(
+          (id) => id.linea === tipo.linea,
+        );
         return disponibilidad ? (
           <Check
-            color={"primary"}
+            color={bob?.activo ? "primary" : "disabled"}
             sx={{ margin: "0 auto" }}
           />
         ) : (
