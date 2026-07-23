@@ -399,7 +399,7 @@ export class DisponibilidadServiciosService {
     );
 
     if (!tipoBusId || !institucionId) {
-      return await this.servicios.findAll();
+      return await this.servicios.findAll(true);
     }
 
     // 404 si no existen
