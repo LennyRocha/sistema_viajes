@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Post,
   Query,
@@ -43,20 +45,19 @@ export class DisponibilidadServiciosController {
     );
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Verificar disponibilidad del servicio' })
-  @ApiParam({ name: 'id', example: '1' })
-  checkAvailability(@Param('id', ParseIntPipe) id: number) {
-    return this.disponibilidades.findOne(id);
-  }
-
   @Get('/servicio/:id')
   @ApiOperation({
     summary: 'Verificar disponibilidad del servicio por  institución',
   })
   @ApiParam({ name: 'id', example: '1' })
-  checkByServicio(@Param('id', ParseIntPipe) id: number) {
-    return this.disponibilidades.findAllByServicio(id);
+  @ApiQuery({ name: 'institucionId', example: '1' })
+  @ApiQuery({ name: 'showActiveOnly', example: 'true' })
+  checkByServicio(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('showActiveOnly', new DefaultValuePipe(true), ParseBoolPipe)
+    showActiveOnly: boolean,
+  ) {
+    return this.disponibilidades.findAllByServicio(id, showActiveOnly);
   }
 
   @Get('/institucion/:id')
@@ -65,8 +66,13 @@ export class DisponibilidadServiciosController {
       'Verificar disponibilidad de servicios por institución en distintos tipos de autobuses',
   })
   @ApiParam({ name: 'id', example: '1' })
-  checkByInstitucion(@Param('id', ParseIntPipe) id: number) {
-    return this.disponibilidades.findAllByInstitucion(id);
+  @ApiQuery({ name: 'showActiveOnly', example: 'true' })
+  checkByInstitucion(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('showActiveOnly', new DefaultValuePipe(true), ParseBoolPipe)
+    showActiveOnly: boolean,
+  ) {
+    return this.disponibilidades.findAllByInstitucion(id, showActiveOnly);
   }
 
   @Get('/autobus/:id')
@@ -75,8 +81,20 @@ export class DisponibilidadServiciosController {
       'Verificar disponibilidad de servicios  por tipo de autobús en distintas instituciones',
   })
   @ApiParam({ name: 'id', example: '1' })
-  checkByTipo(@Param('id', ParseIntPipe) id: number) {
-    return this.disponibilidades.findAllByTipo(id);
+  @ApiQuery({ name: 'showActiveOnly', example: 'true' })
+  checkByTipo(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('showActiveOnly', new DefaultValuePipe(true), ParseBoolPipe)
+    showActiveOnly: boolean,
+  ) {
+    return this.disponibilidades.findAllByTipo(id, showActiveOnly);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Verificar disponibilidad del servicio' })
+  @ApiParam({ name: 'id', example: '1' })
+  checkAvailability(@Param('id', ParseIntPipe) id: number) {
+    return this.disponibilidades.findOne(id);
   }
 
   @Post()

@@ -61,7 +61,7 @@ const buildServicesColumns = (
           }
         >
           <Link
-            href={`services/${params.row.nombre}/disponibilidad`}
+            href={`services/${params.row.slug}/disponibilidad`}
             underline="hover"
             color="secondary"
           >

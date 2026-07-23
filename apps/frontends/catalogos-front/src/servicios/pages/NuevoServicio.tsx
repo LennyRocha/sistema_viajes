@@ -188,6 +188,7 @@ export default function NuevoServicio({
           fullWidth
           required
           disabled={res.isLoading}
+          autoFocus
         />
         <TextField
           label="Descripción"

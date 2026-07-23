@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -13,6 +14,7 @@ import {
   DisponibilidadPorServicio,
   DisponibilidadPorTipo,
 } from './types/disponibilidad-responses';
+import { Prisma } from '@prisma/client';
 
 const LIST_CACHE_KEY = 'disponibilidad_servicios:list';
 
@@ -166,10 +168,11 @@ export class DisponibilidadServiciosService {
 
     const existing = await this.findOne(id); // 404 si no existe
 
-    await this.prisma.servicio.update({
+    await this.prisma.disponibilidadServicio.update({
       where: { id },
-      data: { estatus: !existing.activo },
+      data: { activo: !existing.activo },
     });
+
     this.logger.info(
       { id, newStatus: !existing.activo },
       `${!existing.activo ? 'Activando' : 'Desactivando'} disponibilidad de servicio
@@ -192,7 +195,10 @@ export class DisponibilidadServiciosService {
     return { updated: true };
   }
 
-  async findAllByInstitucion(institucionId: number) {
+  async findAllByInstitucion(
+    institucionId: number,
+    showActiveOnly: boolean = true,
+  ) {
     this.logger.debug(
       { institucionId },
       'Obteniendo disponibilidades de servicios por institución',
@@ -200,8 +206,16 @@ export class DisponibilidadServiciosService {
 
     const institucion = await this.instituciones.findOne(institucionId); // 404 si no existe
 
+    const where: Prisma.DisponibilidadServicioWhereInput = {
+      institucion_id: institucionId,
+    };
+
+    if (showActiveOnly) {
+      where.activo = true;
+    }
+
     const list = await this.prisma.disponibilidadServicio.findMany({
-      where: { institucion_id: institucionId, activo: true },
+      where,
       include: {
         servicio: true,
         tipo_autobus: true,
@@ -231,10 +245,20 @@ export class DisponibilidadServiciosService {
       },
       'Disponibilidades de servicios obtenidas por institución',
     );
-    return data;
+    return data.map((d) => ({
+      ...d,
+      id: crypto.randomUUID(),
+      ids: list
+        .filter((l) => l.servicio_id === d.servicio.id)
+        .map((l) => ({
+          id: l.id,
+          linea: l.tipo_autobus.linea,
+          activo: l.activo,
+        })),
+    }));
   }
 
-  async findAllByServicio(servicioId: number) {
+  async findAllByServicio(servicioId: number, showActiveOnly: boolean = true) {
     this.logger.debug(
       { servicioId },
       'Obteniendo disponibilidades de servicios por servicio',
@@ -242,8 +266,16 @@ export class DisponibilidadServiciosService {
 
     const servicio = await this.servicios.findOne(servicioId); // 404 si no existe
 
+    const where: Prisma.DisponibilidadServicioWhereInput = {
+      servicio_id: servicioId,
+    };
+
+    if (showActiveOnly) {
+      where.activo = true;
+    }
+
     const list = await this.prisma.disponibilidadServicio.findMany({
-      where: { servicio_id: servicioId, activo: true },
+      where,
       include: {
         institucion: true,
         tipo_autobus: true,
@@ -275,10 +307,20 @@ export class DisponibilidadServiciosService {
       },
       'Disponibilidades de servicios obtenidas por servicio',
     );
-    return data;
+    return data.map((d) => ({
+      ...d,
+      id: crypto.randomUUID(),
+      ids: list
+        .filter((l) => l.institucion_id === d.institucion.id)
+        .map((l) => ({
+          id: l.id,
+          linea: l.tipo_autobus.linea,
+          activo: l.activo,
+        })),
+    }));
   }
 
-  async findAllByTipo(tipoBusId: number) {
+  async findAllByTipo(tipoBusId: number, showActiveOnly: boolean = true) {
     this.logger.debug(
       { tipoBusId },
       'Obteniendo disponibilidades de servicios por tipo de autobús',
@@ -286,8 +328,16 @@ export class DisponibilidadServiciosService {
 
     const tipoAutobus = await this.tipos.findOne(tipoBusId); // 404 si no existe
 
+    const where: Prisma.DisponibilidadServicioWhereInput = {
+      tipo_autobus_id: tipoBusId,
+    };
+
+    if (showActiveOnly) {
+      where.activo = true;
+    }
+
     const list = await this.prisma.disponibilidadServicio.findMany({
-      where: { tipo_autobus_id: tipoBusId, activo: true },
+      where,
       include: {
         servicio: true,
         institucion: true,
@@ -319,7 +369,17 @@ export class DisponibilidadServiciosService {
       },
       'Disponibilidades de servicios obtenidas por tipo de autobús',
     );
-    return data;
+    return data.map((d) => ({
+      ...d,
+      id: crypto.randomUUID(),
+      ids: list
+        .filter((l) => l.institucion_id === d.institucion.id)
+        .map((l) => ({
+          id: l.id,
+          servicio: l.servicio.nombre,
+          activo: l.activo,
+        })),
+    }));
   }
 
   async findServiciosDisponibles(tipoBusId: number, institucionId: number) {

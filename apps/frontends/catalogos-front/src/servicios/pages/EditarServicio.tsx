@@ -306,6 +306,7 @@ const Form = ({
           }
           fullWidth
           required
+          autoFocus
         />
         <TextField
           label="Descripción"

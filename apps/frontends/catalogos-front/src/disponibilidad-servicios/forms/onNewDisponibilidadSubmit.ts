@@ -6,35 +6,24 @@ export default async function onSubmit(
   institucionNombre: string,
   {
     snack,
-    navigationFunction,
     mutate,
-    setErrores,
+    closeSidebar,
+    refetch,
   }: {
     snack?: SnackFunctionProps;
-    navigationFunction: (
-      href: string,
-      options?: any,
-    ) => void;
     mutate: MutateFn;
-    setErrores: React.Dispatch<
-      React.SetStateAction<Record<string, string[]>>
-    >;
+    closeSidebar?: () => void;
+    refetch: () => void;
   },
 ) {
   try {
     await mutate(data).unwrap();
     const mensaje = `Disponibilidad del servicio ${servicioNombre} para la institución ${institucionNombre} creada`;
-    navigationFunction("/dashboard/services", {
-      replace: true,
-    });
     snack?.success({
       message: mensaje,
       duration: 3000,
     });
   } catch (error) {
-    if (error.errors) {
-      setErrores(error.errors);
-    }
     snack?.error({
       message:
         error?.data?.message ||
@@ -43,6 +32,8 @@ export default async function onSubmit(
       duration: 3000,
     });
   }
+  refetch();
+  closeSidebar?.();
 }
 
 type MutateFn<TResult = unknown> = (
