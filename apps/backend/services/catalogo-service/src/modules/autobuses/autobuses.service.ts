@@ -150,7 +150,6 @@ export class AutobusesService {
       orderBy: { createdAt: 'desc' },
       where,
       include: {
-        asientos: true,
         servicios: true,
         tipoAutobus: true,
         institucion: true,
@@ -185,7 +184,6 @@ export class AutobusesService {
 
     const autobus = await this.prisma.autobus.findUnique({
       include: {
-        asientos: true,
         servicios: true,
         tipoAutobus: true,
         institucion: true,
@@ -223,7 +221,6 @@ export class AutobusesService {
 
     const autobus = await this.prisma.autobus.findUnique({
       include: {
-        asientos: true,
         servicios: true,
         tipoAutobus: true,
         institucion: true,
@@ -258,7 +255,6 @@ export class AutobusesService {
 
     const autobus = await this.prisma.autobus.findUnique({
       include: {
-        asientos: true,
         servicios: true,
         tipoAutobus: true,
         institucion: true,

@@ -15,6 +15,7 @@ interface AsientoProps {
   readonly?: boolean;
   showPopup?: boolean;
   disableHover?: boolean;
+  canClickOnOutOfService?: boolean;
 }
 
 const AsientoBus = ({
@@ -28,6 +29,7 @@ const AsientoBus = ({
   readonly = false,
   showPopup = true,
   disableHover = false,
+  canClickOnOutOfService = false,
 }: AsientoProps) => {
   const estado = asiento.estado || AsientoEstado.AVAILABLE;
   const [isHovered, setIsHovered] = React.useState(false);
@@ -112,13 +114,21 @@ const AsientoBus = ({
         y: isHovered ? 1.08 : 1,
       }}
       onClick={() => {
-        if (estado === AsientoEstado.OUT_OF_SERVICE) return;
+        if (
+          estado === AsientoEstado.OUT_OF_SERVICE &&
+          !canClickOnOutOfService
+        )
+          return;
         if (readonly) return;
         setIsHovered(false);
         onSelectAsiento(asiento);
       }}
       onTap={() => {
-        if (estado === AsientoEstado.OUT_OF_SERVICE) return;
+        if (
+          estado === AsientoEstado.OUT_OF_SERVICE &&
+          !canClickOnOutOfService
+        )
+          return;
         if (readonly) return;
         onSelectAsiento(asiento);
       }}

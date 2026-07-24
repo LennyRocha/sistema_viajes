@@ -1,5 +1,9 @@
 import { MotionPaper } from "@nexoroute/commons";
-import { Box, Skeleton, Typography } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 import React from "react";
 import Vehiculo3D from "../../tipos_autobus/components/Vehiculo3D";
 import Modelo3DName from "../../tipos_autobus/types/Modelo3DName";
@@ -9,7 +13,7 @@ type Props = {
   paperProps?: React.ComponentProps<typeof MotionPaper>;
 };
 
-function VehiculoPreview({
+export default function VehiculoPreview({
   model = "hyundai",
   paperProps = {},
 }: Readonly<Props>) {
@@ -72,10 +76,12 @@ function VehiculoPreview({
               canRotate
             />
           ) : (
-            <Skeleton
-              variant="rounded"
-              width={300}
-              height={200}
+            <CircularProgress
+              size="5rem"
+              aria-label="Loading model…"
+              sx={(theme) => ({
+                color: theme.palette.accent.main,
+              })}
             />
           )}
         </Box>
@@ -95,5 +101,3 @@ function VehiculoPreview({
     </Box>
   );
 }
-
-export default React.memo(VehiculoPreview);

@@ -23,7 +23,11 @@ export default async function onSubmit(
 ) {
   const payload: Omit<
     ServicioExterno,
-    "id" | "estatus" | "disponibilidad" | "slug"
+    | "id"
+    | "estatus"
+    | "disponibilidad"
+    | "slug"
+    | "serviciosPorTipos"
   > = {
     nombre: data.nombre.trim(),
     descripcion: data.descripcion.trim(),
@@ -48,7 +52,7 @@ export default async function onSubmit(
       message:
         error?.data?.message ||
         error.message ||
-        "Error al actualizar el servicio",
+        "Error al crear el servicio",
       duration: 3000,
     });
   }
@@ -57,7 +61,11 @@ export default async function onSubmit(
 type MutateFn<TResult = unknown> = (
   args: Omit<
     ServicioExterno,
-    "id" | "estatus" | "disponibilidad" | "slug"
+    | "id"
+    | "estatus"
+    | "disponibilidad"
+    | "slug"
+    | "serviciosPorTipos"
   >,
 ) => {
   unwrap: () => Promise<TResult>;

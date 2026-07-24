@@ -1,11 +1,7 @@
 import { SnackFunctionProps } from "@nexoroute/commons";
-import { ServicioSchema } from "../validations/servicioZod";
-import ServicioExterno from "../types/ServicioExterno";
-import CampoConfig from "../types/CampoServicio";
-import { PatchServicioArgs } from "../api/serviciosApi";
+import { AutobusSchema } from "../validations/autobusZod";
 export default async function onSubmit(
-  data: ServicioSchema,
-  id: number,
+  data: AutobusSchema,
   {
     snack,
     navigationFunction,
@@ -23,27 +19,17 @@ export default async function onSubmit(
     >;
   },
 ) {
-  const payload: Omit<
-    ServicioExterno,
-    | "id"
-    | "estatus"
-    | "disponibilidad"
-    | "slug"
-    | "serviciosPorTipos"
-  > = {
-    nombre: data.nombre.trim(),
-    descripcion: data.descripcion.trim(),
-    icono_nombre: data.icono_nombre,
-    propiedades: data.propiedades as CampoConfig[],
+  const payload: AutobusSchema = {
+    ...data,
   };
 
   try {
-    await mutate({ id, ...payload }).unwrap();
-    navigationFunction("/dashboard/services", {
+    await mutate(payload).unwrap();
+    navigationFunction("/dashboard/buses", {
       replace: true,
     });
     snack?.success({
-      message: "Servicio actualizado correctamente",
+      message: "Autobús creado correctamente",
       duration: 3000,
     });
   } catch (error) {
@@ -54,14 +40,17 @@ export default async function onSubmit(
       message:
         error?.data?.message ||
         error.message ||
-        "Error al actualizar el servicio",
+        "Error al crear el autobús, por favor intente nuevamente",
       duration: 3000,
     });
   }
 }
 
 type MutateFn<TResult = unknown> = (
-  args: PatchServicioArgs,
+  args: Omit<
+    AutobusSchema,
+    "id" | "disponibilidad" | "slug"
+  >,
 ) => {
   unwrap: () => Promise<TResult>;
 };
