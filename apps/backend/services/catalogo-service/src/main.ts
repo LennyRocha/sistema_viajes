@@ -53,6 +53,9 @@ async function bootstrap() {
     }),
   );
 
+  // CORS: solo aceptamos el origen del api-gateway (allowlist).
+  //app.enableCors({ origin: [process.env.GATEWAY_URL ?? 'http://localhost:5000'], methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'QUERY'], });
+
   await app.listen(port);
   console.log(`catalogo-service escuchando en http://localhost:${port}`);
   console.log(`Scalar docs en http://localhost:${port}/docs`); // ← NUEVO

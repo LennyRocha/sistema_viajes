@@ -1,15 +1,18 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ServiciosService } from './servicios.service';
 import { CreateServicioDto } from './dtos/create-servicio.dto';
 import { UpdateServicioDto } from './dtos/update-servicio.dto';
@@ -28,8 +31,12 @@ export class ServiciosController {
 
   @Get()
   @ApiOperation({ summary: 'Listar todos los servicios' })
-  findAll() {
-    return this.servicios.findAll();
+  @ApiQuery({ name: 'active', example: true })
+  findAll(
+    @Query('active', new DefaultValuePipe(false), ParseBoolPipe)
+    active: boolean,
+  ) {
+    return this.servicios.findAll(active);
   }
 
   @Get(':id')

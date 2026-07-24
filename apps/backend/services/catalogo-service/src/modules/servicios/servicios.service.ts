@@ -58,12 +58,12 @@ export class ServiciosService {
     return servicio;
   }
 
-  async findAll() {
+  async findAll(active: boolean) {
     this.logger.debug('Obteniendo todos los servicios');
 
     // 1) ¿está en caché?
     try {
-      const cached = await this.redis.get<unknown[]>(LIST_CACHE_KEY);
+      const cached = await this.redis.get<ServicioExterno[]>(LIST_CACHE_KEY);
       if (cached) {
         this.logger.debug(
           {
@@ -73,7 +73,7 @@ export class ServiciosService {
           },
           'Servicios obtenidos desde caché',
         );
-        return cached;
+        return active ? cached.filter((s) => s.estatus) : cached;
       }
     } catch (error) {
       this.logger.error(
@@ -85,9 +85,12 @@ export class ServiciosService {
       );
     }
 
+    const where: Prisma.ServicioWhereInput = active ? { estatus: true } : {};
+
     // 2) no está → base de datos
     const servicios = await this.prisma.servicio.findMany({
       orderBy: { createdAt: 'desc' },
+      where,
       include: {
         serviciosPorTipos: true,
       },

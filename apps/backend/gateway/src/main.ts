@@ -22,7 +22,15 @@ async function bootstrap() {
   // Reverse proxy: se monta en la raiz con pathFilter para conservar la ruta
   // completa (ej. /tasks/123 llega igual al micro). Las rutas que no cumplen el
   // filtro (/, /health) pasan de largo (next) y las atiende Nest.
-  const PROXIED_PREFIXES = ['/servicios', '/docs', '/api-json'];
+  const PROXIED_PREFIXES = [
+    '/disponibilidad-servicios',
+    '/tipos-autobus',
+    '/instituciones',
+    '/health',
+    '/servicios',
+    '/docs',
+    '/api-json',
+  ];
   app.use(
     createProxyMiddleware({
       target: target_one,

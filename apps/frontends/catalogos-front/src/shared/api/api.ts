@@ -17,5 +17,6 @@ export const api = createApi({
     "TipoAutobus",
     "Institucion",
     "Conductor",
+    "Disponibilidad",
   ],
 });

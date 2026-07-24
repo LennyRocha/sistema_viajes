@@ -2,8 +2,8 @@ import { Auditory } from "@nexoroute/commons";
 
 export default interface DisponibilidadServicio extends Auditory {
   id?: number;
-  tipoId: number;
-  institucionId: number;
-  servicioId: number;
+  tipo_autobus_id: number;
+  institucion_id: number;
+  servicio_id: number;
   activo: boolean;
 }

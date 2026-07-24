@@ -3,8 +3,20 @@ import ServicioExterno from "../types/ServicioExterno";
 
 export const serviciosApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    getServicios: builder.query<ServicioExterno[], void>({
-      query: () => "/servicios",
+    getServicios: builder.query<
+      ServicioExterno[],
+      GetServiciosParams | void
+    >({
+      query: (params?: GetServiciosParams) => {
+        const { active, ...rest } = params || {};
+        return {
+          url: "/servicios",
+          params: {
+            ...rest,
+            active,
+          },
+        };
+      },
       providesTags: ["Servicio"],
     }),
 
@@ -73,3 +85,7 @@ export const {
   usePatchServicioMutation,
   useChangeStatusServicioMutation,
 } = serviciosApi;
+
+interface GetServiciosParams {
+  active?: boolean;
+}
