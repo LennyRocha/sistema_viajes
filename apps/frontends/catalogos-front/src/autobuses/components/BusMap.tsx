@@ -21,6 +21,7 @@ interface BusMapProps {
   onSelectAsiento?: (seat: Asiento) => void;
   scale?: Vector2d;
   readonly?: boolean;
+  canClickOnOutOfService?: boolean;
 }
 
 const BusMap = ({
@@ -29,6 +30,7 @@ const BusMap = ({
   onSelectAsiento = (seat: Asiento) => {},
   scale = { x: 1, y: 1 },
   readonly = false,
+  canClickOnOutOfService = false,
 }: BusMapProps) => {
   const theme = useTheme();
   const [popup, setPopup] = React.useState<{
@@ -44,6 +46,16 @@ const BusMap = ({
   ) => {
     setPopup({ seat: asiento, position });
   };
+  function handleSelectAsiento(asiento: Asiento) {
+    if (
+      readonly ||
+      (asiento.estado === "OUT_OF_SERVICE" &&
+        !canClickOnOutOfService)
+    ) {
+      return;
+    }
+    onSelectAsiento(asiento);
+  }
   const busRow = {
     1: 9,
     2: 11,
@@ -94,9 +106,12 @@ const BusMap = ({
                   key={index + 1}
                   verticalRotation={!md}
                   asiento={asiento}
-                  onSelectAsiento={onSelectAsiento}
+                  onSelectAsiento={handleSelectAsiento}
                   onHoverAsiento={onHover}
                   showPopup
+                  canClickOnOutOfService={
+                    canClickOnOutOfService
+                  }
                 />
               ) : (
                 <AsientoBus
@@ -107,7 +122,7 @@ const BusMap = ({
                     x: asiento.y,
                     y: asiento.x,
                   }}
-                  onSelectAsiento={onSelectAsiento}
+                  onSelectAsiento={handleSelectAsiento}
                   onHoverAsiento={onHover}
                   showPopup
                 />

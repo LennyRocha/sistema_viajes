@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { Add, ChevronLeft } from "@mui/icons-material";
 import CustomIconPicker from "../components/CustomIconPicker";
-import { servicioTemplate } from "../utils/servicioTemplate";
+import { servicioTemplate } from "../templates/servicioTemplate";
 import { useForm } from "react-hook-form";
 import onSubmit from "../forms/onNewServicioSubmit";
 import PropiedadServicioContent from "../components/PropiedadServicioContent";
@@ -188,6 +188,7 @@ export default function NuevoServicio({
           fullWidth
           required
           disabled={res.isLoading}
+          placeholder="Ingresa el nombre del servicio"
           autoFocus
         />
         <TextField
@@ -211,6 +212,7 @@ export default function NuevoServicio({
           rows={4}
           required
           disabled={res.isLoading}
+          placeholder="Ingresa una descripción del servicio"
         />
       </PaperBlock>
       <PaperBlock
@@ -383,6 +385,7 @@ export default function NuevoServicio({
         hasRequiredFields
         onResetClick={() => reset(servicioTemplate)}
         submitDisabled={!isDirty || !isValid}
+        resetDisabled={!isDirty}
         isLoading={res.isLoading}
       />
     </>

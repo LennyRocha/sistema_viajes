@@ -21,7 +21,6 @@ import {
 } from "@mui/material";
 import { Add, ChevronLeft } from "@mui/icons-material";
 import CustomIconPicker from "../components/CustomIconPicker";
-import { servicioTemplate } from "../utils/servicioTemplate";
 import { useForm } from "react-hook-form";
 import onSubmit from "../forms/onUpdateServicioSubmit";
 import PropiedadServicioContent from "../components/PropiedadServicioContent";
@@ -307,6 +306,7 @@ const Form = ({
           fullWidth
           required
           autoFocus
+          placeholder="Ingresa el nombre del servicio"
         />
         <TextField
           label="Descripción"
@@ -328,6 +328,7 @@ const Form = ({
           multiline
           rows={4}
           required
+          placeholder="Ingresa una descripción del servicio"
         />
       </PaperBlock>
       <PaperBlock
@@ -498,8 +499,9 @@ const Form = ({
       <FormButtonsRow
         onSubmitClick={handleSubmit(doSubmit)}
         hasRequiredFields
-        onResetClick={() => reset(servicioTemplate)}
+        onResetClick={() => reset(template)}
         submitDisabled={!isDirty || !isValid}
+        resetDisabled={!isDirty}
         isLoading={loading}
       />
     </>

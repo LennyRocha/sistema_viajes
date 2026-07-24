@@ -26,7 +26,7 @@ import BusDetails from "../components/BusDetails";
 
 interface Props extends CommonPageProps {}
 
-export default function AutobusesIndex({
+export default function AutobusesIndexPage({
   navigationFunction,
   openSidebar,
   showDialog = () => {},
@@ -41,7 +41,7 @@ export default function AutobusesIndex({
         breads={[
           {
             nombre: "Autobuses",
-            href: "/buses",
+            href: "/dashboard/buses",
             disabled: true,
           },
         ]}
@@ -52,7 +52,7 @@ export default function AutobusesIndex({
         iconname="directions_bus"
         showButton
         onButtonClick={() =>
-          navigationFunction("/buses/nuevo")
+          navigationFunction("/dashboard/buses/nuevo")
         }
         buttonTitle="Nuevo"
         leftIcon={<Add />}

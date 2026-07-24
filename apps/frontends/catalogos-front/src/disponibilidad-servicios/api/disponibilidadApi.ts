@@ -7,6 +7,7 @@ import {
 } from "../types/disponibilidad-responses";
 import { DisponibilidadServicioInput } from "../types/disponibilidad-input";
 import { DisponibilidadServicioResponse } from "../types/disponibilidad-and";
+import ServicioExterno from "../../servicios/types/ServicioExterno";
 
 type DisponibilidadServicioIdentifier =
   DisponibilidadPorServicio & {
@@ -28,6 +29,11 @@ type GetParams = {
   showActiveOnly?: boolean;
 };
 
+type GetDisponiblesParams = {
+  tipoBusId: number;
+  institucionId: number;
+};
+
 export const disponibilidadApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getDisponibilidadServicios: builder.query<
@@ -44,6 +50,19 @@ export const disponibilidadApi = api.injectEndpoints({
     >({
       query: (id: number) =>
         `/disponibilidad-servicios/${id}`,
+      providesTags: ["Disponibilidad"],
+    }),
+
+    getDisponibilidadMatching: builder.query<
+      ServicioExterno[],
+      GetDisponiblesParams | void
+    >({
+      query: (params: GetDisponiblesParams | void) => {
+        if (!params) {
+          return `/disponibilidad-servicios`;
+        }
+        return `/disponibilidad-servicios?tipoBusId=${params.tipoBusId}&institucionId=${params.institucionId}`;
+      },
       providesTags: ["Disponibilidad"],
     }),
 
@@ -118,6 +137,7 @@ export const {
   useGetDisponibilidadServiciosByInstitucionQuery,
   useGetDisponibilidadServiciosByServicioQuery,
   useGetDisponibilidadServiciosByTipoQuery,
+  useGetDisponibilidadMatchingQuery,
   useSetDisponibilidadServicioMutation,
   useChangeStatusDisponibilidadMutation,
 } = disponibilidadApi;

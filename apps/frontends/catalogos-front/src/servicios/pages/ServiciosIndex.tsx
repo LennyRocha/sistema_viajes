@@ -8,7 +8,11 @@ import {
   HandleResponseError,
 } from "@nexoroute/commons";
 import React from "react";
-import { Add, FilterList } from "@mui/icons-material";
+import {
+  Add,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -16,6 +20,7 @@ import {
   IconButton,
   MenuItem,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import buildServicesColumns from "../utils/buildServicesColumns";
 import ServicioExterno from "../types/ServicioExterno";
@@ -43,8 +48,12 @@ export default function ServiciosIndex({
       title: `Propiedades de: ${servicio.nombre}`,
       children: <PropiedadesServicio servicio={servicio} />,
     });
+  const [active, setActive] =
+    React.useState<boolean>(false);
   const columnas = buildServicesColumns(dispatchSidebar);
-  const query = useGetServiciosQuery();
+  const query = useGetServiciosQuery({
+    active: active,
+  });
 
   const [dispatch, { isLoading }] =
     useChangeStatusServicioMutation();
@@ -150,6 +159,8 @@ export default function ServiciosIndex({
               options={options}
               setOption={setOption}
               option={option}
+              active={active}
+              setActive={setActive}
             />
           }
         />
@@ -164,6 +175,8 @@ const SubheaderComponent = ({
   options = {},
   setOption,
   option,
+  active,
+  setActive,
 }) => {
   return (
     <Box
@@ -200,9 +213,19 @@ const SubheaderComponent = ({
           </MenuItem>
         ))}
       </TextField>
-      <IconButton aria-label="Filtrar" size="small">
-        <FilterList />
-      </IconButton>
+      <Tooltip
+        title={
+          active ? "Mostrar todos" : "Mostrar solo activos"
+        }
+      >
+        <IconButton
+          aria-label="Filtrar"
+          size="medium"
+          onClick={() => setActive((prev) => !prev)}
+        >
+          {active ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+      </Tooltip>
       <Button
         variant="outlined"
         size="small"
