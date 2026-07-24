@@ -81,8 +81,8 @@ export class UpdateAutobusDto {
   @IsUniqueObjectArray('servicio_id', {
     message: 'Los servicios del autobús deben ser únicos',
   })
-  @ArrayMaxSize(10, {
-    message: 'El autobús no puede tener más de 10 servicios',
+  @ArrayMaxSize(15, {
+    message: 'El autobús no puede tener más de 15 servicios',
   })
   @ArrayMinSize(1, {
     message: 'El autobús debe tener al menos 1 servicio',
