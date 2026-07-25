@@ -169,6 +169,13 @@ cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
 pnpm.cmd --filter @nexoroute/commons build
 ```
 
+alternativamente:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\frontends
+pnpm.cmd build:commons
+```
+
 Despues abre el CLI:
 
 ```powershell
@@ -256,6 +263,16 @@ pnpm.cmd --filter @nexoroute/catalogos-front dev
 pnpm.cmd --filter @nexoroute/dashboard-reportes-front dev
 pnpm.cmd --filter @nexoroute/operaciones-front dev
 pnpm.cmd --filter @nexoroute/shell dev
+```
+
+Alternativamente puedes usar los siguientes comandos estando en <code>cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\frontends</code> en cada terminal:
+
+```powershell
+pnpm.cmd dev:shell
+pnpm.cmd dev:catalogos
+pnpm.cmd dev:dashboard
+pnpm.cmd dev:operaciones
+pnpm.cmd dev:auth
 ```
 
 Orden recomendado:
