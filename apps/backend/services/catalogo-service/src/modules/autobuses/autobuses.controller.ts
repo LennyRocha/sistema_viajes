@@ -35,10 +35,12 @@ export class AutobusesController {
   findAll(
     @Query('tipo_bus', new DefaultValuePipe(0), ParseIntPipe)
     tipo_bus: number,
+    @Query('institucion', new DefaultValuePipe(0), ParseIntPipe)
+    institucion: number,
     @Query('active', new DefaultValuePipe(false), ParseBoolPipe)
     active: boolean,
   ) {
-    return this.autobuses.findAll(active, tipo_bus);
+    return this.autobuses.findAll(active, tipo_bus, institucion);
   }
 
   @Get(':id')

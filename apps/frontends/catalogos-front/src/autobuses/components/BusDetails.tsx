@@ -1,5 +1,4 @@
 import React from "react";
-import Autobus from "../types/Autobus";
 import {
   Box,
   Divider,
@@ -8,6 +7,7 @@ import {
 } from "@mui/material";
 import tiposBus from "../../tipos_autobus/constants/TiposBusMapper";
 import dynamic from "next/dynamic";
+import { BusTablaType } from "../types/BusTablaType";
 const Vehiculo3D = dynamic(
   () =>
     import("../../federation").then(
@@ -26,7 +26,7 @@ const Vehiculo3D = dynamic(
 );
 
 type Props = {
-  row: Autobus;
+  row: BusTablaType;
 };
 
 const BusDetails = ({ row }: Props) => {
@@ -86,10 +86,10 @@ const BusDetails = ({ row }: Props) => {
           Institución propietaria: {row.institucion.nombre}
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          Tipo: {row.tipo.nombre}
+          Tipo: {row.tipoAutobus.nombre}
         </Typography>
         <Vehiculo3D
-          tipo={tiposBus[row.tipo.id - 1].model}
+          tipo={tiposBus[row.tipoAutobus.id - 1].model}
         />
         <Typography
           variant="caption"
@@ -137,7 +137,7 @@ const BusDetails = ({ row }: Props) => {
           Capacidad total: {row.capacidad}
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          Estado: {row.estado}
+          Estado: {row.autobus_estado}
         </Typography>
         <Divider />
       </Box>

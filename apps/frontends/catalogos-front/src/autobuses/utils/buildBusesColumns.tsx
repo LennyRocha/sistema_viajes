@@ -1,10 +1,11 @@
 import React from "react";
-import Autobus from "../types/Autobus";
 import { GridColDef } from "@nexoroute/commons";
 import { Chip, Typography } from "@mui/material";
+import { AutobusEstadoLabel } from "../types/AutobusEstadoLabel";
+import { BusTablaType } from "../types/BusTablaType";
 
 const buildAutobusesColumns = () => {
-  const columnas: GridColDef<Autobus>[] = [
+  const columnas: GridColDef<BusTablaType>[] = [
     {
       field: "marca",
       headerName: "Autobús",
@@ -33,7 +34,7 @@ const buildAutobusesColumns = () => {
             color: "accent.main",
           }}
         >
-          {params.row.tipo.linea}
+          {params.row.tipoAutobus.linea}
         </Typography>
       ),
     },
@@ -69,8 +70,16 @@ const buildAutobusesColumns = () => {
         }
         return (
           <Chip
-            label={params.row.estado}
-            color={estadoColorMap[params.row.estado]}
+            label={
+              AutobusEstadoLabel[params.row.autobus_estado]
+            }
+            color={
+              estadoColorMap[
+                AutobusEstadoLabel[
+                  params.row.autobus_estado
+                ]
+              ]
+            }
             variant="outlined"
           />
         );

@@ -91,4 +91,6 @@ export const {
 
 interface GetAutobusesParams {
   active?: boolean;
+  tipo_bus?: number;
+  institucion?: number;
 }
