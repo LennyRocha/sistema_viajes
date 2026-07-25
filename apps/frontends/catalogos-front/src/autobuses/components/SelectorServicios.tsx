@@ -1,4 +1,8 @@
-import { Search } from "@mui/icons-material";
+import {
+  DeleteForever,
+  Edit,
+  Search,
+} from "@mui/icons-material";
 import {
   Box,
   IconButton,
@@ -9,29 +13,74 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  DynamicIcon,
   EmptyState,
   PaperBlock,
+  ServicioIcon,
   type SidebarConfig,
 } from "@nexoroute/commons";
 import React from "react";
 import ServicioExterno from "../../servicios/types/ServicioExterno";
-import { servicios } from "../../data/constants";
 import Add from "@mui/icons-material/Add";
+import AutobusServicio from "../types/AutobusServicio";
+import AutobusServicioForm from "./AutobusServicioForm";
+import useAutobusServicios from "../hooks/useAutobusServicios";
 
 type Props = {
-  existingServices?: ServicioExterno[];
+  existingServices: ServicioExterno[];
+  selectedServices?: Pick<
+    AutobusServicio,
+    "servicioId" | "configuracion_servicio"
+  >[];
   openSidebar: (config: SidebarConfig) => void;
+  closeSidebar?: () => void;
+  updateList: (
+    services: Pick<
+      AutobusServicio,
+      "servicioId" | "configuracion_servicio"
+    >[],
+  ) => void;
 };
 
 export default function SelectorServicios({
   existingServices,
+  selectedServices = [],
   openSidebar,
+  closeSidebar,
+  updateList,
 }: Readonly<Props>) {
-  const [selectedServices, setSelectedServices] =
-    React.useState<ServicioExterno[]>(
-      existingServices ?? [],
-    );
+  const [query, setQuery] = React.useState("");
+  const normalizedQuery = query.trim().toLowerCase();
+
+  const unselectedServices = React.useMemo(
+    () =>
+      existingServices.filter(
+        (servicio) =>
+          !selectedServices.some(
+            (selected) => selected.id === servicio.id,
+          ) &&
+          (normalizedQuery
+            ? servicio.nombre
+                .toLowerCase()
+                .includes(normalizedQuery)
+            : true),
+      ),
+    [existingServices, selectedServices, normalizedQuery],
+  );
+
+  const { add, update, remove, find } = useAutobusServicios(
+    {
+      servicios: existingServices,
+      selected: selectedServices,
+      updateList,
+    },
+  );
+
+  const [pickedService, setPickedService] =
+    React.useState<ServicioExterno | null>(null);
+
+  const [pickedBusService, setPickedBusService] =
+    React.useState<ServicioExterno | null>(null);
+
   return (
     <PaperBlock
       title="Servicios disponibles"
@@ -49,12 +98,15 @@ export default function SelectorServicios({
           label="Buscar servicio"
           variant="outlined"
           size="small"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
           slotProps={{
             input: {
               startAdornment: (
                 <IconButton
                   aria-label="Buscar servicio"
                   size="small"
+                  onClick={() => setQuery("")}
                 >
                   <Search />
                 </IconButton>
@@ -70,21 +122,70 @@ export default function SelectorServicios({
             flex: 1,
           }}
         >
-          {servicios.map((servicio) => (
-            <ListItem
-              key={servicio.id}
-              secondaryAction={
-                <IconButton edge="end" aria-label="add_service" color="primary">
-                  <Add />
-                </IconButton>
+          {unselectedServices.length === 0 ? (
+            <EmptyState
+              variant="no-results"
+              title={
+                normalizedQuery
+                  ? "No se encontraron servicios"
+                  : "No hay servicios disponibles"
               }
-            >
-              <ListItemIcon>
-                <DynamicIcon name={servicio.icono_nombre} />
-              </ListItemIcon>
-              <ListItemText>{servicio.nombre}</ListItemText>
-            </ListItem>
-          ))}
+            />
+          ) : (
+            unselectedServices.map((servicio) => (
+              <ListItem
+                key={servicio.id}
+                sx={(theme) => ({
+                  backgroundColor:
+                    pickedService?.id === servicio.id
+                      ? theme.palette.action.selected
+                      : "inherit",
+                })}
+                secondaryAction={
+                  <IconButton
+                    edge="end"
+                    aria-label="add_service"
+                    color="primary"
+                    onClick={() => {
+                      setPickedService(servicio);
+                      openSidebar({
+                        title: `Agregar servicio: ${servicio.nombre.toLocaleLowerCase()}`,
+                        children: (
+                          <AutobusServicioForm
+                            key={servicio.id}
+                            propiedades={
+                              servicio.propiedades
+                            }
+                            id_servicio={servicio.id ?? 0}
+                            agregarServicio={(
+                              newService,
+                            ) => {
+                              add(newService);
+                              setPickedService(null);
+                              closeSidebar?.();
+                            }}
+                          />
+                        ),
+                        onCloseSidebar: () =>
+                          setPickedService(null),
+                      });
+                    }}
+                  >
+                    <Add />
+                  </IconButton>
+                }
+              >
+                <ListItemIcon>
+                  <ServicioIcon
+                    name={servicio.icono_nombre}
+                  />
+                </ListItemIcon>
+                <ListItemText>
+                  {servicio.nombre}
+                </ListItemText>
+              </ListItem>
+            ))
+          )}
         </Box>
       </Box>
       <Box sx={{ flex: 1 }}>
@@ -97,7 +198,74 @@ export default function SelectorServicios({
             title="No hay servicios agregados"
           />
         ) : (
-          <></>
+          selectedServices.map((servicio) => {
+            const info = find(servicio.servicioId);
+            return (
+              <ListItem
+                key={servicio.servicioId}
+                sx={(theme) => ({
+                  backgroundColor:
+                    pickedBusService?.id === servicio.servicioId
+                      ? theme.palette.action.selected
+                      : "inherit",
+                })}
+                secondaryAction={
+                  <>
+                    <IconButton
+                      aria-label="edit_service"
+                      onClick={() => {
+                        setPickedBusService(info ?? null);
+                        openSidebar({
+                          title: `Editar servicio: ${(info?.nombre ?? "").toLocaleLowerCase()}`,
+                          children: (
+                            <AutobusServicioForm
+                              key={servicio.servicioId}
+                              propiedades={
+                                info?.propiedades ?? []
+                              }
+                              id_servicio={
+                                servicio.servicioId ?? 0
+                              }
+                              existingProperties={
+                                servicio.configuracion_servicio
+                              }
+                              agregarServicio={(
+                                updatedService,
+                              ) => {
+                                update(updatedService);
+                                closeSidebar?.();
+                              }}
+                            />
+                          ),
+                          onCloseSidebar: () =>
+                            setPickedBusService(null),
+                        });
+                      }}
+                    >
+                      <Edit />
+                    </IconButton>
+                    <IconButton
+                      aria-label="remove_service"
+                      onClick={() =>
+                        remove(servicio.servicioId ?? 0)
+                      }
+                    >
+                      <DeleteForever />
+                    </IconButton>
+                  </>
+                }
+              >
+                <ListItemIcon>
+                  <ServicioIcon
+                    name={info?.icono_nombre ?? "default"}
+                  />
+                </ListItemIcon>
+                <ListItemText>
+                  {info?.nombre ?? "Servicio no encontrado"}
+                </ListItemText>
+              </ListItem>
+            );
+          })
         )}
       </Box>
     </PaperBlock>

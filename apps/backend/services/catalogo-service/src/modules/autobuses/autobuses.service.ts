@@ -51,15 +51,19 @@ export class AutobusesService {
     }
 
     const payloadExceptServicios: Prisma.AutobusCreateInput = {
-      marca: dto.marca,
-      alias: dto.alias,
-      modelo: dto.modelo,
+      marca:
+        dto.marca.trim().at(0)?.toUpperCase() +
+        dto.marca.trim().slice(1).toLowerCase(),
+      alias: dto.alias.trim().replace(/\s+/g, ' '),
+      modelo: dto.modelo.trim().replace(/\s+/g, ' '),
       ano: dto.ano,
       capacidad: dto.capacidad,
       estado: dto.estado,
-      color: dto.color,
-      descripcion: dto.descripcion,
-      codigo_interno: dto.codigo_interno,
+      color: dto.color.trim().replace(/\s+/g, ' '),
+      descripcion:
+        dto.descripcion.at(0)?.toUpperCase() +
+        dto.descripcion.slice(1).toLowerCase().trim().replace(/\s+/g, ' '),
+      codigo_interno: dto.codigo_interno.trim().replace(/\s+/g, ' '),
       institucion: {
         connect: {
           id: dto.institucion_id,
@@ -316,15 +320,23 @@ export class AutobusesService {
     }
 
     const payloadExceptServicios: Prisma.AutobusUpdateInput = {
-      marca: dto.marca ?? existing.marca,
-      alias: dto.alias ?? existing.alias,
-      modelo: dto.modelo ?? existing.modelo,
+      marca: dto.marca
+        ? dto.marca.trim().at(0)?.toUpperCase() +
+          dto.marca.trim().slice(1).toLowerCase()
+        : existing.marca,
+      alias: dto.alias?.trim()?.replace(/\s+/g, ' ') ?? existing.alias,
+      modelo: dto.modelo?.trim()?.replace(/\s+/g, ' ') ?? existing.modelo,
       ano: dto.ano ?? existing.ano,
       capacidad: dto.capacidad ?? existing.capacidad,
       estado: dto.estado ?? existing.estado,
       color: dto.color ?? existing.color,
-      descripcion: dto.descripcion ?? existing.descripcion,
-      codigo_interno: dto.codigo_interno ?? existing.codigo_interno,
+      descripcion: dto.descripcion
+        ? dto.descripcion.at(0)?.toUpperCase() +
+          dto.descripcion.slice(1).toLowerCase().trim().replace(/\s+/g, ' ')
+        : existing.descripcion,
+      codigo_interno:
+        dto.codigo_interno?.trim()?.replace(/\s+/g, ' ') ??
+        existing.codigo_interno,
       institucion: {
         connect: {
           id: dto.institucion_id ?? existing.institucion_id,

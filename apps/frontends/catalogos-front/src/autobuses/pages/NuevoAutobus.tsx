@@ -58,11 +58,11 @@ export default function NuevoAutobus({
     trigger,
     setValue,
     watch,
-    formState: { errors, isDirty, isValid },
+    formState: { errors, isDirty, isValid, dirtyFields },
   } = useForm<AutobusSchema>({
     resolver: zodResolver(autobusSchema),
     defaultValues: autobusTemplate,
-    mode: "onChange",
+    mode: "all",
     reValidateMode: "onChange",
   });
 
@@ -89,8 +89,8 @@ export default function NuevoAutobus({
 
   const modelos: Record<number, Modelo3DName> = {
     1: "hyundai",
-    2: "mercedes",
-    3: "volkswagen",
+    2: "volkswagen",
+    3: "mercedes",
   };
 
   const asientosMap = {
@@ -103,12 +103,16 @@ export default function NuevoAutobus({
     setValue(
       "asientos",
       asientosMap[watch("tipo_autobus_id")],
+      { shouldValidate: true, shouldDirty: true },
     );
     const capacidad = watch("asientos").filter(
       (asiento) =>
         asiento.estado !== AsientoEstado.OUT_OF_SERVICE,
     ).length;
-    setValue("capacidad", capacidad);
+    setValue("capacidad", capacidad, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   }, [watch("tipo_autobus_id"), watch("asientos")]);
 
   const modelo = React.useMemo(() => {
@@ -120,6 +124,10 @@ export default function NuevoAutobus({
       tipoBusId: watch("tipo_autobus_id"),
       institucionId: watch("institucion_id"),
     };
+  }, [watch("tipo_autobus_id"), watch("institucion_id")]);
+
+  React.useEffect(() => {
+    setValue("servicios", []);
   }, [watch("tipo_autobus_id"), watch("institucion_id")]);
 
   const disponiblesQuery =
@@ -293,6 +301,11 @@ export default function NuevoAutobus({
                 {...register("codigo_interno", {
                   required:
                     "El código interno es obligatorio",
+                  pattern: {
+                    value: /^[A-Za-z0-9-]+$/,
+                    message:
+                      "Solo se permiten letras, números y guiones.",
+                  },
                 })}
                 fullWidth
                 placeholder="Identificador único ej: BUS-001, BUS-002, etc."
@@ -309,7 +322,6 @@ export default function NuevoAutobus({
                   htmlInput: {
                     maxLength: 10,
                     minLength: 1,
-                    pattern: "^[a-zA-Z0-9-]+$",
                   },
                 }}
                 required
@@ -325,6 +337,10 @@ export default function NuevoAutobus({
                   setValue(
                     "institucion_id",
                     Number(e.target.value),
+                    {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    },
                   )
                 }
                 select
@@ -361,6 +377,10 @@ export default function NuevoAutobus({
                 setValue(
                   "tipo_autobus_id",
                   Number(e.target.value),
+                  {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  },
                 )
               }
               disabled={tiposQuery.isLoading}
@@ -424,7 +444,7 @@ export default function NuevoAutobus({
             fullWidth
           />
           <TextField
-            label="Modelo *"
+            label="Modelo"
             variant="outlined"
             size="small"
             slotProps={{
@@ -458,11 +478,18 @@ export default function NuevoAutobus({
           }}
         >
           <TextField
-            label="Año *"
+            label="Año de fabricación"
+            required
             variant="outlined"
             size="small"
             fullWidth
-            defaultValue={"2026"}
+            value={watch("ano")}
+            onChange={(e) =>
+              setValue("ano", Number(e.target.value), {
+                shouldValidate: true,
+                shouldDirty: true,
+              })
+            }
             select
           >
             {getYearsList().map((option) => (
@@ -491,6 +518,9 @@ export default function NuevoAutobus({
           label="Color"
           variant="outlined"
           size="small"
+          {...register("color", {
+            required: "El color del autobús es obligatorio",
+          })}
           fullWidth
           slotProps={{
             htmlInput: {
@@ -517,7 +547,17 @@ export default function NuevoAutobus({
           gap: "12px",
         }}
       >
-        <Box sx={{ width: "fit-content", margin: "0 auto", display: "flex", flexDirection: "column", gap: "12px", alignItems: "center", justifyContent: "center" }}>
+        <Box
+          sx={{
+            width: "fit-content",
+            margin: "0 auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <BusMap
             asientos={watch("asientos")}
             canClickOnOutOfService={true}
@@ -545,17 +585,34 @@ export default function NuevoAutobus({
                     asiento.estado !==
                     AsientoEstado.OUT_OF_SERVICE,
                 ).length;
-                setValue("capacidad", capacidad);
-                setValue("asientos", asientos);
-                trigger("asientos");
-                trigger("capacidad");
+                setValue("capacidad", capacidad, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
+                setValue("asientos", asientos, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
+                trigger();
               }
             }}
           />
           <AsientoSimbología />
         </Box>
       </PaperBlock>
-      <SelectorServicios openSidebar={openSidebar} />
+      <SelectorServicios
+        openSidebar={openSidebar}
+        existingServices={disponiblesQuery.data ?? []}
+        selectedServices={watch("servicios")}
+        updateList={(services) => {
+          setValue("servicios", services, {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+          trigger("servicios");
+        }}
+        closeSidebar={closeSidebar}
+      />
       <FormButtonsRow
         onSubmitClick={handleSubmit(doSubmit)}
         hasRequiredFields

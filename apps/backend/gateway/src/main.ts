@@ -28,6 +28,7 @@ async function bootstrap() {
     '/instituciones',
     '/health',
     '/servicios',
+    '/autobuses',
     '/docs',
     '/api-json',
   ];

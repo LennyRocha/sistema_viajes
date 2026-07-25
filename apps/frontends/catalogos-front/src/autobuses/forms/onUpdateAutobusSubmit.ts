@@ -20,8 +20,15 @@ export default async function onSubmit(
     >;
   },
 ) {
+  const payload: Partial<AutobusSchema> = {
+    ...data,
+    servicios: data.servicios?.map((servicio) => ({
+      servicio_id: servicio.servicioId,
+      config_servicio: servicio.configuracion_servicio,
+    })),
+  };
   try {
-    await mutate({ id, ...data }).unwrap();
+    await mutate({ id, ...payload }).unwrap();
     navigationFunction("/dashboard/buses", {
       replace: true,
     });

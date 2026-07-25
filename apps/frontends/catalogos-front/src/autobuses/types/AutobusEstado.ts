@@ -1,8 +1,8 @@
 enum AutobusEstado {
-  DISPONIBLE = "Disponible",
-  ENVIAJE = "En viaje",
-  MANTENIMIENTO = "En mantenimiento",
-  FUERASERVICIO="Fuera de servicio",
+  DISPONIBLE = "DISPONIBLE",
+  EN_RUTA = "EN_RUTA",
+  EN_MANTENIMIENTO = "EN_MANTENIMIENTO",
+  FUERA_DE_SERVICIO = "FUERA_DE_SERVICIO",
 }
 
 export default AutobusEstado;

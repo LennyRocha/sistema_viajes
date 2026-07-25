@@ -21,6 +21,10 @@ export default async function onSubmit(
 ) {
   const payload: AutobusSchema = {
     ...data,
+    servicios: data.servicios.map((servicio) => ({
+      servicio_id: servicio.servicioId,
+      config_servicio: servicio.configuracion_servicio,
+    })),
   };
 
   try {
