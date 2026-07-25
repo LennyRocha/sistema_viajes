@@ -59,9 +59,9 @@ export const disponibilidadApi = api.injectEndpoints({
     >({
       query: (params: GetDisponiblesParams | void) => {
         if (!params) {
-          return `/disponibilidad-servicios`;
+          return `/disponibilidad-servicios/disponibles`;
         }
-        return `/disponibilidad-servicios?tipoBusId=${params.tipoBusId}&institucionId=${params.institucionId}`;
+        return `/disponibilidad-servicios/disponibles?tipoBusId=${params.tipoBusId}&institucionId=${params.institucionId}`;
       },
       providesTags: ["Disponibilidad"],
     }),

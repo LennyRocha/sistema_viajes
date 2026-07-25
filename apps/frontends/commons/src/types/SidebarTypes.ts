@@ -3,6 +3,7 @@ import { type ReactNode } from "react";
 export type SidebarConfig = {
   title: string;
   children: ReactNode;
+  onCloseSidebar?: () => void;
 };
 
 export type SidebarProviderValues = {

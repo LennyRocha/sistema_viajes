@@ -21,6 +21,8 @@ export function SidebarProvider({
 }: Readonly<SidebarProviderProps>) {
   const [rightSidebarOpen, setRightSidebarOpen] =
     React.useState<boolean>(false);
+  const [onCloseCallback, setOnCloseCallback] =
+    React.useState<(() => void) | undefined>(undefined);
   const showSidebar = (config: SidebarConfig) => {
     if (rightSidebarOpen) {
       setRightSidebarOpen(false);
@@ -34,8 +36,17 @@ export function SidebarProvider({
       setSidebarTitle(config.title);
       setSidebarChildren(config.children);
     }
+    if (config.onCloseSidebar) {
+      setOnCloseCallback(() => config.onCloseSidebar);
+    }
   };
-  const hideSidebar = () => setRightSidebarOpen(false);
+  const hideSidebar = () => {
+    setRightSidebarOpen(false);
+    if (onCloseCallback) {
+      onCloseCallback();
+      setOnCloseCallback(undefined);
+    }
+  };
   const [sidebarChildren, setSidebarChildren] =
     React.useState<ReactNode>(null);
   const [sidebarTitle, setSidebarTitle] =
