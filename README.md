@@ -87,7 +87,7 @@ DASHBOARD_SERVICE_URL=http://localhost:5004
 
 ```env
 PORT=5002
-DATABASE_URL="postgresql://postgres:root@localhost:5432/catalogos_db?schema=public"
+DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=public"
 REDIS_URL="redis://localhost:6379"
 ```
 
@@ -99,6 +99,23 @@ terminal por cada app.
 ### 4.1 Backend con CLI
 
 Abre Docker Desktop antes de ejecutar el CLI.
+
+Antes de arrancar el CLI, prepara las librerias compartidas del backend y
+Prisma:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
+pnpm.cmd --dir apps\backend\commons build:all
+```
+
+Primera vez, o cuando cambie `schema.prisma`, genera Prisma Client:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
+.\node_modules\.bin\prisma.CMD generate
+```
+
+Despues ejecuta el CLI:
 
 ```powershell
 cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\dev-cli
@@ -112,8 +129,8 @@ Primera vez, o cuando cambien migraciones de Prisma, ejecuta en otra terminal:
 
 ```powershell
 cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
-pnpm.cmd exec prisma migrate dev
-pnpm.cmd prisma:seed
+.\node_modules\.bin\prisma.CMD migrate dev
+.\node_modules\.bin\prisma.CMD db seed
 ```
 
 URLs principales:
@@ -132,6 +149,14 @@ Postgres y Redis:
 ```powershell
 cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
 docker compose down
+```
+
+Si ya habias levantado Docker cuando Postgres usaba el puerto `5432` del host,
+apaga y vuelve a crear los contenedores para aplicar el cambio a `5437`:
+
+```powershell
+docker compose down
+docker compose up -d
 ```
 
 ### 4.2 Frontend con CLI
@@ -171,6 +196,13 @@ Usa esta forma cuando quieras ver logs separados o levantar solo una parte.
 
 ### 5.1 Backend individual
 
+Primero prepara las librerias compartidas del backend:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
+pnpm.cmd --dir apps\backend\commons build:all
+```
+
 Terminal 1, Docker para Postgres y Redis:
 
 ```powershell
@@ -181,8 +213,9 @@ docker compose up -d
 Primera vez o despues de cambios en Prisma:
 
 ```powershell
-pnpm.cmd exec prisma migrate dev
-pnpm.cmd prisma:seed
+.\node_modules\.bin\prisma.CMD generate
+.\node_modules\.bin\prisma.CMD migrate dev
+.\node_modules\.bin\prisma.CMD db seed
 ```
 
 Terminal 2, catalogo-service:
@@ -244,7 +277,7 @@ Orden recomendado:
 | Operaciones front | 3004 | Remote `operaciones` |
 | Gateway backend | 5000 | URL que deberian usar los frontends |
 | Catalogo service | 5002 | API de catalogos |
-| Postgres | 5432 | Docker |
+| Postgres | 5437 -> 5432 | Docker: host 5437, contenedor 5432 |
 | Redis | 6379 | Docker |
 
 ## 7. Builds
@@ -322,6 +355,22 @@ docker compose up -d
 Revisa que `catalogo-service` tenga `PORT=5002` en su `.env`. Si no existe ese
 archivo, el servicio puede caer al puerto default del codigo y el gateway no lo
 va a encontrar.
+
+### catalogo-service muestra errores de @commons o @prisma/client
+
+Si salen errores como `Cannot find module '@commons/utils'`, `Module
+'@prisma/client' has no exported member 'PrismaClient'` o `Property 'autobus'
+does not exist on type 'PrismaService'`, faltan pasos de preparacion:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
+pnpm.cmd --dir apps\backend\commons build:all
+
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
+.\node_modules\.bin\prisma.CMD generate
+```
+
+Despues reinicia el CLI o el `catalogo-service`.
 
 ### Google Maps no aparece
 
