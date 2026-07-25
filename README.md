@@ -2,36 +2,36 @@
 
 Guia rapida para instalar dependencias y levantar el proyecto en local.
 
+Este repositorio usa PNPM workspaces, microfrontends con Module Federation,
+servicios NestJS y Docker para la base de datos/Redis del backend.
+
 ## 1. Requisitos
 
-Necesitas:
+Instala o verifica:
 
 - Node.js 20 o superior.
 - PNPM.
+- Docker Desktop, necesario para levantar Postgres y Redis del backend.
 
-En Windows/PowerShell se recomienda usar `pnpm.cmd` para evitar errores de politicas de ejecucion.
-
-Verifica si ya tienes PNPM:
+En Windows/PowerShell usa `pnpm.cmd` para evitar problemas de politicas de
+ejecucion.
 
 ```powershell
+node --version
 pnpm.cmd --version
+docker --version
+docker compose version
 ```
 
-Si no existe, instala PNPM:
+Si no tienes PNPM:
 
 ```powershell
 npm install -g pnpm
 ```
 
-Vuelve a verificar:
-
-```powershell
-pnpm.cmd --version
-```
-
 ## 2. Instalar dependencias
 
-Desde la raiz del proyecto:
+Desde la raiz del workspace:
 
 ```powershell
 cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
@@ -40,230 +40,259 @@ pnpm.cmd install
 
 ## 3. Variables de entorno
 
-### Shell
+No vi archivos `.env.example` en el proyecto. Por ahora crea estos archivos a
+mano. No subas `.env`, `.env.local` ni API keys reales.
 
-Crea o edita:
-
-```text
-apps/frontends/shell/.env.local
-```
-
-Contenido:
+### apps/frontends/shell/.env.local
 
 ```env
+NEXT_PUBLIC_MF_AUTH=http://localhost:3001/_next/static/chunks/remoteEntry.js
 NEXT_PUBLIC_MF_CATALOGOS=http://localhost:3002/_next/static/chunks/remoteEntry.js
+NEXT_PUBLIC_MF_DASHBOARD=http://localhost:3003/_next/static/chunks/remoteEntry.js
 NEXT_PUBLIC_MF_OPERACIONES=http://localhost:3004/_next/static/chunks/remoteEntry.js
-NEXT_PUBLIC_MF_AUTH=http://localhost:3003/_next/static/chunks/remoteEntry.js
-NEXT_PUBLIC_MF_DASHBOARD=http://localhost:3004/_next/static/chunks/remoteEntry.js
 ```
 
-### Catalogos
+Importante: si `AUTH` o `DASHBOARD` apuntan al puerto incorrecto, el shell puede
+mostrar 404 o errores de Module Federation.
 
-Crea o edita:
-
-```text
-apps/frontends/catalogos-front/.env.local
-```
-
-Contenido:
+### apps/frontends/catalogos-front/.env.local
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_API_URL=http://localhost:5000
 NEXT_PRIVATE_LOCAL_WEBPACK=true
 ```
 
-### Operaciones
-
-Crea o edita:
-
-```text
-apps/frontends/operaciones-front/.env.local
-```
-
-Contenido:
+### apps/frontends/operaciones-front/.env.local
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_API_URL=http://localhost:5000
 NEXT_PRIVATE_LOCAL_WEBPACK=true
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_api_key_de_google_maps
 ```
 
-No subas tu API key real a Git.
+`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` se usa para el mapa de viajes. Debe ser una
+key restringida en Google Cloud y no debe subirse al repo.
 
-## 4. Build de commons
+### apps/backend/gateway/.env
 
-Antes de levantar shell o microfrontends, compila `commons`:
+```env
+PORT=5000
+AUTH_SERVICE_URL=http://localhost:5001
+CATALOGO_SERVICE_URL=http://localhost:5002
+OPERACIONES_SERVICE_URL=http://localhost:5003
+DASHBOARD_SERVICE_URL=http://localhost:5004
+```
+
+### apps/backend/services/catalogo-service/.env
+
+```env
+PORT=5002
+DATABASE_URL="postgresql://postgres:root@localhost:5432/catalogos_db?schema=public"
+REDIS_URL="redis://localhost:6379"
+```
+
+## 4. Levantar con CLI
+
+Esta es la forma recomendada cuando quieres levantar varias cosas sin abrir una
+terminal por cada app.
+
+### 4.1 Backend con CLI
+
+Abre Docker Desktop antes de ejecutar el CLI.
 
 ```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\dev-cli
+pnpm.cmd dev
+```
+
+El CLI siempre levanta `gateway` y te deja elegir otros servicios. Si eliges
+`catalogo-service`, tambien ejecuta `docker compose up -d` para Postgres y Redis.
+
+Primera vez, o cuando cambien migraciones de Prisma, ejecuta en otra terminal:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
+pnpm.cmd exec prisma migrate dev
+pnpm.cmd prisma:seed
+```
+
+URLs principales:
+
+```text
+Gateway:          http://localhost:5000
+Catalogo service: http://localhost:5002
+Docs catalogos:   http://localhost:5002/docs
+```
+
+Para apagar los procesos Node del CLI, presiona `Ctrl+C` en la terminal del CLI.
+
+Docker queda levantado porque el CLI usa `docker compose up -d`. Para apagar
+Postgres y Redis:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
+docker compose down
+```
+
+### 4.2 Frontend con CLI
+
+Primero compila `commons`, porque los frontends importan componentes desde su
+carpeta `dist`.
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
 pnpm.cmd --filter @nexoroute/commons build
 ```
 
-Repite este comando cada vez que cambies algo en:
+Despues abre el CLI:
 
-```text
-apps/frontends/commons/src
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\frontends\dev-cli
+pnpm.cmd dev
 ```
 
-## 5. Levantar servicios
+El CLI siempre levanta `shell` y te deja elegir los microfrontends.
 
-Abre una terminal por cada comando.
+URLs:
 
-### Mock API
+```text
+Shell:       http://localhost:3000
+Auth:        http://localhost:3001
+Catalogos:   http://localhost:3002
+Dashboard:   http://localhost:3003
+Operaciones: http://localhost:3004
+```
+
+Para apagar los frontends del CLI, presiona `Ctrl+C` en esa terminal.
+
+## 5. Levantar individualmente
+
+Usa esta forma cuando quieras ver logs separados o levantar solo una parte.
+
+### 5.1 Backend individual
+
+Terminal 1, Docker para Postgres y Redis:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
+docker compose up -d
+```
+
+Primera vez o despues de cambios en Prisma:
+
+```powershell
+pnpm.cmd exec prisma migrate dev
+pnpm.cmd prisma:seed
+```
+
+Terminal 2, catalogo-service:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
+pnpm.cmd start:dev
+```
+
+Terminal 3, gateway:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\gateway
+pnpm.cmd start:dev
+```
+
+Para apagar Node usa `Ctrl+C` en cada terminal. Para apagar Docker:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
+docker compose down
+```
+
+### 5.2 Frontend individual
+
+Primero:
 
 ```powershell
 cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
-pnpm.cmd --filter @nexoroute/mock-api dev
-```
-
-URL:
-
-```text
-http://localhost:4000
-```
-
-### Catalogos
-
-```powershell
-cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
-pnpm.cmd --filter @nexoroute/catalogos-front dev
-```
-
-URL:
-
-```text
-http://localhost:3002
-```
-
-Remote:
-
-```text
-http://localhost:3002/_next/static/chunks/remoteEntry.js
-```
-
-### Operaciones
-
-```powershell
-cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
-pnpm.cmd --filter @nexoroute/operaciones-front dev
-```
-
-URL:
-
-```text
-http://localhost:3004
-```
-
-Remote:
-
-```text
-http://localhost:3004/_next/static/chunks/remoteEntry.js
-```
-
-### Shell
-
-```powershell
-cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
-pnpm.cmd --filter @nexoroute/shell dev
-```
-
-URL principal:
-
-```text
-http://localhost:3000
-```
-
-## 6. Orden recomendado
-
-1. Instalar dependencias:
-
-```powershell
-pnpm.cmd install
-```
-
-2. Compilar commons:
-
-```powershell
 pnpm.cmd --filter @nexoroute/commons build
 ```
 
-3. Levantar API:
+Luego abre una terminal por app:
 
 ```powershell
-pnpm.cmd --filter @nexoroute/mock-api dev
-```
-
-4. Levantar catalogos:
-
-```powershell
+pnpm.cmd --filter @nexoroute/auth-front dev
 pnpm.cmd --filter @nexoroute/catalogos-front dev
-```
-
-5. Levantar operaciones:
-
-```powershell
+pnpm.cmd --filter @nexoroute/dashboard-reportes-front dev
 pnpm.cmd --filter @nexoroute/operaciones-front dev
-```
-
-6. Levantar shell:
-
-```powershell
 pnpm.cmd --filter @nexoroute/shell dev
 ```
 
-7. Abrir:
+Orden recomendado:
 
-```text
-http://localhost:3000
-```
+1. Backend: Docker, `catalogo-service`, `gateway`.
+2. Frontend: `commons build`.
+3. Microfrontends que uses: auth/catalogos/dashboard/operaciones.
+4. Shell al final.
+5. Abrir `http://localhost:3000`.
+
+## 6. Puertos
+
+| Parte | Puerto | Notas |
+| --- | ---: | --- |
+| Shell | 3000 | Host de Module Federation |
+| Auth front | 3001 | Remote `auth` |
+| Catalogos front | 3002 | Remote `catalogos` |
+| Dashboard/reportes front | 3003 | Remote `dashboard-reportes` |
+| Operaciones front | 3004 | Remote `operaciones` |
+| Gateway backend | 5000 | URL que deberian usar los frontends |
+| Catalogo service | 5002 | API de catalogos |
+| Postgres | 5432 | Docker |
+| Redis | 6379 | Docker |
 
 ## 7. Builds
 
-Build de shell:
-
 ```powershell
+pnpm.cmd --filter @nexoroute/commons build
+pnpm.cmd --filter @nexoroute/auth-front build
+pnpm.cmd --filter @nexoroute/catalogos-front build
+pnpm.cmd --filter @nexoroute/dashboard-reportes-front build
+pnpm.cmd --filter @nexoroute/operaciones-front build
 pnpm.cmd --filter @nexoroute/shell build
 ```
 
-Build de catalogos:
+Backend:
 
 ```powershell
-pnpm.cmd --filter @nexoroute/catalogos-front build
-```
-
-Build de operaciones:
-
-```powershell
-pnpm.cmd --filter @nexoroute/operaciones-front build
+pnpm.cmd --filter gateway build
+pnpm.cmd --filter catalogo-service build
 ```
 
 ## 8. Problemas comunes
 
-### PowerShell no deja correr pnpm
+### El shell da 404 al entrar a Viajes
 
-Usa:
-
-```powershell
-pnpm.cmd
-```
-
-en vez de:
-
-```powershell
-pnpm
-```
-
-### El shell no carga un modulo
-
-Revisa que el microfrontend este levantado y que su remote abra:
+Revisa que `operaciones-front` este levantado y que exista:
 
 ```text
-http://localhost:3002/_next/static/chunks/remoteEntry.js
 http://localhost:3004/_next/static/chunks/remoteEntry.js
 ```
 
-Si cambiaste `.env.local`, reinicia el servidor correspondiente.
+Tambien revisa `apps/frontends/shell/.env.local`:
 
-### Cambie commons y no se refleja
+```env
+NEXT_PUBLIC_MF_OPERACIONES=http://localhost:3004/_next/static/chunks/remoteEntry.js
+```
+
+### Error RUNTIME-008 de Module Federation
+
+Significa que el shell no pudo descargar el `remoteEntry.js`.
+
+Checklist:
+
+- El microfrontend esta corriendo.
+- El puerto del `.env.local` del shell coincide con el puerto real.
+- Abriste el remote directo en el navegador.
+- Reiniciaste el shell despues de cambiar `.env.local`.
+
+### Cambie commons y no se ve
 
 Vuelve a compilar:
 
@@ -271,4 +300,35 @@ Vuelve a compilar:
 pnpm.cmd --filter @nexoroute/commons build
 ```
 
-Luego reinicia shell y los microfrontends que usen `commons`.
+Despues reinicia el frontend que lo usa.
+
+### El backend no conecta a la base
+
+Revisa que Docker este prendido:
+
+```powershell
+docker ps
+```
+
+Si no aparece Postgres/Redis:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
+docker compose up -d
+```
+
+### El gateway responde pero catalogos no
+
+Revisa que `catalogo-service` tenga `PORT=5002` en su `.env`. Si no existe ese
+archivo, el servicio puede caer al puerto default del codigo y el gateway no lo
+va a encontrar.
+
+### Google Maps no aparece
+
+Revisa en `apps/frontends/operaciones-front/.env.local`:
+
+```env
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_api_key_de_google_maps
+```
+
+Despues reinicia `operaciones-front`.
