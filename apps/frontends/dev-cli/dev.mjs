@@ -199,6 +199,16 @@ async function main() {
         return;
     }
 
+    // 1) Build opcional del paquete compartido de frontend.
+    if (withCommons) {
+        await runOnce(
+            'pnpm',
+            ['--filter', '@nexoroute/commons', 'build'],
+            ROOT,
+            'build @nexoroute/commons',
+        );
+    }
+
     // 2) Levantar cada servicio seleccionado.
     console.log('');
     for (const key of toStart) {
@@ -211,18 +221,6 @@ async function main() {
             continue;
         }
         launchService(key);
-    }
-
-    // 3) Prisma Studio (opcional), sobre el task-service.
-    if (withCommons && existsSync(join(ROOT, 'task-service'))) {
-        const child = spawnProcess('pnpm', ['--filter', '@nexorute/commons', 'build'], {
-            cwd: join(ROOT, 'task-service'),
-        });
-        const prefix = chalk.blue('[commons]');
-        child.stdout.on('data', (d) => process.stdout.write(prefixChunk(prefix, d)));
-        child.stderr.on('data', (d) => process.stderr.write(prefixChunk(prefix, d)));
-        children.push(child);
-        console.log(`${prefix} ${chalk.green('iniciado')}`);
     }
 
     if (children.length === 0) {

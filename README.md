@@ -43,7 +43,18 @@ pnpm.cmd install
 No vi archivos `.env.example` en el proyecto. Por ahora crea estos archivos a
 mano. No subas `.env`, `.env.local` ni API keys reales.
 
-### apps/frontends/shell/.env.local
+### Frontend
+
+Todos los microfrontends que usan Module Federation necesitan
+`NEXT_PRIVATE_LOCAL_WEBPACK=true`. Si falta, Next muestra este error:
+
+```text
+process.env.NEXT_PRIVATE_LOCAL_WEBPACK is not set to true
+```
+
+El shell tambien necesita saber en que puerto esta cada remote.
+
+#### apps/frontends/shell/.env.local
 
 ```env
 NEXT_PUBLIC_MF_AUTH=http://localhost:3001/_next/static/chunks/remoteEntry.js
@@ -55,14 +66,26 @@ NEXT_PUBLIC_MF_OPERACIONES=http://localhost:3004/_next/static/chunks/remoteEntry
 Importante: si `AUTH` o `DASHBOARD` apuntan al puerto incorrecto, el shell puede
 mostrar 404 o errores de Module Federation.
 
-### apps/frontends/catalogos-front/.env.local
+#### apps/frontends/auth-front/.env.local
+
+```env
+NEXT_PRIVATE_LOCAL_WEBPACK=true
+```
+
+#### apps/frontends/catalogos-front/.env.local
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
 NEXT_PRIVATE_LOCAL_WEBPACK=true
 ```
 
-### apps/frontends/operaciones-front/.env.local
+#### apps/frontends/dashboard-reportes-front/.env.local
+
+```env
+NEXT_PRIVATE_LOCAL_WEBPACK=true
+```
+
+#### apps/frontends/operaciones-front/.env.local
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
@@ -72,6 +95,21 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_api_key_de_google_maps
 
 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` se usa para el mapa de viajes. Debe ser una
 key restringida en Google Cloud y no debe subirse al repo.
+
+Resumen de puertos de frontend:
+
+| App | Puerto | Variable/remote |
+| --- | ---: | --- |
+| shell | 3000 | App principal |
+| auth-front | 3001 | `NEXT_PUBLIC_MF_AUTH` |
+| catalogos-front | 3002 | `NEXT_PUBLIC_MF_CATALOGOS` |
+| dashboard-reportes-front | 3003 | `NEXT_PUBLIC_MF_DASHBOARD` |
+| operaciones-front | 3004 | `NEXT_PUBLIC_MF_OPERACIONES` |
+
+`NEXT_PUBLIC_API_URL` debe apuntar al gateway backend, no directo al
+microservicio. En local es `http://localhost:5000`.
+
+### Backend
 
 ### apps/backend/gateway/.env
 
