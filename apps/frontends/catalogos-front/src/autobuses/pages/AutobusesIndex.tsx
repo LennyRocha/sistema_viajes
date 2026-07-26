@@ -96,13 +96,30 @@ export default function AutobusesIndexPage({
     }
   }, [tipoBus, institucion]);
 
-  if (query.error) {
+  const dispatchRefetchs = () => {
+    query.refetch();
+    tiposQuery.refetch();
+    institucionesQuery.refetch();
+    serviciosQuery.refetch();
+  };
+
+  if (
+    query.isError ||
+    tiposQuery.isError ||
+    institucionesQuery.isError ||
+    serviciosQuery.isError
+  ) {
     return (
       <HandleResponseError
-        error={query.error as any}
+        error={
+          (query.error as any) ||
+          (tiposQuery.error as any) ||
+          (institucionesQuery.error as any) ||
+          (serviciosQuery.error as any)
+        }
         router={router as any}
         path={pathname}
-        onRetry={query.refetch}
+        onRetry={dispatchRefetchs}
       />
     );
   }
