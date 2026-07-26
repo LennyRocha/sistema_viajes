@@ -5,6 +5,7 @@ import {
   Tabla,
   CommonPageProps,
   HandleResponseError,
+  EmptyState,
 } from "@nexoroute/commons";
 import React from "react";
 import {
@@ -54,6 +55,9 @@ export default function AutobusesIndexPage({
   const [institucion, setInstitucion] =
     React.useState<number>(0);
 
+  const [byFilters, setByFilters] =
+    React.useState<boolean>(false);
+
   const query = useGetAutobusesQuery({
     active: active,
     tipo_bus: tipoBus,
@@ -62,6 +66,9 @@ export default function AutobusesIndexPage({
   const tiposQuery = useGetTiposAutobusQuery();
   const institucionesQuery = useGetInstitucionesQuery({
     active: true,
+  });
+  const serviciosQuery = useGetAutobusesQuery({
+    active: false,
   });
   const [dispatch, { isLoading }] =
     useChangeStatusAutobusMutation();
@@ -80,6 +87,15 @@ export default function AutobusesIndexPage({
     tipoBus,
     institucion,
   );
+
+  React.useEffect(() => {
+    if (tipoBus !== 0 || institucion !== 0) {
+      setByFilters(true);
+    } else {
+      setByFilters(false);
+    }
+  }, [tipoBus, institucion]);
+
   if (query.error) {
     return (
       <HandleResponseError
@@ -112,72 +128,97 @@ export default function AutobusesIndexPage({
         }
         buttonTitle="Nuevo"
         leftIcon={<Add />}
-      />
-      <Tabla<BusTablaType>
-        titulo="Autobuses"
-        subtitulo="Listado de autobuses disponibles"
-        columnas={columnas}
-        data={list ?? []}
         isLoading={
           query.isLoading ||
           query.isFetching ||
           tiposQuery.isLoading ||
-          institucionesQuery.isLoading
-        }
-        onEditClick={(row) =>
-          navigationFunction(
-            `/buses/editar/${row.codigo_interno}`,
-          )
-        }
-        onToggleActiveClick={(row) =>
-          showDialog({
-            title: "¿Cambiar estado del autobús?",
-            content: (
-              <DialogContentText>
-                ¿Desea cambiar el estado del autobús
-                {row.codigo_interno}, alias "{row.alias}" de{" "}
-                {row.estatus ? "activo" : "inactivo"} a{" "}
-                {row.estatus ? "inactivo" : "activo"}?
-              </DialogContentText>
-            ),
-            showCloseButton: true,
-            showCancelButton: true,
-            onConfirm: () => {
-              onChangeStatus(row.id ?? -1, {
-                snack,
-                mutate: dispatch,
-              });
-              query.refetch();
-            },
-            onClose: () => {},
-            isLoading: isLoading,
-            submitOnEnter: true,
-          })
-        }
-        onInfoClick={(row) =>
-          openSidebar({
-            title: "Detalles del autobús",
-            children: <BusDetails row={row} />,
-          })
-        }
-        subHeaderComponent={
-          <SubHeaderComponent
-            alias={alias}
-            setAlias={setAlias}
-            codigo={codigo}
-            setCodigo={setCodigo}
-            clearFilters={clearFilters}
-            tiposQuery={tiposQuery}
-            institucionesQuery={institucionesQuery}
-            tipoBus={tipoBus}
-            setTipoBus={setTipoBus}
-            institucion={institucion}
-            setInstitucion={setInstitucion}
-            active={active}
-            setActive={setActive}
-          />
+          institucionesQuery.isLoading ||
+          serviciosQuery.isLoading
         }
       />
+      {query.data?.length === 0 && !byFilters ? (
+        <EmptyState
+          variant="no-data"
+          title="No hay autobuses disponibles"
+          description="Actualmente no hay autobuses disponibles para mostrar. Por favor, agregue un nuevo autobús para continuar."
+          action={{
+            label: "Agregar autobús",
+            onClick: () =>
+              navigationFunction("/dashboard/buses/nuevo"),
+          }}
+          imageSize={{
+            width: 200,
+            height: 200,
+          }}
+        />
+      ) : (
+        <Tabla<BusTablaType>
+          titulo="Autobuses"
+          subtitulo="Listado de autobuses disponibles"
+          columnas={columnas}
+          data={list ?? []}
+          isLoading={
+            query.isLoading ||
+            query.isFetching ||
+            tiposQuery.isLoading ||
+            institucionesQuery.isLoading ||
+            serviciosQuery.isLoading
+          }
+          onEditClick={(row) =>
+            navigationFunction(
+              `/dashboard/buses/editar/${row.codigo_interno}`,
+            )
+          }
+          onToggleActiveClick={(row) =>
+            showDialog({
+              title: "¿Cambiar estado del autobús?",
+              content: (
+                <DialogContentText>
+                  ¿Desea cambiar el estado del autobús
+                  {row.codigo_interno}, alias "{row.alias}"
+                  de {row.estatus ? "activo" : "inactivo"} a{" "}
+                  {row.estatus ? "inactivo" : "activo"}?
+                </DialogContentText>
+              ),
+              showCloseButton: true,
+              showCancelButton: true,
+              onConfirm: () => {
+                onChangeStatus(row.id ?? -1, {
+                  snack,
+                  mutate: dispatch,
+                });
+                query.refetch();
+              },
+              onClose: () => {},
+              isLoading: isLoading,
+              submitOnEnter: true,
+            })
+          }
+          onInfoClick={(row) =>
+            openSidebar({
+              title: "Detalles del autobús",
+              children: <BusDetails row={row} />,
+            })
+          }
+          subHeaderComponent={
+            <SubHeaderComponent
+              alias={alias}
+              setAlias={setAlias}
+              codigo={codigo}
+              setCodigo={setCodigo}
+              clearFilters={clearFilters}
+              tiposQuery={tiposQuery}
+              institucionesQuery={institucionesQuery}
+              tipoBus={tipoBus}
+              setTipoBus={setTipoBus}
+              institucion={institucion}
+              setInstitucion={setInstitucion}
+              active={active}
+              setActive={setActive}
+            />
+          }
+        />
+      )}
     </>
   );
 }

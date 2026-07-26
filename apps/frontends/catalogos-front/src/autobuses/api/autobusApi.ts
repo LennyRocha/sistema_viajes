@@ -31,7 +31,7 @@ export const autobusApi = api.injectEndpoints({
       string
     >({
       query: (codigoInterno: string) =>
-        `/autobuses/codigo-interno/${codigoInterno}`,
+        `/autobuses/codigo/${codigoInterno}`,
       providesTags: ["Autobus"],
     }),
 

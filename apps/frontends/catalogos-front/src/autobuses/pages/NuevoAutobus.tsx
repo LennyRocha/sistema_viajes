@@ -58,7 +58,7 @@ export default function NuevoAutobus({
     trigger,
     setValue,
     watch,
-    formState: { errors, isDirty, isValid, dirtyFields },
+    formState: { errors, isDirty, isValid },
   } = useForm<AutobusSchema>({
     resolver: zodResolver(autobusSchema),
     defaultValues: autobusTemplate,
@@ -133,6 +133,20 @@ export default function NuevoAutobus({
   const disponiblesQuery =
     useGetDisponibilidadMatchingQuery(params);
 
+  const filteredUnselectedServices = React.useMemo(() => {
+    const servicios = watch("servicios");
+    if (!disponiblesQuery.data) return [];
+    if (servicios.length === 0)
+      return disponiblesQuery.data;
+    return disponiblesQuery.data.filter(
+      (disponible) =>
+        !servicios.some(
+          (servicio) =>
+            servicio.servicioId === disponible.id,
+        ),
+    );
+  }, [disponiblesQuery.data, watch("servicios")]);
+
   const loading =
     res.isLoading ||
     tiposQuery.isLoading ||
@@ -200,6 +214,12 @@ export default function NuevoAutobus({
         }
         buttonTitle="Volver"
         leftIcon={<ChevronLeft />}
+        isLoading={
+          res.isLoading ||
+          tiposQuery.isLoading ||
+          institucionesQuery.isLoading ||
+          disponiblesQuery.isLoading
+        }
       />
       <Box
         sx={{
@@ -601,8 +621,9 @@ export default function NuevoAutobus({
         </Box>
       </PaperBlock>
       <SelectorServicios
+        fullList={disponiblesQuery.data ?? []}
         openSidebar={openSidebar}
-        existingServices={disponiblesQuery.data ?? []}
+        existingServices={filteredUnselectedServices}
         selectedServices={watch("servicios")}
         updateList={(services) => {
           setValue("servicios", services, {

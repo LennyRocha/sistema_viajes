@@ -37,7 +37,7 @@ export const campoConfigSchema = z.object({
       "switch",
     ])
     .optional(),
-  requerido: z.boolean().optional(),
+  requerido: z.boolean(),
   min: z
     .number()
     .min(0, {
@@ -75,7 +75,7 @@ export const campoConfigSchema = z.object({
     })
     .optional(),
   opciones: z
-    .array(z.string().or(z.boolean()).or(z.number()))
+    .array(z.string().or(z.number()))
     .min(1, {
       message:
         "La propiedad debe tener al menos una opción",
