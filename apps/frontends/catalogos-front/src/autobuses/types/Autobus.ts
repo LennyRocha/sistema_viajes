@@ -8,7 +8,7 @@ import Asiento from "./Asiento";
 export default interface Autobus extends Auditory {
   id?: number;
   institucion: Institucion;
-  tipo: TipoAutobus;
+  tipoAutobus: TipoAutobus;
   alias: string;
   marca: string;
   modelo: string;

@@ -16,7 +16,7 @@ export default interface CampoConfig {
     | "radio"
     | "switch";
 
-  requerido?: boolean;
+  requerido: boolean;
 
   min?: number;
 
