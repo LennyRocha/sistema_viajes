@@ -35,7 +35,7 @@ export default function CampoField({
     if (campo.visible) {
       const { campo: campoVisible, valor } = campo.visible;
       const shouldBeVisible =
-        properties[campoVisible] !== valor;
+        properties[campoVisible] === valor;
       setVisible(shouldBeVisible);
 
       if (!shouldBeVisible) {

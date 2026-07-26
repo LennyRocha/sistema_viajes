@@ -72,7 +72,10 @@ export function DialogProvider({
     if (!dialogOpen) return;
 
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Esc" && !dialogProps?.isLoading)
+      if (
+        (e.key === "Escape" || e.key === "Esc") &&
+        !dialogProps?.isLoading
+      )
         hideDialog();
     }
 
@@ -107,6 +110,10 @@ export function DialogProvider({
     confirmDialog,
     dialogProps?.submitOnEnter,
   ]);
+
+  React.useEffect(() => {
+    hideDialog();
+  }, []);
 
   return (
     <DialogContext.Provider value={contextValue}>

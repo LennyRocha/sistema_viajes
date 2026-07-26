@@ -223,7 +223,7 @@ const optionsColumn = <T extends GridValidRowModel>(
         {callbacks.onToggleActiveClick && (
           <Switch
             checked={
-              params.row.estatus || params.row.estado
+              params.row.estatus ?? params.row.estado
             }
             onClick={(e) => e.stopPropagation()}
             onChange={() =>

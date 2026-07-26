@@ -1,56 +1,161 @@
 import React from "react";
 import {
-  PaperHeader,
   Breadcrumb,
-  PaperBlock,
-  FormButtonsRow,
   CommonPageProps,
+  EmptyState,
+  FormButtonsRow,
   getYearsList,
   HandleResponseError,
+  PaperBlock,
+  PaperHeader,
 } from "@nexoroute/commons";
+import { skipToken } from "@reduxjs/toolkit/query";
 import {
-  Box,
-  TextField,
-  MenuItem,
-  CircularProgress,
-} from "@mui/material";
+  useGetAutobusByCodigoInternoQuery,
+  usePatchAutobusMutation,
+} from "../api/autobusApi";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft } from "@mui/icons-material";
-import VehiculoPreview from "../components/VehiculoPreview";
-import SelectorServicios from "../components/SelectorServicios";
-import BusMap from "../components/BusMap";
-import AsientoSimbología from "../components/AsientoSimbología";
+import { TextField, MenuItem } from "@mui/material";
 import { useForm } from "react-hook-form";
-import {
-  autobusSchema,
-  AutobusSchema,
-} from "../validations/autobusZod";
-import { autobusTemplate } from "../templates/autobusTemplate";
-import { zodResolver } from "@hookform/resolvers/zod/dist/zod.js";
-import onSubmit from "../forms/onNewAutobusSubmit";
-import { useCreateAutobusMutation } from "../api/autobusApi";
-import { useGetTiposAutobusQuery } from "../../tipos_autobus/api/tiposAutobusApi";
-import { useGetInstitucionesQuery } from "../../instituciones/api/institucionesApi";
-import Modelo3DName from "../../tipos_autobus/types/Modelo3DName";
 import { useGetDisponibilidadMatchingQuery } from "../../disponibilidad-servicios/api/disponibilidadApi";
+import { useGetInstitucionesQuery } from "../../instituciones/api/institucionesApi";
+import { useGetTiposAutobusQuery } from "../../tipos_autobus/api/tiposAutobusApi";
+import Modelo3DName from "../../tipos_autobus/types/Modelo3DName";
+import AsientoSimbología from "../components/AsientoSimbología";
+import BusMap from "../components/BusMap";
+import SelectorServicios from "../components/SelectorServicios";
+import VehiculoPreview from "../components/VehiculoPreview";
 import {
-  plantillaEstandar,
   plantillaPremium,
+  plantillaEstandar,
   plantillaShuttle,
 } from "../constants/asientosPlantilla";
+import onSubmit from "../forms/onUpdateAutobusSubmit";
 import { AsientoEstado } from "../types/AsientoEstado";
+import {
+  AutobusSchema,
+  autobusSchema,
+} from "../validations/autobusZod";
+import { getAutobusDirtyValues } from "../utils/getAutobusDirtyValues";
+import { mapAutobusResponseToFormValues } from "../utils/mapAutobusResponse";
 
-interface NuevoAutobusProps extends CommonPageProps {}
+interface EditarServicioProps extends CommonPageProps {
+  codigo_interno?: string;
+}
 
-export default function NuevoAutobus({
+export default function EditarAutobus({
   navigationFunction,
   openSidebar,
   closeSidebar = () => {},
   showDialog = () => {},
   snack,
   router,
-  userPrivileges = [],
   pathname,
-}: Readonly<NuevoAutobusProps>) {
+  codigo_interno,
+  userPrivileges = [],
+}: Readonly<EditarServicioProps>) {
+  const query = useGetAutobusByCodigoInternoQuery(
+    codigo_interno ?? skipToken,
+  );
+
+  if (!codigo_interno) {
+    return (
+      <EmptyState
+        variant="warning"
+        title="Parámetro de autobús no definido"
+        description="No se ha especificado un autobús para editar"
+        action={{
+          label: "volver atrás",
+          onClick() {
+            router?.replace("/dashboard/buses");
+          },
+        }}
+        fullHeight
+      />
+    );
+  }
+
+  if (query.isLoading || query.isFetching) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress
+          size="3rem"
+          aria-label="Loading…"
+        />
+      </Box>
+    );
+  }
+
+  if (!query.data) {
+    return (
+      <EmptyState
+        variant="no-data"
+        title="Autobús no encontrado"
+        description="El autobús con el código interno especificado no existe"
+        fullHeight
+        action={{
+          label: "volver atrás",
+          onClick() {
+            router?.replace("/dashboard/buses");
+          },
+        }}
+      />
+    );
+  }
+
+  if (query.error) {
+    return (
+      <HandleResponseError
+        error={query.error as any}
+        router={router as any}
+        path={pathname}
+        onRetry={query.refetch}
+      />
+    );
+  }
+
+  return (
+    <Form
+      query={query}
+      navigationFunction={navigationFunction}
+      openSidebar={openSidebar}
+      closeSidebar={closeSidebar}
+      showDialog={showDialog}
+      snack={snack}
+      router={router}
+      pathname={pathname}
+      codigo_interno={codigo_interno}
+      userPrivileges={userPrivileges}
+    />
+  );
+}
+
+const Form = ({
+  query,
+  navigationFunction,
+  openSidebar,
+  closeSidebar = () => {},
+  showDialog = () => {},
+  snack,
+  router,
+  pathname,
+  codigo_interno,
+  userPrivileges = [],
+}: Readonly<EditarServicioProps & { query: any }>) => {
+  const template: AutobusSchema = autobusSchema.parse(
+    mapAutobusResponseToFormValues(query.data),
+  );
   const {
     register,
     handleSubmit,
@@ -58,10 +163,11 @@ export default function NuevoAutobus({
     trigger,
     setValue,
     watch,
-    formState: { errors, isDirty, isValid },
+    getValues,
+    formState: { errors, isDirty, isValid, dirtyFields },
   } = useForm<AutobusSchema>({
     resolver: zodResolver(autobusSchema),
-    defaultValues: autobusTemplate,
+    defaultValues: template,
     mode: "all",
     reValidateMode: "onChange",
   });
@@ -70,14 +176,19 @@ export default function NuevoAutobus({
     Record<string, string[]>
   >({});
 
-  const [mutate, res] = useCreateAutobusMutation();
+  const [mutate, res] = usePatchAutobusMutation();
   const tiposQuery = useGetTiposAutobusQuery();
   const institucionesQuery = useGetInstitucionesQuery({
     active: true,
   });
 
   const doSubmit = async (data: AutobusSchema) => {
-    return await onSubmit(data, {
+    const values = getValues();
+    const payload = getAutobusDirtyValues(
+      dirtyFields,
+      values,
+    );
+    return await onSubmit(payload, query.data.id, {
       snack,
       navigationFunction,
       mutate,
@@ -126,9 +237,12 @@ export default function NuevoAutobus({
     };
   }, [watch("tipo_autobus_id"), watch("institucion_id")]);
 
-  React.useEffect(() => {
-    setValue("servicios", []);
-  }, [watch("tipo_autobus_id"), watch("institucion_id")]);
+  const resetServicios = () => {
+    setValue("servicios", [], {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
 
   const disponiblesQuery =
     useGetDisponibilidadMatchingQuery(params);
@@ -198,16 +312,16 @@ export default function NuevoAutobus({
         breads={[
           { nombre: "Autobuses", href: "/dashboard/buses" },
           {
-            nombre: "Nuevo",
-            href: "/dashboard/buses/nuevo",
+            nombre: codigo_interno ?? "Editar",
+            href: `/dashboard/buses/editar/${codigo_interno}`,
             disabled: true,
           },
         ]}
       />
       <PaperHeader
-        title="Nuevo autobús"
-        subtitle="Agrega un nuevo autobús para que se pueda utilizar en los viajes"
-        iconname="add"
+        title="Actualizar autobús"
+        subtitle="Modifica los datos de un autobús existente"
+        iconname="edit"
         showButton
         onButtonClick={() =>
           navigationFunction("/dashboard/buses")
@@ -353,7 +467,7 @@ export default function NuevoAutobus({
                 required
                 fullWidth
                 value={watch("institucion_id")}
-                onChange={(e) =>
+                onChange={(e) => {
                   setValue(
                     "institucion_id",
                     Number(e.target.value),
@@ -361,8 +475,9 @@ export default function NuevoAutobus({
                       shouldValidate: true,
                       shouldDirty: true,
                     },
-                  )
-                }
+                  );
+                  resetServicios();
+                }}
                 select
                 disabled={institucionesQuery.isLoading}
                 defaultValue={
@@ -393,7 +508,7 @@ export default function NuevoAutobus({
               required
               label="Tipo de autobús"
               value={watch("tipo_autobus_id")}
-              onChange={(e) =>
+              onChange={(e) => {
                 setValue(
                   "tipo_autobus_id",
                   Number(e.target.value),
@@ -401,8 +516,9 @@ export default function NuevoAutobus({
                     shouldValidate: true,
                     shouldDirty: true,
                   },
-                )
-              }
+                );
+                resetServicios();
+              }}
               disabled={tiposQuery.isLoading}
               defaultValue={tiposQuery.data?.[0]?.id ?? ""}
               size="small"
@@ -637,11 +753,11 @@ export default function NuevoAutobus({
       <FormButtonsRow
         onSubmitClick={handleSubmit(doSubmit)}
         hasRequiredFields
-        onResetClick={() => reset(autobusTemplate)}
+        onResetClick={() => reset(template)}
         submitDisabled={!isDirty || !isValid}
         isLoading={res.isLoading}
         resetDisabled={!isDirty}
       />
     </>
   );
-}
+};

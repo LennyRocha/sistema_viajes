@@ -150,6 +150,7 @@ export default function ServiciosIndex({
                 }),
               onClose: () => {},
               isLoading: isLoading,
+              submitOnEnter: true,
             })
           }
           subHeaderComponent={
