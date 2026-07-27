@@ -67,7 +67,7 @@ export default function ServiciosIndex({
     setOption,
   } = useServicesFilter(query.data ?? []);
 
-  if (query.error) {
+  if (query.isError) {
     return (
       <HandleResponseError
         error={query.error as any}
@@ -150,6 +150,7 @@ export default function ServiciosIndex({
                 }),
               onClose: () => {},
               isLoading: isLoading,
+              submitOnEnter: true,
             })
           }
           subHeaderComponent={

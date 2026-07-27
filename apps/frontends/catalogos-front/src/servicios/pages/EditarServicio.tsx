@@ -110,7 +110,7 @@ export default function EditarServicio({
     );
   }
 
-  if (query.error) {
+  if (query.isError) {
     return (
       <HandleResponseError
         error={query.error as any}

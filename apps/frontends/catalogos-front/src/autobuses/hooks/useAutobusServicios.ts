@@ -3,7 +3,7 @@ import AutobusServicio from "../types/AutobusServicio";
 
 type AutobusServicioItem = Pick<
   AutobusServicio,
-  "id" | "configuracion_servicio"
+  "servicioId" | "configuracion_servicio"
 >;
 
 type useAutobusServiciosProps = {
@@ -24,16 +24,22 @@ export default function useAutobusServicios({
   const update = (updatedItem: AutobusServicioItem) => {
     updateList(
       selected.map((item) =>
-        item.id === updatedItem.id ? updatedItem : item,
+        item.servicioId === updatedItem.servicioId
+          ? updatedItem
+          : item,
       ),
     );
   };
 
   const remove = (id: number) => {
-    updateList(selected.filter((item) => item.id !== id));
+    updateList(
+      selected.filter((item) => item.servicioId !== id),
+    );
   };
 
-  const find = (id?: number): ServicioExterno | undefined => {
+  const find = (
+    id?: number,
+  ): ServicioExterno | undefined => {
     return servicios.find((s) => s.id === id);
   };
 

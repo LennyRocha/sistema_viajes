@@ -1,13 +1,42 @@
+"use client";
 import MainLayout from "@/src/layout/MainLayout";
-import React from "react";
+import { federatedComponent } from "@/src/lib/loadRemote";
+import { useDialog } from "@/src/providers/DialogProvider";
+import { useSidebar } from "@/src/providers/SidebarProvider";
+import { snack } from "@nexoroute/commons";
+import { usePathname, useRouter } from "next/navigation";
+import { use } from "react";
 
 type Props = {
-  params: {
+  params: Promise<{
     codigo_interno: string;
-  };
+  }>;
 };
 
-export default async function page({ params }: Props) {
-  const { codigo_interno } = await params;
-  return <MainLayout>page {codigo_interno}</MainLayout>;
+const EditarAutobus = federatedComponent(
+  "catalogos/AutobusesModule",
+  "EditarAutobus",
+  "form",
+);
+
+export default function Page({ params }: Readonly<Props>) {
+  const { codigo_interno } = use(params);
+  const router = useRouter();
+  const { showDialog } = useDialog();
+  const { showSidebar, hideSidebar } = useSidebar();
+  const pathname = usePathname();
+  return (
+    <MainLayout>
+      <EditarAutobus
+        navigationFunction={router.push}
+        showDialog={showDialog}
+        snack={snack}
+        openSidebar={showSidebar}
+        closeSidebar={hideSidebar}
+        router={router}
+        codigo_interno={codigo_interno}
+        pathname={pathname}
+      />
+    </MainLayout>
+  );
 }

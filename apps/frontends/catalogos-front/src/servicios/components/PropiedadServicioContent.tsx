@@ -154,6 +154,14 @@ export default function PropiedadServicioContent({
       propiedad.inputTipo,
     ],
   );
+  React.useEffect(() => {
+    if (propiedad.requerido === undefined) {
+      setPropiedad({
+        ...propiedad,
+        requerido: false,
+      });
+    }
+  }, []);
   return (
     <Box
       sx={{
@@ -343,11 +351,7 @@ export default function PropiedadServicioContent({
         <FormControlLabel
           control={
             <Checkbox
-              checked={
-                propiedad.requerido
-                  ? propiedad.requerido
-                  : false
-              }
+              checked={propiedad.requerido ?? false}
               onChange={(e) =>
                 setPropiedad({
                   ...propiedad,
@@ -508,7 +512,10 @@ export default function PropiedadServicioContent({
                 >
                   {propiedadDependiente?.opciones?.map(
                     (opcion) => (
-                      <MenuItem key={opcion} value={opcion}>
+                      <MenuItem
+                        key={crypto.randomUUID()}
+                        value={opcion}
+                      >
                         {opcion}
                       </MenuItem>
                     ),
@@ -1707,122 +1714,137 @@ const TextTypeSection = ({
           )}
         </motion.div>
       </Box>
-      <Box
-        sx={{
+      <motion.div
+        initial={{ opacity: 0, display: "none", y: -10 }}
+        animate={
+          !listChecked
+            ? { opacity: 1, display: "flex", y: 0 }
+            : { opacity: 0, display: "none", y: -10 }
+        }
+        exit={{ opacity: 0, display: "none", y: -10 }}
+        style={{
           display: "flex",
           flexDirection: "column",
           gap: "4px",
-          alignItems: "flex-start",
-          justifyContent: "center",
         }}
       >
-        <Typography
-          variant="h6"
-          color="secondary"
-          sx={{ fontWeight: "600" }}
-        >
-          Formato de texto
-        </Typography>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={regexChecked}
-              onChange={(e) => {
-                setRegexChecked(e.target.checked);
-                if (!e.target.checked) {
-                  setPropiedad({
-                    ...propiedad,
-                    regex: undefined,
-                  });
-                  setCustomRegex("");
-                }
-              }}
-              disabled={readOnly}
-            />
-          }
-          label="Esta propiedad debe cumplir con un formato específico (expresión regular)"
+        <Box
           sx={{
-            color: "text.secondary",
-            fontSize: "0.75rem",
-            "& .MuiFormControlLabel-label": {
-              fontSize: "0.75rem",
-            },
-          }}
-        />
-        <motion.div
-          initial={{ opacity: 0, height: 0, y: -10 }}
-          animate={
-            regexChecked
-              ? { opacity: 1, height: "auto", y: 0 }
-              : { opacity: 0, height: 0, y: -10 }
-          }
-          exit={{ opacity: 0, height: 0, y: -10 }}
-          style={{
             display: "flex",
             flexDirection: "column",
-            gap: "8px",
-            width: "100%",
+            gap: "4px",
+            alignItems: "flex-start",
+            justifyContent: "center",
           }}
         >
-          <TextField
-            label={`Formato de texto (expresión regular)`}
-            type="text"
-            value={regexSelectValue}
-            disabled={readOnly}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === "custom") {
-                setCustomRegex(customRegex || " ");
-                setPropiedad({
-                  ...propiedad,
-                  regex: customRegex || "",
-                });
-              } else {
-                setCustomRegex("");
-                setPropiedad({
-                  ...propiedad,
-                  regex: value,
-                });
-              }
-            }}
-            sx={{
-              mt: "8px",
-            }}
-            size="small"
-            fullWidth
-            select
+          <Typography
+            variant="h6"
+            color="secondary"
+            sx={{ fontWeight: "600" }}
           >
-            {regexOptions.map((option) => (
-              <MenuItem
-                key={option.value}
-                value={option.value}
-              >
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
-          {regexSelectValue === "custom" && (
+            Formato de texto
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={regexChecked}
+                onChange={(e) => {
+                  setRegexChecked(e.target.checked);
+                  if (!e.target.checked) {
+                    setPropiedad({
+                      ...propiedad,
+                      regex: undefined,
+                    });
+                    setCustomRegex("");
+                  }
+                }}
+                disabled={readOnly}
+              />
+            }
+            label="Esta propiedad debe cumplir con un formato específico (expresión regular)"
+            sx={{
+              color: "text.secondary",
+              fontSize: "0.75rem",
+              "& .MuiFormControlLabel-label": {
+                fontSize: "0.75rem",
+              },
+            }}
+          />
+          <motion.div
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={
+              regexChecked
+                ? { opacity: 1, height: "auto", y: 0 }
+                : { opacity: 0, height: 0, y: -10 }
+            }
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+              width: "100%",
+            }}
+          >
             <TextField
-              label={`Formato (expresión regular)`}
+              label={`Formato de texto (expresión regular)`}
               type="text"
-              value={customRegex.trim() ?? ""}
+              value={regexSelectValue}
               disabled={readOnly}
               onChange={(e) => {
-                setCustomRegex(e.target.value);
-                setPropiedad({
-                  ...propiedad,
-                  regex: e.target.value,
-                });
+                const value = e.target.value;
+                if (value === "custom") {
+                  setCustomRegex(customRegex || " ");
+                  setPropiedad({
+                    ...propiedad,
+                    regex: customRegex || "",
+                  });
+                } else {
+                  setCustomRegex("");
+                  setPropiedad({
+                    ...propiedad,
+                    regex: value,
+                  });
+                }
               }}
               sx={{
                 mt: "8px",
               }}
               size="small"
               fullWidth
-            />
-          )}
-        </motion.div>
-      </Box>
+              select
+            >
+              {regexOptions.map((option) => (
+                <MenuItem
+                  key={option.value}
+                  value={option.value}
+                >
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
+            {regexSelectValue === "custom" && (
+              <TextField
+                label={`Formato (expresión regular)`}
+                type="text"
+                value={customRegex.trim() ?? ""}
+                disabled={readOnly}
+                onChange={(e) => {
+                  setCustomRegex(e.target.value);
+                  setPropiedad({
+                    ...propiedad,
+                    regex: e.target.value,
+                  });
+                }}
+                sx={{
+                  mt: "8px",
+                }}
+                size="small"
+                fullWidth
+              />
+            )}
+          </motion.div>
+        </Box>
+      </motion.div>
     </>
   );
 };

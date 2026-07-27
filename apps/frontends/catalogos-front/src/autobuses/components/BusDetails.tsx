@@ -1,13 +1,18 @@
 import React from "react";
-import Autobus from "../types/Autobus";
 import {
   Box,
+  Chip,
   Divider,
   Skeleton,
   Typography,
 } from "@mui/material";
 import tiposBus from "../../tipos_autobus/constants/TiposBusMapper";
 import dynamic from "next/dynamic";
+import { BusTablaType } from "../types/BusTablaType";
+import ServicioExterno from "../../servicios/types/ServicioExterno";
+import { ServicioIcon } from "@nexoroute/commons";
+import AutobusServicio from "../types/AutobusServicio";
+import { AnimatePresence, motion } from "framer-motion";
 const Vehiculo3D = dynamic(
   () =>
     import("../../federation").then(
@@ -26,10 +31,19 @@ const Vehiculo3D = dynamic(
 );
 
 type Props = {
-  row: Autobus;
+  row: BusTablaType;
+  servicios: ServicioExterno[];
 };
 
-const BusDetails = ({ row }: Props) => {
+const BusDetails = ({ row, servicios }: Props) => {
+  const findServicio = (id: number) => {
+    const servicio = servicios.find(
+      (servicio) => servicio.id === id,
+    );
+    return servicio;
+  };
+  const [selectedServicio, setSelectedServicio] =
+    React.useState<AutobusServicio | null>(null);
   return (
     <Box
       sx={{
@@ -86,10 +100,10 @@ const BusDetails = ({ row }: Props) => {
           Institución propietaria: {row.institucion.nombre}
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          Tipo: {row.tipo.nombre}
+          Tipo: {row.tipoAutobus.nombre}
         </Typography>
         <Vehiculo3D
-          tipo={tiposBus[row.tipo.id - 1].model}
+          tipo={tiposBus[row.tipoAutobus.id - 1].model}
         />
         <Typography
           variant="caption"
@@ -137,7 +151,7 @@ const BusDetails = ({ row }: Props) => {
           Capacidad total: {row.capacidad}
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          Estado: {row.estado}
+          Estado: {row.autobus_estado}
         </Typography>
         <Divider />
       </Box>
@@ -158,15 +172,82 @@ const BusDetails = ({ row }: Props) => {
           >
             Servicios disponibles
           </Typography>
-          <Typography
-            variant="caption"
-            color="textSecondary"
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 1,
+              width: "100%",
+            }}
           >
-            {row.servicios
-              .map((servicio) => servicio.activo)
-              .join(", ")}
-          </Typography>
+            {row.servicios.map((servicio) => {
+              const service = findServicio(
+                servicio.servicio_id ?? -1,
+              );
+              return selectedServicio?.servicio_id ===
+                servicio.servicio_id ? (
+                <Chip
+                  sx={{
+                    paddingLeft: 1.5,
+                  }}
+                  key={servicio.id}
+                  label={service?.nombre ?? ""}
+                  variant={"outlined"}
+                  color={"accent"}
+                  icon={
+                    <ServicioIcon
+                      size="xs"
+                      name={service?.icono_nombre ?? ""}
+                    />
+                  }
+                  onDelete={() => setSelectedServicio(null)}
+                />
+              ) : (
+                <Chip
+                  sx={{
+                    paddingLeft: 1.5,
+                  }}
+                  key={servicio.id}
+                  label={service?.nombre ?? ""}
+                  variant={"outlined"}
+                  color={"secondary"}
+                  icon={
+                    <ServicioIcon
+                      size="xs"
+                      name={service?.icono_nombre ?? ""}
+                    />
+                  }
+                  onClick={() => {
+                    setSelectedServicio(null);
+                    setTimeout(
+                      () => setSelectedServicio(servicio),
+                      300,
+                    );
+                  }}
+                />
+              );
+            })}
+          </Box>
           <Divider />
+          <AnimatePresence mode="wait">
+            {selectedServicio && (
+              <motion.div
+                key={selectedServicio.id}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                {Object.entries(
+                  selectedServicio.config_servicio ?? {},
+                ).map(([key, value]) => (
+                  <Typography key={key} variant="caption">
+                    {key}: {isBooleanOrValue(value)}
+                  </Typography>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Box>
       )}
     </Box>
@@ -174,3 +255,10 @@ const BusDetails = ({ row }: Props) => {
 };
 
 export default BusDetails;
+
+function isBooleanOrValue(value: any): string {
+  if (typeof value === "boolean") {
+    return value ? "Sí" : "No";
+  }
+  return String(value);
+}

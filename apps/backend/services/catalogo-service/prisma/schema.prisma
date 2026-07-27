@@ -79,6 +79,7 @@ model Institucion {
   id          Int    @id @default(autoincrement())
   nombre      String @unique @db.VarChar(100)
   descripcion String @db.VarChar(255)
+  slug        String @unique @db.VarChar(100)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

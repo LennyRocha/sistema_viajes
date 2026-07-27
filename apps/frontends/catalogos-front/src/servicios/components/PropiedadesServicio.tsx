@@ -1,6 +1,7 @@
 import React from "react";
 import ServicioExterno from "../types/ServicioExterno";
 import { Box, Typography } from "@mui/material";
+import { boolean } from "zod";
 
 type Props = {
   servicio: ServicioExterno;
@@ -18,7 +19,11 @@ export default function PropiedadesServicio({
       ? isObject.length
       : "No aplica";
   };
-  const valor = (value) => (value ? "Sí" : "No");
+  const valor = (value) => {
+    if (value === true || value === false)
+      return value ? "true" : "false";
+    return value;
+  };
   return (
     <>
       {servicio.propiedades.map((propiedad) => (

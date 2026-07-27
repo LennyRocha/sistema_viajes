@@ -12,7 +12,7 @@ import { ServiciosService } from '../servicios/servicios.service';
 import { TiposAutobusService } from '../tipos_autobus/tipo_bus.service';
 import slugify from 'slugify';
 
-const LIST_CACHE_KEY = 'servicios:list';
+const LIST_CACHE_KEY = 'autobuses:list';
 
 @Injectable()
 export class AutobusesService {
@@ -112,12 +112,12 @@ export class AutobusesService {
     return autobus;
   }
 
-  async findAll(active: boolean, tipo_bus = 0) {
+  async findAll(active: boolean, tipo_bus = 0, institucion = 0) {
     this.logger.debug('Obteniendo todos los autobuses');
 
     // 1) ¿está en caché?
     try {
-      const cached = await this.redis.get<Autobus[]>(LIST_CACHE_KEY);
+      let cached = await this.redis.get<Autobus[]>(LIST_CACHE_KEY);
       if (cached) {
         this.logger.debug(
           {
@@ -127,7 +127,12 @@ export class AutobusesService {
           },
           'Autobuses obtenidos desde caché',
         );
-        return active ? cached.filter((s) => s.estatus) : cached;
+        if (active) cached = cached.filter((s) => s.estatus);
+        if (tipo_bus !== 0)
+          cached = cached.filter((s) => s.tipo_autobus_id === tipo_bus);
+        if (institucion !== 0)
+          cached = cached.filter((s) => s.institucion_id === institucion);
+        return cached;
       }
     } catch (error) {
       this.logger.error(
@@ -147,6 +152,10 @@ export class AutobusesService {
 
     if (tipo_bus !== 0) {
       where.tipo_autobus_id = tipo_bus;
+    }
+
+    if (institucion !== 0) {
+      where.institucion_id = institucion;
     }
 
     // 2) no está → base de datos
@@ -188,7 +197,12 @@ export class AutobusesService {
 
     const autobus = await this.prisma.autobus.findUnique({
       include: {
-        servicios: true,
+        servicios: {
+          where: { servicio: { estatus: true } },
+          include: {
+            servicio: true,
+          },
+        },
         tipoAutobus: true,
         institucion: true,
       },
@@ -225,7 +239,12 @@ export class AutobusesService {
 
     const autobus = await this.prisma.autobus.findUnique({
       include: {
-        servicios: true,
+        servicios: {
+          where: { servicio: { estatus: true } },
+          include: {
+            servicio: true,
+          },
+        },
         tipoAutobus: true,
         institucion: true,
       },
@@ -259,7 +278,12 @@ export class AutobusesService {
 
     const autobus = await this.prisma.autobus.findUnique({
       include: {
-        servicios: true,
+        servicios: {
+          where: { servicio: { estatus: true } },
+          include: {
+            servicio: true,
+          },
+        },
         tipoAutobus: true,
         institucion: true,
       },

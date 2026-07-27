@@ -26,6 +26,38 @@ export default function AutobusServicioForm({
     Record<string, unknown>
   >({});
 
+  const isValid = React.useMemo(() => {
+    return propiedades.every((campo) => {
+      const isVisible = campo.visible
+        ? properties[campo.visible.campo] ===
+          campo.visible.valor
+        : true;
+
+      if (!isVisible) return true; // oculto: no bloquea
+      if (!campo.requerido) return true; // opcional: no bloquea
+
+      const value = properties[campo.clave];
+      return (
+        value !== null &&
+        value !== undefined &&
+        value !== ""
+      );
+    });
+  }, [propiedades, properties]);
+
+  const sanitizeProperties = (
+    props: Record<string, unknown>,
+  ): Record<string, unknown> => {
+    return Object.fromEntries(
+      Object.entries(props).filter(
+        ([, value]) =>
+          value !== null &&
+          value !== undefined &&
+          value !== "",
+      ),
+    );
+  };
+
   const addProperty = React.useCallback(
     (clave: string, valor: string | number | boolean) => {
       setProperties((prev) => ({
@@ -69,24 +101,12 @@ export default function AutobusServicioForm({
         variant="outlined"
         size="small"
         fullWidth
-        disabled={
-          Object.keys(properties).length === 0 ||
-          Object.keys(properties).length !==
-            propiedades.length ||
-          Object.entries(properties).some(
-            ([key, value]) => {
-              return (
-                value === null ||
-                value === undefined ||
-                value === ""
-              );
-            },
-          )
-        }
+        disabled={!isValid}
         onClick={() =>
           agregarServicio({
             servicioId: id_servicio,
-            configuracion_servicio: properties,
+            configuracion_servicio:
+              sanitizeProperties(properties),
           })
         }
       >

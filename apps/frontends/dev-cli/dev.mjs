@@ -223,6 +223,18 @@ async function main() {
         launchService(key);
     }
 
+    // 3) Build a commons si el usuario lo pidió. Esto es independiente de los frontends, y se hace en paralelo.
+    if (withCommons) {
+        const child = spawnProcess('pnpm', ['--filter', '@nexoroute/commons', 'build'], {
+            cwd: join(ROOT, 'commons'),
+        });
+        const prefix = chalk.blue('[commons]');
+        child.stdout.on('data', (d) => process.stdout.write(prefixChunk(prefix, d)));
+        child.stderr.on('data', (d) => process.stderr.write(prefixChunk(prefix, d)));
+        children.push(child);
+        console.log(`${prefix} ${chalk.green('iniciado')}`);
+    }
+
     if (children.length === 0) {
         console.log(chalk.yellow('\nNo se levanto ningun servicio.'));
         return;

@@ -119,7 +119,7 @@ export default function NuevoServicio({
   ).filter(([field]) => field.startsWith("propiedades."));
 
   if (
-    res.error &&
+    res.isError &&
     errs.data?.message !== "Error de validación"
   ) {
     return (

@@ -26,6 +26,7 @@ import AutobusServicioForm from "./AutobusServicioForm";
 import useAutobusServicios from "../hooks/useAutobusServicios";
 
 type Props = {
+  fullList: ServicioExterno[];
   existingServices: ServicioExterno[];
   selectedServices?: Pick<
     AutobusServicio,
@@ -47,6 +48,7 @@ export default function SelectorServicios({
   openSidebar,
   closeSidebar,
   updateList,
+  fullList,
 }: Readonly<Props>) {
   const [query, setQuery] = React.useState("");
   const normalizedQuery = query.trim().toLowerCase();
@@ -56,7 +58,8 @@ export default function SelectorServicios({
       existingServices.filter(
         (servicio) =>
           !selectedServices.some(
-            (selected) => selected.id === servicio.id,
+            (selected) =>
+              selected.servicioId === servicio.id,
           ) &&
           (normalizedQuery
             ? servicio.nombre
@@ -69,7 +72,7 @@ export default function SelectorServicios({
 
   const { add, update, remove, find } = useAutobusServicios(
     {
-      servicios: existingServices,
+      servicios: fullList,
       selected: selectedServices,
       updateList,
     },
@@ -143,9 +146,14 @@ export default function SelectorServicios({
                 })}
                 secondaryAction={
                   <IconButton
+                    disabled={selectedServices.length >= 12}
                     edge="end"
                     aria-label="add_service"
-                    color="primary"
+                    color={
+                      selectedServices.length >= 12
+                        ? "inherit"
+                        : "primary"
+                    }
                     onClick={() => {
                       setPickedService(servicio);
                       openSidebar({
@@ -198,14 +206,15 @@ export default function SelectorServicios({
             title="No hay servicios agregados"
           />
         ) : (
-          selectedServices.map((servicio) => {
+          selectedServices.map((servicio, index) => {
             const info = find(servicio.servicioId);
             return (
               <ListItem
-                key={servicio.servicioId}
+                key={servicio.servicioId ?? index + 1}
                 sx={(theme) => ({
                   backgroundColor:
-                    pickedBusService?.id === servicio.servicioId
+                    pickedBusService?.id ===
+                    servicio.servicioId
                       ? theme.palette.action.selected
                       : "inherit",
                 })}
@@ -268,6 +277,13 @@ export default function SelectorServicios({
           })
         )}
       </Box>
+      {selectedServices.length >= 12 && (
+        <Typography variant="caption" color="error">
+          Se ha alcanzado el límite máximo de 12 servicios
+          seleccionados. Para agregar más, elimine uno de
+          los servicios existentes.
+        </Typography>
+      )}
     </PaperBlock>
   );
 }
