@@ -62,7 +62,10 @@ export default function EmptyState({
         loading="lazy"
       />
 
-      <Typography variant="h5" sx={{ fontWeight: 600 }}>
+      <Typography
+        variant="h5"
+        sx={{ fontWeight: 600, textAlign: "center" }}
+      >
         {title}
       </Typography>
 

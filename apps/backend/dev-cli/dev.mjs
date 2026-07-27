@@ -31,6 +31,7 @@ const SERVICES = {
         args: ['start:dev'],
         docker: true, // levanta Postgres + Redis antes de arrancar
         color: 'cyan',
+        seeds: true, // puede ejecutar seeds
     },
 };
 
@@ -145,6 +146,7 @@ async function main() {
 
     let selected;
     let withStudio;
+    let withSeeds;
 
     if (dry) {
         selected = Object.keys(SERVICES);
@@ -156,6 +158,10 @@ async function main() {
         });
         withStudio = await confirm({
             message: '¿Abrir Prisma Studio (explorador visual de la BD)?',
+            default: false,
+        });
+        withSeeds = await confirm({
+            message: '¿Cargar datos de prueba (seeds) de todos los servicios ?',
             default: false,
         });
     }
@@ -173,7 +179,9 @@ async function main() {
     console.log(
         `  ${withStudio ? chalk.green('✓') : chalk.gray('·')} Prisma Studio`,
     );
-
+    console.log(
+        `  ${withSeeds ? chalk.green('✓') : chalk.gray('·')} Datos de prueba`,
+    );
     if (dry) {
         console.log(chalk.gray('\n(--dry) No se lanza nada. Solo se muestra el plan.'));
         return;
@@ -192,7 +200,22 @@ async function main() {
         }
     }
 
-    // 2) Levantar cada servicio seleccionado.
+    // 2) Seeds (datos de prueba) para los servicios que lo necesiten.
+    if (withSeeds) {
+        for (const key of toStart) {
+            const s = SERVICES[key];
+            if (s.seeds && existsSync(join(ROOT, s.dir))) {
+                await runOnce(
+                    'pnpm',
+                    ['prisma:seed'],
+                    join(ROOT, s.dir),
+                    `pnpm prisma:seed (${key})`,
+                );
+            }
+        }
+    }
+
+    // 3) Levantar cada servicio seleccionado.
     console.log('');
     for (const key of toStart) {
         if (!existsSync(join(ROOT, SERVICES[key].dir))) {
@@ -206,7 +229,7 @@ async function main() {
         launchService(key);
     }
 
-    // 3) Prisma Studio (opcional), sobre el catalogo-service.
+    // 4) Prisma Studio (opcional), sobre el catalogo-service.
     if (withStudio && existsSync(join(ROOT, 'catalogo-service'))) {
         const child = spawnProcess('pnpm', ['exec', 'prisma', 'studio'], {
             cwd: join(ROOT, 'catalogo-service'),

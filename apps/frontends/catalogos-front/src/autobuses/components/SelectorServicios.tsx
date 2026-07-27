@@ -146,9 +146,14 @@ export default function SelectorServicios({
                 })}
                 secondaryAction={
                   <IconButton
+                    disabled={selectedServices.length >= 12}
                     edge="end"
                     aria-label="add_service"
-                    color="primary"
+                    color={
+                      selectedServices.length >= 12
+                        ? "inherit"
+                        : "primary"
+                    }
                     onClick={() => {
                       setPickedService(servicio);
                       openSidebar({
@@ -272,6 +277,13 @@ export default function SelectorServicios({
           })
         )}
       </Box>
+      {selectedServices.length >= 12 && (
+        <Typography variant="caption" color="error">
+          Se ha alcanzado el límite máximo de 12 servicios
+          seleccionados. Para agregar más, elimine uno de
+          los servicios existentes.
+        </Typography>
+      )}
     </PaperBlock>
   );
 }

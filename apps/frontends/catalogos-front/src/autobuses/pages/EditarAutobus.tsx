@@ -114,7 +114,7 @@ export default function EditarAutobus({
     );
   }
 
-  if (query.error) {
+  if (query.isError) {
     return (
       <HandleResponseError
         error={query.error as any}
@@ -269,7 +269,8 @@ const Form = ({
 
   if (
     tiposQuery.isLoading ||
-    institucionesQuery.isLoading
+    institucionesQuery.isLoading ||
+    disponiblesQuery.isLoading
   ) {
     return (
       <Box
@@ -291,12 +292,19 @@ const Form = ({
 
   if (
     tiposQuery.isError ||
+    institucionesQuery.isError ||
+    disponiblesQuery.isError ||
     (res.error &&
       errs.data?.message !== "Error de validación")
   ) {
     return (
       <HandleResponseError
-        error={(res.error as any) || tiposQuery.error}
+        error={
+          (res.error as any) ||
+          tiposQuery.error ||
+          institucionesQuery.error ||
+          disponiblesQuery.error
+        }
         router={router as any}
         path={pathname}
         onRetry={

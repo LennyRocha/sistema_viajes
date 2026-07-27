@@ -4,12 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Error 500",
-  description: "Error interno del servidor",
+  title: "Error 404",
+  description: "Página no encontrada",
 };
 
-//Mover esto a app/error.tsx y cambiar el nombre del archivo a error.tsx
-const InternalServerServer = () => {
+const NotFound = () => {
   return (
     <Box
       sx={{
@@ -41,25 +40,25 @@ const InternalServerServer = () => {
             fontSize: "150px",
           }}
         >
-          500
+          404
         </Typography>
         <Typography variant="h5">
-          Error interno del servidor
+          Página no encontrada
         </Typography>
         <Typography
           variant="body2"
           sx={{ textAlign: { xs: "center", md: "left" } }}
         >
-          Lo sentimos, ha ocurrido un error en el servidor.
-          Por favor, intenta nuevamente más tarde.
+          Lo sentimos, la página que estás buscando no
+          existe.
         </Typography>
         <Button variant="contained" size="small">
           <Link href="/">Volver al inicio</Link>
         </Button>
       </Box>
       <Image
-        src="/assets/errors/500.png"
-        alt="500 Error"
+        src="/assets/errors/404.png"
+        alt="404 Error"
         width={250}
         height={250}
         sizes="(max-width: 768px) 100vw, 25vw"
@@ -73,4 +72,4 @@ const InternalServerServer = () => {
   );
 };
 
-export default InternalServerServer;
+export default NotFound;
