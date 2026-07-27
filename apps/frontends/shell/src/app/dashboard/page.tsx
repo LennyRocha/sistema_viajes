@@ -1,22 +1,22 @@
-"use client";
-
 import {
   PaperBlock,
   PaperHeader,
   snack,
 } from "@nexoroute/commons";
 import MainLayout from "../../layout/MainLayout";
-import { useSidebar } from "../../providers/SidebarProvider";
 import { ChevronLeft } from "@mui/icons-material";
 import Button from "@mui/material/Button";
 import Image from "next/image";
 import "@/src/lib/federation";
-import { useDialog } from "../../providers/DialogProvider";
-import { DialogContentText } from "@mui/material";
+import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
+
+export const metadata: Metadata = {
+  title: "Dashboard | Nexoroute",
+  description:
+    "Panel de control para la gestión de la información del sistema, con acceso a diferentes secciones y funcionalidades según los permisos del usuario.",
+};
 
 function Home() {
-  const { showSidebar } = useSidebar();
-  const { showDialog } = useDialog();
   return (
     <div className="flex flex-col flex-1 items-center justify-center font-sans  gap-10 ">
       <PaperHeader
@@ -99,39 +99,10 @@ function Home() {
           </a>
         </div>
       </PaperBlock>
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={() =>
-          showSidebar({
-            title: "Sidebar Title",
-            children: <div>Sidebar Content</div>,
-          })
-        }
-      >
+      <Button variant="contained" color="secondary">
         Click me
       </Button>
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={() =>
-          showDialog({
-            title: "Dialog Title",
-            content: (
-              <DialogContentText>
-                {" "}
-                Let Google help apps determine location.
-                This means sending anonymous location data
-                to Google, even when no apps are running.
-              </DialogContentText>
-            ),
-            showCloseButton: true,
-            onConfirm: () =>
-              console.log("Dialog confirmed"),
-            onClose: () => console.log("Dialog closed"),
-          })
-        }
-      >
+      <Button variant="contained" color="secondary">
         Click me
       </Button>
     </div>
