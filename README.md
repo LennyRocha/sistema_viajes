@@ -138,19 +138,11 @@ terminal por cada app.
 
 Abre Docker Desktop antes de ejecutar el CLI.
 
-Antes de arrancar el CLI, prepara las librerias compartidas del backend y
-Prisma:
+Antes de arrancar el CLI, prepara las librerias compartidas del backend:
 
 ```powershell
 cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
 pnpm.cmd --dir apps\backend\commons build:all
-```
-
-Primera vez, o cuando cambie `schema.prisma`, genera Prisma Client:
-
-```powershell
-cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
-.\node_modules\.bin\prisma.CMD generate
 ```
 
 Despues ejecuta el CLI:
@@ -161,7 +153,8 @@ pnpm.cmd dev
 ```
 
 El CLI siempre levanta `gateway` y te deja elegir otros servicios. Si eliges
-`catalogo-service`, tambien ejecuta `docker compose up -d` para Postgres y Redis.
+`catalogo-service`, tambien ejecuta `docker compose up -d` para Postgres/Redis y
+`prisma generate` para evitar errores de `@prisma/client`.
 
 Primera vez, o cuando cambien migraciones de Prisma, ejecuta en otra terminal:
 

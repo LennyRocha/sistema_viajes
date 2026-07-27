@@ -10,6 +10,7 @@ import figlet from 'figlet';
 // El CLI vive en dev-cli/, y los servicios estan una carpeta arriba (la raiz del repo).
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const IS_WIN = process.platform === 'win32';
+const PRISMA_BIN = join('.', 'node_modules', '.bin', IS_WIN ? 'prisma.CMD' : 'prisma');
 
 // Servicio obligatorio: no se puede desactivar.
 const REQUIRED = 'gateway';
@@ -30,6 +31,7 @@ const SERVICES = {
         command: 'pnpm',
         args: ['start:dev'],
         docker: true, // levanta Postgres + Redis antes de arrancar
+        prismaGenerate: true, // genera @prisma/client antes de compilar en watch
         color: 'cyan',
         seeds: true, // puede ejecutar seeds
     },
@@ -200,7 +202,20 @@ async function main() {
         }
     }
 
-    // 2) Seeds (datos de prueba) para los servicios que lo necesiten.
+    // 2) Prisma Client para los servicios que lo necesiten.
+    for (const key of toStart) {
+        const s = SERVICES[key];
+        if (s.prismaGenerate && existsSync(join(ROOT, s.dir))) {
+            await runOnce(
+                PRISMA_BIN,
+                ['generate'],
+                join(ROOT, s.dir),
+                `prisma generate (${key})`,
+            );
+        }
+    }
+
+    // 3) Seeds (datos de prueba) para los servicios que lo necesiten.
     if (withSeeds) {
         for (const key of toStart) {
             const s = SERVICES[key];
@@ -215,7 +230,7 @@ async function main() {
         }
     }
 
-    // 3) Levantar cada servicio seleccionado.
+    // 4) Levantar cada servicio seleccionado.
     console.log('');
     for (const key of toStart) {
         if (!existsSync(join(ROOT, SERVICES[key].dir))) {
@@ -229,10 +244,10 @@ async function main() {
         launchService(key);
     }
 
-    // 4) Prisma Studio (opcional), sobre el catalogo-service.
-    if (withStudio && existsSync(join(ROOT, 'catalogo-service'))) {
+    // 5) Prisma Studio (opcional), sobre el catalogo-service.
+    if (withStudio && existsSync(join(ROOT, SERVICES['catalogo-service'].dir))) {
         const child = spawnProcess('pnpm', ['exec', 'prisma', 'studio'], {
-            cwd: join(ROOT, 'catalogo-service'),
+            cwd: join(ROOT, SERVICES['catalogo-service'].dir),
         });
         const prefix = chalk.blue('[prisma-studio]');
         child.stdout.on('data', (d) => process.stdout.write(prefixChunk(prefix, d)));
