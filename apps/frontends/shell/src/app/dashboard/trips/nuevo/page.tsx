@@ -12,7 +12,7 @@ export default function Page() {
   return (
     <MainLayout>
       <FederatedPage
-        remote="catalogos/ViajesModule"
+        remote="operaciones/ViajesModule"
         exportName="NuevoViaje"
         skeletonVariant="form"
       />

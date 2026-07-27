@@ -5,6 +5,9 @@ export const rutasBase: RutaBase[] = [
   {
     id: 1,
     nombre: "Ruta Centro - Universidad",
+    descripcion: "Corredor principal de entrada al campus con paradas urbanas de alta demanda.",
+    color: "#1f618d",
+    estatus: true,
     origen: {
       nombre: "Terminal Centro",
       direccion: "Centro, Cuernavaca, Morelos",
@@ -37,6 +40,9 @@ export const rutasBase: RutaBase[] = [
   {
     id: 2,
     nombre: "Ruta Norte - Parque Industrial",
+    descripcion: "Conexion norte para personal administrativo y enlaces con zona industrial.",
+    color: "#b7791f",
+    estatus: true,
     origen: {
       nombre: "Base Norte",
       direccion: "Col. Buena Vista, Cuernavaca",
@@ -63,6 +69,9 @@ export const rutasBase: RutaBase[] = [
   {
     id: 3,
     nombre: "Ruta Sur - Estadio",
+    descripcion: "Trayecto sur con cobertura para eventos y salidas especiales.",
+    color: "#6b46c1",
+    estatus: true,
     origen: {
       nombre: "Base Sur",
       direccion: "Temixco, Morelos",
@@ -85,6 +94,41 @@ export const rutasBase: RutaBase[] = [
     ],
     distanciaKm: 16.8,
     duracionMin: 39,
+  },
+  {
+    id: 4,
+    nombre: "Ruta Campus - Terminal Sur",
+    descripcion: "Salida de retorno desde campus hacia el corredor sur metropolitano.",
+    color: "#2f855a",
+    estatus: true,
+    origen: {
+      nombre: "Campus UTEZ",
+      direccion: "Emiliano Zapata, Morelos",
+      lat: 18.8505,
+      lng: -99.2005,
+    },
+    destino: {
+      nombre: "Terminal Sur",
+      direccion: "Temixco, Morelos",
+      lat: 18.8528,
+      lng: -99.2254,
+    },
+    paradas: [
+      {
+        nombre: "Zapata Centro",
+        direccion: "Emiliano Zapata, Morelos",
+        lat: 18.8387,
+        lng: -99.1845,
+      },
+      {
+        nombre: "Acatlipa",
+        direccion: "Temixco, Morelos",
+        lat: 18.8298,
+        lng: -99.2252,
+      },
+    ],
+    distanciaKm: 12.6,
+    duracionMin: 31,
   },
 ];
 
@@ -121,5 +165,15 @@ export const viajesBase: ViajeBase[] = [
     frecuencia: "Bajo demanda",
     proximaApertura: "Sin programar",
     estatus: false,
+  },
+  {
+    id: 4,
+    nombre: "Circuito campus retorno",
+    descripcion: "Viaje base armado con rutas conectadas para entrada y retorno operativo.",
+    rutas: [rutasBase[0], rutasBase[3]],
+    servicios: ["WiFi", "Equipaje", "Cargadores USB"],
+    frecuencia: "Lunes a viernes",
+    proximaApertura: "2026-07-06 13:40",
+    estatus: true,
   },
 ];
