@@ -15,13 +15,13 @@ module.exports = {
 
                 remotes: {
                     operaciones:
-                        "operaciones@http://localhost:3001/_next/static/chunks/remoteEntry.js",
+                        "operaciones@http://localhost:3004/_next/static/chunks/remoteEntry.js",
                     catalogos:
                         "catalogos@http://localhost:3002/_next/static/chunks/remoteEntry.js",
                     auth:
-                        "auth@http://localhost:3003/_next/static/chunks/remoteEntry.js",
+                        "auth@http://localhost:3001/_next/static/chunks/remoteEntry.js",
                     dashboard:
-                        "dashboard@http://localhost:3004/_next/static/chunks/remoteEntry.js",
+                        "dashboard@http://localhost:3003/_next/static/chunks/remoteEntry.js",
                 },
 
                 shared,

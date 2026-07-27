@@ -25,28 +25,28 @@ const FRONTS = {
         required: true,
     },
     'catalogos-front': {
-        label: 'catalogos-front — frontend de catálogos (:3001)',
+        label: 'catalogos-front - frontend de catalogos (:3002)',
         dir: 'catalogos-front',
         command: 'pnpm',
         args: ['dev'],
         color: 'cyan',
     },
     'operaciones-front': {
-        label: 'operaciones-front — frontend de operaciones (:3002)',
+        label: 'operaciones-front - frontend de operaciones (:3004)',
         dir: 'operaciones-front',
         command: 'pnpm',
         args: ['dev'],
         color: 'green',
     },
     'auth-front': {
-        label: 'auth-front — frontend de autenticación (:3003)',
+        label: 'auth-front - frontend de autenticacion (:3001)',
         dir: 'auth-front',
         command: 'pnpm',
         args: ['dev'],
         color: 'blue',
     },
     'dashboard-reportes-front': {
-        label: 'dashboard-reportes-front — frontend de dashboard y reportes (:3004)',
+        label: 'dashboard-reportes-front - frontend de dashboard y reportes (:3003)',
         dir: 'dashboard-reportes-front',
         command: 'pnpm',
         args: ['dev'],
@@ -197,6 +197,16 @@ async function main() {
     if (dry) {
         console.log(chalk.gray('\n(--dry) No se lanza nada. Solo se muestra el plan.'));
         return;
+    }
+
+    // 1) Build opcional del paquete compartido de frontend.
+    if (withCommons) {
+        await runOnce(
+            'pnpm',
+            ['--filter', '@nexoroute/commons', 'build'],
+            ROOT,
+            'build @nexoroute/commons',
+        );
     }
 
     // 2) Levantar cada servicio seleccionado.

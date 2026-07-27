@@ -93,10 +93,13 @@ DASHBOARD_SERVICE_URL=http://localhost:5004
 ### Para cada microservicio
 
 ```bash
-DATABASE_URL="postgresql://postgres:root@localhost:5432/catalogos_db?schema=public"
+DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=public"
 REDIS_URL="redis://localhost:6379"
 PORT=5002
 ```
+
+Postgres se expone en el host por el puerto 5437 para no chocar con un Postgres
+local. Dentro del contenedor sigue usando 5432.
 
 Reemplaza PORT y el nombre de la base de datos según el microservicio
 
