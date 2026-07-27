@@ -50,8 +50,9 @@ export default function EditarServicio({
   snack,
   router,
   userPrivileges = [],
-  servicioName,
   pathname,
+  userRoles = [],
+  servicioName,
 }: Readonly<EditarServicioProps>) {
   const query = useGetServicioByNameQuery(
     servicioName ?? skipToken,
