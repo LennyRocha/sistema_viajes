@@ -48,12 +48,12 @@ export default function NuevoViaje({
       <Breadcrumb
         rolActual="Rol actual"
         breads={[
-          { nombre: "Viajes", href: "/trips" },
+          { nombre: "Viajes", href: "/dashboard/trips" },
           {
             nombre: isEditing ? "Editar" : "Nuevo",
             href: isEditing
-              ? `/trips/editar/${viajeId}`
-              : "/trips/nuevo",
+              ? `/dashboard/trips/editar/${viajeId}`
+              : "/dashboard/trips/nuevo",
             disabled: true,
           },
         ]}
@@ -63,7 +63,7 @@ export default function NuevoViaje({
         subtitle="Define rutas asociadas, servicios y apertura operativa"
         iconname={isEditing ? "edit" : "add"}
         showButton
-        onButtonClick={() => navigationFunction("/trips")}
+        onButtonClick={() => navigationFunction("/dashboard/trips")}
         buttonTitle="Volver"
         leftIcon={<ChevronLeft />}
       />
@@ -185,9 +185,9 @@ export default function NuevoViaje({
               ? "Viaje base actualizado"
               : "Viaje base creado",
           });
-          navigationFunction("/trips");
+          navigationFunction("/dashboard/trips");
         }}
-        onResetClick={() => navigationFunction("/trips")}
+        onResetClick={() => navigationFunction("/dashboard/trips")}
       />
     </>
   );

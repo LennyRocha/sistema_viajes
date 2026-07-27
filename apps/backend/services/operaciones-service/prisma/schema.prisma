@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["operaciones"]
+}
+
+model ConfiguracionOperacion {
+  id          Int      @id @default(autoincrement())
+  clave       String   @unique @db.VarChar(80)
+  valor       Json
+  descripcion String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@schema("operaciones")
+}
+
+model Ruta {
+  id               Int      @id @default(autoincrement())
+  nombre           String   @unique @db.VarChar(120)
+  descripcion      String?  @db.VarChar(500)
+  origen           Json
+  destino          Json
+  paradas          Json
+  waypoints        Json?
+  encodedPolyline  String?  @db.Text
+  distanciaMetros  Int?
+  duracionSegundos Int?
+  estatus          Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdBy        String?  @db.VarChar(50)
+  updatedBy        String?  @db.VarChar(50)
+
+  viajes ViajeBaseRuta[]
+
+  @@schema("operaciones")
+}
+
+model ViajeBase {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @unique @db.VarChar(120)
+  descripcion String?  @db.VarChar(500)
+  frecuencia  String?  @db.VarChar(80)
+  estatus     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?  @db.VarChar(50)
+  updatedBy   String?  @db.VarChar(50)
+
+  rutas ViajeBaseRuta[]
+
+  @@schema("operaciones")
+}
+
+model ViajeBaseRuta {
+  id                       Int      @id @default(autoincrement())
+  viajeBaseId              Int
+  rutaId                   Int
+  orden                    Int
+  conexion                 Json?
+  conexionEncodedPolyline  String?  @db.Text
+  distanciaConexionMetros  Int?
+  requiereConexion         Boolean  @default(false)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  viajeBase ViajeBase @relation(fields: [viajeBaseId], references: [id], onDelete: Cascade)
+  ruta      Ruta      @relation(fields: [rutaId], references: [id])
+
+  @@unique([viajeBaseId, orden])
+  @@unique([viajeBaseId, rutaId, orden])
+  @@schema("operaciones")
+}
