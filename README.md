@@ -38,6 +38,16 @@ cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
 pnpm.cmd install
 ```
 
+Si PNPM pregunta por reconstruir o purgar `node_modules`, en Windows puedes
+evitar el prompt con:
+
+```powershell
+pnpm.cmd install --config.confirmModulesPurge=false
+```
+
+Esto no es un paso especial del proyecto; solo evita una confirmacion
+interactiva de PNPM cuando cambia el workspace.
+
 ## 3. Variables de entorno
 
 No vi archivos `.env.example` en el proyecto. Por ahora crea estos archivos a
@@ -129,6 +139,13 @@ DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=publ
 REDIS_URL="redis://localhost:6379"
 ```
 
+### apps/backend/services/operaciones-service/.env
+
+```env
+PORT=5003
+DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=operaciones&options=--search_path%3Doperaciones"
+```
+
 ## 4. Levantar con CLI
 
 Esta es la forma recomendada cuando quieres levantar varias cosas sin abrir una
@@ -153,8 +170,12 @@ pnpm.cmd dev
 ```
 
 El CLI siempre levanta `gateway` y te deja elegir otros servicios. Si eliges
-`catalogo-service`, tambien ejecuta `docker compose up -d` para Postgres/Redis y
-`prisma generate` para evitar errores de `@prisma/client`.
+`catalogo-service` u `operaciones-service`, tambien ejecuta:
+
+- `docker compose up -d` para Postgres/Redis.
+- `prisma migrate deploy` para aplicar migraciones pendientes.
+- `prisma generate` para generar el cliente Prisma.
+- `prisma db seed` para seeds idempotentes, como configuraciones base.
 
 Primera vez, o cuando cambien migraciones de Prisma, ejecuta en otra terminal:
 
@@ -163,6 +184,10 @@ cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\ap
 .\node_modules\.bin\prisma.CMD migrate dev
 .\node_modules\.bin\prisma.CMD db seed
 ```
+
+Nota: el CLI aplica migraciones ya creadas. Cuando alguien modifique
+`schema.prisma`, esa persona debe crear y commitear la migracion con
+`prisma migrate dev --name nombre_del_cambio`; los demas solo levantan con CLI.
 
 URLs principales:
 

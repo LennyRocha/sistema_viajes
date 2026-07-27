@@ -55,7 +55,7 @@ export default function ViajesIndex({
         breads={[
           {
             nombre: "Viajes",
-            href: "/trips",
+            href: "/dashboard/trips",
             disabled: true,
           },
         ]}
@@ -65,7 +65,7 @@ export default function ViajesIndex({
         subtitle="Composicion operativa de rutas, servicios y apertura en calendario"
         iconname="trip"
         showButton
-        onButtonClick={() => navigationFunction("/trips/nuevo")}
+        onButtonClick={() => navigationFunction("/dashboard/trips/nuevo")}
         buttonTitle="Nuevo"
         leftIcon={<Add />}
       />
@@ -159,7 +159,7 @@ export default function ViajesIndex({
                     size="small"
                     aria-label="Editar viaje base"
                     onClick={() =>
-                      navigationFunction(`/trips/editar/${viaje.id}`)
+                      navigationFunction(`/dashboard/trips/editar/${viaje.id}`)
                     }
                   >
                     <Edit />

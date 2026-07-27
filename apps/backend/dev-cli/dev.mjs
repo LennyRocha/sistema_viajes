@@ -31,9 +31,21 @@ const SERVICES = {
         command: 'pnpm',
         args: ['start:dev'],
         docker: true, // levanta Postgres + Redis antes de arrancar
+        prismaMigrate: true,
         prismaGenerate: true, // genera @prisma/client antes de compilar en watch
         color: 'cyan',
         seeds: true, // puede ejecutar seeds
+    },
+    'operaciones-service': {
+        label: 'operaciones-service - API de rutas y viajes (:5003)',
+        dir: 'services/operaciones-service',
+        command: 'pnpm',
+        args: ['start:dev'],
+        dockerDir: 'services/catalogo-service',
+        prismaMigrate: true,
+        prismaGenerate: true,
+        color: 'green',
+        seedAlways: true,
     },
 };
 
@@ -82,12 +94,26 @@ function runOnce(command, args, cwd, tag) {
     return new Promise((resolve) => {
         console.log(chalk.gray(`  → ${tag}`));
         const p = spawnProcess(command, args, { cwd, stdio: 'inherit' });
-        p.on('exit', () => resolve());
+        p.on('exit', (code) => {
+            if (code === 0) {
+                resolve(true);
+                return;
+            }
+            console.log(chalk.red(`  x ${tag}: termino con codigo ${code}`));
+            resolve(false);
+        });
         p.on('error', (err) => {
             console.log(chalk.red(`  ✗ ${tag}: ${err.message}`));
-            resolve();
+            resolve(false);
         });
     });
+}
+
+async function runRequired(command, args, cwd, tag) {
+    const ok = await runOnce(command, args, cwd, tag);
+    if (!ok) {
+        throw new Error(`${tag} fallo. Corrige ese paso antes de levantar los servicios.`);
+    }
 }
 
 function launchService(key) {
@@ -192,21 +218,35 @@ async function main() {
     // 1) Docker (Postgres/Redis) para los servicios que lo necesiten.
     for (const key of toStart) {
         const s = SERVICES[key];
-        if (s.docker && existsSync(join(ROOT, s.dir))) {
-            await runOnce(
+        const dockerDir = s.dockerDir ?? s.dir;
+        if ((s.docker || s.dockerDir) && existsSync(join(ROOT, dockerDir))) {
+            await runRequired(
                 'docker',
                 ['compose', 'up', '-d'],
-                join(ROOT, s.dir),
+                join(ROOT, dockerDir),
                 `docker compose up -d (${key})`,
             );
         }
     }
 
-    // 2) Prisma Client para los servicios que lo necesiten.
+    // 2) Migraciones Prisma para los servicios que lo necesiten.
+    for (const key of toStart) {
+        const s = SERVICES[key];
+        if (s.prismaMigrate && existsSync(join(ROOT, s.dir))) {
+            await runRequired(
+                PRISMA_BIN,
+                ['migrate', 'deploy'],
+                join(ROOT, s.dir),
+                `prisma migrate deploy (${key})`,
+            );
+        }
+    }
+
+    // 3) Prisma Client para los servicios que lo necesiten.
     for (const key of toStart) {
         const s = SERVICES[key];
         if (s.prismaGenerate && existsSync(join(ROOT, s.dir))) {
-            await runOnce(
+            await runRequired(
                 PRISMA_BIN,
                 ['generate'],
                 join(ROOT, s.dir),
@@ -215,22 +255,20 @@ async function main() {
         }
     }
 
-    // 3) Seeds (datos de prueba) para los servicios que lo necesiten.
-    if (withSeeds) {
-        for (const key of toStart) {
-            const s = SERVICES[key];
-            if (s.seeds && existsSync(join(ROOT, s.dir))) {
-                await runOnce(
-                    'pnpm',
-                    ['prisma:seed'],
-                    join(ROOT, s.dir),
-                    `pnpm prisma:seed (${key})`,
-                );
-            }
+    // 4) Seeds idempotentes o datos de prueba para los servicios que lo necesiten.
+    for (const key of toStart) {
+        const s = SERVICES[key];
+        if ((s.seedAlways || (withSeeds && s.seeds)) && existsSync(join(ROOT, s.dir))) {
+            await runRequired(
+                PRISMA_BIN,
+                ['db', 'seed'],
+                join(ROOT, s.dir),
+                `prisma db seed (${key})`,
+            );
         }
     }
 
-    // 4) Levantar cada servicio seleccionado.
+    // 5) Levantar cada servicio seleccionado.
     console.log('');
     for (const key of toStart) {
         if (!existsSync(join(ROOT, SERVICES[key].dir))) {
@@ -244,7 +282,7 @@ async function main() {
         launchService(key);
     }
 
-    // 5) Prisma Studio (opcional), sobre el catalogo-service.
+    // 6) Prisma Studio (opcional), sobre el catalogo-service.
     if (withStudio && existsSync(join(ROOT, SERVICES['catalogo-service'].dir))) {
         const child = spawnProcess('pnpm', ['exec', 'prisma', 'studio'], {
             cwd: join(ROOT, SERVICES['catalogo-service'].dir),
