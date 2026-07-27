@@ -12,8 +12,8 @@ export default function Page() {
   return (
     <MainLayout>
       <FederatedPage
-        remote="catalogos/ViajesModule"
-        exportName="ListaViajes"
+        remote="operaciones/ViajesModule"
+        exportName="ViajesIndex"
         skeletonVariant="table"
       />
     </MainLayout>

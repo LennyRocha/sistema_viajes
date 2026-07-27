@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
+import net from 'node:net';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,6 +23,7 @@ const SERVICES = {
         dir: 'gateway',
         command: 'pnpm',
         args: ['start:dev'],
+        port: 5000,
         color: 'magenta',
         required: true,
     },
@@ -30,6 +32,7 @@ const SERVICES = {
         dir: 'services/catalogo-service',
         command: 'pnpm',
         args: ['start:dev'],
+        port: 5002,
         docker: true, // levanta Postgres + Redis antes de arrancar
         prismaMigrate: true,
         prismaGenerate: true, // genera @prisma/client antes de compilar en watch
@@ -41,6 +44,7 @@ const SERVICES = {
         dir: 'services/operaciones-service',
         command: 'pnpm',
         args: ['start:dev'],
+        port: 5003,
         dockerDir: 'services/catalogo-service',
         prismaMigrate: true,
         prismaGenerate: true,
@@ -114,6 +118,41 @@ async function runRequired(command, args, cwd, tag) {
     if (!ok) {
         throw new Error(`${tag} fallo. Corrige ese paso antes de levantar los servicios.`);
     }
+}
+
+function isPortFree(port) {
+    return new Promise((resolve) => {
+        const server = net.createServer();
+        server.once('error', () => resolve(false));
+        server.once('listening', () => {
+            server.close(() => resolve(true));
+        });
+        server.listen(port, '0.0.0.0');
+    });
+}
+
+async function assertPortsFree(keys) {
+    const busy = [];
+
+    for (const key of keys) {
+        const port = SERVICES[key]?.port;
+        if (!port) continue;
+        const free = await isPortFree(port);
+        if (!free) busy.push({ key, port });
+    }
+
+    if (busy.length === 0) return;
+
+    console.log(chalk.red('\nHay puertos ocupados. Cierra esos procesos antes de levantar el CLI:\n'));
+    for (const item of busy) {
+        console.log(chalk.red(`  - ${item.key}: puerto ${item.port}`));
+        if (IS_WIN) {
+            console.log(chalk.gray(`    Ver PID: netstat -ano | findstr :${item.port}`));
+            console.log(chalk.gray('    Apagar: taskkill /PID <PID> /T /F'));
+        }
+    }
+
+    throw new Error('No se levantaron servicios porque hay puertos ocupados.');
 }
 
 function launchService(key) {
@@ -268,7 +307,10 @@ async function main() {
         }
     }
 
-    // 5) Levantar cada servicio seleccionado.
+    // 5) Revisar puertos antes de levantar Nest en watch mode.
+    await assertPortsFree(toStart);
+
+    // 6) Levantar cada servicio seleccionado.
     console.log('');
     for (const key of toStart) {
         if (!existsSync(join(ROOT, SERVICES[key].dir))) {
@@ -282,7 +324,7 @@ async function main() {
         launchService(key);
     }
 
-    // 6) Prisma Studio (opcional), sobre el catalogo-service.
+    // 7) Prisma Studio (opcional), sobre el catalogo-service.
     if (withStudio && existsSync(join(ROOT, SERVICES['catalogo-service'].dir))) {
         const child = spawnProcess('pnpm', ['exec', 'prisma', 'studio'], {
             cwd: join(ROOT, SERVICES['catalogo-service'].dir),
