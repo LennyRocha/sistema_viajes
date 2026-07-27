@@ -1,12 +1,6 @@
-"use client";
-
+import FederatedPage from "@/src/adapters/FederatedPage";
 import MainLayout from "@/src/layout/MainLayout";
-import { federatedComponent } from "@/src/lib/loadRemote";
-import { useDialog } from "@/src/providers/DialogProvider";
-import { useSidebar } from "@/src/providers/SidebarProvider";
-import { snack } from "@nexoroute/commons";
 import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
-import { usePathname, useRouter } from "next/navigation";
 import { use } from "react";
 
 type Props = {
@@ -15,36 +9,21 @@ type Props = {
   }>;
 };
 
-const EditarServicio = federatedComponent(
-  "catalogos/ServiciosModule",
-  "EditarServicio",
-  "form",
-);
-
 export const metadata: Metadata = {
-  title: "Editar Servicio",
+  title: "Editar Servicio | Nexoroute",
   description:
     "Sección para editar la información de un servicio",
 };
 
 export default function Page({ params }: Readonly<Props>) {
   const { nombre } = use(params);
-  const router = useRouter();
-  const { showDialog } = useDialog();
-  const { showSidebar, hideSidebar } = useSidebar();
-  const pathname = usePathname();
   return (
     <MainLayout>
-      <EditarServicio
-        navigationFunction={router.push}
-        showDialog={showDialog}
-        snack={snack}
-        openSidebar={showSidebar}
-        closeSidebar={hideSidebar}
-        router={router}
-        servicioName={nombre}
-        pathname={pathname}
-        userRoles={[]}
+      <FederatedPage
+        remote="catalogos/ServiciosModule"
+        exportName="EditarServicio"
+        skeletonVariant="form"
+        params={{ servicioName: nombre }}
       />
     </MainLayout>
   );

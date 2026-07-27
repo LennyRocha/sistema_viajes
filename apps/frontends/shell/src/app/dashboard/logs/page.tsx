@@ -5,7 +5,7 @@ import React from "react";
 type Props = {};
 
 export const metadata: Metadata = {
-  title: "Bitácora administrativa",
+  title: "Bitácora administrativa | Nexoroute",
   description:
     "Panel de consulta y gestión de bitácora administrativa, con opciones para filtrar por fecha, usuario y tipo de acción.",
 };

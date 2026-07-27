@@ -5,7 +5,7 @@ import React from "react";
 type Props = {};
 
 export const metadata: Metadata = {
-  title: "Rutas y paradas",
+  title: "Rutas y paradas | Nexoroute ",
   description:
     "Panel administrativo para la gestión de rutas y paradas, con opciones para agregar, editar y eliminar rutas, así como para visualizar detalles de cada ruta y sus paradas asociadas.",
 };

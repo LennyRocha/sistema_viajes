@@ -1,3 +1,4 @@
+"use client";
 import MainLayout from "@/src/layout/MainLayout";
 import { federatedComponent } from "@/src/lib/loadRemote";
 

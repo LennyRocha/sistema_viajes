@@ -5,7 +5,7 @@ import React from "react";
 type Props = {};
 
 export const metadata: Metadata = {
-  title: "Reportes de viajes",
+  title: "Reportes de viajes | Nexoroute",
   description:
     "Panel de consulta y gestión de reportes de viajes, con opciones para filtrar por fecha, destino y estado del viaje.",
 };
