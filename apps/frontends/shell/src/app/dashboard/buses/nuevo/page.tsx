@@ -6,12 +6,18 @@ import MainLayout from "@/src/layout/MainLayout";
 import { useSidebar } from "@/src/providers/SidebarProvider";
 import { useDialog } from "@/src/providers/DialogProvider";
 import { snack } from "@nexoroute/commons";
+import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 
 const NuevoAutobus = federatedComponent(
   "catalogos/AutobusesModule",
   "NuevoAutobus",
   "form",
 );
+
+export const metadata: Metadata = {
+  title: "Nuevo Autobus",
+  description: "Sección para crear un nuevo autobus",
+};
 
 const Page = () => {
   const router = useRouter();

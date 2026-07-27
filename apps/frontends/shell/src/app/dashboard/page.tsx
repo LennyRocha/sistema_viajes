@@ -13,6 +13,13 @@ import Image from "next/image";
 import "@/src/lib/federation";
 import { useDialog } from "../../providers/DialogProvider";
 import { DialogContentText } from "@mui/material";
+import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description:
+    "Panel de control para la gestión de la información del sistema, con acceso a diferentes secciones y funcionalidades según los permisos del usuario.",
+};
 
 function Home() {
   const { showSidebar } = useSidebar();
