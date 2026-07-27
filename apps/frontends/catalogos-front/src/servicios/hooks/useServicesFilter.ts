@@ -27,8 +27,8 @@ export default function useServicesFilter(
             .toLowerCase()
             .includes(lowerQuery) &&
           options[option] === "predeterminada"
-            ? servicio.disponibilidad?.length === 0
-            : servicio.disponibilidad?.length > 0,
+            ? servicio.serviciosPorTipos?.length === 0
+            : servicio.serviciosPorTipos?.length > 0,
         );
   }, [data, query, option]);
 

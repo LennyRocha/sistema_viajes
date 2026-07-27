@@ -1,29 +1,135 @@
-"use client";
-
 import {
   Breadcrumb,
   CommonPageProps,
+  EmptyState,
   FormButtonsRow,
   HandleResponseError,
   PaperBlock,
   PaperHeader,
 } from "@nexoroute/commons";
-import { ChevronLeft } from "@mui/icons-material";
-import { TextField } from "@mui/material";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useCreateInstitucionMutation } from "../api/institucionesApi";
-import onSubmit from "../forms/onNewInstitucionSubmit";
+import { skipToken } from "@reduxjs/toolkit/query/react";
 import React from "react";
 import {
-  institucionSchema,
+  useCreateInstitucionMutation,
+  useGetInstitucionByNameQuery,
+  usePatchInstitucionMutation,
+} from "../api/institucionesApi";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ChevronLeft } from "@mui/icons-material";
+import { TextField } from "@mui/material";
+import { useForm } from "react-hook-form";
+import onSubmit from "../forms/onUpdateInstitucionSubmit";
+import {
   InstitucionSchema,
+  institucionSchema,
 } from "../validations/institucionZod";
-import { institucionTemplate } from "../templates/institucionTemplate";
 
-interface NuevaInstitucionProps extends CommonPageProps {}
+interface EditarInstitucionProps extends CommonPageProps {
+  institucionNombre: string;
+}
 
-export default function NuevaInstitucion({
+export default function EditarInstitucion({
+  navigationFunction,
+  openSidebar,
+  closeSidebar = () => {},
+  showDialog = () => {},
+  snack,
+  router,
+  pathname,
+  userPrivileges = [],
+  userRoles = [],
+  institucionNombre,
+}: Readonly<EditarInstitucionProps>) {
+  const query = useGetInstitucionByNameQuery(
+    institucionNombre ?? skipToken,
+  );
+
+  if (!institucionNombre) {
+    return (
+      <EmptyState
+        variant="warning"
+        title="Parámetro de institución no definido"
+        description="No se ha especificado una institución para editar"
+        action={{
+          label: "volver atrás",
+          onClick() {
+            router?.replace("/dashboard/institutions");
+          },
+        }}
+        fullHeight
+      />
+    );
+  }
+
+  if (query.isLoading || query.isFetching) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress
+          size="3rem"
+          aria-label="Loading…"
+        />
+      </Box>
+    );
+  }
+
+  if (!query.data) {
+    return (
+      <EmptyState
+        variant="no-data"
+        title="Institución no encontrada"
+        description="La institución especificada no existe"
+        fullHeight
+        action={{
+          label: "volver atrás",
+          onClick() {
+            router?.replace("/dashboard/institutions");
+          },
+        }}
+      />
+    );
+  }
+
+  if (query.isError) {
+    return (
+      <HandleResponseError
+        error={query.error as any}
+        router={router as any}
+        path={pathname}
+        onRetry={query.refetch}
+      />
+    );
+  }
+
+  return (
+    <Form
+      query={query}
+      institucionNombre={institucionNombre}
+      navigationFunction={navigationFunction}
+      openSidebar={openSidebar}
+      closeSidebar={closeSidebar}
+      showDialog={showDialog}
+      snack={snack}
+      router={router}
+      pathname={pathname}
+      userRoles={userRoles}
+      userPrivileges={userPrivileges}
+    />
+  );
+}
+
+const Form = ({
+  query,
+  institucionNombre,
   navigationFunction,
   openSidebar,
   closeSidebar = () => {},
@@ -33,7 +139,9 @@ export default function NuevaInstitucion({
   pathname,
   userRoles = [],
   userPrivileges = [],
-}: Readonly<NuevaInstitucionProps>) {
+}: Readonly<EditarInstitucionProps & { query: any }>) => {
+  const template: InstitucionSchema =
+    institucionSchema.parse(query.data);
   const {
     register,
     handleSubmit,
@@ -42,19 +150,19 @@ export default function NuevaInstitucion({
     formState: { errors, isDirty, isValid },
   } = useForm<InstitucionSchema>({
     resolver: zodResolver(institucionSchema),
-    defaultValues: institucionTemplate,
+    defaultValues: template,
     mode: "onChange",
     reValidateMode: "onChange",
   });
 
-  const [mutate, res] = useCreateInstitucionMutation();
+  const [mutate, res] = usePatchInstitucionMutation();
 
   const [errores, setErrores] = React.useState<
     Record<string, string[]>
   >({});
 
   const doSubmit = async (data: InstitucionSchema) => {
-    return await onSubmit(data, {
+    return await onSubmit(data, query.data?.id ?? -1, {
       snack,
       navigationFunction,
       mutate,
@@ -90,16 +198,16 @@ export default function NuevaInstitucion({
             href: "/dashboard/institutions",
           },
           {
-            nombre: "Nuevo",
-            href: "/dashboard/institutions/nuevo",
+            nombre: institucionNombre ?? "Editar",
+            href: `/dashboard/institutions/${institucionNombre}`,
             disabled: true,
           },
         ]}
       />
       <PaperHeader
-        title="Nueva institución"
-        subtitle="Agrega una nueva institución para asociarla con unidades y servicios"
-        iconname="add"
+        title="Editar institución"
+        subtitle="Modifica los datos de una institución existente"
+        iconname="edit"
         showButton
         onButtonClick={() =>
           navigationFunction("/dashboard/institutions")
@@ -164,11 +272,11 @@ export default function NuevaInstitucion({
       <FormButtonsRow
         onSubmitClick={handleSubmit(doSubmit)}
         hasRequiredFields
-        onResetClick={() => reset(institucionTemplate)}
+        onResetClick={() => reset(template)}
         submitDisabled={!isDirty || !isValid}
         resetDisabled={!isDirty}
         isLoading={res.isLoading}
       />
     </>
   );
-}
+};

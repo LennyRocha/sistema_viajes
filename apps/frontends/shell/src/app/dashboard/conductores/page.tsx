@@ -24,6 +24,7 @@ export default function Page() {
         userPrivileges={[]}
         showDialog={showDialog}
         snack={snack}
+        userRoles={[]}
       />
     </MainLayout>
   );

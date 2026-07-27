@@ -37,6 +37,7 @@ export default function Page({ params }: Readonly<Props>) {
         router={router}
         servicioName={nombre}
         pathname={pathname}
+        userRoles={[]}
       />
     </MainLayout>
   );

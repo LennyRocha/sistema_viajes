@@ -7,7 +7,7 @@ import { useSidebar } from "@/src/providers/SidebarProvider";
 const NuevoConductor = federatedComponent(
   "catalogos/ConductoresModule",
   "NuevoConductor",
-  "form"
+  "form",
 );
 
 export default function Page() {
@@ -17,8 +17,11 @@ export default function Page() {
   return (
     <MainLayout>
       <NuevoConductor
-        navigationFunction={() => router.push("/conductores")}
+        navigationFunction={() =>
+          router.push("/conductores")
+        }
         openSidebar={showSidebar}
+        userRoles={[]}
       />
     </MainLayout>
   );

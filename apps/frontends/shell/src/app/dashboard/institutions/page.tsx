@@ -5,7 +5,7 @@ import { federatedComponent } from "@/src/lib/loadRemote";
 import { useDialog } from "@/src/providers/DialogProvider";
 import { useSidebar } from "@/src/providers/SidebarProvider";
 import { snack } from "@nexoroute/commons";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const InstitucionesIndex = federatedComponent(
   "catalogos/InstitucionesModule",
@@ -16,15 +16,18 @@ export default function Page() {
   const router = useRouter();
   const { showSidebar } = useSidebar();
   const { showDialog } = useDialog();
-
+  const pathname = usePathname();
   return (
     <MainLayout>
       <InstitucionesIndex
         navigationFunction={router.push}
         openSidebar={showSidebar}
-        userPrivileges={[]}
-        showDialog={showDialog}
         snack={snack}
+        showDialog={showDialog}
+        userPrivileges={[]}
+        pathname={pathname}
+        router={router}
+        userRoles={[]}
       />
     </MainLayout>
   );

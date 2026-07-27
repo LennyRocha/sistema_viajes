@@ -36,6 +36,7 @@ export default function Page({ params }: Readonly<Props>) {
         router={router}
         codigo_interno={codigo_interno}
         pathname={pathname}
+        userRoles={[]}
       />
     </MainLayout>
   );

@@ -26,6 +26,7 @@ export default function Page() {
         closeSidebar={hideSidebar}
         router={router}
         pathname={pathname}
+        userRoles={[]}
       />
     </MainLayout>
   );
