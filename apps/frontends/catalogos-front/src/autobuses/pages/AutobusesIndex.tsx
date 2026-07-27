@@ -34,6 +34,7 @@ import { useGetTiposAutobusQuery } from "../../tipos_autobus/api/tiposAutobusApi
 import { useGetInstitucionesQuery } from "../../instituciones/api/institucionesApi";
 import useBusesFilter from "../hooks/useAutobusFilter";
 import onChangeStatus from "../forms/onChangeStatusSubmit";
+import { useGetServiciosQuery } from "../../servicios/api/serviciosApi";
 
 interface Props extends CommonPageProps {}
 
@@ -67,7 +68,7 @@ export default function AutobusesIndexPage({
   const institucionesQuery = useGetInstitucionesQuery({
     active: true,
   });
-  const serviciosQuery = useGetAutobusesQuery({
+  const serviciosQuery = useGetServiciosQuery({
     active: false,
   });
   const [dispatch, { isLoading }] =
@@ -214,7 +215,12 @@ export default function AutobusesIndexPage({
           onInfoClick={(row) =>
             openSidebar({
               title: "Detalles del autobús",
-              children: <BusDetails row={row} />,
+              children: (
+                <BusDetails
+                  row={row}
+                  servicios={serviciosQuery.data ?? []}
+                />
+              ),
             })
           }
           subHeaderComponent={
