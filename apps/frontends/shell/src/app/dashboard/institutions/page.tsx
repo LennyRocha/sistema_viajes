@@ -1,33 +1,20 @@
-"use client";
-
+import FederatedPage from "@/src/adapters/FederatedPage";
 import MainLayout from "@/src/layout/MainLayout";
-import { federatedComponent } from "@/src/lib/loadRemote";
-import { useDialog } from "@/src/providers/DialogProvider";
-import { useSidebar } from "@/src/providers/SidebarProvider";
-import { snack } from "@nexoroute/commons";
-import { usePathname, useRouter } from "next/navigation";
+import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 
-const InstitucionesIndex = federatedComponent(
-  "catalogos/InstitucionesModule",
-  "InstitucionesIndex",
-);
+export const metadata: Metadata = {
+  title: "Instituciones | Nexoroute",
+  description:
+    "Panel administrativo para la gestión de instituciones",
+};
 
 export default function Page() {
-  const router = useRouter();
-  const { showSidebar } = useSidebar();
-  const { showDialog } = useDialog();
-  const pathname = usePathname();
   return (
     <MainLayout>
-      <InstitucionesIndex
-        navigationFunction={router.push}
-        openSidebar={showSidebar}
-        snack={snack}
-        showDialog={showDialog}
-        userPrivileges={[]}
-        pathname={pathname}
-        router={router}
-        userRoles={[]}
+      <FederatedPage
+        remote="catalogos/InstitucionesModule"
+        exportName="InstitucionesIndex"
+        skeletonVariant="table"
       />
     </MainLayout>
   );
