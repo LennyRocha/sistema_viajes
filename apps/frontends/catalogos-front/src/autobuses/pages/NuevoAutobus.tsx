@@ -155,7 +155,11 @@ export default function NuevoAutobus({
 
   if (
     tiposQuery.isLoading ||
-    institucionesQuery.isLoading
+    institucionesQuery.isLoading ||
+    disponiblesQuery.isLoading ||
+    tiposQuery.isFetching ||
+    institucionesQuery.isFetching ||
+    disponiblesQuery.isFetching
   ) {
     return (
       <Box
@@ -175,19 +179,34 @@ export default function NuevoAutobus({
     );
   }
 
+  const dispatchRefetchs = () => {
+    if (res.data) {
+      handleSubmit(doSubmit);
+    } else {
+      tiposQuery.refetch();
+      institucionesQuery.refetch();
+      disponiblesQuery.refetch();
+    }
+  };
+
   if (
     tiposQuery.isError ||
-    (res.error &&
+    institucionesQuery.isError ||
+    disponiblesQuery.isError ||
+    (res.isError &&
       errs.data?.message !== "Error de validación")
   ) {
     return (
       <HandleResponseError
-        error={(res.error as any) || tiposQuery.error}
+        error={
+          (res.error as any) ||
+          tiposQuery.error ||
+          institucionesQuery.error ||
+          disponiblesQuery.error
+        }
         router={router as any}
         path={pathname}
-        onRetry={
-          res.data ? undefined : handleSubmit(doSubmit)
-        }
+        onRetry={dispatchRefetchs}
       />
     );
   }

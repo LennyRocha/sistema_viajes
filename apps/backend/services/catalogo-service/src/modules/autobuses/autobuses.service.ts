@@ -197,7 +197,12 @@ export class AutobusesService {
 
     const autobus = await this.prisma.autobus.findUnique({
       include: {
-        servicios: true,
+        servicios: {
+          where: { servicio: { estatus: true } },
+          include: {
+            servicio: true,
+          },
+        },
         tipoAutobus: true,
         institucion: true,
       },
@@ -234,7 +239,12 @@ export class AutobusesService {
 
     const autobus = await this.prisma.autobus.findUnique({
       include: {
-        servicios: true,
+        servicios: {
+          where: { servicio: { estatus: true } },
+          include: {
+            servicio: true,
+          },
+        },
         tipoAutobus: true,
         institucion: true,
       },
@@ -268,7 +278,12 @@ export class AutobusesService {
 
     const autobus = await this.prisma.autobus.findUnique({
       include: {
-        servicios: true,
+        servicios: {
+          where: { servicio: { estatus: true } },
+          include: {
+            servicio: true,
+          },
+        },
         tipoAutobus: true,
         institucion: true,
       },

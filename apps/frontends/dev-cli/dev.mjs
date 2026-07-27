@@ -223,6 +223,18 @@ async function main() {
         launchService(key);
     }
 
+    // 3) Prisma Studio (opcional), sobre el task-service.
+    if (withCommons && existsSync(join(ROOT, 'task-service'))) {
+        const child = spawnProcess('pnpm', ['--filter', '@nexorute/commons', 'build'], {
+            cwd: join(ROOT, 'task-service'),
+        });
+        const prefix = chalk.blue('[commons]');
+        child.stdout.on('data', (d) => process.stdout.write(prefixChunk(prefix, d)));
+        child.stderr.on('data', (d) => process.stderr.write(prefixChunk(prefix, d)));
+        children.push(child);
+        console.log(`${prefix} ${chalk.green('iniciado')}`);
+    }
+
     if (children.length === 0) {
         console.log(chalk.yellow('\nNo se levanto ningun servicio.'));
         return;

@@ -154,12 +154,18 @@ export default function DisponibilidadIndex({
       isLoading: isLoading,
     });
   };
-  if (query.error || nameQuery.error || tiposQuery.error) {
-    console.error("Error fetching data:", {
-      queryError: query.error,
-      nameQueryError: nameQuery.error,
-      tiposQueryError: tiposQuery.error,
-    });
+  const dispatchRefetchs = () => {
+    query.refetch();
+    tiposQuery.refetch();
+    institucionesQuery.refetch();
+    nameQuery.refetch();
+  };
+  if (
+    query.isError ||
+    nameQuery.isError ||
+    tiposQuery.isError ||
+    institucionesQuery.isError
+  ) {
     return (
       <HandleResponseError
         error={
@@ -167,7 +173,7 @@ export default function DisponibilidadIndex({
         }
         router={router as any}
         path={pathname}
-        onRetry={query.refetch}
+        onRetry={dispatchRefetchs}
       />
     );
   }

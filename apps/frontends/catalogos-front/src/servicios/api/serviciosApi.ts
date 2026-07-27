@@ -57,7 +57,12 @@ export const serviciosApi = api.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: ["Servicio"],
+      invalidatesTags: [
+        "Servicio",
+        "Autobus",
+        "Disponibilidad",
+        "Institucion",
+      ],
     }),
 
     changeStatusServicio: builder.mutation<
@@ -68,7 +73,12 @@ export const serviciosApi = api.injectEndpoints({
         url: `/servicios/status/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Servicio"],
+      invalidatesTags: [
+        "Servicio",
+        "Autobus",
+        "Disponibilidad",
+        "Institucion",
+      ],
     }),
   }),
 });

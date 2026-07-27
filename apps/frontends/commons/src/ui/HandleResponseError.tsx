@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { ApiErrorBody } from "../types/Api-Error";
 import EmptyState from "./EmptyStateComponent";
 import { EmptyStateImageKey } from "../types/EmptyStateImages";
@@ -117,14 +116,18 @@ const HandleResponseError = ({
 }: Props) => {
   const isConnIssue = isConnectionError(error);
 
-  useEffect(() => {
-    if (isConnIssue) {
-      router.replace("/500");
-    }
-  }, [isConnIssue, router]);
-
   if (isConnIssue) {
-    return null;
+    return (
+      <EmptyState
+        variant="network-error"
+        title="No fue posible conectar con el servidor."
+        action={{
+          label: "Reintentar",
+          onClick: () => onRetry?.(),
+        }}
+        fullHeight
+      />
+    );
   }
 
   const config =

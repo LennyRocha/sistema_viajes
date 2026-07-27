@@ -1,5 +1,5 @@
 export const emptyStateImages = {
-  "no-data": "/assets/canvas/brokenrobot.png",
+  "no-data": "/assets/canvas/emptyfile.png",
   "no-files": "/assets/canvas/emptyfolder.png",
   error: "/assets/canvas/brokenrobot.png",
   "network-error": "/assets/canvas/noconnection.png",
