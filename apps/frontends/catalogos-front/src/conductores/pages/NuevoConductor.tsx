@@ -6,7 +6,7 @@ import {
   FormButtonsRow,
   CommonPageProps,
 } from "@nexoroute/commons";
-import { Box, TextField, MenuItem } from "@mui/material";
+import { Box, TextField } from "@mui/material";
 import { ChevronLeft } from "@mui/icons-material";
 
 interface NuevoConductorProps extends CommonPageProps {}
@@ -104,7 +104,7 @@ export default function NuevoConductor({
               type="date"
               size="small"
               fullWidth
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </PaperBlock>
 
@@ -130,7 +130,7 @@ export default function NuevoConductor({
                 type="date"
                 size="small"
                 fullWidth
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
               <TextField
                 label="Fecha de vencimiento *"
@@ -138,7 +138,7 @@ export default function NuevoConductor({
                 type="date"
                 size="small"
                 fullWidth
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
             </Box>
             <TextField

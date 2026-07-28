@@ -17,7 +17,7 @@ export default function Page() {
   return (
     <MainLayout>
       <NuevoConductor
-        navigationFunction={() => router.push("/conductores")}
+        navigationFunction={() => router.push("/dashboard/conductores")}
         openSidebar={showSidebar}
       />
     </MainLayout>
