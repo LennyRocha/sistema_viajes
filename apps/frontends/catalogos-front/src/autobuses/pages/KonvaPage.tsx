@@ -3,6 +3,7 @@ import BusMap from "../components/BusMap";
 import tiposBus from "../../tipos_autobus/constants/TiposBusMapper";
 import Asiento from "../types/Asiento";
 import { AsientoEstado } from "../types/AsientoEstado";
+import AsientoSimbología from "../components/AsientoSimbología";
 
 export default function KonvaPage() {
   const [seats, setSeats] = React.useState(
@@ -46,6 +47,7 @@ export default function KonvaPage() {
           console.log("Asiento 3", seat)
         }
       />
+      <AsientoSimbología />
     </>
   );
 }

@@ -37,7 +37,7 @@ const AsientoBus = ({
   const mapColorState = {
     [AsientoEstado.AVAILABLE]: theme.palette.text.secondary,
     [AsientoEstado.SELECTED]: theme.palette.accent.main,
-    [AsientoEstado.RESERVED]: theme.palette.success.main,
+    [AsientoEstado.RESERVED]: theme.palette.info.main,
     [AsientoEstado.SOLD]: theme.palette.secondary.main,
     [AsientoEstado.OUT_OF_SERVICE]: theme.palette.divider,
   };
