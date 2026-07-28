@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   MinLength,
@@ -15,7 +15,10 @@ import {
 } from '@commons/decorators';
 
 export class UpdateServicioDto {
-  @ApiProperty({ example: 'Wi-Fi' })
+  @ApiPropertyOptional({
+    example: 'Wi-Fi',
+    description: 'El nombre del servicio',
+  })
   @IsString()
   @IsOptional()
   @MinLength(5, {
@@ -26,7 +29,10 @@ export class UpdateServicioDto {
   })
   nombre?: string;
 
-  @ApiProperty({ example: 'Servicio de Wi-Fi a bordo del autobús' })
+  @ApiPropertyOptional({
+    example: 'Servicio de Wi-Fi a bordo del autobús',
+    description: 'La descripción del servicio',
+  })
   @IsString()
   @IsOptional()
   @MinLength(20, {
@@ -37,7 +43,7 @@ export class UpdateServicioDto {
   })
   descripcion?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'wifi',
     description:
       'Consulta la lista de iconos disponibles en https://fonts.google.com/icons',
@@ -49,7 +55,11 @@ export class UpdateServicioDto {
   })
   icono_nombre?: string;
 
-  @ApiProperty({})
+  @ApiPropertyOptional({
+    example: [],
+    description: 'Las propiedades del servicio',
+    type: [CreateCampoConfigDto],
+  })
   @IsOptional()
   @IsUniqueObjectArray<CreateCampoConfigDto>('clave', {
     message: 'Las propiedades del servicio deben ser únicas entre sí',
