@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   MinLength,
@@ -10,7 +10,10 @@ import {
 import { IsUniquePrimitiveArray } from '@commons/decorators';
 
 export class UpdateCampoConfigDto {
-  @ApiProperty({ example: 'velocidad' })
+  @ApiPropertyOptional({
+    example: 'velocidad',
+    description: 'La clave de la propiedad',
+  })
   @IsString()
   @IsOptional()
   @MinLength(3, {
@@ -21,7 +24,10 @@ export class UpdateCampoConfigDto {
   })
   clave?: string;
 
-  @ApiProperty({ example: 'Velocidad' })
+  @ApiPropertyOptional({
+    example: 'Velocidad',
+    description: 'El nombre de la propiedad',
+  })
   @IsString()
   @IsOptional()
   @MinLength(3, {
@@ -32,12 +38,16 @@ export class UpdateCampoConfigDto {
   })
   label?: string;
 
-  @ApiProperty({ example: 'string', enum: ['string', 'number', 'boolean'] })
+  @ApiPropertyOptional({
+    example: 'string',
+    enum: ['string', 'number', 'boolean'],
+    description: 'El tipo de la propiedad',
+  })
   @IsString()
   @IsOptional()
   tipo?: 'string' | 'number' | 'boolean';
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'text',
     enum: [
       'text',
@@ -48,60 +58,91 @@ export class UpdateCampoConfigDto {
       'radio',
       'switch',
     ],
+    description: 'El tipo de input para la propiedad',
   })
   @IsOptional()
   @IsString()
   inputTipo?:
     'text' | 'textarea' | 'number' | 'checkbox' | 'select' | 'radio' | 'switch';
 
-  @ApiProperty({ example: true })
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Indica si el campo es requerido',
+  })
   @IsOptional()
   @IsBoolean()
   @IsOptional()
   requerido?: boolean;
 
-  @ApiProperty({ example: 0 })
+  @ApiPropertyOptional({
+    example: 0,
+    description: 'El valor mínimo para la propiedad',
+  })
   @IsOptional()
   @IsNumber()
   min?: number;
 
-  @ApiProperty({ example: 100 })
+  @ApiPropertyOptional({
+    example: 100,
+    description: 'El valor máximo para la propiedad',
+  })
   @IsOptional()
   @IsNumber()
   max?: number;
 
-  @ApiProperty({ example: 0 })
+  @ApiPropertyOptional({
+    example: 0,
+    description: 'La longitud mínima para la propiedad',
+  })
   @IsOptional()
   @IsNumber()
   minLength?: number;
 
-  @ApiProperty({ example: 100 })
+  @ApiPropertyOptional({
+    example: 100,
+    description: 'La longitud máxima para la propiedad',
+  })
   @IsOptional()
   @IsNumber()
   maxLength?: number;
 
-  @ApiProperty({ example: '^[a-zA-Z0-9]+$' })
+  @ApiPropertyOptional({
+    example: '^[a-zA-Z0-9]+$',
+    description: 'La expresión regular para la propiedad',
+  })
   @IsOptional()
   @IsString()
   regex?: string;
 
-  @ApiProperty({ example: 'Ingrese un valor' })
+  @ApiPropertyOptional({
+    example: 'Ingrese un valor',
+    description: 'El placeholder para la propiedad',
+  })
   @IsOptional()
   @IsString()
   placeholder?: string;
 
-  @ApiProperty({ example: 'default value' })
+  @ApiPropertyOptional({
+    example: 'default value',
+    description: 'El valor por defecto para la propiedad',
+  })
   @IsOptional()
   defaultValue?: string | number | boolean;
 
-  @ApiProperty({ example: { campo: 'tipo', valor: 'avanzado' } })
+  @ApiPropertyOptional({
+    example: { campo: 'tipo', valor: 'avanzado' },
+    description: 'La visibilidad del campo',
+  })
   @IsOptional()
   visible?: {
     campo: string;
     valor: string | number | boolean;
   };
 
-  @ApiProperty({ example: ['opcion1', 'opcion2'] })
+  @ApiPropertyOptional({
+    example: ['opcion1', 'opcion2'],
+    description: 'Las opciones para el campo',
+  })
   @IsOptional()
   @IsUniquePrimitiveArray({ message: 'Las opciones deben ser únicas' })
   opciones?: Array<string | number>;
