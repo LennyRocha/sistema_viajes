@@ -34,7 +34,7 @@ export default function ConductoresIndex({
         breads={[
           {
             nombre: "Conductores",
-            href: "/conductores",
+            href: "/dashboard/conductores",
             disabled: true,
           },
         ]}
@@ -44,7 +44,7 @@ export default function ConductoresIndex({
         subtitle="Listado de conductores disponibles"
         iconname="person"
         showButton
-        onButtonClick={() => navigationFunction("/conductores/nuevo")}
+        onButtonClick={() => navigationFunction("/dashboard/conductores/nuevo")}
         buttonTitle="Nuevo"
         leftIcon={<Add />}
       />
@@ -54,7 +54,7 @@ export default function ConductoresIndex({
         columnas={columnas}
         data={data}
         onEditClick={(row) =>
-          navigationFunction(`/conductores/editar/${row.cedula}`)
+          navigationFunction(`/dashboard/conductores/editar/${row.cedula}`)
         }
         onInfoClick={(row) =>
           openSidebar({

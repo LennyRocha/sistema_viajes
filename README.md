@@ -139,13 +139,6 @@ DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=publ
 REDIS_URL="redis://localhost:6379"
 ```
 
-### apps/backend/services/operaciones-service/.env
-
-```env
-PORT=5003
-DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=operaciones&options=--search_path%3Doperaciones"
-```
-
 ## 4. Levantar con CLI
 
 Esta es la forma recomendada cuando quieres levantar varias cosas sin abrir una
@@ -155,11 +148,19 @@ terminal por cada app.
 
 Abre Docker Desktop antes de ejecutar el CLI.
 
-Antes de arrancar el CLI, prepara las librerias compartidas del backend:
+Antes de arrancar el CLI, prepara las librerias compartidas del backend y
+Prisma:
 
 ```powershell
 cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
 pnpm.cmd --dir apps\backend\commons build:all
+```
+
+Primera vez, o cuando cambie `schema.prisma`, genera Prisma Client:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\catalogo-service
+.\node_modules\.bin\prisma.CMD generate
 ```
 
 Despues ejecuta el CLI:
@@ -170,12 +171,7 @@ pnpm.cmd dev
 ```
 
 El CLI siempre levanta `gateway` y te deja elegir otros servicios. Si eliges
-`catalogo-service` u `operaciones-service`, tambien ejecuta:
-
-- `docker compose up -d` para Postgres/Redis.
-- `prisma migrate deploy` para aplicar migraciones pendientes.
-- `prisma generate` para generar el cliente Prisma.
-- `prisma db seed` para seeds idempotentes, como configuraciones base.
+`catalogo-service`, tambien ejecuta `docker compose up -d` para Postgres y Redis.
 
 Primera vez, o cuando cambien migraciones de Prisma, ejecuta en otra terminal:
 
@@ -184,10 +180,6 @@ cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\ap
 .\node_modules\.bin\prisma.CMD migrate dev
 .\node_modules\.bin\prisma.CMD db seed
 ```
-
-Nota: el CLI aplica migraciones ya creadas. Cuando alguien modifique
-`schema.prisma`, esa persona debe crear y commitear la migracion con
-`prisma migrate dev --name nombre_del_cambio`; los demas solo levantan con CLI.
 
 URLs principales:
 

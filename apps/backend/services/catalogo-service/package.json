@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "prisma": {
-    "seed": "node_modules/.bin/ts-node.CMD prisma/seed.ts"
+    "seed": "pnpm exec ts-node prisma/seed.ts"
   },
   "scripts": {
     "build": "nest build",
