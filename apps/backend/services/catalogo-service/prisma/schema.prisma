@@ -6,6 +6,58 @@ datasource db {
   provider = "postgresql"
 }
 
+model Conductor {
+  id Int @id @default(autoincrement())
+
+  // Datos personales
+  nombres             String   @db.VarChar(100)
+  apellido_paterno    String   @db.VarChar(100)
+  apellido_materno    String   @db.VarChar(100)
+  curp                String   @unique @db.VarChar(18)
+  fecha_nacimiento    DateTime @db.Date
+  telefono            String   @db.VarChar(15)
+  email               String   @unique @db.VarChar(150)
+  foto_perfil         String   @db.VarChar(255)
+
+  // Relación con la institución
+  institucion_id Int
+  institucion Institucion @relation(fields: [institucion_id], references: [id])
+
+  // Relaciones
+  licencias Licencia[]
+
+  // Auditoría
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String? @db.VarChar(50)
+  updatedBy String? @db.VarChar(50)
+
+  estatus Boolean @default(true)
+
+  @@index([institucion_id])
+}
+
+model Licencia {
+  id Int @id @default(autoincrement())
+
+  conductor_id Int
+  conductor Conductor @relation(fields: [conductor_id], references: [id], onDelete: Cascade)
+
+  numero_licencia   String   @unique @db.VarChar(30)
+  categoria         String   @db.VarChar(20)
+  fecha_expedicion  DateTime @db.Date
+  fecha_vencimiento DateTime @db.Date
+  estado_emisor     String   @db.VarChar(100)
+  imagen_licencia   String   @db.VarChar(255)
+
+  vigente Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([conductor_id])
+}
+
 model Autobus {
   id             Int    @id @default(autoincrement())
   codigo_interno String @unique @db.VarChar(10)
@@ -89,6 +141,7 @@ model Institucion {
   estatus Boolean @default(true)
 
   autobuses            Autobus[]
+  conductores          Conductor[]
   serviciosDisponibles DisponibilidadServicio[]
 }
 
