@@ -47,7 +47,11 @@ export const autobusApi = api.injectEndpoints({
           method: "POST",
           body,
         }),
-        invalidatesTags: ["Autobus"],
+        invalidatesTags: [
+          "Autobus",
+          "Institucion",
+          "Disponibilidad",
+        ],
       },
     ),
 
@@ -63,7 +67,11 @@ export const autobusApi = api.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: ["Autobus"],
+      invalidatesTags: [
+        "Autobus",
+        "Institucion",
+        "Disponibilidad",
+      ],
     }),
 
     changeStatusAutobus: builder.mutation<
@@ -74,7 +82,11 @@ export const autobusApi = api.injectEndpoints({
         url: `/autobuses/status/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Autobus"],
+      invalidatesTags: [
+        "Autobus",
+        "Institucion",
+        "Disponibilidad",
+      ],
     }),
   }),
 });

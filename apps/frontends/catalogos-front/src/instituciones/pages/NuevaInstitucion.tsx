@@ -4,54 +4,109 @@ import {
   Breadcrumb,
   CommonPageProps,
   FormButtonsRow,
+  HandleResponseError,
   PaperBlock,
   PaperHeader,
 } from "@nexoroute/commons";
 import { ChevronLeft } from "@mui/icons-material";
 import { TextField } from "@mui/material";
-import { instituciones } from "../../data/constants";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useCreateInstitucionMutation } from "../api/institucionesApi";
+import onSubmit from "../forms/onNewInstitucionSubmit";
+import React from "react";
+import {
+  institucionSchema,
+  InstitucionSchema,
+} from "../validations/institucionZod";
+import { institucionTemplate } from "../templates/institucionTemplate";
 
-interface NuevaInstitucionProps extends CommonPageProps {
-  institucionId?: string;
-}
+interface NuevaInstitucionProps extends CommonPageProps {}
 
 export default function NuevaInstitucion({
   navigationFunction,
+  openSidebar,
+  closeSidebar = () => {},
+  showDialog = () => {},
   snack,
-  institucionId,
+  router,
+  pathname,
+  userRoles = [],
+  userPrivileges = [],
 }: Readonly<NuevaInstitucionProps>) {
-  const institucion = instituciones.find(
-    (item) => String(item.id) === institucionId,
-  );
-  const isEditing = Boolean(institucionId);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors, isDirty, isValid },
+  } = useForm<InstitucionSchema>({
+    resolver: zodResolver(institucionSchema),
+    defaultValues: institucionTemplate,
+    mode: "onChange",
+    reValidateMode: "onChange",
+  });
+
+  const [mutate, res] = useCreateInstitucionMutation();
+
+  const [errores, setErrores] = React.useState<
+    Record<string, string[]>
+  >({});
+
+  const doSubmit = async (data: InstitucionSchema) => {
+    return await onSubmit(data, {
+      snack,
+      navigationFunction,
+      mutate,
+      setErrores,
+    });
+  };
+
+  const errs = res.error as any;
+
+  if (
+    res.isError &&
+    errs.data?.message !== "Error de validación"
+  ) {
+    return (
+      <HandleResponseError
+        error={res.error as any}
+        router={router as any}
+        path={pathname}
+        onRetry={
+          res.data ? undefined : handleSubmit(doSubmit)
+        }
+      />
+    );
+  }
 
   return (
     <>
       <Breadcrumb
         rolActual="Rol actual"
         breads={[
-          { nombre: "Instituciones", href: "/institutions" },
           {
-            nombre: isEditing ? "Editar" : "Nuevo",
-            href: isEditing
-              ? `/institutions/editar/${institucionId}`
-              : "/institutions/nuevo",
+            nombre: "Instituciones",
+            href: "/dashboard/institutions",
+          },
+          {
+            nombre: "Nuevo",
+            href: "/dashboard/institutions/nuevo",
             disabled: true,
           },
         ]}
       />
       <PaperHeader
-        title={isEditing ? "Editar institucion" : "Nueva institucion"}
-        subtitle={
-          isEditing
-            ? "Actualiza los datos principales de la institucion"
-            : "Registra una institucion para asociarla con unidades y servicios"
-        }
-        iconname={isEditing ? "edit" : "add"}
+        title="Nueva institución"
+        subtitle="Agrega una nueva institución para asociarla con unidades y servicios"
+        iconname="add"
         showButton
-        onButtonClick={() => navigationFunction("/institutions")}
+        onButtonClick={() =>
+          navigationFunction("/dashboard/institutions")
+        }
         buttonTitle="Volver"
         leftIcon={<ChevronLeft />}
+        isLoading={res.isLoading}
       />
       <PaperBlock
         title="Datos generales"
@@ -63,11 +118,24 @@ export default function NuevaInstitucion({
         }}
       >
         <TextField
-          label="Nombre de la institucion *"
+          label="Nombre de la institucion"
           variant="outlined"
           size="small"
           fullWidth
-          defaultValue={institucion?.nombre}
+          {...register("nombre", {
+            required:
+              "El nombre de la institución es requerido",
+          })}
+          error={!!errors.nombre || !!errores.nombre}
+          helperText={
+            errors.nombre?.message ||
+            errores.nombre?.join(", ") ||
+            `${watch("nombre").trim().length}/50`
+          }
+          required
+          disabled={res.isLoading}
+          placeholder="Ingresa el nombre de la institución"
+          autoFocus
         />
         <TextField
           label="Descripcion *"
@@ -76,22 +144,30 @@ export default function NuevaInstitucion({
           fullWidth
           multiline
           rows={4}
-          defaultValue={institucion?.descripcion}
+          {...register("descripcion", {
+            required:
+              "La descripción de la institución es requerida",
+          })}
+          error={
+            !!errors.descripcion || !!errores.descripcion
+          }
+          helperText={
+            errors.descripcion?.message ||
+            errores.descripcion?.join(", ") ||
+            `${watch("descripcion").trim().length}/100`
+          }
+          required
+          disabled={res.isLoading}
+          placeholder="Ingresa una descripción de la institución"
         />
       </PaperBlock>
       <FormButtonsRow
+        onSubmitClick={handleSubmit(doSubmit)}
         hasRequiredFields
-        submitText="Guardar"
-        resetText="Cancelar"
-        onSubmitClick={() => {
-          snack?.success({
-            message: isEditing
-              ? "Institucion actualizada"
-              : "Institucion guardada",
-          });
-          navigationFunction("/institutions");
-        }}
-        onResetClick={() => navigationFunction("/institutions")}
+        onResetClick={() => reset(institucionTemplate)}
+        submitDisabled={!isDirty || !isValid}
+        resetDisabled={!isDirty}
+        isLoading={res.isLoading}
       />
     </>
   );

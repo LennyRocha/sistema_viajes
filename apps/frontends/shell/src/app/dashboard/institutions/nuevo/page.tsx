@@ -1,28 +1,19 @@
-"use client";
-
 import MainLayout from "@/src/layout/MainLayout";
-import { federatedComponent } from "@/src/lib/loadRemote";
-import { useSidebar } from "@/src/providers/SidebarProvider";
-import { snack } from "@nexoroute/commons";
-import { useRouter } from "next/navigation";
+import { Metadata } from "next";
+import FederatedPage from "@/src/adapters/FederatedPage";
 
-const NuevaInstitucion = federatedComponent(
-  "catalogos/InstitucionesModule",
-  "NuevaInstitucion",
-  "form",
-);
+export const metadata: Metadata = {
+  title: "Nueva Institución | Nexoroute",
+  description: "Sección para crear una nueva institución",
+};
 
 export default function Page() {
-  const router = useRouter();
-  const { showSidebar } = useSidebar();
-
   return (
     <MainLayout>
-      <NuevaInstitucion
-        navigationFunction={router.push}
-        openSidebar={showSidebar}
-        userPrivileges={[]}
-        snack={snack}
+      <FederatedPage
+        remote="catalogos/InstitucionesModule"
+        exportName="NuevaInstitucion"
+        skeletonVariant="form"
       />
     </MainLayout>
   );

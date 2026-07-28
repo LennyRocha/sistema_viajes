@@ -46,6 +46,7 @@ export default function AutobusesIndexPage({
   router,
   pathname,
   userPrivileges = [],
+  userRoles = [],
 }: Readonly<Props>) {
   const [active, setActive] =
     React.useState<boolean>(false);
@@ -331,7 +332,10 @@ const SubHeaderComponent = ({
         variant="outlined"
         size="small"
         color="secondary"
-        onClick={() => clearFilters()}
+        onClick={() => {
+          clearFilters();
+          setActive(false);
+        }}
       >
         Limpiar filtros
       </Button>

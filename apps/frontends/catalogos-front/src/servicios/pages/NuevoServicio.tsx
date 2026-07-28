@@ -43,8 +43,9 @@ export default function NuevoServicio({
   showDialog = () => {},
   snack,
   router,
-  userPrivileges = [],
   pathname,
+  userPrivileges = [],
+  userRoles = [],
 }: Readonly<NuevoServicioProps>) {
   const {
     register,

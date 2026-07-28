@@ -1,28 +1,20 @@
-"use client";
-
+import FederatedPage from "@/src/adapters/FederatedPage";
 import MainLayout from "@/src/layout/MainLayout";
-import { federatedComponent } from "@/src/lib/loadRemote";
-import { useSidebar } from "@/src/providers/SidebarProvider";
-import { snack } from "@nexoroute/commons";
-import { useRouter } from "next/navigation";
+import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 
-const NuevoViaje = federatedComponent(
-  "operaciones/ViajesModule",
-  "NuevoViaje",
-  "form"
-);
+export const metadata: Metadata = {
+  title: "Dar de alta un nuevo viaje | Nexoroute",
+  description:
+    "Panel de gestión para dar de alta un nuevo viaje, con opciones para ingresar información del viaje, asignar paradas y configurar la ruta.",
+};
 
 export default function Page() {
-  const router = useRouter();
-  const { showSidebar } = useSidebar();
-
   return (
     <MainLayout>
-      <NuevoViaje
-        navigationFunction={router.push}
-        openSidebar={showSidebar}
-        userPrivileges={[]}
-        snack={snack}
+      <FederatedPage
+        remote="operaciones/ViajesModule"
+        exportName="NuevoViaje"
+        skeletonVariant="form"
       />
     </MainLayout>
   );

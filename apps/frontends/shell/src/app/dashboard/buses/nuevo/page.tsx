@@ -1,33 +1,19 @@
-"use client";
-
-import { usePathname, useRouter } from "next/navigation";
-import { federatedComponent } from "@/src/lib/loadRemote";
 import MainLayout from "@/src/layout/MainLayout";
-import { useSidebar } from "@/src/providers/SidebarProvider";
-import { useDialog } from "@/src/providers/DialogProvider";
-import { snack } from "@nexoroute/commons";
+import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
+import FederatedPage from "@/src/adapters/FederatedPage";
 
-const NuevoAutobus = federatedComponent(
-  "catalogos/AutobusesModule",
-  "NuevoAutobus",
-  "form",
-);
+export const metadata: Metadata = {
+  title: "Nuevo Autobus | Nexoroute",
+  description: "Sección para crear un nuevo autobus",
+};
 
 const Page = () => {
-  const router = useRouter();
-  const { showDialog } = useDialog();
-  const { showSidebar, hideSidebar } = useSidebar();
-  const pathname = usePathname();
   return (
     <MainLayout>
-      <NuevoAutobus
-        navigationFunction={router.push}
-        showDialog={showDialog}
-        snack={snack}
-        openSidebar={showSidebar}
-        closeSidebar={hideSidebar}
-        router={router}
-        pathname={pathname}
+      <FederatedPage
+        remote="catalogos/AutobusesModule"
+        exportName="NuevoAutobus"
+        skeletonVariant="form"
       />
     </MainLayout>
   );

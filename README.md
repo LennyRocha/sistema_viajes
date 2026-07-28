@@ -38,6 +38,16 @@ cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes
 pnpm.cmd install
 ```
 
+Si PNPM pregunta por reconstruir o purgar `node_modules`, en Windows puedes
+evitar el prompt con:
+
+```powershell
+pnpm.cmd install --config.confirmModulesPurge=false
+```
+
+Esto no es un paso especial del proyecto; solo evita una confirmacion
+interactiva de PNPM cuando cambia el workspace.
+
 ## 3. Variables de entorno
 
 No vi archivos `.env.example` en el proyecto. Por ahora crea estos archivos a
