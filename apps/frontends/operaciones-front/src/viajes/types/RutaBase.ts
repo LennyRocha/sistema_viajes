@@ -11,4 +11,6 @@ export default interface RutaBase {
   duracionMin: number;
   estatus?: boolean;
   color?: string;
+  encodedPolyline?: string | null;
+  waypoints?: GeoPoint[] | null;
 }
