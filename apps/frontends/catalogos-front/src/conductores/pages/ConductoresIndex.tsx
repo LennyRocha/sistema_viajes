@@ -7,16 +7,13 @@ import {
 } from "@nexoroute/commons";
 import React from "react";
 import { Add, FilterList } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  IconButton,
-  TextField,
-  MenuItem,
-} from "@mui/material";
-import { conductores as data } from "../../data/constants";
+import { Box, IconButton, TextField } from "@mui/material";
 import buildConductoresColumns from "../utils/buildConductoresColumns";
 import ConductorDetails from "../components/ConductorDetails";
+import {
+  useGetConductoresQuery,
+  useChangeStatusConductorMutation,
+} from "../api/conductorApi";
 
 export default function ConductoresIndex({
   navigationFunction,
@@ -26,6 +23,25 @@ export default function ConductoresIndex({
   userPrivileges = [],
 }: Readonly<CommonPageProps>) {
   const columnas = buildConductoresColumns();
+
+  const {
+    data: conductores,
+    isLoading,
+    isFetching,
+    isError,
+  } = useGetConductoresQuery();
+
+  const [changeStatus] = useChangeStatusConductorMutation();
+
+  const handleToggleActive = async (row: { id: number }) => {
+    try {
+      await changeStatus({ id: row.id }).unwrap();
+      snack?.("Estado actualizado correctamente", "success");
+    } catch (error) {
+      console.error(error);
+      snack?.("No se pudo cambiar el estado del conductor", "error");
+    }
+  };
 
   return (
     <>
@@ -52,9 +68,10 @@ export default function ConductoresIndex({
         titulo="Conductores"
         subtitulo="Listado de conductores disponibles"
         columnas={columnas}
-        data={data}
+        data={conductores ?? []}
+        loading={isLoading || isFetching}
         onEditClick={(row) =>
-          navigationFunction(`/dashboard/conductores/editar/${row.cedula}`)
+          navigationFunction(`/dashboard/conductores/editar/${row.id}`)
         }
         onInfoClick={(row) =>
           openSidebar({
@@ -62,11 +79,11 @@ export default function ConductoresIndex({
             children: <ConductorDetails row={row} />,
           })
         }
-        onToggleActiveClick={console.log}
+        onToggleActiveClick={handleToggleActive}
         subHeaderComponent={
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
-              label="Buscar por cédula"
+              label="Buscar por CURP"
               variant="outlined"
               size="small"
               sx={{ flex: 1, minWidth: 200 }}
@@ -83,6 +100,11 @@ export default function ConductoresIndex({
           </Box>
         }
       />
+      {isError && (
+        <Box sx={{ p: 2, color: "error.main" }}>
+          Ocurrió un error al cargar los conductores.
+        </Box>
+      )}
     </>
   );
 }
