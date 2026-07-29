@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
+import net from 'node:net';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,6 +22,7 @@ const FRONTS = {
         dir: 'shell',
         command: 'pnpm',
         args: ['dev'],
+        port: 3000,
         color: 'magenta',
         required: true,
     },
@@ -29,6 +31,7 @@ const FRONTS = {
         dir: 'catalogos-front',
         command: 'pnpm',
         args: ['dev'],
+        port: 3002,
         color: 'cyan',
     },
     'operaciones-front': {
@@ -36,6 +39,7 @@ const FRONTS = {
         dir: 'operaciones-front',
         command: 'pnpm',
         args: ['dev'],
+        port: 3004,
         color: 'green',
     },
     'auth-front': {
@@ -43,6 +47,7 @@ const FRONTS = {
         dir: 'auth-front',
         command: 'pnpm',
         args: ['dev'],
+        port: 3001,
         color: 'blue',
     },
     'dashboard-reportes-front': {
@@ -50,6 +55,7 @@ const FRONTS = {
         dir: 'dashboard-reportes-front',
         command: 'pnpm',
         args: ['dev'],
+        port: 3003,
         color: 'orange',
     },
 };
@@ -99,12 +105,47 @@ function runOnce(command, args, cwd, tag) {
     return new Promise((resolve) => {
         console.log(chalk.gray(`  → ${tag}`));
         const p = spawnProcess(command, args, { cwd, stdio: 'inherit' });
-        p.on('exit', () => resolve());
+        p.on('exit', (code) => resolve(code === 0));
         p.on('error', (err) => {
             console.log(chalk.red(`  ✗ ${tag}: ${err.message}`));
-            resolve();
+            resolve(false);
         });
     });
+}
+
+function isPortFree(port) {
+    return new Promise((resolve) => {
+        const server = net.createServer();
+        server.once('error', () => resolve(false));
+        server.once('listening', () => {
+            server.close(() => resolve(true));
+        });
+        server.listen(port, '0.0.0.0');
+    });
+}
+
+async function assertPortsFree(keys) {
+    const busy = [];
+
+    for (const key of keys) {
+        const port = FRONTS[key]?.port;
+        if (!port) continue;
+        const free = await isPortFree(port);
+        if (!free) busy.push({ key, port });
+    }
+
+    if (busy.length === 0) return;
+
+    console.log(chalk.red('\nHay puertos ocupados. Cierra esos procesos antes de levantar el CLI:\n'));
+    for (const item of busy) {
+        console.log(chalk.red(`  - ${item.key}: puerto ${item.port}`));
+        if (IS_WIN) {
+            console.log(chalk.gray(`    Ver PID: netstat -ano | findstr :${item.port}`));
+            console.log(chalk.gray('    Apagar: taskkill /PID <PID> /T /F'));
+        }
+    }
+
+    throw new Error('No se levantaron frontends porque hay puertos ocupados.');
 }
 
 function launchService(key) {
@@ -201,15 +242,21 @@ async function main() {
 
     // 1) Build opcional del paquete compartido de frontend.
     if (withCommons) {
-        await runOnce(
+        const ok = await runOnce(
             'pnpm',
             ['--filter', '@nexoroute/commons', 'build'],
             ROOT,
             'build @nexoroute/commons',
         );
+        if (!ok) {
+            throw new Error('build @nexoroute/commons fallo. Corrige commons antes de levantar frontends.');
+        }
     }
 
-    // 2) Levantar cada servicio seleccionado.
+    // 2) Revisar puertos antes de levantar Next. Evita que Next mueva el shell a otro puerto.
+    await assertPortsFree(toStart);
+
+    // 3) Levantar cada servicio seleccionado.
     console.log('');
     for (const key of toStart) {
         if (!existsSync(join(ROOT, FRONTS[key].dir))) {
@@ -223,18 +270,7 @@ async function main() {
         launchService(key);
     }
 
-    // 3) Prisma Studio (opcional), sobre el task-service.
-    if (withCommons && existsSync(join(ROOT, 'task-service'))) {
-        const child = spawnProcess('pnpm', ['--filter', '@nexorute/commons', 'build'], {
-            cwd: join(ROOT, 'task-service'),
-        });
-        const prefix = chalk.blue('[commons]');
-        child.stdout.on('data', (d) => process.stdout.write(prefixChunk(prefix, d)));
-        child.stderr.on('data', (d) => process.stderr.write(prefixChunk(prefix, d)));
-        children.push(child);
-        console.log(`${prefix} ${chalk.green('iniciado')}`);
-    }
-
+    // 3) Build a commons si el usuario lo pidió. Esto es independiente de los frontends, y se hace en paralelo.
     if (children.length === 0) {
         console.log(chalk.yellow('\nNo se levanto ningun servicio.'));
         return;

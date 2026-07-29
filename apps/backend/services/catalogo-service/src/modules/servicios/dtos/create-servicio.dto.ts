@@ -15,7 +15,7 @@ import {
 } from '@commons/decorators';
 
 export class CreateServicioDto {
-  @ApiProperty({ example: 'Wi-Fi' })
+  @ApiProperty({ description: 'El nombre del servicio', example: 'Wi-Fi' })
   @IsString()
   @IsNotEmpty({ message: 'El nombre del servicio es obligatorio' })
   @MinLength(5, {
@@ -26,7 +26,10 @@ export class CreateServicioDto {
   })
   nombre!: string;
 
-  @ApiProperty({ example: 'Servicio de Wi-Fi a bordo del autobús' })
+  @ApiProperty({
+    description: 'La descripción del servicio',
+    example: 'Servicio de Wi-Fi a bordo del autobús',
+  })
   @IsString()
   @IsNotEmpty({ message: 'La descripción del servicio es obligatoria' })
   @MinLength(20, {
@@ -49,7 +52,10 @@ export class CreateServicioDto {
   })
   icono_nombre!: string;
 
-  @ApiProperty({})
+  @ApiProperty({
+    description: 'La lista de propiedades del servicio',
+    type: [CreateCampoConfigDto],
+  })
   @IsNotEmpty({ message: 'Las propiedades del servicio son obligatorias' })
   @IsUniqueObjectArray<CreateCampoConfigDto>('clave', {
     message: 'Las propiedades del servicio deben ser únicas entre sí',

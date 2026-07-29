@@ -45,7 +45,12 @@ export const serviciosApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Servicio"],
+      invalidatesTags: [
+        "Servicio",
+        "Institucion",
+        "Autobus",
+        "Disponibilidad",
+      ],
     }),
 
     patchServicio: builder.mutation<

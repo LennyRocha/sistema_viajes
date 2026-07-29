@@ -56,6 +56,7 @@ export default function EditarAutobus({
   pathname,
   codigo_interno,
   userPrivileges = [],
+  userRoles = [],
 }: Readonly<EditarServicioProps>) {
   const query = useGetAutobusByCodigoInternoQuery(
     codigo_interno ?? skipToken,

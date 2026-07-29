@@ -5,4 +5,5 @@ export default interface Institucion extends Auditory{
   nombre: string;
   descripcion: string;
   estatus: boolean;
+  slug: string;
 }

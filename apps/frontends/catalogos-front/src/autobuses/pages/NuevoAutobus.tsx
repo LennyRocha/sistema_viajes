@@ -48,8 +48,9 @@ export default function NuevoAutobus({
   showDialog = () => {},
   snack,
   router,
-  userPrivileges = [],
   pathname,
+  userPrivileges = [],
+  userRoles = [],
 }: Readonly<NuevoAutobusProps>) {
   const {
     register,

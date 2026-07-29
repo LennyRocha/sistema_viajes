@@ -45,6 +45,23 @@ async function bootstrap() {
     }),
   );
 
+  const OPERACIONES_PREFIXES = [
+    '/configuraciones-operaciones',
+    '/operaciones/health',
+    '/viajes-base',
+    '/rutas',
+  ];
+  app.use(
+    createProxyMiddleware({
+      target: target_two,
+      changeOrigin: true,
+      pathFilter: (pathname) =>
+        OPERACIONES_PREFIXES.some(
+          (p) => pathname === p || pathname.startsWith(`${p}/`),
+        ),
+    }),
+  );
+
   await app.listen(port);
   console.log(`api-gateway escuchando en http://localhost:${port}`);
   console.log(`Reenviando /servicios, /docs y /api-json →${target_one}`);

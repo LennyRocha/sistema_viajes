@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
+import net from 'node:net';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,6 +11,7 @@ import figlet from 'figlet';
 // El CLI vive en dev-cli/, y los servicios estan una carpeta arriba (la raiz del repo).
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const IS_WIN = process.platform === 'win32';
+const PRISMA_BIN = join('.', 'node_modules', '.bin', IS_WIN ? 'prisma.CMD' : 'prisma');
 
 // Servicio obligatorio: no se puede desactivar.
 const REQUIRED = 'gateway';
@@ -21,6 +23,7 @@ const SERVICES = {
         dir: 'gateway',
         command: 'pnpm',
         args: ['start:dev'],
+        port: 5000,
         color: 'magenta',
         required: true,
     },
@@ -29,9 +32,24 @@ const SERVICES = {
         dir: 'services/catalogo-service',
         command: 'pnpm',
         args: ['start:dev'],
+        port: 5002,
         docker: true, // levanta Postgres + Redis antes de arrancar
+        prismaMigrate: true,
+        prismaGenerate: true, // genera @prisma/client antes de compilar en watch
         color: 'cyan',
         seeds: true, // puede ejecutar seeds
+    },
+    'operaciones-service': {
+        label: 'operaciones-service - API de rutas y viajes (:5003)',
+        dir: 'services/operaciones-service',
+        command: 'pnpm',
+        args: ['start:dev'],
+        port: 5003,
+        dockerDir: 'services/catalogo-service',
+        prismaMigrate: true,
+        prismaGenerate: true,
+        color: 'green',
+        seedAlways: true,
     },
 };
 
@@ -80,12 +98,61 @@ function runOnce(command, args, cwd, tag) {
     return new Promise((resolve) => {
         console.log(chalk.gray(`  → ${tag}`));
         const p = spawnProcess(command, args, { cwd, stdio: 'inherit' });
-        p.on('exit', () => resolve());
+        p.on('exit', (code) => {
+            if (code === 0) {
+                resolve(true);
+                return;
+            }
+            console.log(chalk.red(`  x ${tag}: termino con codigo ${code}`));
+            resolve(false);
+        });
         p.on('error', (err) => {
             console.log(chalk.red(`  ✗ ${tag}: ${err.message}`));
-            resolve();
+            resolve(false);
         });
     });
+}
+
+async function runRequired(command, args, cwd, tag) {
+    const ok = await runOnce(command, args, cwd, tag);
+    if (!ok) {
+        throw new Error(`${tag} fallo. Corrige ese paso antes de levantar los servicios.`);
+    }
+}
+
+function isPortFree(port) {
+    return new Promise((resolve) => {
+        const server = net.createServer();
+        server.once('error', () => resolve(false));
+        server.once('listening', () => {
+            server.close(() => resolve(true));
+        });
+        server.listen(port, '0.0.0.0');
+    });
+}
+
+async function assertPortsFree(keys) {
+    const busy = [];
+
+    for (const key of keys) {
+        const port = SERVICES[key]?.port;
+        if (!port) continue;
+        const free = await isPortFree(port);
+        if (!free) busy.push({ key, port });
+    }
+
+    if (busy.length === 0) return;
+
+    console.log(chalk.red('\nHay puertos ocupados. Cierra esos procesos antes de levantar el CLI:\n'));
+    for (const item of busy) {
+        console.log(chalk.red(`  - ${item.key}: puerto ${item.port}`));
+        if (IS_WIN) {
+            console.log(chalk.gray(`    Ver PID: netstat -ano | findstr :${item.port}`));
+            console.log(chalk.gray('    Apagar: taskkill /PID <PID> /T /F'));
+        }
+    }
+
+    throw new Error('No se levantaron servicios porque hay puertos ocupados.');
 }
 
 function launchService(key) {
@@ -190,32 +257,60 @@ async function main() {
     // 1) Docker (Postgres/Redis) para los servicios que lo necesiten.
     for (const key of toStart) {
         const s = SERVICES[key];
-        if (s.docker && existsSync(join(ROOT, s.dir))) {
-            await runOnce(
+        const dockerDir = s.dockerDir ?? s.dir;
+        if ((s.docker || s.dockerDir) && existsSync(join(ROOT, dockerDir))) {
+            await runRequired(
                 'docker',
                 ['compose', 'up', '-d'],
-                join(ROOT, s.dir),
+                join(ROOT, dockerDir),
                 `docker compose up -d (${key})`,
             );
         }
     }
 
-    // 2) Seeds (datos de prueba) para los servicios que lo necesiten.
-    if (withSeeds) {
-        for (const key of toStart) {
-            const s = SERVICES[key];
-            if (s.seeds && existsSync(join(ROOT, s.dir))) {
-                await runOnce(
-                    'pnpm',
-                    ['prisma:seed'],
-                    join(ROOT, s.dir),
-                    `pnpm prisma:seed (${key})`,
-                );
-            }
+    // 2) Migraciones Prisma para los servicios que lo necesiten.
+    for (const key of toStart) {
+        const s = SERVICES[key];
+        if (s.prismaMigrate && existsSync(join(ROOT, s.dir))) {
+            await runRequired(
+                PRISMA_BIN,
+                ['migrate', 'deploy'],
+                join(ROOT, s.dir),
+                `prisma migrate deploy (${key})`,
+            );
         }
     }
 
-    // 3) Levantar cada servicio seleccionado.
+    // 3) Prisma Client para los servicios que lo necesiten.
+    for (const key of toStart) {
+        const s = SERVICES[key];
+        if (s.prismaGenerate && existsSync(join(ROOT, s.dir))) {
+            await runRequired(
+                PRISMA_BIN,
+                ['generate'],
+                join(ROOT, s.dir),
+                `prisma generate (${key})`,
+            );
+        }
+    }
+
+    // 4) Seeds idempotentes o datos de prueba para los servicios que lo necesiten.
+    for (const key of toStart) {
+        const s = SERVICES[key];
+        if ((s.seedAlways || (withSeeds && s.seeds)) && existsSync(join(ROOT, s.dir))) {
+            await runRequired(
+                PRISMA_BIN,
+                ['db', 'seed'],
+                join(ROOT, s.dir),
+                `prisma db seed (${key})`,
+            );
+        }
+    }
+
+    // 5) Revisar puertos antes de levantar Nest en watch mode.
+    await assertPortsFree(toStart);
+
+    // 6) Levantar cada servicio seleccionado.
     console.log('');
     for (const key of toStart) {
         if (!existsSync(join(ROOT, SERVICES[key].dir))) {
@@ -229,10 +324,10 @@ async function main() {
         launchService(key);
     }
 
-    // 4) Prisma Studio (opcional), sobre el catalogo-service.
-    if (withStudio && existsSync(join(ROOT, 'catalogo-service'))) {
+    // 7) Prisma Studio (opcional), sobre el catalogo-service.
+    if (withStudio && existsSync(join(ROOT, SERVICES['catalogo-service'].dir))) {
         const child = spawnProcess('pnpm', ['exec', 'prisma', 'studio'], {
-            cwd: join(ROOT, 'catalogo-service'),
+            cwd: join(ROOT, SERVICES['catalogo-service'].dir),
         });
         const prefix = chalk.blue('[prisma-studio]');
         child.stdout.on('data', (d) => process.stdout.write(prefixChunk(prefix, d)));

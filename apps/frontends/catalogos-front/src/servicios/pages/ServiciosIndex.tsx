@@ -234,6 +234,7 @@ const SubheaderComponent = ({
         onClick={() => {
           setQuery("");
           setOption("");
+          setActive(false);
         }}
       >
         Limpiar filtros

@@ -7,6 +7,7 @@ import {
   Text,
   Shape,
   Group,
+  Image,
 } from "react-konva";
 import { useTheme, useMediaQuery } from "@mui/material";
 import AsientoBus from "./AsientoBus";
@@ -14,6 +15,7 @@ import tiposBus from "../../tipos_autobus/constants/TiposBusMapper";
 import Asiento from "../types/Asiento";
 import { Vector2d } from "konva/lib/types";
 import AsientoPopup from "./AsientoPopup";
+import useImage from "use-image";
 
 interface BusMapProps {
   idTipo?: number;
@@ -67,15 +69,16 @@ const BusMap = ({
   );
   const md = useMediaQuery(theme.breakpoints.up("md"));
   const stageSize = React.useMemo(() => {
-    const calc = size * 40 + 100;
+    const num = md ? 102 : 100;
+    const calc = size * 40 + num;
     if (md) {
       return {
         width: calc,
-        height: 250,
+        height: 220,
       };
     } else {
       return {
-        width: 250,
+        width: 220,
         height: calc,
       };
     }
@@ -96,8 +99,8 @@ const BusMap = ({
         <Layer>
           <DriverSeat
             rotate={md}
-            x={md ? stageSize.width - 20 : 20}
-            y={10}
+            x={md ? stageSize.width - 22 : 10}
+            y={md ? 10 : 20}
           />
           <Group x={0} y={0}>
             {plantillas.map((asiento, index) => {
@@ -132,7 +135,7 @@ const BusMap = ({
           <BackPart
             x={md ? 30 : 10}
             y={md ? 10 : stageSize.height - 30}
-            width={md ? 230 : stageSize.width - 20}
+            width={md ? 200 : stageSize.width - 20}
             height={20}
             rotate={md}
           />
@@ -153,7 +156,9 @@ const DriverSeat = ({
   x = 200,
   y = 175,
 }) => {
+  const [img] = useImage("/assets/konva/volante.png");
   const theme = useTheme();
+  const md = useMediaQuery(theme.breakpoints.up("md"));
   return (
     <Group x={x} y={y} rotation={rotate ? 90 : 0}>
       <Rect
@@ -165,6 +170,13 @@ const DriverSeat = ({
         cornerRadius={[4, 4, 0, 0]}
         stroke={theme.palette.background.default}
         strokeWidth={1}
+      />
+      <Image
+        image={img}
+        x={8}
+        y={md ? -12 : -10}
+        width={25}
+        height={25}
       />
       <Rect
         x={0}

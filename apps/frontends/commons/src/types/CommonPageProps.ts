@@ -12,4 +12,5 @@ export default interface CommonPageProps {
   snack?: SnackFunctionProps;
   pathname?: string;
   router?: Router;
+  userRoles?: string[] | string;
 }
