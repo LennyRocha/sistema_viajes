@@ -1,4 +1,12 @@
-import { IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class GeoPointDto {
   @IsNumber()
@@ -19,4 +27,10 @@ export class GeoPointDto {
   @IsString()
   @MaxLength(255)
   placeId?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(240)
+  tiempoParadaMin?: number;
 }
