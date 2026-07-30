@@ -13,4 +13,7 @@ export default interface RutaBase {
   color?: string;
   encodedPolyline?: string | null;
   waypoints?: GeoPoint[] | null;
+  conexionAnterior?: GeoPoint[] | null;
+  distanciaConexionAnteriorMetros?: number | null;
+  requiereConexionAnterior?: boolean;
 }
