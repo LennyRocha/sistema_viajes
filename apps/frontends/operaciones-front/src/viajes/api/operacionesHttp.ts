@@ -177,3 +177,14 @@ export function createViajeBase(body: CreateViajeBaseBody) {
     body: JSON.stringify(body),
   });
 }
+
+export function getViajeBase(id: string | number) {
+  return request<ViajeBaseApi>(`/viajes-base/${id}`);
+}
+
+export function updateViajeBase(id: string | number, body: CreateViajeBaseBody) {
+  return request<ViajeBaseApi>(`/viajes-base/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}

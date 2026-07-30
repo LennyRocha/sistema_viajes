@@ -1,19 +1,21 @@
+import FederatedPage from "@/src/adapters/FederatedPage";
 import MainLayout from "@/src/layout/MainLayout";
 import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
-import React from "react";
-
-type Props = {};
 
 export const metadata: Metadata = {
-  title: "Rutas y paradas | Nexoroute ",
+  title: "Rutas y paradas | Nexoroute",
   description:
-    "Panel administrativo para la gestión de rutas y paradas, con opciones para agregar, editar y eliminar rutas, así como para visualizar detalles de cada ruta y sus paradas asociadas.",
+    "Panel administrativo para gestionar rutas reutilizables, paradas y recorridos geograficos.",
 };
 
-export default function page({}: Props) {
+export default function Page() {
   return (
     <MainLayout>
-      <div>page Rutas</div>
+      <FederatedPage
+        remote="operaciones/ViajesModule"
+        exportName="RutasIndex"
+        skeletonVariant="dashboard"
+      />
     </MainLayout>
   );
 }

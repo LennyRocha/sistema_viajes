@@ -31,10 +31,18 @@ import {
 import GoogleRouteMap from "../components/GoogleRouteMap";
 import ViajeDetails from "../components/ViajeDetails";
 import { getViajesBasePage, useOperacionesData } from "../api/operacionesHttp";
+import GeoPoint from "../types/GeoPoint";
 import { mapRutaApi, mapViajeApi } from "../utils/apiMappers";
-import { buildConnectionSegments, getJourneyMetrics } from "../utils/routeUtils";
+import {
+  buildConnectionSegments,
+  buildJourneySimulationPath,
+  getJourneyMetrics,
+} from "../utils/routeUtils";
 
 interface Props extends CommonPageProps {}
+
+const DEFAULT_VIAJE_IMAGE = "/imagen_defecto_viajes.jpg";
+const EMPTY_ROUTES: ReturnType<typeof mapRutaApi>[] = [];
 
 function MetricCard({
   label,
@@ -122,16 +130,50 @@ export default function ViajesIndex({
   }, [pageViajes, selectedId]);
 
   const selectedViaje = pageViajes.find((viaje) => viaje.id === selectedId) || pageViajes[0];
-  const selectedRoutes = selectedViaje?.rutas || [];
+  const selectedRoutes = selectedViaje?.rutas || EMPTY_ROUTES;
   const connections = React.useMemo(
     () => buildConnectionSegments(selectedRoutes),
     [selectedRoutes],
   );
-  const metrics = React.useMemo(
-    () => getJourneyMetrics(selectedRoutes, connections),
-    [connections, selectedRoutes],
+  const [connectionOverrides, setConnectionOverrides] = React.useState<
+    Map<string, { path: GeoPoint[]; distanceMeters: number }>
+  >(() => new Map());
+  const mergedConnections = React.useMemo(
+    () =>
+      connections.map((connection) => {
+        const override = connectionOverrides.get(connection.id);
+        return override
+          ? { ...connection, path: override.path, distanceMeters: override.distanceMeters }
+          : connection;
+      }),
+    [connectionOverrides, connections],
   );
-  const ready = selectedRoutes.length > 0 && connections.length === 0;
+  const metrics = React.useMemo(
+    () => getJourneyMetrics(selectedRoutes, mergedConnections),
+    [mergedConnections, selectedRoutes],
+  );
+  const journeySimulationPath = React.useMemo(
+    () => buildJourneySimulationPath(selectedRoutes, mergedConnections),
+    [mergedConnections, selectedRoutes],
+  );
+  const updateConnectionPath = React.useCallback(
+    (connectionId: string, path: GeoPoint[], distanceMeters: number) => {
+      setConnectionOverrides((current) => {
+        const existing = current.get(connectionId);
+        if (
+          existing?.distanceMeters === distanceMeters &&
+          existing.path.length === path.length
+        ) {
+          return current;
+        }
+        const next = new Map(current);
+        next.set(connectionId, { path, distanceMeters });
+        return next;
+      });
+    },
+    [],
+  );
+  const ready = selectedRoutes.length > 0 && mergedConnections.length === 0;
 
   return (
     <>
@@ -233,19 +275,17 @@ export default function ViajesIndex({
                   cursor: "pointer",
                 }}
               >
-                {(viaje.imagenBase64 || viaje.imagenUrl) && (
-                  <Box
-                    component="img"
-                    src={viaje.imagenBase64 || viaje.imagenUrl || ""}
-                    alt={viaje.nombre}
-                    sx={{
-                      width: "100%",
-                      height: 92,
-                      objectFit: "cover",
-                      display: "block",
-                    }}
-                  />
-                )}
+                <Box
+                  component="img"
+                  src={viaje.imagenBase64 || viaje.imagenUrl || DEFAULT_VIAJE_IMAGE}
+                  alt={viaje.nombre}
+                  sx={{
+                    width: "100%",
+                    height: 92,
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
                 <Box sx={{ p: 1.5 }}>
                 <Stack direction="row" spacing={1} sx={{ justifyContent: "space-between" }}>
                   <Box sx={{ minWidth: 0 }}>
@@ -289,10 +329,13 @@ export default function ViajesIndex({
             >
               <GoogleRouteMap
                 routes={selectedRoutes}
-                connections={connections}
+                connections={mergedConnections}
                 height={560}
                 title={ready ? "Viaje conectado" : "Viaje con enlace operativo pendiente"}
                 enableStreetView
+                enableSimulation={journeySimulationPath.length > 1}
+                simulationPath={journeySimulationPath}
+                onConnectionPathChange={updateConnectionPath}
               />
             </PaperBlock>
 

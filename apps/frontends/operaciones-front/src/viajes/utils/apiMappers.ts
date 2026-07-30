@@ -56,6 +56,11 @@ export function mapViajeApi(viaje: ViajeBaseApi): ViajeBase {
     imagenStorage: viaje.imagenStorage,
     estatus: viaje.estatus,
     servicios: [],
-    rutas: viaje.rutas.map((item) => mapRutaApi(item.ruta)),
+    rutas: viaje.rutas.map((item) => ({
+      ...mapRutaApi(item.ruta),
+      conexionAnterior: item.conexion,
+      distanciaConexionAnteriorMetros: item.distanciaConexionMetros,
+      requiereConexionAnterior: item.requiereConexion,
+    })),
   };
 }
