@@ -7,6 +7,7 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { CreateInstitucionDto } from './dtos/create-institucion.dto';
 import { UpdateInstitucionDto } from './dtos/update-insticuion.dto';
 import slugify from 'slugify';
+import { Prisma } from '@prisma/client';
 
 const LIST_CACHE_KEY = 'instituciones:list';
 
@@ -84,9 +85,16 @@ export class InstitucionesService {
       );
     }
 
+    const where: Prisma.InstitucionWhereInput = active
+      ? {
+          estatus: true,
+        }
+      : {};
+
     // 2) no está → base de datos
     const instituciones = await this.prisma.institucion.findMany({
       orderBy: { createdAt: 'desc' },
+      where,
     });
 
     // 3) guarda para la próxima (1 hora = 3600 segundos)
