@@ -3,9 +3,12 @@ import {
   ArrayMinSize,
   IsArray,
   IsBoolean,
+  IsInt,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { ViajeBaseRutaDto } from './viaje-base-ruta.dto';
@@ -24,6 +27,35 @@ export class CreateViajeBaseDto {
   @IsString()
   @MaxLength(80)
   frecuencia?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  duracionCalculadaMin?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(1440)
+  margenMin?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  duracionTotalMin?: number;
+
+  @IsOptional()
+  @IsString()
+  imagenUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  imagenBase64?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  imagenStorage?: string;
 
   @IsOptional()
   @IsBoolean()

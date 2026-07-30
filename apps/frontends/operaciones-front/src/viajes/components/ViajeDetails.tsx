@@ -37,7 +37,7 @@ export default function ViajeDetails({ viaje }: Readonly<Props>) {
           color={viaje.estatus ? "success" : "default"}
           variant="outlined"
         />
-        <Chip label={viaje.frecuencia} variant="outlined" />
+        <Chip label={`${viaje.duracionTotalMin || 0} min`} variant="outlined" />
         <Chip
           label={`${viaje.rutas.length} ruta(s)`}
           color="primary"

@@ -101,10 +101,26 @@ NEXT_PRIVATE_LOCAL_WEBPACK=true
 NEXT_PUBLIC_API_URL=http://localhost:5000
 NEXT_PRIVATE_LOCAL_WEBPACK=true
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_api_key_de_google_maps
+NEXT_PUBLIC_IMAGE_STORAGE_MODE=base64
 ```
 
 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` se usa para el mapa de viajes. Debe ser una
 key restringida en Google Cloud y no debe subirse al repo.
+
+`NEXT_PUBLIC_IMAGE_STORAGE_MODE` es opcional. En local usa `base64` para que las
+imagenes subidas de viajes se guarden directo en la base. En produccion puede
+usarse `aws`/`aws-url`: el frontend mandara URL y no base64, dejando listo el
+flujo para S3 u otro storage.
+
+Para el modulo de rutas/viajes, la API key debe tener habilitadas estas APIs en
+Google Cloud:
+
+- Maps JavaScript API.
+- Places API.
+- Directions API.
+- Geocoding API.
+
+La imagen del viaje se sube manualmente desde la interfaz.
 
 Resumen de puertos de frontend:
 
@@ -138,6 +154,16 @@ PORT=5002
 DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=public"
 REDIS_URL="redis://localhost:6379"
 ```
+
+### apps/backend/services/operaciones-service/.env
+
+```env
+PORT=5003
+DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=operaciones&options=--search_path%3Doperaciones"
+```
+
+El modulo de Viajes usa `operaciones-service`. Si `gateway` esta prendido pero
+`operaciones-service` no esta en `5003`, el frontend puede mostrar errores 504.
 
 ## 4. Levantar con CLI
 
@@ -184,9 +210,11 @@ cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\ap
 URLs principales:
 
 ```text
-Gateway:          http://localhost:5000
-Catalogo service: http://localhost:5002
-Docs catalogos:   http://localhost:5002/docs
+Gateway:             http://localhost:5000
+Catalogo service:    http://localhost:5002
+Operaciones service: http://localhost:5003
+Docs catalogos:      http://localhost:5002/docs
+Docs operaciones:    http://localhost:5003/docs
 ```
 
 Para apagar los procesos Node del CLI, presiona `Ctrl+C` en la terminal del CLI.
@@ -287,6 +315,15 @@ cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\ap
 pnpm.cmd start:dev
 ```
 
+Terminal 4, operaciones-service:
+
+```powershell
+cd C:\Users\Sistemas.DESKTOP-LNVDK55\Documents\9NO\Integradora\sistema_viajes\apps\backend\services\operaciones-service
+.\node_modules\.bin\prisma.CMD generate
+.\node_modules\.bin\prisma.CMD migrate dev
+pnpm.cmd start:dev
+```
+
 Para apagar Node usa `Ctrl+C` en cada terminal. Para apagar Docker:
 
 ```powershell
@@ -342,6 +379,7 @@ Orden recomendado:
 | Operaciones front | 3004 | Remote `operaciones` |
 | Gateway backend | 5000 | URL que deberian usar los frontends |
 | Catalogo service | 5002 | API de catalogos |
+| Operaciones service | 5003 | API de rutas y viajes |
 | Postgres | 5437 -> 5432 | Docker: host 5437, contenedor 5432 |
 | Redis | 6379 | Docker |
 
@@ -361,6 +399,7 @@ Backend:
 ```powershell
 pnpm.cmd --filter gateway build
 pnpm.cmd --filter catalogo-service build
+pnpm.cmd --filter operaciones-service build
 ```
 
 ## 8. Problemas comunes
@@ -446,3 +485,26 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_api_key_de_google_maps
 ```
 
 Despues reinicia `operaciones-front`.
+
+### La imagen del viaje
+
+La imagen del viaje se sube manualmente desde el formulario. En local se guarda
+como base64 si tienes:
+
+```env
+NEXT_PUBLIC_IMAGE_STORAGE_MODE=base64
+```
+
+### Viajes muestra HTTP 504
+
+Significa que el gateway esta prendido, pero no puede llegar a
+`operaciones-service`.
+
+Revisa que este vivo:
+
+```powershell
+netstat -ano | findstr ":5003"
+```
+
+Si no aparece, levanta `operaciones-service` desde el CLI del backend o de forma
+individual.
