@@ -24,6 +24,12 @@ type ConexionValidada = {
   requiereConexion: boolean;
 };
 
+type FindAllOptions = {
+  page?: number;
+  limit?: number;
+  search?: string;
+};
+
 @Injectable()
 export class ViajesBaseService {
   constructor(
@@ -41,6 +47,14 @@ export class ViajesBaseService {
         nombre: dto.nombre,
         descripcion: dto.descripcion,
         frecuencia: dto.frecuencia,
+        duracionCalculadaMin: dto.duracionCalculadaMin,
+        margenMin: dto.margenMin ?? 0,
+        duracionTotalMin:
+          dto.duracionTotalMin ??
+          ((dto.duracionCalculadaMin ?? 0) + (dto.margenMin ?? 0)),
+        imagenUrl: dto.imagenUrl,
+        imagenBase64: dto.imagenBase64,
+        imagenStorage: dto.imagenStorage,
         estatus: dto.estatus ?? true,
         rutas: {
           create: segmentos,
@@ -50,12 +64,48 @@ export class ViajesBaseService {
     });
   }
 
-  findAll(active: boolean) {
-    return this.prisma.viajeBase.findMany({
-      where: active ? { estatus: true } : undefined,
-      include: this.includeRutas(),
-      orderBy: { createdAt: 'desc' },
-    });
+  async findAll(active: boolean, options: FindAllOptions = {}) {
+    const search = options.search?.trim();
+    const where: Prisma.ViajeBaseWhereInput = {
+      ...(active ? { estatus: true } : {}),
+      ...(search
+        ? {
+            OR: [
+              { nombre: { contains: search, mode: 'insensitive' } },
+              { descripcion: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    };
+
+    if (!options.page && !options.limit && !search) {
+      return this.prisma.viajeBase.findMany({
+        where,
+        include: this.includeRutas(),
+        orderBy: { createdAt: 'desc' },
+      });
+    }
+
+    const page = Math.max(1, options.page || 1);
+    const limit = Math.min(50, Math.max(1, options.limit || 5));
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.viajeBase.findMany({
+        where,
+        include: this.includeRutas(),
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.viajeBase.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    };
   }
 
   async findOne(id: number) {
@@ -90,6 +140,12 @@ export class ViajesBaseService {
           nombre: dto.nombre,
           descripcion: dto.descripcion,
           frecuencia: dto.frecuencia,
+          duracionCalculadaMin: dto.duracionCalculadaMin,
+          margenMin: dto.margenMin,
+          duracionTotalMin: dto.duracionTotalMin,
+          imagenUrl: dto.imagenUrl,
+          imagenBase64: dto.imagenBase64,
+          imagenStorage: dto.imagenStorage,
           estatus: dto.estatus,
           rutas: rutas
             ? {

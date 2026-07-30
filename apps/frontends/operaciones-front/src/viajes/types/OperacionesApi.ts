@@ -16,6 +16,14 @@ export type RutaApi = {
   updatedAt?: string;
 };
 
+export type PaginatedRutasApi = {
+  data: RutaApi[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
 export type ViajeBaseRutaApi = {
   id: number;
   viajeBaseId: number;
@@ -33,10 +41,24 @@ export type ViajeBaseApi = {
   nombre: string;
   descripcion?: string | null;
   frecuencia?: string | null;
+  duracionCalculadaMin?: number | null;
+  margenMin?: number | null;
+  duracionTotalMin?: number | null;
+  imagenUrl?: string | null;
+  imagenBase64?: string | null;
+  imagenStorage?: string | null;
   estatus: boolean;
   createdAt?: string;
   updatedAt?: string;
   rutas: ViajeBaseRutaApi[];
+};
+
+export type PaginatedViajesBaseApi = {
+  data: ViajeBaseApi[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 };
 
 export type ConexionValidadaApi = {
@@ -71,6 +93,12 @@ export type CreateViajeBaseBody = {
   nombre: string;
   descripcion?: string;
   frecuencia?: string;
+  duracionCalculadaMin?: number;
+  margenMin?: number;
+  duracionTotalMin?: number;
+  imagenUrl?: string;
+  imagenBase64?: string;
+  imagenStorage?: string;
   estatus?: boolean;
   rutas: Array<{
     rutaId: number;

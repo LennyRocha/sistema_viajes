@@ -190,6 +190,7 @@ function normalizeRoutes(routes: RutaBase[] = []) {
   return routes.map((route, index) => ({
     id: String(route.id),
     name: route.nombre,
+    order: index + 1,
     color: route.color || FALLBACK_COLORS[index % FALLBACK_COLORS.length],
     points: getRoutePoints(route).map((point, pointIndex, allPoints) => ({
       ...point,
@@ -330,6 +331,12 @@ export default function GoogleRouteMap({
         renderedRoutes.forEach((route) => {
           route.points.forEach((point, index) => {
             const pointColor = point.markerRole === "parada" ? STOP_COLOR : route.color;
+            const labelText =
+              point.markerRole === "origen"
+                ? `${route.order}O`
+                : point.markerRole === "destino"
+                  ? `${route.order}D`
+                  : `${route.order}.${index}`;
             markers.push(
               new window.google.maps.Marker({
                 map,
@@ -337,10 +344,10 @@ export default function GoogleRouteMap({
                 title: point.nombre,
                 icon: markerIcon(pointColor, index === 0 || index === route.points.length - 1 ? 1 : 0.82),
                 label: {
-                  text: String(index + 1),
+                  text: labelText,
                   color: pointColor,
                   fontWeight: "900",
-                  fontSize: "11px",
+                  fontSize: "10px",
                 },
               }),
             );
@@ -429,7 +436,7 @@ export default function GoogleRouteMap({
           );
         });
 
-        connections.forEach((segment) => {
+        connections.forEach((segment, index) => {
           polylines.push(
             new window.google.maps.Polyline({
               map,
@@ -443,6 +450,20 @@ export default function GoogleRouteMap({
                   repeat: "16px",
                 },
               ],
+            }),
+          );
+          markers.push(
+            new window.google.maps.Marker({
+              map,
+              position: segment.from,
+              title: `Enlace ${index + 1}: salida`,
+              icon: markerIcon("#2d3748", 0.72),
+              label: {
+                text: `E${index + 1}`,
+                color: "#2d3748",
+                fontWeight: "900",
+                fontSize: "10px",
+              },
             }),
           );
         });

@@ -16,6 +16,11 @@ export function routeColor(id: number) {
 }
 
 export function mapRutaApi(ruta: RutaApi): RutaBase {
+  const paradaMin = (ruta.paradas || []).reduce(
+    (total, parada) => total + (parada.tiempoParadaMin || 0),
+    0,
+  );
+
   return {
     id: ruta.id,
     nombre: ruta.nombre,
@@ -30,6 +35,8 @@ export function mapRutaApi(ruta: RutaApi): RutaBase {
       : 0,
     duracionMin: ruta.duracionSegundos
       ? Math.max(1, Math.round(ruta.duracionSegundos / 60))
+      : paradaMin
+        ? paradaMin
       : 0,
     estatus: ruta.estatus,
     color: routeColor(ruta.id),
@@ -41,8 +48,12 @@ export function mapViajeApi(viaje: ViajeBaseApi): ViajeBase {
     id: viaje.id,
     nombre: viaje.nombre,
     descripcion: viaje.descripcion || "",
-    frecuencia: viaje.frecuencia || "Sin frecuencia definida",
-    proximaApertura: "Pendiente de calendario",
+    duracionCalculadaMin: viaje.duracionCalculadaMin || 0,
+    margenMin: viaje.margenMin || 0,
+    duracionTotalMin: viaje.duracionTotalMin || 0,
+    imagenUrl: viaje.imagenUrl,
+    imagenBase64: viaje.imagenBase64,
+    imagenStorage: viaje.imagenStorage,
     estatus: viaje.estatus,
     servicios: [],
     rutas: viaje.rutas.map((item) => mapRutaApi(item.ruta)),

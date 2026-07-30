@@ -9,6 +9,7 @@ import {
   PaperHeader,
 } from "@nexoroute/commons";
 import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import AltRouteIcon from "@mui/icons-material/AltRoute";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -33,6 +34,7 @@ import {
   ToggleButtonGroup,
   Tooltip,
   Typography,
+  Pagination,
 } from "@mui/material";
 import GoogleRouteMap, {
   PlaceSuggestion,
@@ -44,6 +46,7 @@ import GoogleRouteMap, {
 import {
   createRuta,
   createViajeBase,
+  getRutasPage,
   useOperacionesData,
 } from "../api/operacionesHttp";
 import GeoPoint from "../types/GeoPoint";
@@ -55,17 +58,6 @@ interface Props extends CommonPageProps {
   viajeId?: string;
 }
 
-const DAYS = [
-  { key: "LU", label: "Lun" },
-  { key: "MA", label: "Mar" },
-  { key: "MI", label: "Mie" },
-  { key: "JU", label: "Jue" },
-  { key: "VI", label: "Vie" },
-  { key: "SA", label: "Sab" },
-  { key: "DO", label: "Dom" },
-];
-
-type ScheduleMode = "RECURRENTE" | "FECHA_UNICA" | "BAJO_DEMANDA";
 type MapPointAction = {
   replaceClientId?: string;
 };
@@ -79,6 +71,11 @@ function routeDraftFromPoints(
   metrics?: RouteMetrics,
 ): RutaBase | null {
   if (!origen || !destino) return null;
+  const stopSeconds = paradas.reduce(
+    (total, parada) => total + (parada.tiempoParadaMin || 0) * 60,
+    0,
+  );
+  const totalSeconds = (metrics?.duracionSegundos || 0) + stopSeconds;
 
   return {
     id: -1,
@@ -90,8 +87,8 @@ function routeDraftFromPoints(
     distanciaKm: metrics?.distanciaMetros
       ? Number((metrics.distanciaMetros / 1000).toFixed(1))
       : 0,
-    duracionMin: metrics?.duracionSegundos
-      ? Math.max(1, Math.round(metrics.duracionSegundos / 60))
+    duracionMin: totalSeconds
+      ? Math.max(1, Math.round(totalSeconds / 60))
       : 0,
     color: "#1f618d",
     estatus: true,
@@ -101,6 +98,15 @@ function routeDraftFromPoints(
 function cleanPoint(point: GeoPoint): GeoPoint {
   const { clientId, isResolving, ...clean } = point;
   return clean;
+}
+
+function readImageAsBase64(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("No se pudo leer la imagen"));
+    reader.readAsDataURL(file);
+  });
 }
 
 export default function NuevoViaje({
@@ -120,8 +126,23 @@ export default function NuevoViaje({
   const [isSaving, setIsSaving] = React.useState(false);
 
   const rutas = React.useMemo(() => rutasData.map(mapRutaApi), [rutasData]);
+  const [routePageRoutes, setRoutePageRoutes] = React.useState<RutaBase[]>([]);
   const [selectedRouteIds, setSelectedRouteIds] = React.useState<number[]>([]);
-  const selectedRoutes = rutas.filter((ruta) => selectedRouteIds.includes(ruta.id));
+  const [selectedRouteMap, setSelectedRouteMap] = React.useState<Map<number, RutaBase>>(
+    () => new Map(),
+  );
+  const rutasById = React.useMemo(
+    () => new Map([...rutas, ...routePageRoutes].map((ruta) => [ruta.id, ruta])),
+    [routePageRoutes, rutas],
+  );
+  const selectedRouteKey = selectedRouteIds.join("|");
+  const selectedRoutes = React.useMemo(
+    () =>
+      selectedRouteIds
+        .map((id) => selectedRouteMap.get(id) || rutasById.get(id))
+        .filter((ruta): ruta is RutaBase => Boolean(ruta)),
+    [rutasById, selectedRouteKey, selectedRouteMap],
+  );
   const connections = React.useMemo(
     () => buildConnectionSegments(selectedRoutes),
     [selectedRoutes],
@@ -133,9 +154,16 @@ export default function NuevoViaje({
 
   const [nombreViaje, setNombreViaje] = React.useState("");
   const [descripcionViaje, setDescripcionViaje] = React.useState("");
-  const [days, setDays] = React.useState<string[]>(["LU", "MA", "MI", "JU", "VI"]);
-  const [scheduleMode, setScheduleMode] = React.useState<ScheduleMode>("RECURRENTE");
-  const [fechaUnica, setFechaUnica] = React.useState("");
+  const [margenViajeMin, setMargenViajeMin] = React.useState(0);
+  const [imagenViajeBase64, setImagenViajeBase64] = React.useState("");
+  const [imagenViajePreview, setImagenViajePreview] = React.useState("");
+  const [routeSearch, setRouteSearch] = React.useState("");
+  const [routePage, setRoutePage] = React.useState(1);
+  const [routePageData, setRoutePageData] = React.useState({
+    total: 0,
+    totalPages: 1,
+  });
+  const [isLoadingRoutePage, setIsLoadingRoutePage] = React.useState(false);
 
   const [nombreRuta, setNombreRuta] = React.useState("");
   const [descripcionRuta, setDescripcionRuta] = React.useState("");
@@ -192,14 +220,11 @@ export default function NuevoViaje({
     [destino, origen, paradas],
   );
 
-  const frecuencia =
-    scheduleMode === "BAJO_DEMANDA"
-      ? "BAJO_DEMANDA"
-      : scheduleMode === "FECHA_UNICA"
-        ? `FECHA_UNICA:${fechaUnica}`
-        : days.length
-          ? `RECURRENTE:${days.join(",")}`
-          : "SIN_DIAS";
+  const duracionCalculadaViajeMin = Math.round(metrics.durationMin);
+  const duracionTotalViajeMin = duracionCalculadaViajeMin + margenViajeMin;
+  const viajeImage = imagenViajePreview;
+  const storesImagesAsBase64 =
+    (process.env.NEXT_PUBLIC_IMAGE_STORAGE_MODE || "base64") === "base64";
 
   React.useEffect(() => {
     if (!apiKey || origenInput.trim().length < 3) {
@@ -237,12 +262,57 @@ export default function NuevoViaje({
     return () => window.clearTimeout(timeout);
   }, [apiKey, destinoInput]);
 
+  React.useEffect(() => {
+    const timeout = window.setTimeout(async () => {
+      setIsLoadingRoutePage(true);
+      try {
+        const response = await getRutasPage({
+          page: routePage,
+          limit: 5,
+          search: routeSearch,
+          active: false,
+        });
+        const mapped = response.data.map(mapRutaApi);
+        setRoutePageRoutes(mapped);
+        setRoutePageData({
+          total: response.total,
+          totalPages: response.totalPages,
+        });
+        setSelectedRouteMap((current) => {
+          const next = new Map(current);
+          mapped.forEach((ruta) => {
+            if (selectedRouteIds.includes(ruta.id)) next.set(ruta.id, ruta);
+          });
+          return next;
+        });
+      } catch (error) {
+        snack?.error({
+          message:
+            error instanceof Error
+              ? `No se pudieron cargar rutas: ${error.message}`
+              : "No se pudieron cargar rutas",
+        });
+      } finally {
+        setIsLoadingRoutePage(false);
+      }
+    }, 260);
+
+    return () => window.clearTimeout(timeout);
+  }, [routePage, routeSearch, selectedRouteIds, snack]);
+
   const toggleRoute = (routeId: number) => {
+    const route = rutasById.get(routeId);
     setSelectedRouteIds((current) =>
       current.includes(routeId)
         ? current.filter((id) => id !== routeId)
         : [...current, routeId],
     );
+    setSelectedRouteMap((current) => {
+      const next = new Map(current);
+      if (next.has(routeId)) next.delete(routeId);
+      else if (route) next.set(routeId, route);
+      return next;
+    });
   };
 
   const searchPoint = async (kind: "origen" | "destino") => {
@@ -359,7 +429,12 @@ export default function NuevoViaje({
         paradas: paradas.map(cleanPoint),
         waypoints: routeMetrics?.overviewPath,
         distanciaMetros: routeMetrics?.distanciaMetros,
-        duracionSegundos: routeMetrics?.duracionSegundos,
+        duracionSegundos:
+          (routeMetrics?.duracionSegundos || 0) +
+          paradas.reduce(
+            (total, parada) => total + (parada.tiempoParadaMin || 0) * 60,
+            0,
+          ),
         estatus: true,
       });
       snack?.success({ message: "Ruta guardada" });
@@ -383,21 +458,17 @@ export default function NuevoViaje({
       snack?.error({ message: "Necesitas nombre y al menos una ruta" });
       return;
     }
-    if (scheduleMode === "RECURRENTE" && days.length === 0) {
-      snack?.error({ message: "Selecciona al menos un dia para el viaje recurrente" });
-      return;
-    }
-    if (scheduleMode === "FECHA_UNICA" && !fechaUnica) {
-      snack?.error({ message: "Selecciona la fecha del viaje unico" });
-      return;
-    }
-
     try {
       setIsSaving(true);
       await createViajeBase({
         nombre: nombreViaje.trim(),
         descripcion: descripcionViaje.trim(),
-        frecuencia,
+        duracionCalculadaMin: duracionCalculadaViajeMin,
+        margenMin: margenViajeMin,
+        duracionTotalMin: duracionTotalViajeMin,
+        imagenUrl: storesImagesAsBase64 ? undefined : viajeImage,
+        imagenBase64: storesImagesAsBase64 ? imagenViajeBase64 : undefined,
+        imagenStorage: storesImagesAsBase64 ? "base64" : "aws-url",
         estatus: true,
         rutas: selectedRouteIds.map((rutaId, index) => ({
           rutaId,
@@ -430,7 +501,7 @@ export default function NuevoViaje({
       />
       <PaperHeader
         title={isEditing ? "Editar viaje base" : "Nuevo viaje base"}
-        subtitle="Crea primero trayectos reutilizables y despues arma el viaje que se abrira en calendario"
+        subtitle="Crea trayectos reutilizables y arma la composicion operativa del viaje"
         iconname={isEditing ? "edit" : "add"}
         showButton
         onButtonClick={() => navigationFunction("/dashboard/trips")}
@@ -468,7 +539,7 @@ export default function NuevoViaje({
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <PaperBlock
               title="1. Datos del viaje"
-              subtitle="Esto es una plantilla; la fecha real se define al abrir salidas en calendario"
+              subtitle="Define la plantilla operativa. La programacion de salidas pertenece al modulo de calendario."
               contentWrapperSx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
             >
               <TextField
@@ -487,72 +558,115 @@ export default function NuevoViaje({
                 rows={3}
                 fullWidth
               />
+              <Stack spacing={1.25}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                  Duracion operativa
+                </Typography>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+                  <Chip
+                    label={`Calculada: ${duracionCalculadaViajeMin} min`}
+                    color="primary"
+                  />
+                  <Chip label={`Margen: ${margenViajeMin} min`} />
+                  <Chip
+                    label={`Total: ${duracionTotalViajeMin} min`}
+                    color="secondary"
+                  />
+                </Stack>
+                <TextField
+                  label="Margen adicional del viaje"
+                  type="number"
+                  value={margenViajeMin}
+                  onChange={(event) =>
+                    setMargenViajeMin(Math.max(0, Number(event.target.value) || 0))
+                  }
+                  size="small"
+                  fullWidth
+                  helperText="Solo puedes agregar tiempo. La duracion calculada viene de Google + minutos de paradas."
+                />
+              </Stack>
+
               <Stack spacing={1}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                  Programacion
+                  Imagen del viaje
                 </Typography>
-                <ToggleButtonGroup
-                  exclusive
-                  size="small"
-                  value={scheduleMode}
-                  onChange={(_, value) => value && setScheduleMode(value)}
-                  fullWidth
-                >
-                  <ToggleButton value="RECURRENTE">Recurrente</ToggleButton>
-                  <ToggleButton value="FECHA_UNICA">Una fecha</ToggleButton>
-                  <ToggleButton value="BAJO_DEMANDA">Bajo demanda</ToggleButton>
-                </ToggleButtonGroup>
-                {scheduleMode === "FECHA_UNICA" && (
-                  <TextField
-                    label="Fecha del viaje"
-                    type="date"
-                    value={fechaUnica}
-                    onChange={(event) => setFechaUnica(event.target.value)}
-                    size="small"
-                    fullWidth
-                    slotProps={{ inputLabel: { shrink: true } }}
+                {viajeImage ? (
+                  <Box
+                    component="img"
+                    src={viajeImage}
+                    alt="Imagen del viaje"
+                    sx={{
+                      width: "100%",
+                      height: 150,
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                      border: "1px solid",
+                      borderColor: "divider",
+                    }}
                   />
-                )}
-                {scheduleMode === "RECURRENTE" && (
-                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
-                  {DAYS.map((day) => (
-                    <Chip
-                      key={day.key}
-                      label={day.label}
-                      clickable
-                      color={days.includes(day.key) ? "primary" : "default"}
-                      variant={days.includes(day.key) ? "filled" : "outlined"}
-                      onClick={() => {
-                        setDays((current) =>
-                          current.includes(day.key)
-                            ? current.filter((item) => item !== day.key)
-                            : [...current, day.key],
-                        );
-                      }}
-                    />
-                  ))}
-                </Stack>
-                )}
-                {scheduleMode === "BAJO_DEMANDA" && (
+                ) : (
                   <Alert severity="info">
-                    El viaje queda como plantilla operativa; la salida se abrira despues cuando exista solicitud.
+                    Sube una imagen para identificar visualmente este viaje.
                   </Alert>
                 )}
+                <Button
+                  component="label"
+                  variant="outlined"
+                  startIcon={<AddPhotoAlternateIcon />}
+                >
+                  Cambiar imagen
+                  <input
+                    hidden
+                    accept="image/*"
+                    type="file"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const base64 = await readImageAsBase64(file);
+                        setImagenViajeBase64(base64);
+                        setImagenViajePreview(base64);
+                      } catch (error) {
+                        snack?.error({
+                          message:
+                            error instanceof Error
+                              ? error.message
+                              : "No se pudo cargar la imagen",
+                        });
+                      }
+                    }}
+                  />
+                </Button>
               </Stack>
             </PaperBlock>
 
             <PaperBlock
               title="2. Rutas del viaje"
-              subtitle="Selecciona las rutas en el orden en que se recorreran"
+              subtitle="Selecciona las rutas en el orden exacto en que inicia y termina el viaje"
               contentMaxHeight={460}
               contentWrapperSx={{ display: "flex", flexDirection: "column", gap: 1 }}
             >
-              {rutas.length === 0 ? (
+              <TextField
+                label="Buscar ruta"
+                value={routeSearch}
+                onChange={(event) => {
+                  setRouteSearch(event.target.value);
+                  setRoutePage(1);
+                }}
+                size="small"
+                fullWidth
+              />
+              <Typography variant="caption" color="text.secondary">
+                {isLoadingRoutePage
+                  ? "Buscando rutas..."
+                  : `${routePageData.total} ruta(s) encontradas`}
+              </Typography>
+              {routePageRoutes.length === 0 ? (
                 <Alert severity="info">
-                  Todavia no hay rutas activas. Crea una ruta reutilizable en la segunda pestana.
+                  No hay rutas para esta busqueda. Crea una ruta reutilizable en la segunda pestana.
                 </Alert>
               ) : (
-                rutas.map((ruta) => (
+                routePageRoutes.map((ruta) => (
                   <Box
                     key={ruta.id}
                     sx={{
@@ -575,6 +689,13 @@ export default function NuevoViaje({
                           {ruta.origen.direccion} a {ruta.destino.direccion}
                         </Typography>
                         <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                          {selectedRouteIds.includes(ruta.id) && (
+                            <Chip
+                              label={`Orden ${selectedRouteIds.indexOf(ruta.id) + 1}`}
+                              color="primary"
+                              size="small"
+                            />
+                          )}
                           <Chip label={`${ruta.distanciaKm || "-"} km`} size="small" />
                           <Chip label={`${ruta.duracionMin || "-"} min`} size="small" />
                           <Chip label={`${ruta.paradas.length} parada(s)`} size="small" />
@@ -584,13 +705,22 @@ export default function NuevoViaje({
                   </Box>
                 ))
               )}
+              {routePageData.totalPages > 1 && (
+                <Pagination
+                  count={routePageData.totalPages}
+                  page={routePage}
+                  onChange={(_, page) => setRoutePage(page)}
+                  color="primary"
+                  size="small"
+                />
+              )}
             </PaperBlock>
           </Box>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <PaperBlock
               title="Vista previa del viaje"
-              subtitle="Las rutas seleccionadas se pintan con su propio color"
+              subtitle="El orden sale de tu seleccion. Si dos rutas no conectan, se dibuja un enlace operativo punteado."
               paperProps={{ sx: { p: 0, overflow: "hidden" } }}
               contentWrapperSx={{ p: 0 }}
             >
@@ -608,15 +738,57 @@ export default function NuevoViaje({
             </PaperBlock>
             <PaperBlock
               title="Resumen antes de guardar"
-              subtitle="Si una ruta no empata con la siguiente, el backend la marcara como enlace operativo"
+              subtitle="La duracion incluye tiempos de ruta, espera en paradas y margen adicional"
               contentWrapperSx={{ display: "flex", flexDirection: "column", gap: 1 }}
             >
               <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
                 <Chip label={`${selectedRoutes.length} ruta(s)`} color="primary" />
                 <Chip label={`${metrics.distanceKm.toFixed(1)} km`} />
-                <Chip label={`${Math.round(metrics.durationMin)} min`} />
+                <Chip label={`${duracionCalculadaViajeMin} min calculados`} />
+                <Chip label={`${duracionTotalViajeMin} min totales`} color="secondary" />
                 <Chip label={connections.length ? `${connections.length} enlace(s)` : "Sin enlaces"} />
               </Stack>
+              {selectedRoutes.length > 0 && (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
+                    Secuencia operativa
+                  </Typography>
+                  {selectedRoutes.map((ruta, index) => {
+                    const previousConnection = connections.find(
+                      (connection) => connection.toRouteId === ruta.id,
+                    );
+                    return (
+                      <Box key={ruta.id}>
+                        {previousConnection && (
+                          <Alert severity="warning" sx={{ mb: 1 }}>
+                            Enlace antes de ruta {index + 1}: el autobus viaja sin pasajeros desde el fin de la ruta anterior hasta el inicio de esta.
+                          </Alert>
+                        )}
+                        <Box
+                          sx={{
+                            p: 1,
+                            border: "1px solid",
+                            borderColor: "divider",
+                            borderRadius: "8px",
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ fontWeight: 900 }}>
+                            {index + 1}. {ruta.nombre}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {ruta.origen.nombre} -&gt; {ruta.destino.nombre}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    );
+                  })}
+                </Box>
+              )}
+              {connections.length > 0 && (
+                <Alert severity="warning">
+                  Hay rutas que no empiezan donde termina la anterior. Si dos recorridos comparten calles, se siguen pintando ambos; lo que manda para el viaje es este orden operativo.
+                </Alert>
+              )}
             </PaperBlock>
           </Box>
         </Box>

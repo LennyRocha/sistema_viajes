@@ -4,6 +4,8 @@ import React from "react";
 import {
   CreateRutaBody,
   CreateViajeBaseBody,
+  PaginatedRutasApi,
+  PaginatedViajesBaseApi,
   RutaApi,
   ViajeBaseApi,
 } from "../types/OperacionesApi";
@@ -127,6 +129,46 @@ export function createRuta(body: CreateRutaBody) {
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+export function getRutasPage({
+  page,
+  limit,
+  search,
+  active = false,
+}: {
+  page: number;
+  limit: number;
+  search?: string;
+  active?: boolean;
+}) {
+  const params = new URLSearchParams({
+    active: String(active),
+    page: String(page),
+    limit: String(limit),
+  });
+  if (search?.trim()) params.set("search", search.trim());
+  return request<PaginatedRutasApi>(`/rutas?${params.toString()}`);
+}
+
+export function getViajesBasePage({
+  page,
+  limit,
+  search,
+  active = false,
+}: {
+  page: number;
+  limit: number;
+  search?: string;
+  active?: boolean;
+}) {
+  const params = new URLSearchParams({
+    active: String(active),
+    page: String(page),
+    limit: String(limit),
+  });
+  if (search?.trim()) params.set("search", search.trim());
+  return request<PaginatedViajesBaseApi>(`/viajes-base?${params.toString()}`);
 }
 
 export function createViajeBase(body: CreateViajeBaseBody) {

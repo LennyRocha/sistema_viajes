@@ -32,11 +32,21 @@ export class RutasController {
   @Get()
   @ApiOperation({ summary: 'Listar rutas' })
   @ApiQuery({ name: 'active', required: false, example: true })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 5 })
+  @ApiQuery({ name: 'search', required: false, example: 'azteca' })
   findAll(
     @Query('active', new DefaultValuePipe(false), ParseBoolPipe)
     active: boolean,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
   ) {
-    return this.rutas.findAll(active);
+    return this.rutas.findAll(active, {
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+      search,
+    });
   }
 
   @Get(':id')

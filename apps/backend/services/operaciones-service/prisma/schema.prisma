@@ -42,15 +42,21 @@ model Ruta {
 }
 
 model ViajeBase {
-  id          Int      @id @default(autoincrement())
-  nombre      String   @unique @db.VarChar(120)
-  descripcion String?  @db.VarChar(500)
-  frecuencia  String?  @db.VarChar(80)
-  estatus     Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String?  @db.VarChar(50)
-  updatedBy   String?  @db.VarChar(50)
+  id                   Int      @id @default(autoincrement())
+  nombre               String   @unique @db.VarChar(120)
+  descripcion          String?  @db.VarChar(500)
+  frecuencia           String?  @db.VarChar(80)
+  duracionCalculadaMin Int?
+  margenMin            Int      @default(0)
+  duracionTotalMin     Int?
+  imagenUrl            String?  @db.Text
+  imagenBase64         String?  @db.Text
+  imagenStorage        String?  @db.VarChar(20)
+  estatus              Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  createdBy            String?  @db.VarChar(50)
+  updatedBy            String?  @db.VarChar(50)
 
   rutas ViajeBaseRuta[]
 
