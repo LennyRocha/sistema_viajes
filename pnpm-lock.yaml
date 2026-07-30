@@ -418,12 +418,6 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
-  apps/backend/services/operaciones-service/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.8.0
-        version: 7.8.0
-
   apps/frontends: {}
 
   apps/frontends/auth-front:
