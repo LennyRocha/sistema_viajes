@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Usuario {
+  id Int @id @default(autoincrement())
+
+  // Datos personales
+  nombres          String   @db.VarChar(100)
+  apellido_paterno String   @db.VarChar(100)
+  apellido_materno String   @db.VarChar(100)
+  curp             String   @unique @db.VarChar(18)
+  fecha_nacimiento DateTime @db.Date
+  telefono         String   @unique @db.VarChar(15)
+  email            String   @unique @db.VarChar(150)
+  foto_perfil      String   @db.VarChar(255)
+  foto_base64      String?  @db.Text
+  contra           String   @db.VarChar(255)
+
+  // Relaciones
+  refreshTokens      RefreshToken[]
+  passwordResetCodes PasswordResetCode[]
+  roles              UserRole[]
+
+  // Auditoría
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  estatus Boolean @default(true)
+
+  @@index([curp, email, telefono])
+}
+
+model Rol {
+  id          Int     @id @default(autoincrement())
+  nombre      String  @unique @db.VarChar(50)
+  descripcion String  @db.VarChar(255)
+  estatus     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  privilegios RolePrivilege[]
+  usuarios    UserRole[]
+}
+
+model Privilegio {
+  id          Int     @id @default(autoincrement())
+  nombre      String  @unique @db.VarChar(50)
+  descripcion String  @db.VarChar(255)
+  estatus     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roles RolePrivilege[]
+}
+
+model UserRole {
+  userId Int
+  roleId Int
+  user   Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Rol     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model RolePrivilege {
+  roleId      Int
+  privilegeId Int
+  role        Rol        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  privilege   Privilegio @relation(fields: [privilegeId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, privilegeId])
+  @@index([privilegeId])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    Int
+  // Hash, no el token en claro: si filtran la DB no pueden usarlo.
+  tokenHash String    @unique
+  familyId  String
+  usedAt    DateTime?
+  revokedAt DateTime?
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  user      Usuario   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+}
+
+model RevokedAccessToken {
+  jti       String   @id
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model PasswordResetCode {
+  id        String    @id @default(uuid())
+  userId    Int
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      Usuario   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

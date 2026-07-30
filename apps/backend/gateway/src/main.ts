@@ -31,6 +31,9 @@ async function bootstrap() {
     '/autobuses',
     '/docs',
     '/api-json',
+    '/usuarios',
+    '/auth',
+    '/dashboard',
   ];
   app.use(
     createProxyMiddleware({
