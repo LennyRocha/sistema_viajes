@@ -36,7 +36,8 @@ model Ruta {
   createdBy        String?  @db.VarChar(50)
   updatedBy        String?  @db.VarChar(50)
 
-  viajes ViajeBaseRuta[]
+  viajes  ViajeBaseRuta[]
+  boletos Boleto[]
 
   @@schema("operaciones")
 }
@@ -124,6 +125,8 @@ model Salida {
   @@schema("operaciones")
 }
 
+//Tipos unicos fecha y hora directa,
+
 model Boleto {
   id Int @id @default(autoincrement())
 
@@ -139,9 +142,13 @@ model Boleto {
 
   fechaCompra DateTime @default(now())
   monto       Decimal  @db.Decimal(10, 2)
+  rutaId      Int
+  ruta        Ruta     @relation(fields: [rutaId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@schema("operaciones")
 }
+
+//Ruta de ida y vuelta, con asientos reservados, con QR code, con fecha de compra y monto total.
