@@ -51,7 +51,7 @@ import {
 } from "../api/operacionesHttp";
 import GeoPoint from "../types/GeoPoint";
 import RutaBase from "../types/RutaBase";
-import { mapRutaApi, mapViajeApi } from "../utils/apiMappers";
+import { isGoogleStreetViewImage, mapRutaApi, mapViajeApi } from "../utils/apiMappers";
 import {
   buildConnectionSegments,
   buildJourneySimulationPath,
@@ -292,8 +292,11 @@ export default function NuevoViaje({
         setNombreViaje(viaje.nombre);
         setDescripcionViaje(viaje.descripcion || "");
         setMargenViajeMin(viaje.margenMin || 0);
+        const storedImageUrl = isGoogleStreetViewImage(viaje.imagenUrl)
+          ? ""
+          : viaje.imagenUrl || "";
         setImagenViajeBase64(viaje.imagenBase64 || "");
-        setImagenViajePreview(viaje.imagenBase64 || viaje.imagenUrl || "");
+        setImagenViajePreview(viaje.imagenBase64 || storedImageUrl);
         setSelectedRouteIds(viaje.rutas.map((ruta) => ruta.id));
         setSelectedRouteMap(new Map(viaje.rutas.map((ruta) => [ruta.id, ruta])));
       })
@@ -552,9 +555,12 @@ export default function NuevoViaje({
         margenMin: margenViajeMin,
         duracionTotalMin: duracionTotalViajeMin,
         imagenUrl:
-          storesImagesAsBase64 && imagenViajeBase64
-            ? undefined
-            : viajeImage,
+          !storesImagesAsBase64 &&
+          imagenViajePreview &&
+          !imagenViajeBase64 &&
+          !isGoogleStreetViewImage(imagenViajePreview)
+            ? imagenViajePreview
+            : undefined,
         imagenBase64:
           storesImagesAsBase64 && imagenViajeBase64
             ? imagenViajeBase64

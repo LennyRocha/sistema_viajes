@@ -15,6 +15,10 @@ export function routeColor(id: number) {
   return ROUTE_COLORS[Math.abs(id) % ROUTE_COLORS.length];
 }
 
+export function isGoogleStreetViewImage(url?: string | null) {
+  return Boolean(url?.includes("maps.googleapis.com/maps/api/streetview"));
+}
+
 export function mapRutaApi(ruta: RutaApi): RutaBase {
   const paradaMin = (ruta.paradas || []).reduce(
     (total, parada) => total + (parada.tiempoParadaMin || 0),
@@ -51,8 +55,8 @@ export function mapViajeApi(viaje: ViajeBaseApi): ViajeBase {
     duracionCalculadaMin: viaje.duracionCalculadaMin || 0,
     margenMin: viaje.margenMin || 0,
     duracionTotalMin: viaje.duracionTotalMin || 0,
-    imagenUrl: viaje.imagenUrl,
-    imagenBase64: viaje.imagenBase64,
+    imagenUrl: isGoogleStreetViewImage(viaje.imagenUrl) ? undefined : viaje.imagenUrl,
+    imagenBase64: viaje.imagenBase64 || undefined,
     imagenStorage: viaje.imagenStorage,
     estatus: viaje.estatus,
     servicios: [],
