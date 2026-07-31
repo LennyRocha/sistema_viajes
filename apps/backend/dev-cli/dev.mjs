@@ -39,6 +39,17 @@ const SERVICES = {
         color: 'cyan',
         seeds: true, // puede ejecutar seeds
     },
+    'auth-service': {
+        label: 'auth-service — API de autenticación (:5001)',
+        dir: 'services/auth-service',
+        command: 'pnpm',
+        args: ['start:dev'],
+        port: 5001,
+        prismaMigrate: true,
+        prismaGenerate: true, // genera @prisma/client antes de compilar en watch
+        color: 'cyan',
+        seeds: true, // puede ejecutar seeds
+    },
     'operaciones-service': {
         label: 'operaciones-service - API de rutas y viajes (:5003)',
         dir: 'services/operaciones-service',

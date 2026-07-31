@@ -124,13 +124,13 @@ La imagen del viaje se sube manualmente desde la interfaz.
 
 Resumen de puertos de frontend:
 
-| App | Puerto | Variable/remote |
-| --- | ---: | --- |
-| shell | 3000 | App principal |
-| auth-front | 3001 | `NEXT_PUBLIC_MF_AUTH` |
-| catalogos-front | 3002 | `NEXT_PUBLIC_MF_CATALOGOS` |
-| dashboard-reportes-front | 3003 | `NEXT_PUBLIC_MF_DASHBOARD` |
-| operaciones-front | 3004 | `NEXT_PUBLIC_MF_OPERACIONES` |
+| App                      | Puerto | Variable/remote              |
+| ------------------------ | -----: | ---------------------------- |
+| shell                    |   3000 | App principal                |
+| auth-front               |   3001 | `NEXT_PUBLIC_MF_AUTH`        |
+| catalogos-front          |   3002 | `NEXT_PUBLIC_MF_CATALOGOS`   |
+| dashboard-reportes-front |   3003 | `NEXT_PUBLIC_MF_DASHBOARD`   |
+| operaciones-front        |   3004 | `NEXT_PUBLIC_MF_OPERACIONES` |
 
 `NEXT_PUBLIC_API_URL` debe apuntar al gateway backend, no directo al
 microservicio. En local es `http://localhost:5000`.
@@ -147,12 +147,22 @@ OPERACIONES_SERVICE_URL=http://localhost:5003
 DASHBOARD_SERVICE_URL=http://localhost:5004
 ```
 
+### apps/backend/services/auth-service/.env
+
+```env
+DATABASE_URL="postgresql://postgres:root@localhost:5432/auth_db?schema=public"
+REDIS_URL="redis://localhost:6379"
+PORT=5001
+GATEWAY_URL="http://localhost:5000"
+```
+
 ### apps/backend/services/catalogo-service/.env
 
 ```env
 PORT=5002
 DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=public"
 REDIS_URL="redis://localhost:6379"
+GATEWAY_URL="http://localhost:5000"
 ```
 
 ### apps/backend/services/operaciones-service/.env
@@ -370,18 +380,18 @@ Orden recomendado:
 
 ## 6. Puertos
 
-| Parte | Puerto | Notas |
-| --- | ---: | --- |
-| Shell | 3000 | Host de Module Federation |
-| Auth front | 3001 | Remote `auth` |
-| Catalogos front | 3002 | Remote `catalogos` |
-| Dashboard/reportes front | 3003 | Remote `dashboard-reportes` |
-| Operaciones front | 3004 | Remote `operaciones` |
-| Gateway backend | 5000 | URL que deberian usar los frontends |
-| Catalogo service | 5002 | API de catalogos |
-| Operaciones service | 5003 | API de rutas y viajes |
-| Postgres | 5437 -> 5432 | Docker: host 5437, contenedor 5432 |
-| Redis | 6379 | Docker |
+| Parte                    |       Puerto | Notas                               |
+| ------------------------ | -----------: | ----------------------------------- |
+| Shell                    |         3000 | Host de Module Federation           |
+| Auth front               |         3001 | Remote `auth`                       |
+| Catalogos front          |         3002 | Remote `catalogos`                  |
+| Dashboard/reportes front |         3003 | Remote `dashboard-reportes`         |
+| Operaciones front        |         3004 | Remote `operaciones`                |
+| Gateway backend          |         5000 | URL que deberian usar los frontends |
+| Catalogo service         |         5002 | API de catalogos                    |
+| Operaciones service      |         5003 | API de rutas y viajes               |
+| Postgres                 | 5437 -> 5432 | Docker: host 5437, contenedor 5432  |
+| Redis                    |         6379 | Docker                              |
 
 ## 7. Builds
 
