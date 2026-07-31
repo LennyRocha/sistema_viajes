@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
-      POSTGRES_DB: auth_db
+      POSTGRES_DB: catalogos_db
     ports:
       - "5437:5432"
     volumes:
