@@ -59,7 +59,7 @@ type Props = {
   routes?: RutaBase[];
   connections?: ConnectionSegment[];
   markerPoints?: Array<GeoPoint & { markerRole?: EditingTarget }>;
-  height?: number;
+  height?: number | string;
   title?: string;
   editable?: boolean;
   editingTarget?: EditingTarget;
@@ -337,7 +337,13 @@ function routeHeading(previous: GeoPoint, current: GeoPoint) {
   );
 }
 
-function FallbackMap({ routes, height }: { routes: ReturnType<typeof normalizeRoutes>; height: number }) {
+function FallbackMap({
+  routes,
+  height,
+}: {
+  routes: ReturnType<typeof normalizeRoutes>;
+  height: number | string;
+}) {
   return (
     <Box
       sx={{
@@ -823,7 +829,14 @@ export default function GoogleRouteMap({
     if (!isSimulating || !enableSimulation || simulationPath.length <= 1) return undefined;
 
     const interval = window.setInterval(() => {
-      setSimulationStep((current) => (current + 1) % simulationPath.length);
+      setSimulationStep((current) => {
+        const next = current + 1;
+        if (next >= simulationPath.length) {
+          setIsSimulating(false);
+          return simulationPath.length - 1;
+        }
+        return next;
+      });
     }, Math.max(180, (streetViewSimulation ? 2600 : 900) / simulationSpeed));
 
     return () => window.clearInterval(interval);

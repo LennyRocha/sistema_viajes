@@ -336,14 +336,31 @@ export default function ViajesIndex({
               xl: "420px minmax(0, 1fr)",
             },
             gap: 2,
-            alignItems: "start",
+            alignItems: "stretch",
+            minHeight: {
+              xs: "auto",
+              xl: "calc(100vh - 190px)",
+            },
           }}
         >
           <PaperBlock
             title="Viajes base"
             subtitle="Selecciona un viaje para revisar su recorrido y continuidad"
-            contentMaxHeight={760}
-            contentWrapperSx={{ display: "flex", flexDirection: "column", gap: 1 }}
+            paperProps={{
+              sx: {
+                minHeight: { xl: "calc(100vh - 190px)" },
+                display: "flex",
+                flexDirection: "column",
+              },
+            }}
+            contentWrapperSx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              flex: 1,
+              minHeight: 0,
+              overflow: "hidden",
+            }}
           >
             <TextField
               label="Buscar viaje"
@@ -360,118 +377,192 @@ export default function ViajesIndex({
                 ? "Buscando viajes..."
                 : `${viajePageData.total || pageViajes.length} viaje(s) encontrados`}
             </Typography>
-            {pageViajes.map((viaje) => (
-              <Box
-                key={viaje.id}
-                component="div"
-                role="button"
-                tabIndex={0}
-                onClick={() => setSelectedId(viaje.id)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") setSelectedId(viaje.id);
-                }}
-                sx={{
-                  width: "100%",
-                  textAlign: "left",
-                  p: 0,
-                  overflow: "hidden",
-                  borderRadius: "8px",
-                  border: "1px solid",
-                  borderColor: selectedViaje?.id === viaje.id ? "primary.main" : "divider",
-                  backgroundColor:
-                    selectedViaje?.id === viaje.id
-                      ? "rgba(31, 97, 141, 0.07)"
-                      : "background.paper",
-                  cursor: "pointer",
-                }}
-              >
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                overflow: "auto",
+                pr: 0.25,
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
+              }}
+            >
+              {pageViajes.map((viaje) => (
                 <Box
-                  component="img"
-                  src={viaje.imagenBase64 || viaje.imagenUrl || DEFAULT_VIAJE_IMAGE}
-                  alt={viaje.nombre}
+                  key={viaje.id}
+                  component="div"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedId(viaje.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") setSelectedId(viaje.id);
+                  }}
                   sx={{
                     width: "100%",
-                    height: 92,
-                    objectFit: "cover",
-                    display: "block",
+                    textAlign: "left",
+                    p: 0,
+                    overflow: "hidden",
+                    borderRadius: "8px",
+                    border: "1px solid",
+                    borderColor: selectedViaje?.id === viaje.id ? "primary.main" : "divider",
+                    backgroundColor:
+                      selectedViaje?.id === viaje.id
+                        ? "rgba(31, 97, 141, 0.07)"
+                        : "background.paper",
+                    cursor: "pointer",
                   }}
-                />
-                <Box sx={{ p: 1.5 }}>
-                <Stack direction="row" spacing={1} sx={{ justifyContent: "space-between" }}>
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography sx={{ fontWeight: 900 }}>{viaje.nombre}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {viaje.descripcion || "Sin descripcion"}
-                    </Typography>
-                  </Box>
-                  <Chip
-                    label={viaje.estatus ? "Activo" : "Inactivo"}
-                    color={viaje.estatus ? "success" : "default"}
-                    size="small"
-                    variant="outlined"
-                  />
-                </Stack>
-                <Divider sx={{ my: 1.25 }} />
-                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 0.75 }}>
-                  <Chip icon={<RouteIcon />} label={`${viaje.rutas.length} ruta(s)`} size="small" />
-                  <Chip label={`${viaje.duracionTotalMin || Math.round(getJourneyMetrics(viaje.rutas, []).durationMin)} min`} size="small" />
-                </Stack>
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  sx={{ mt: 1.25, justifyContent: "flex-end" }}
                 >
-                  <Tooltip title="Ver detalle">
-                    <IconButton
-                      size="small"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        openSidebar({
-                          title: "Detalle del viaje base",
-                          children: <ViajeDetails viaje={viaje} />,
-                        });
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "112px minmax(0, 1fr) 42px",
+                      minHeight: 92,
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={viaje.imagenBase64 || viaje.imagenUrl || DEFAULT_VIAJE_IMAGE}
+                      alt={viaje.nombre}
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                    <Box sx={{ p: 1, minWidth: 0 }}>
+                      <Stack spacing={0.35}>
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                          <Typography
+                            sx={{
+                              fontWeight: 900,
+                              lineHeight: 1.12,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {viaje.nombre}
+                          </Typography>
+                          <Chip
+                            label={viaje.estatus ? "Activo" : "Inactivo"}
+                            color={viaje.estatus ? "success" : "default"}
+                            size="small"
+                            variant="outlined"
+                            sx={{ height: 22 }}
+                          />
+                        </Stack>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {viaje.descripcion || "Sin descripcion"}
+                        </Typography>
+                      </Stack>
+                      <Divider sx={{ my: 0.75 }} />
+                      <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 0.5 }}>
+                        <Chip
+                          icon={<RouteIcon />}
+                          label={`${viaje.rutas.length} ruta(s)`}
+                          size="small"
+                          sx={{ height: 24 }}
+                        />
+                        <Chip
+                          label={`${viaje.duracionTotalMin || Math.round(getJourneyMetrics(viaje.rutas, []).durationMin)} min`}
+                          size="small"
+                          sx={{ height: 24 }}
+                        />
+                      </Stack>
+                    </Box>
+                    <Stack
+                      spacing={0.25}
+                      sx={{
+                        p: 0.5,
+                        justifyContent: "center",
+                        borderLeft: "1px solid",
+                        borderColor: "divider",
+                        backgroundColor: "rgba(255,255,255,0.62)",
                       }}
                     >
-                      <InfoIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Editar">
-                    <IconButton
-                      size="small"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        navigationFunction(`/dashboard/trips/editar/${viaje.id}`);
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
-                </Stack>
+                      <Tooltip title="Ver detalle">
+                        <IconButton
+                          size="small"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openSidebar({
+                              title: "Detalle del viaje base",
+                              children: <ViajeDetails viaje={viaje} />,
+                            });
+                          }}
+                        >
+                          <InfoIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Editar">
+                        <IconButton
+                          size="small"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            navigationFunction(`/dashboard/trips/editar/${viaje.id}`);
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  </Box>
                 </Box>
+              ))}
+            </Box>
+            {viajePageData.total > 0 && (
+              <Box
+                sx={{
+                  pt: 0.5,
+                  mt: "auto",
+                  borderTop: "1px solid",
+                  borderColor: "divider",
+                  backgroundColor: "background.paper",
+                  display: "flex",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Pagination
+                  count={Math.max(1, viajePageData.totalPages)}
+                  page={viajePage}
+                  onChange={(_, page) => setViajePage(page)}
+                  color="primary"
+                  size="small"
+                />
               </Box>
-            ))}
-            {viajePageData.totalPages > 1 && (
-              <Pagination
-                count={viajePageData.totalPages}
-                page={viajePage}
-                onChange={(_, page) => setViajePage(page)}
-                color="primary"
-                size="small"
-              />
             )}
           </PaperBlock>
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
             <PaperBlock
               title={selectedViaje?.nombre}
               subtitle="Mapa del viaje base seleccionado"
-              paperProps={{ sx: { p: 0, overflow: "hidden" } }}
+              paperProps={{
+                sx: {
+                  p: 0,
+                  overflow: "hidden",
+                  height: { xl: "calc(100vh - 178px)" },
+                  minHeight: 590,
+                },
+              }}
               contentWrapperSx={{ p: 0 }}
             >
               <GoogleRouteMap
                 routes={selectedRoutes}
                 connections={mergedConnections}
-                height={560}
+                height="calc(100vh - 250px)"
                 title={ready ? "Viaje conectado" : "Viaje con enlace operativo pendiente"}
                 enableStreetView
                 enableSimulation={journeySimulationPath.length > 1}
