@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -31,7 +34,7 @@ export class UsuariosService {
       'Creando usuario',
     );
 
-    const institucion = await this.prisma.usuario.create({
+    const user = await this.prisma.usuario.create({
       data: {
         ...dto,
         contra: await this.hasher.hash(dto.contra),
@@ -53,11 +56,11 @@ export class UsuariosService {
 
     this.logger.info(
       {
-        institucionId: institucion.id,
+        userId: user.id,
       },
       'Usuario creada',
     );
-    return institucion;
+    return user;
   }
 
   async findAll(active: boolean) {
@@ -94,11 +97,13 @@ export class UsuariosService {
       : {};
 
     // 2) no está → base de datos
-    const instituciones = await this.prisma.usuario.findMany({
+    const users = await this.prisma.usuario.findMany({
       orderBy: { createdAt: 'desc' },
       where,
       omit: {
         contra: false,
+      },
+      include: {
         refreshTokens: false,
         passwordResetCodes: false,
       },
@@ -106,7 +111,7 @@ export class UsuariosService {
 
     // 3) guarda para la próxima (1 hora = 3600 segundos)
     try {
-      await this.redis.set(LIST_CACHE_KEY, instituciones, 60 * 60); // 1 hora
+      await this.redis.set(LIST_CACHE_KEY, users, 60 * 60); // 1 hora
     } catch (error) {
       this.logger.error(
         {
@@ -120,11 +125,11 @@ export class UsuariosService {
     this.logger.debug(
       {
         source: 'database',
-        count: instituciones.length,
+        count: users.length,
       },
       'Usuarios  obtenidos desde base de datos y guardadas en caché',
     );
-    return instituciones;
+    return users;
   }
 
   async findOne(id: number) {
@@ -134,6 +139,8 @@ export class UsuariosService {
       where: { id },
       omit: {
         contra: false,
+      },
+      include: {
         refreshTokens: false,
         passwordResetCodes: false,
       },
@@ -164,10 +171,12 @@ export class UsuariosService {
 
     const user = await this.prisma.usuario.findUnique({
       where: { email },
-      omit: {
-        contra: includeSensitive,
+      include: {
         refreshTokens: includeSensitive,
         passwordResetCodes: includeSensitive,
+      },
+      omit: {
+        contra: includeSensitive,
       },
     });
 
@@ -196,10 +205,12 @@ export class UsuariosService {
 
     const user = await this.prisma.usuario.findUnique({
       where: { curp },
-      omit: {
-        contra: false,
+      include: {
         refreshTokens: false,
         passwordResetCodes: false,
+      },
+      omit: {
+        contra: false,
       },
     });
 
@@ -228,10 +239,12 @@ export class UsuariosService {
 
     const user = await this.prisma.usuario.findUnique({
       where: { telefono },
-      omit: {
-        contra: false,
+      include: {
         refreshTokens: false,
         passwordResetCodes: false,
+      },
+      omit: {
+        contra: false,
       },
     });
 
