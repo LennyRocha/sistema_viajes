@@ -224,14 +224,21 @@ async function main() {
     let selected;
     let withStudio;
     let withSeeds;
+    let withCommonsBuild;
 
     if (dry) {
         selected = Object.keys(SERVICES);
         withStudio = false;
+        withSeeds = false;
+        withCommonsBuild = false;
     } else {
         selected = await checkbox({
             message: 'Servicios a levantar (espacio = marcar, enter = confirmar):',
             choices: [requiredChoice, ...optionalChoices],
+        });
+        withCommonsBuild = await confirm({
+            message: 'Build de backend commons (@commons/* compartidos)?',
+            default: true,
         });
         withStudio = await confirm({
             message: '¿Abrir Prisma Studio (explorador visual de la BD)?',
@@ -254,6 +261,9 @@ async function main() {
         console.log(`  ${mark} ${key}${req}`);
     }
     console.log(
+        `  ${withCommonsBuild ? chalk.green('ok') : chalk.gray('-')} Build backend commons`,
+    );
+    console.log(
         `  ${withStudio ? chalk.green('✓') : chalk.gray('·')} Prisma Studio`,
     );
     console.log(
@@ -264,7 +274,17 @@ async function main() {
         return;
     }
 
-    // 1) Docker (Postgres/Redis) para los servicios que lo necesiten.
+    // 1) Commons compartidos del backend. Si estan viejos, los servicios compilan contra exports obsoletos.
+    if (withCommonsBuild && existsSync(join(ROOT, 'commons'))) {
+        await runRequired(
+            'pnpm',
+            ['build:all'],
+            join(ROOT, 'commons'),
+            'build backend commons (@commons/*)',
+        );
+    }
+
+    // 2) Docker (Postgres/Redis) para los servicios que lo necesiten.
     for (const key of toStart) {
         const s = SERVICES[key];
         const dockerDir = s.dockerDir ?? s.dir;
