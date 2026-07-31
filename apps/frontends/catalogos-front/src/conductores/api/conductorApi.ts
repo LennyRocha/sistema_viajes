@@ -1,6 +1,6 @@
 import { api } from "../../shared/api/api";
 import Conductor from "../types/Conductor";
-import { ConductorSchema } from "../validations/conductorZod";
+import { ConductorSchema, UpdateConductorSchema } from "../validations/conductorZod";
 
 export const conductorApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -34,12 +34,9 @@ export const conductorApi = api.injectEndpoints({
 
     patchConductor: builder.mutation<
       Conductor,
-      Partial<ConductorSchema> & { id: number }
+      UpdateConductorSchema & { id: number }
     >({
-      query: ({
-        id,
-        ...body
-      }: Partial<ConductorSchema> & { id: number }) => ({
+      query: ({ id, ...body }) => ({
         url: `/conductores/${id}`,
         method: "PATCH",
         body,

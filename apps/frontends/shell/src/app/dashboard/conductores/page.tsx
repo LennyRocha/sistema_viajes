@@ -13,7 +13,7 @@ export default function Page() {
     <MainLayout>
       <FederatedPage
         remote="catalogos/ConductoresModule"
-        exportName="EditarConductor"
+        exportName="ConductoresIndex"
         skeletonVariant="table"
       />
     </MainLayout>

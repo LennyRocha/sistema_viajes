@@ -87,8 +87,7 @@ export const updateConductorSchema = z.object({
   telefono: conductorSchema.shape.telefono.optional(),
   email: conductorSchema.shape.email.optional(),
   foto_perfil: conductorSchema.shape.foto_perfil.optional(),
-  institucion_id: conductorSchema.shape.institucion_id.optional(),
-  licencia: licenciaBaseSchema.partial().optional(),
+  institucion_id: conductorSchema.shape.institucion_id.optional()
 });
 
 export type UpdateConductorSchema = z.infer<typeof updateConductorSchema>;

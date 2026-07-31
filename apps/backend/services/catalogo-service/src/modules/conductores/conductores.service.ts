@@ -79,7 +79,7 @@ export class ConductoresService {
             .replace(/\s+/g, '')
             .toUpperCase(),
 
-          fecha_nacimiento: conductorData.fecha_nacimiento,
+          fecha_nacimiento: new Date(conductorData.fecha_nacimiento),
 
           telefono: conductorData.telefono.trim(),
 
@@ -106,9 +106,9 @@ export class ConductoresService {
 
           categoria: licencia.categoria.trim().toUpperCase(),
 
-          fecha_expedicion: licencia.fecha_expedicion,
+          fecha_expedicion: new Date(licencia.fecha_expedicion),
 
-          fecha_vencimiento: licencia.fecha_vencimiento,
+          fecha_vencimiento: new Date(licencia.fecha_vencimiento),
 
           estado_emisor: this.normalizeText(
             licencia.estado_emisor,
@@ -310,7 +310,7 @@ export class ConductoresService {
 
     const existing = await this.findOne(id);
 
-    const { licencia, ...conductorData } = dto;
+    const {...conductorData } = dto;
 
     if (conductorData.institucion_id) {
       await this.instituciones.findOne(
@@ -348,9 +348,11 @@ export class ConductoresService {
                 .toUpperCase()
               : existing.curp,
 
-            fecha_nacimiento:
-              conductorData.fecha_nacimiento ??
-              existing.fecha_nacimiento,
+            fecha_nacimiento: conductorData.fecha_nacimiento
+              ? new Date(conductorData.fecha_nacimiento)
+              : existing.fecha_nacimiento,
+
+
 
             telefono:
               conductorData.telefono?.trim() ??
@@ -374,40 +376,6 @@ export class ConductoresService {
           },
         });
 
-        if (licencia) {
-          await tx.licencia.update({
-            where: {
-              id: existing.licencia.id,
-            },
-            data: {
-              numero_licencia:
-                licencia.numero_licencia ??
-                existing.licencia.numero_licencia,
-
-              categoria:
-                licencia.categoria ??
-                existing.licencia.categoria,
-
-              fecha_expedicion:
-                licencia.fecha_expedicion ??
-                existing.licencia.fecha_expedicion,
-
-              fecha_vencimiento:
-                licencia.fecha_vencimiento ??
-                existing.licencia.fecha_vencimiento,
-
-              estado_emisor: licencia.estado_emisor
-                ? this.normalizeText(
-                  licencia.estado_emisor,
-                )
-                : existing.licencia.estado_emisor,
-
-              imagen_licencia:
-                licencia.imagen_licencia ??
-                existing.licencia.imagen_licencia,
-            },
-          });
-        }
 
         return updated;
       },

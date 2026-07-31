@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { LicenciasService } from './licencias.service';
-import { CreateLicenciaDto } from './dtos/create-licencia.dto';
+import { CreateLicenciaAloneDto } from './dtos/create-licencia-alone.dto';
 import { UpdateLicenciaDto } from './dtos/update-licencia.dto';
 
 @ApiTags('licencias')
@@ -24,7 +24,7 @@ export class LicenciasController {
   @Post()
   @HttpCode(201)
   @ApiOperation({ summary: 'Crear licencia' })
-  create(@Body() dto: CreateLicenciaDto) {
+  create(@Body() dto: CreateLicenciaAloneDto) {
     return this.licencias.create(dto);
   }
 

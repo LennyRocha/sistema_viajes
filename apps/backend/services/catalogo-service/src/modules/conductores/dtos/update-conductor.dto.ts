@@ -49,12 +49,5 @@ export class UpdateConductorDto {
   @IsNumber()
   institucion_id?: number;
 
-  // ==========================
-  // Datos de la licencia vigente
-  // ==========================
 
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => UpdateLicenciaDto)
-  licencia?: UpdateLicenciaDto;
 }
