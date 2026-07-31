@@ -19,6 +19,13 @@ async function main() {
 
   //Temporal en lo que está el módulo de instituciones
   await prisma.institucion.deleteMany();
+
+  //Reestablecer secuencias de IDs para evitar conflictos con seeds
+  await prisma.$executeRawUnsafe(`
+    TRUNCATE TABLE "Institucion" RESTART IDENTITY CASCADE;
+    TRUNCATE TABLE "TipoAutobus" RESTART IDENTITY CASCADE;
+`);
+
   await prisma.institucion.createMany({
     data: institucionesSeeds,
   });

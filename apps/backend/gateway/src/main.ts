@@ -33,6 +33,9 @@ async function bootstrap() {
     '/licencias',
     '/docs',
     '/api-json',
+    '/usuarios',
+    '/auth',
+    '/dashboard',
   ];
   app.use(
     createProxyMiddleware({

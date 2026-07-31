@@ -9,7 +9,6 @@ import {
 } from "@nexoroute/commons";
 import AddIcon from "@mui/icons-material/Add";
 import AltRouteIcon from "@mui/icons-material/AltRoute";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
@@ -23,17 +22,27 @@ import {
   CircularProgress,
   Divider,
   IconButton,
+  Pagination,
   Stack,
+  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
 import GoogleRouteMap from "../components/GoogleRouteMap";
 import ViajeDetails from "../components/ViajeDetails";
-import { useOperacionesData } from "../api/operacionesHttp";
+import { getViajesBasePage, useOperacionesData } from "../api/operacionesHttp";
+import GeoPoint from "../types/GeoPoint";
 import { mapRutaApi, mapViajeApi } from "../utils/apiMappers";
-import { buildConnectionSegments, getJourneyMetrics } from "../utils/routeUtils";
+import {
+  buildConnectionSegments,
+  buildJourneySimulationPath,
+  getJourneyMetrics,
+} from "../utils/routeUtils";
 
 interface Props extends CommonPageProps {}
+
+const DEFAULT_VIAJE_IMAGE = "/imagen_defecto_viajes.jpg";
+const EMPTY_ROUTES: ReturnType<typeof mapRutaApi>[] = [];
 
 function MetricCard({
   label,
@@ -77,22 +86,94 @@ export default function ViajesIndex({
   const viajes = React.useMemo(() => viajesData.map(mapViajeApi), [viajesData]);
   const rutas = React.useMemo(() => rutasData.map(mapRutaApi), [rutasData]);
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
+  const [viajeSearch, setViajeSearch] = React.useState("");
+  const [viajePage, setViajePage] = React.useState(1);
+  const [viajePageData, setViajePageData] = React.useState({
+    total: 0,
+    totalPages: 1,
+  });
+  const [pageViajes, setPageViajes] = React.useState(viajes);
+  const [isLoadingViajePage, setIsLoadingViajePage] = React.useState(false);
 
   React.useEffect(() => {
-    if (!selectedId && viajes[0]) setSelectedId(viajes[0].id);
-  }, [selectedId, viajes]);
+    const timeout = window.setTimeout(async () => {
+      setIsLoadingViajePage(true);
+      try {
+        const response = await getViajesBasePage({
+          page: viajePage,
+          limit: 5,
+          search: viajeSearch,
+          active: false,
+        });
+        const mapped = response.data.map(mapViajeApi);
+        setPageViajes(mapped);
+        setViajePageData({
+          total: response.total,
+          totalPages: response.totalPages,
+        });
+        if (!mapped.some((viaje) => viaje.id === selectedId)) {
+          setSelectedId(mapped[0]?.id || null);
+        }
+      } catch {
+        setPageViajes(viajes);
+        setViajePageData({ total: viajes.length, totalPages: 1 });
+      } finally {
+        setIsLoadingViajePage(false);
+      }
+    }, 260);
 
-  const selectedViaje = viajes.find((viaje) => viaje.id === selectedId) || viajes[0];
-  const selectedRoutes = selectedViaje?.rutas || [];
+    return () => window.clearTimeout(timeout);
+  }, [selectedId, viajePage, viajeSearch, viajes]);
+
+  React.useEffect(() => {
+    if (!selectedId && pageViajes[0]) setSelectedId(pageViajes[0].id);
+  }, [pageViajes, selectedId]);
+
+  const selectedViaje = pageViajes.find((viaje) => viaje.id === selectedId) || pageViajes[0];
+  const selectedRoutes = selectedViaje?.rutas || EMPTY_ROUTES;
   const connections = React.useMemo(
     () => buildConnectionSegments(selectedRoutes),
     [selectedRoutes],
   );
-  const metrics = React.useMemo(
-    () => getJourneyMetrics(selectedRoutes, connections),
-    [connections, selectedRoutes],
+  const [connectionOverrides, setConnectionOverrides] = React.useState<
+    Map<string, { path: GeoPoint[]; distanceMeters: number }>
+  >(() => new Map());
+  const mergedConnections = React.useMemo(
+    () =>
+      connections.map((connection) => {
+        const override = connectionOverrides.get(connection.id);
+        return override
+          ? { ...connection, path: override.path, distanceMeters: override.distanceMeters }
+          : connection;
+      }),
+    [connectionOverrides, connections],
   );
-  const ready = selectedRoutes.length > 0 && connections.length === 0;
+  const metrics = React.useMemo(
+    () => getJourneyMetrics(selectedRoutes, mergedConnections),
+    [mergedConnections, selectedRoutes],
+  );
+  const journeySimulationPath = React.useMemo(
+    () => buildJourneySimulationPath(selectedRoutes, mergedConnections),
+    [mergedConnections, selectedRoutes],
+  );
+  const updateConnectionPath = React.useCallback(
+    (connectionId: string, path: GeoPoint[], distanceMeters: number) => {
+      setConnectionOverrides((current) => {
+        const existing = current.get(connectionId);
+        if (
+          existing?.distanceMeters === distanceMeters &&
+          existing.path.length === path.length
+        ) {
+          return current;
+        }
+        const next = new Map(current);
+        next.set(connectionId, { path, distanceMeters });
+        return next;
+      });
+    },
+    [],
+  );
+  const ready = selectedRoutes.length > 0 && mergedConnections.length === 0;
 
   return (
     <>
@@ -104,7 +185,7 @@ export default function ViajesIndex({
       />
       <PaperHeader
         title="Viajes"
-        subtitle="Plantillas operativas para abrir salidas: primero eliges el viaje, luego revisas su recorrido"
+        subtitle="Plantillas operativas compuestas por rutas reutilizables"
         iconname="trip"
         showButton
         onButtonClick={() => navigationFunction("/dashboard/trips/nuevo")}
@@ -126,7 +207,7 @@ export default function ViajesIndex({
             <Typography>Cargando viajes desde backend...</Typography>
           </Stack>
         </PaperBlock>
-      ) : viajes.length === 0 ? (
+      ) : pageViajes.length === 0 ? (
         <PaperBlock
           title="Aun no hay viajes base"
           subtitle="Crea primero rutas reutilizables y despues arma un viaje base con ellas"
@@ -159,7 +240,22 @@ export default function ViajesIndex({
             contentMaxHeight={760}
             contentWrapperSx={{ display: "flex", flexDirection: "column", gap: 1 }}
           >
-            {viajes.map((viaje) => (
+            <TextField
+              label="Buscar viaje"
+              value={viajeSearch}
+              onChange={(event) => {
+                setViajeSearch(event.target.value);
+                setViajePage(1);
+              }}
+              size="small"
+              fullWidth
+            />
+            <Typography variant="caption" color="text.secondary">
+              {isLoadingViajePage
+                ? "Buscando viajes..."
+                : `${viajePageData.total || pageViajes.length} viaje(s) encontrados`}
+            </Typography>
+            {pageViajes.map((viaje) => (
               <Box
                 key={viaje.id}
                 component="button"
@@ -167,7 +263,8 @@ export default function ViajesIndex({
                 sx={{
                   width: "100%",
                   textAlign: "left",
-                  p: 1.5,
+                  p: 0,
+                  overflow: "hidden",
                   borderRadius: "8px",
                   border: "1px solid",
                   borderColor: selectedViaje?.id === viaje.id ? "primary.main" : "divider",
@@ -178,6 +275,18 @@ export default function ViajesIndex({
                   cursor: "pointer",
                 }}
               >
+                <Box
+                  component="img"
+                  src={viaje.imagenBase64 || viaje.imagenUrl || DEFAULT_VIAJE_IMAGE}
+                  alt={viaje.nombre}
+                  sx={{
+                    width: "100%",
+                    height: 92,
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+                <Box sx={{ p: 1.5 }}>
                 <Stack direction="row" spacing={1} sx={{ justifyContent: "space-between" }}>
                   <Box sx={{ minWidth: 0 }}>
                     <Typography sx={{ fontWeight: 900 }}>{viaje.nombre}</Typography>
@@ -195,10 +304,20 @@ export default function ViajesIndex({
                 <Divider sx={{ my: 1.25 }} />
                 <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 0.75 }}>
                   <Chip icon={<RouteIcon />} label={`${viaje.rutas.length} ruta(s)`} size="small" />
-                  <Chip icon={<CalendarMonthIcon />} label={viaje.frecuencia} size="small" />
+                  <Chip label={`${viaje.duracionTotalMin || Math.round(getJourneyMetrics(viaje.rutas, []).durationMin)} min`} size="small" />
                 </Stack>
+                </Box>
               </Box>
             ))}
+            {viajePageData.totalPages > 1 && (
+              <Pagination
+                count={viajePageData.totalPages}
+                page={viajePage}
+                onChange={(_, page) => setViajePage(page)}
+                color="primary"
+                size="small"
+              />
+            )}
           </PaperBlock>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -210,10 +329,13 @@ export default function ViajesIndex({
             >
               <GoogleRouteMap
                 routes={selectedRoutes}
-                connections={connections}
+                connections={mergedConnections}
                 height={560}
-                title={ready ? "Viaje listo para calendario" : "Viaje con enlace operativo pendiente"}
+                title={ready ? "Viaje conectado" : "Viaje con enlace operativo pendiente"}
                 enableStreetView
+                enableSimulation={journeySimulationPath.length > 1}
+                simulationPath={journeySimulationPath}
+                onConnectionPathChange={updateConnectionPath}
               />
             </PaperBlock>
 
@@ -225,7 +347,7 @@ export default function ViajesIndex({
               }}
             >
               <MetricCard label="Distancia" value={`${metrics.distanceKm.toFixed(1)} km`} accent="#1f618d" />
-              <MetricCard label="Tiempo" value={`${Math.round(metrics.durationMin)} min`} accent="#b7791f" />
+              <MetricCard label="Duracion" value={`${selectedViaje?.duracionTotalMin || Math.round(metrics.durationMin)} min`} accent="#b7791f" />
               <MetricCard label="Paradas" value={String(metrics.stops)} accent="#2f855a" />
               <MetricCard label="Rutas" value={String(selectedRoutes.length)} accent="#6b46c1" />
             </Box>
@@ -238,23 +360,10 @@ export default function ViajesIndex({
               <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}>
                 <Chip
                   icon={ready ? <CheckCircleIcon /> : <LinkOffIcon />}
-                  label={ready ? "Continuidad valida" : "Requiere enlace"}
+                  label={ready ? "Continuidad valida" : "Usa enlace operativo"}
                   color={ready ? "success" : "warning"}
                   variant="outlined"
                 />
-                <Button
-                  size="small"
-                  variant="contained"
-                  color="secondary"
-                  disabled={!selectedViaje?.estatus || selectedRoutes.length === 0}
-                  onClick={() =>
-                    snack?.success({
-                      message: "La apertura de salidas requiere el modulo de calendario.",
-                    })
-                  }
-                >
-                  Abrir salida
-                </Button>
                 {selectedViaje && (
                   <>
                     <Tooltip title="Ver detalle">

@@ -8,12 +8,48 @@ export type ConnectionSegment = {
   from: GeoPoint;
   to: GeoPoint;
   distanceMeters: number;
+  path?: GeoPoint[];
 };
 
 export const CONNECTION_TOLERANCE_METERS = 100;
 
 export function getRoutePoints(route: RutaBase): GeoPoint[] {
   return [route.origen, ...route.paradas, route.destino];
+}
+
+export function getRouteSimulationPath(route: RutaBase): GeoPoint[] {
+  return route.waypoints?.length ? route.waypoints : getRoutePoints(route);
+}
+
+function pushPointIfDifferent(points: GeoPoint[], point: GeoPoint) {
+  const last = points[points.length - 1];
+  if (!last || distanceMeters(last, point) > 2) points.push(point);
+}
+
+export function buildJourneySimulationPath(
+  routes: RutaBase[],
+  connections: ConnectionSegment[] = [],
+): GeoPoint[] {
+  const path: GeoPoint[] = [];
+  const connectionByTarget = new Map(
+    connections.map((connection) => [connection.toRouteId, connection]),
+  );
+
+  routes.forEach((route, index) => {
+    if (index > 0) {
+      const connection = connectionByTarget.get(route.id);
+      if (connection) {
+        const connectionPath = connection.path?.length
+          ? connection.path
+          : [connection.from, connection.to];
+        connectionPath.forEach((point) => pushPointIfDifferent(path, point));
+      }
+    }
+
+    getRouteSimulationPath(route).forEach((point) => pushPointIfDifferent(path, point));
+  });
+
+  return path;
 }
 
 export function distanceMeters(a: GeoPoint, b: GeoPoint): number {
@@ -52,7 +88,8 @@ export function buildConnectionSegments(
         toRouteId: next.id,
         from: current.destino,
         to: next.origen,
-        distanceMeters: distance,
+        distanceMeters: next.distanciaConexionAnteriorMetros ?? distance,
+        path: next.conexionAnterior || undefined,
       });
     }
   }

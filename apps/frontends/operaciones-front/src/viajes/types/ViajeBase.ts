@@ -6,7 +6,11 @@ export default interface ViajeBase {
   descripcion: string;
   rutas: RutaBase[];
   servicios: string[];
-  frecuencia: string;
-  proximaApertura: string;
+  duracionCalculadaMin: number;
+  margenMin: number;
+  duracionTotalMin: number;
+  imagenUrl?: string | null;
+  imagenBase64?: string | null;
+  imagenStorage?: string | null;
   estatus: boolean;
 }
