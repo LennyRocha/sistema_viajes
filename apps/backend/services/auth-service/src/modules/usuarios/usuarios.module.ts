@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { InstitucionesController } from './usuarios.controller';
-import { InstitucionesService } from './usuarios.service';
+import { UsuariosController } from './usuarios.controller';
+import { UsuariosService } from './usuarios.service';
+import { ArgonPasswordHasher } from 'src/infra/crypto/argon-password.hasher';
 
 @Module({
-  providers: [InstitucionesService],
-  controllers: [InstitucionesController],
-  exports: [InstitucionesService],
+  providers: [UsuariosService],
+  controllers: [UsuariosController],
+  exports: [UsuariosService],
+  imports: [ArgonPasswordHasher],
 })
 export class UsuariosModule {}

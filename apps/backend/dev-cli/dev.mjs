@@ -47,7 +47,7 @@ const SERVICES = {
         port: 5001,
         prismaMigrate: true,
         prismaGenerate: true, // genera @prisma/client antes de compilar en watch
-        color: 'cyan',
+        color: 'yellow',
         seeds: true, // puede ejecutar seeds
     },
     'operaciones-service': {
