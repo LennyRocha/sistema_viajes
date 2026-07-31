@@ -22,8 +22,8 @@ async function main() {
 
   //Reestablecer secuencias de IDs para evitar conflictos con seeds
   await prisma.$executeRawUnsafe(`
-    TRUNCATE TABLE "institucion" RESTART IDENTITY CASCADE;
-    TRUNCATE TABLE "tipo_autobus" RESTART IDENTITY CASCADE;
+    TRUNCATE TABLE "Institucion" RESTART IDENTITY CASCADE;
+    TRUNCATE TABLE "TipoAutobus" RESTART IDENTITY CASCADE;
 `);
 
   await prisma.institucion.createMany({
