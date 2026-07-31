@@ -342,12 +342,6 @@ importers:
         specifier: ^8.20.0
         version: 8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
 
-  apps/backend/services/auth-service/generated/client:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.8.0
-        version: 7.8.0
-
   apps/backend/services/catalogo-service:
     dependencies:
       '@commons/contracts':
@@ -586,6 +580,12 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
+
+  apps/backend/services/operaciones-service/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.8.0
+        version: 7.8.0
 
   apps/frontends: {}
 
