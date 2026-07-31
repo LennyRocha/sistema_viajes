@@ -150,7 +150,7 @@ DASHBOARD_SERVICE_URL=http://localhost:5004
 ### apps/backend/services/auth-service/.env
 
 ```env
-DATABASE_URL="postgresql://postgres:root@localhost:5432/auth_db?schema=public"
+DATABASE_URL="postgresql://postgres:root@localhost:5432/catalogos_db?schema=auth&options=--search_path%3Dauth"
 REDIS_URL="redis://localhost:6379"
 PORT=5001
 GATEWAY_URL="http://localhost:5000"
