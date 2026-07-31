@@ -45,7 +45,6 @@ const SERVICES = {
         command: 'pnpm',
         args: ['start:dev'],
         port: 5001,
-        docker: true, // levanta Postgres + Redis antes de arrancar
         prismaMigrate: true,
         prismaGenerate: true, // genera @prisma/client antes de compilar en watch
         color: 'cyan',
