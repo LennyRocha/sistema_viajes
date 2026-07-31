@@ -93,6 +93,15 @@ enum TipoSalida {
   @@schema("operaciones")
 }
 
+enum EstadoSalida {
+  PROGRAMADO
+  EN_CURSO
+  FINALIZADO
+  CANCELADO
+
+  @@schema("operaciones")
+}
+
 model Salida {
   id Int @id @default(autoincrement())
 
@@ -103,15 +112,12 @@ model Salida {
   viajeBaseId Int
   viaje       ViajeBase @relation(fields: [viajeBaseId], references: [id])
 
-  fechaSalida  DateTime? @db.Date
-  fechaLlegada DateTime? @db.Date
-  horaSalida   DateTime? @db.Time
-  horaLlegada  DateTime? @db.Time
+  horario_configuracion Json
 
-  tipoSalida TipoSalida @default(UNICA)
+  tipoSalida   TipoSalida   @default(UNICA)
+  estadoSalida EstadoSalida @default(PROGRAMADO)
 
-  configuracion Json?
-  precios       Json
+  precios Json
 
   boletos Compra[]
 
@@ -120,8 +126,8 @@ model Salida {
   createdBy String?  @db.VarChar(50)
   updatedBy String?  @db.VarChar(50)
 
-  @@unique([fechaSalida, horaSalida, horaLlegada, autobusId, conductorId, viajeBaseId])
-  @@index([fechaSalida, horaSalida, horaLlegada])
+  estatus Boolean @default(false)
+
   @@schema("operaciones")
 }
 
@@ -168,5 +174,9 @@ model Comprador {
   email            String   @unique @db.VarChar(150)
   compras          Compra[]
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email, telefono])
   @@schema("operaciones")
 }
