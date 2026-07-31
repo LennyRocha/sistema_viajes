@@ -36,7 +36,8 @@ model Ruta {
   createdBy        String?  @db.VarChar(50)
   updatedBy        String?  @db.VarChar(50)
 
-  viajes ViajeBaseRuta[]
+  viajes  ViajeBaseRuta[]
+  boletos Compra[]
 
   @@schema("operaciones")
 }
@@ -92,6 +93,15 @@ enum TipoSalida {
   @@schema("operaciones")
 }
 
+enum EstadoSalida {
+  PROGRAMADO
+  EN_CURSO
+  FINALIZADO
+  CANCELADO
+
+  @@schema("operaciones")
+}
+
 model Salida {
   id Int @id @default(autoincrement())
 
@@ -102,35 +112,37 @@ model Salida {
   viajeBaseId Int
   viaje       ViajeBase @relation(fields: [viajeBaseId], references: [id])
 
-  fechaSalida  DateTime? @db.Date
-  fechaLlegada DateTime? @db.Date
-  horaSalida   DateTime? @db.Time
-  horaLlegada  DateTime? @db.Time
+  horario_configuracion Json
 
-  tipoSalida TipoSalida @default(UNICA)
+  tipoSalida   TipoSalida   @default(UNICA)
+  estadoSalida EstadoSalida @default(PROGRAMADO)
 
-  configuracion Json?
-  precios       Json
+  precios Json
 
-  boletos Boleto[]
+  boletos Compra[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   createdBy String?  @db.VarChar(50)
   updatedBy String?  @db.VarChar(50)
 
-  @@unique([fechaSalida, horaSalida, horaLlegada, autobusId, conductorId, viajeBaseId])
-  @@index([fechaSalida, horaSalida, horaLlegada])
+  estatus Boolean @default(false)
+
   @@schema("operaciones")
 }
 
-model Boleto {
-  id Int @id @default(autoincrement())
+//Tipos unicos fecha y hora directa,
 
-  email String @unique @db.VarChar(150)
+model Compra {
+  id       Int    @id @default(autoincrement())
+  publicId String @unique @default(uuid()) @db.VarChar(100)
 
-  salidaId Int
-  salida   Salida @relation(fields: [salidaId], references: [id])
+  salidaId    Int
+  compradorId Int
+  comprador   Comprador @relation(fields: [compradorId], references: [id])
+  salida      Salida    @relation(fields: [salidaId], references: [id])
+
+  pasajeros Int
 
   asientos Json
 
@@ -139,9 +151,32 @@ model Boleto {
 
   fechaCompra DateTime @default(now())
   monto       Decimal  @db.Decimal(10, 2)
+  rutaId      Int
+  ruta        Ruta     @relation(fields: [rutaId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([compradorId, salidaId])
+  @@schema("operaciones")
+}
+
+//Ruta de ida y vuelta, con asientos reservados, con QR code, con fecha de compra y monto total.
+
+model Comprador {
+  id Int @id @default(autoincrement())
+
+  // Datos personales
+  nombres          String   @db.VarChar(100)
+  apellido_paterno String   @db.VarChar(100)
+  apellido_materno String   @db.VarChar(100)
+  telefono         String   @unique @db.VarChar(15)
+  email            String   @unique @db.VarChar(150)
+  compras          Compra[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email, telefono])
   @@schema("operaciones")
 }

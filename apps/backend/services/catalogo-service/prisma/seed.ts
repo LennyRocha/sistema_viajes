@@ -11,13 +11,6 @@ async function main() {
 
   // Limpieza opcional (útil en dev para reseedar sin duplicar)
   await prisma.tipoAutobus.deleteMany();
-
-  // Inserción de datos de prueba
-  const buses = await prisma.tipoAutobus.createMany({
-    data: tiposAutobusSeeds,
-  });
-
-  //Temporal en lo que está el módulo de instituciones
   await prisma.institucion.deleteMany();
 
   //Reestablecer secuencias de IDs para evitar conflictos con seeds
@@ -25,6 +18,11 @@ async function main() {
     TRUNCATE TABLE "Institucion" RESTART IDENTITY CASCADE;
     TRUNCATE TABLE "TipoAutobus" RESTART IDENTITY CASCADE;
 `);
+
+  // Inserción de datos de prueba
+  const buses = await prisma.tipoAutobus.createMany({
+    data: tiposAutobusSeeds,
+  });
 
   await prisma.institucion.createMany({
     data: institucionesSeeds,
