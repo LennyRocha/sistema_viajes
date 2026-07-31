@@ -4,10 +4,7 @@ import {
   CommonPageProps,
   PaperHeader,
 } from "@nexoroute/commons";
-
 import { ChevronLeft } from "@mui/icons-material";
-
-import { useParams } from "next/navigation";
 
 import ConductorForm from "../components/ConductorForms";
 
@@ -28,27 +25,34 @@ import {
 
 import { useGetInstitucionesQuery } from "../../instituciones/api/institucionesApi";
 
-interface EditarConductorProps extends CommonPageProps { }
+interface EditarConductorProps extends CommonPageProps {
+  id?: string;
+}
 
 export default function EditarConductor({
   navigationFunction,
   snack,
+  id,
 }: Readonly<EditarConductorProps>) {
-  const { id } = useParams();
+  const conductorId = id ? Number(id) : undefined;
 
-  const [form, setForm] =
-    useState<FormState>(initialState);
+  const [form, setForm] = useState<FormState>(initialState);
 
-  const [errors, setErrors] =
-    useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { data: conductor } =
-    useGetConductorByIdQuery(Number(id));
+  const {
+    data: conductor,
+    isLoading: loadingConductor,
+  } = useGetConductorByIdQuery(conductorId!, {
+    skip: !conductorId,
+  });
 
-  const { data: instituciones, isLoading: loadingInstituciones } =
-    useGetInstitucionesQuery({
-      active: true,
-    });
+  const {
+    data: instituciones,
+    isLoading: loadingInstituciones,
+  } = useGetInstitucionesQuery({
+    active: true,
+  });
 
   const [patchConductor, { isLoading }] =
     usePatchConductorMutation();
@@ -62,12 +66,13 @@ export default function EditarConductor({
       apellido_materno: conductor.apellido_materno,
       curp: conductor.curp,
       fecha_nacimiento:
-        conductor.fecha_nacimiento.slice(0, 10),
+        conductor.fecha_nacimiento?.slice(0, 10) ?? "",
       telefono: conductor.telefono,
       email: conductor.email,
       foto_perfil: conductor.foto_perfil,
       institucion_id: conductor.institucion_id,
-      licencia: conductor.licencia ?? initialState.licencia
+      licencia:
+        conductor.licencia ?? initialState.licencia,
     });
   }, [conductor]);
 
@@ -81,32 +86,41 @@ export default function EditarConductor({
       };
 
   const handleLicenciaChange =
-    (_: keyof FormState["licencia"]) =>
-      (_e: React.ChangeEvent<HTMLInputElement>) => { };
+    (field: keyof FormState["licencia"]) =>
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setForm((prev) => ({
+          ...prev,
+          licencia: {
+            ...prev.licencia,
+            [field]: e.target.value,
+          },
+        }));
+      };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (
+    e?: React.FormEvent | React.MouseEvent
+  ) => {
+    e?.preventDefault?.();
+
+    if (!conductorId) return;
+
     const payload = {
       ...form,
       institucion_id: Number(form.institucion_id),
     };
 
-    const result =
-      updateConductorSchema.safeParse(payload);
+    const result = updateConductorSchema.safeParse(payload);
 
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
 
       result.error.issues.forEach((issue) => {
-        fieldErrors[issue.path.join(".")] =
-          issue.message;
+        fieldErrors[issue.path.join(".")] = issue.message;
       });
 
       setErrors(fieldErrors);
 
-      snack?.(
-        "Revisa los campos marcados.",
-        "error",
-      );
+      snack?.error?.("Revisa los campos marcados.");
 
       return;
     }
@@ -115,24 +129,38 @@ export default function EditarConductor({
 
     try {
       await patchConductor({
-        id: Number(id),
+        id: conductorId,
         ...(result.data as UpdateConductorSchema),
       }).unwrap();
 
-      snack?.(
-        "Conductor actualizado correctamente",
-        "success",
-      );
+      snack?.success?.("Conductor actualizado correctamente");
 
       navigationFunction("/dashboard/conductores");
     } catch (err: any) {
-      snack?.(
+      console.error(err);
+
+      snack?.error?.(
         err?.data?.message ??
-        "No se pudo actualizar el conductor",
-        "error",
+        "No se pudo actualizar el conductor"
       );
     }
   };
+
+  if (!conductorId) {
+    return (
+      <div style={{ padding: 20 }}>
+        ID de conductor inválido.
+      </div>
+    );
+  }
+
+  if (loadingConductor) {
+    return (
+      <div style={{ padding: 20 }}>
+        Cargando conductor...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -141,7 +169,7 @@ export default function EditarConductor({
         breads={[
           {
             nombre: "Conductores",
-            href: "/conductores",
+            href: "/dashboard/conductores",
           },
           {
             nombre: "Editar",
@@ -158,9 +186,11 @@ export default function EditarConductor({
         showButton
         buttonTitle="Volver"
         leftIcon={<ChevronLeft />}
-        onButtonClick={() =>
-          navigationFunction("/dashboard/conductores")
-        }
+        onButtonClick={() => {
+          if (typeof navigationFunction === "function") {
+            navigationFunction("/dashboard/conductores");
+          }
+        }}
       />
 
       <ConductorForm
@@ -173,9 +203,11 @@ export default function EditarConductor({
         onChange={handleChange}
         onLicenciaChange={handleLicenciaChange}
         onSubmit={handleSubmit}
-        onCancel={() =>
-          navigationFunction("/dashboard/conductores")
-        }
+        onCancel={() => {
+          if (typeof navigationFunction === "function") {
+            navigationFunction("/dashboard/conductores");
+          }
+        }}
       />
     </>
   );
