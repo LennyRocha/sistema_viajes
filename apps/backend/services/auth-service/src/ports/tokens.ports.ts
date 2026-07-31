@@ -2,7 +2,10 @@
  * Puertos (interfaces): el dominio/aplicación depende de contratos, no de Prisma/jose/Redis.
  * Así puedes testear use-cases con fakes y cambiar infra sin tocar reglas de negocio.
  */
-import { AccessTokenClaims, AuthUserView } from '../domain/entities/auth-user.entity';
+import {
+  AccessTokenClaims,
+  AuthUserView,
+} from '../modules/usuarios/types/auth-user.entity';
 
 export const PASSWORD_HASHER = Symbol('PASSWORD_HASHER');
 export const TOKEN_SIGNER = Symbol('TOKEN_SIGNER');
@@ -14,7 +17,9 @@ export interface PasswordHasherPort {
 }
 
 export interface TokenSignerPort {
-  signAccess(claims: Omit<AccessTokenClaims, 'jti'> & { jti?: string }): Promise<{
+  signAccess(
+    claims: Omit<AccessTokenClaims, 'jti'> & { jti?: string },
+  ): Promise<{
     accessToken: string;
     jti: string;
     expiresAt: Date;

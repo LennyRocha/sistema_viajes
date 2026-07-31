@@ -58,27 +58,90 @@ model ViajeBase {
   createdBy            String?  @db.VarChar(50)
   updatedBy            String?  @db.VarChar(50)
 
-  rutas ViajeBaseRuta[]
+  rutas   ViajeBaseRuta[]
+  salidas Salida[]
 
   @@schema("operaciones")
 }
 
 model ViajeBaseRuta {
-  id                       Int      @id @default(autoincrement())
-  viajeBaseId              Int
-  rutaId                   Int
-  orden                    Int
-  conexion                 Json?
-  conexionEncodedPolyline  String?  @db.Text
-  distanciaConexionMetros  Int?
-  requiereConexion         Boolean  @default(false)
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
+  id                      Int      @id @default(autoincrement())
+  viajeBaseId             Int
+  rutaId                  Int
+  orden                   Int
+  conexion                Json?
+  conexionEncodedPolyline String?  @db.Text
+  distanciaConexionMetros Int?
+  requiereConexion        Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
   viajeBase ViajeBase @relation(fields: [viajeBaseId], references: [id], onDelete: Cascade)
   ruta      Ruta      @relation(fields: [rutaId], references: [id])
 
   @@unique([viajeBaseId, orden])
   @@unique([viajeBaseId, rutaId, orden])
+  @@schema("operaciones")
+}
+
+enum TipoSalida {
+  UNICA
+  RECURRENTE
+  ESPECIAL
+
+  @@schema("operaciones")
+}
+
+model Salida {
+  id Int @id @default(autoincrement())
+
+  //Ids de otro microservicio que no están en este esquema
+  autobusId   Int
+  conductorId Int
+
+  viajeBaseId Int
+  viaje       ViajeBase @relation(fields: [viajeBaseId], references: [id])
+
+  fechaSalida  DateTime? @db.Date
+  fechaLlegada DateTime? @db.Date
+  horaSalida   DateTime? @db.Time
+  horaLlegada  DateTime? @db.Time
+
+  tipoSalida TipoSalida @default(UNICA)
+
+  configuracion Json?
+  precios       Json
+
+  boletos Boleto[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?  @db.VarChar(50)
+  updatedBy String?  @db.VarChar(50)
+
+  @@unique([fechaSalida, horaSalida, horaLlegada, autobusId, conductorId, viajeBaseId])
+  @@index([fechaSalida, horaSalida, horaLlegada])
+  @@schema("operaciones")
+}
+
+model Boleto {
+  id Int @id @default(autoincrement())
+
+  email String @unique @db.VarChar(150)
+
+  salidaId Int
+  salida   Salida @relation(fields: [salidaId], references: [id])
+
+  asientos Json
+
+  qrCodeUrl    String? @db.Text
+  qrCodeBase64 String? @db.Text
+
+  fechaCompra DateTime @default(now())
+  monto       Decimal  @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@schema("operaciones")
 }
