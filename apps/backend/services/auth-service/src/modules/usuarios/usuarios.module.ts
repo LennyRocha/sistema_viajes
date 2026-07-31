@@ -4,9 +4,8 @@ import { UsuariosService } from './usuarios.service';
 import { ArgonPasswordHasher } from 'src/infra/crypto/argon-password.hasher';
 
 @Module({
-  providers: [UsuariosService],
+  providers: [UsuariosService, ArgonPasswordHasher],
   controllers: [UsuariosController],
   exports: [UsuariosService],
-  imports: [ArgonPasswordHasher],
 })
 export class UsuariosModule {}
