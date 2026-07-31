@@ -44,29 +44,134 @@ interface Props extends CommonPageProps {}
 const DEFAULT_VIAJE_IMAGE = "/imagen_defecto_viajes.jpg";
 const EMPTY_ROUTES: ReturnType<typeof mapRutaApi>[] = [];
 
-function MetricCard({
-  label,
-  value,
-  accent,
-}: Readonly<{ label: string; value: string; accent: string }>) {
+function JourneyInfoPanel({
+  metrics,
+  durationMin,
+  ready,
+  routes,
+}: Readonly<{
+  metrics: ReturnType<typeof getJourneyMetrics>;
+  durationMin: number;
+  ready: boolean;
+  routes: ReturnType<typeof mapRutaApi>[];
+}>) {
+  const statItems = [
+    { label: "Distancia", value: `${metrics.distanceKm.toFixed(1)} km` },
+    { label: "Duracion", value: `${durationMin} min` },
+    { label: "Paradas", value: String(metrics.stops) },
+    { label: "Rutas", value: String(routes.length) },
+  ];
+
   return (
-    <Box
-      sx={{
-        p: 1.5,
-        borderRadius: "8px",
-        border: "1px solid",
-        borderColor: "divider",
-        borderLeft: `4px solid ${accent}`,
-        backgroundColor: "background.paper",
-      }}
-    >
-      <Typography variant="caption" color="text.secondary">
-        {label}
-      </Typography>
-      <Typography variant="h5" sx={{ fontWeight: 900, lineHeight: 1.1 }}>
-        {value}
-      </Typography>
-    </Box>
+    <Stack spacing={1.5}>
+      <Box
+        sx={{
+          p: 1.5,
+          borderRadius: "8px",
+          color: "white",
+          background:
+            "linear-gradient(135deg, rgba(15,23,42,0.96), rgba(31,97,141,0.92))",
+        }}
+      >
+        <Typography variant="overline" sx={{ opacity: 0.74, letterSpacing: 0 }}>
+          Resumen operativo
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: 1,
+            mt: 0.5,
+          }}
+        >
+          {statItems.map((item) => (
+            <Box key={item.label}>
+              <Typography variant="h6" sx={{ fontWeight: 950, lineHeight: 1 }}>
+                {item.value}
+              </Typography>
+              <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.72)" }}>
+                {item.label}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          p: 1.25,
+          borderRadius: "8px",
+          border: "1px solid",
+          borderColor: ready ? "success.light" : "warning.light",
+          backgroundColor: ready
+            ? "rgba(46, 125, 50, 0.08)"
+            : "rgba(237, 108, 2, 0.08)",
+        }}
+      >
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          {ready ? (
+            <CheckCircleIcon color="success" fontSize="small" />
+          ) : (
+            <LinkOffIcon color="warning" fontSize="small" />
+          )}
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 900 }}>
+              {ready ? "Recorrido continuo" : "Incluye enlace operativo"}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {ready
+                ? "Las rutas empatan en el orden seleccionado."
+                : "El tramo punteado conecta el final de una ruta con el inicio de la siguiente."}
+            </Typography>
+          </Box>
+        </Stack>
+      </Box>
+
+      <Stack spacing={1}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
+          Secuencia del viaje
+        </Typography>
+        {routes.map((ruta, index) => (
+          <Box
+            key={ruta.id}
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "28px 1fr auto",
+              gap: 1,
+              alignItems: "center",
+              py: 1,
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Box
+              sx={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                display: "grid",
+                placeItems: "center",
+                color: "white",
+                fontSize: 12,
+                fontWeight: 900,
+                backgroundColor: ruta.color || "primary.main",
+              }}
+            >
+              {index + 1}
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="body2" sx={{ fontWeight: 900 }}>
+                {ruta.nombre}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {ruta.origen.nombre} a {ruta.destino.nombre}
+              </Typography>
+            </Box>
+            <Chip label={`${ruta.duracionMin || "-"} min`} size="small" />
+          </Box>
+        ))}
+      </Stack>
+    </Stack>
   );
 }
 
@@ -258,8 +363,13 @@ export default function ViajesIndex({
             {pageViajes.map((viaje) => (
               <Box
                 key={viaje.id}
-                component="button"
+                component="div"
+                role="button"
+                tabIndex={0}
                 onClick={() => setSelectedId(viaje.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") setSelectedId(viaje.id);
+                }}
                 sx={{
                   width: "100%",
                   textAlign: "left",
@@ -306,6 +416,37 @@ export default function ViajesIndex({
                   <Chip icon={<RouteIcon />} label={`${viaje.rutas.length} ruta(s)`} size="small" />
                   <Chip label={`${viaje.duracionTotalMin || Math.round(getJourneyMetrics(viaje.rutas, []).durationMin)} min`} size="small" />
                 </Stack>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ mt: 1.25, justifyContent: "flex-end" }}
+                >
+                  <Tooltip title="Ver detalle">
+                    <IconButton
+                      size="small"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openSidebar({
+                          title: "Detalle del viaje base",
+                          children: <ViajeDetails viaje={viaje} />,
+                        });
+                      }}
+                    >
+                      <InfoIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Editar">
+                    <IconButton
+                      size="small"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        navigationFunction(`/dashboard/trips/editar/${viaje.id}`);
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
                 </Box>
               </Box>
             ))}
@@ -336,84 +477,17 @@ export default function ViajesIndex({
                 enableSimulation={journeySimulationPath.length > 1}
                 simulationPath={journeySimulationPath}
                 onConnectionPathChange={updateConnectionPath}
+                infoContent={
+                  <JourneyInfoPanel
+                    metrics={metrics}
+                    durationMin={
+                      selectedViaje?.duracionTotalMin || Math.round(metrics.durationMin)
+                    }
+                    ready={ready}
+                    routes={selectedRoutes}
+                  />
+                }
               />
-            </PaperBlock>
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "repeat(4, 1fr)" },
-                gap: 1.5,
-              }}
-            >
-              <MetricCard label="Distancia" value={`${metrics.distanceKm.toFixed(1)} km`} accent="#1f618d" />
-              <MetricCard label="Duracion" value={`${selectedViaje?.duracionTotalMin || Math.round(metrics.durationMin)} min`} accent="#b7791f" />
-              <MetricCard label="Paradas" value={String(metrics.stops)} accent="#2f855a" />
-              <MetricCard label="Rutas" value={String(selectedRoutes.length)} accent="#6b46c1" />
-            </Box>
-
-            <PaperBlock
-              title="Continuidad del viaje"
-              subtitle="Las rutas internas se revisan en orden; si no empatan, el sistema marca el enlace"
-              contentWrapperSx={{ display: "flex", flexDirection: "column", gap: 1.25 }}
-            >
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}>
-                <Chip
-                  icon={ready ? <CheckCircleIcon /> : <LinkOffIcon />}
-                  label={ready ? "Continuidad valida" : "Usa enlace operativo"}
-                  color={ready ? "success" : "warning"}
-                  variant="outlined"
-                />
-                {selectedViaje && (
-                  <>
-                    <Tooltip title="Ver detalle">
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          openSidebar({
-                            title: "Detalle del viaje base",
-                            children: <ViajeDetails viaje={selectedViaje} />,
-                          })
-                        }
-                      >
-                        <InfoIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Editar">
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          navigationFunction(`/dashboard/trips/editar/${selectedViaje.id}`)
-                        }
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </>
-                )}
-              </Stack>
-              {selectedRoutes.map((ruta, index) => (
-                <Box
-                  key={ruta.id}
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "12px 32px 1fr",
-                    gap: 1,
-                    alignItems: "center",
-                  }}
-                >
-                  <Box sx={{ width: 10, height: 44, borderRadius: 8, backgroundColor: ruta.color }} />
-                  <Chip label={index + 1} size="small" />
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 800 }}>
-                      {ruta.nombre}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {ruta.origen.nombre} a {ruta.destino.nombre}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
             </PaperBlock>
           </Box>
         </Box>

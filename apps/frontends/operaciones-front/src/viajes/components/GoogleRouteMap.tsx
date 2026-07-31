@@ -1,14 +1,34 @@
 "use client";
 
 import React from "react";
-import { Box, Button, Chip, Stack, Typography } from "@mui/material";
+import dynamic from "next/dynamic";
+import {
+  Box,
+  Button,
+  Chip,
+  Divider,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Slider,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt";
+import CloseIcon from "@mui/icons-material/Close";
+import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import StreetviewIcon from "@mui/icons-material/Streetview";
 import GeoPoint from "../types/GeoPoint";
 import RutaBase from "../types/RutaBase";
 import { ConnectionSegment, formatMeters, getRoutePoints } from "../utils/routeUtils";
+import { VehicleModelName } from "./VehicleModelPreview";
 
 declare global {
   interface Window {
@@ -51,6 +71,7 @@ type Props = {
   enableSimulation?: boolean;
   simulationRoute?: RutaBase | null;
   simulationPath?: GeoPoint[];
+  infoContent?: React.ReactNode;
 };
 
 const DEFAULT_CENTER = { lat: 23.6345, lng: -102.5528 };
@@ -60,6 +81,17 @@ const EMPTY_MARKERS: NonNullable<Props["markerPoints"]> = [];
 const FALLBACK_COLORS = ["#1f618d", "#2f855a", "#b7791f", "#6b46c1"];
 const STOP_COLOR = "#d97706";
 const ORIGIN_DESTINATION_COLOR = "#1f618d";
+const SIMULATION_SPEEDS = [0.5, 1, 1.5, 2, 3];
+const VEHICLE_MODELS = [
+  { value: "hyundai", label: "Estandar", color: "#1f618d" },
+  { value: "mercedes", label: "Shuttle", color: "#2f855a" },
+  { value: "volkswagen", label: "Premium", color: "#6b46c1" },
+] as const;
+type VehicleModel = VehicleModelName;
+
+const VehicleModelPreview = dynamic(() => import("./VehicleModelPreview"), {
+  ssr: false,
+});
 
 export function ensureGoogleMaps(apiKey?: string) {
   if (typeof window === "undefined") return Promise.resolve();
@@ -198,25 +230,38 @@ function markerIcon(color: string, label = "", scale = 1) {
   };
 }
 
-function busIcon(heading = 0) {
+function busIcon(heading = 0, model: VehicleModel = "hyundai") {
+  const modelConfig = {
+    hyundai: { body: "#1f618d", roof: "#0f172a", glass: "#dbeafe", label: "STD" },
+    mercedes: { body: "#2f855a", roof: "#12372a", glass: "#dcfce7", label: "SHT" },
+    volkswagen: { body: "#6b46c1", roof: "#241151", glass: "#ede9fe", label: "PRM" },
+  }[model];
   const svg = encodeURIComponent(`
-    <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
-      <g transform="rotate(${heading} 22 22)">
-        <circle cx="22" cy="22" r="18" fill="rgba(31,97,141,0.18)"/>
-        <rect x="12" y="9" width="20" height="27" rx="5" fill="#111827" stroke="white" stroke-width="2"/>
-        <rect x="15" y="12" width="14" height="7" rx="2" fill="#e0f2fe"/>
-        <rect x="15" y="22" width="14" height="7" rx="2" fill="#f8fafc"/>
-        <rect x="10" y="15" width="3" height="8" rx="1.5" fill="#0f172a"/>
-        <rect x="31" y="15" width="3" height="8" rx="1.5" fill="#0f172a"/>
-        <path d="M18 35h8" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
+    <svg width="58" height="58" viewBox="0 0 58 58" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.35"/>
+        </filter>
+      </defs>
+      <g transform="rotate(${heading} 29 29)" filter="url(#shadow)">
+        <path d="M29 4L35 12H23L29 4Z" fill="#facc15" stroke="white" stroke-width="1.5"/>
+        <rect x="16" y="10" width="26" height="39" rx="7" fill="${modelConfig.body}" stroke="white" stroke-width="2.4"/>
+        <rect x="20" y="14" width="18" height="8" rx="2.5" fill="${modelConfig.glass}"/>
+        <rect x="20" y="26" width="18" height="12" rx="2.5" fill="rgba(255,255,255,0.92)"/>
+        <rect x="13" y="20" width="4" height="10" rx="2" fill="${modelConfig.roof}"/>
+        <rect x="41" y="20" width="4" height="10" rx="2" fill="${modelConfig.roof}"/>
+        <rect x="13" y="35" width="4" height="9" rx="2" fill="${modelConfig.roof}"/>
+        <rect x="41" y="35" width="4" height="9" rx="2" fill="${modelConfig.roof}"/>
+        <text x="29" y="36" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="7.5" font-weight="900" fill="${modelConfig.roof}">${modelConfig.label}</text>
+        <path d="M23 47h12" stroke="#facc15" stroke-width="3" stroke-linecap="round"/>
       </g>
     </svg>
   `);
 
   return {
     url: `data:image/svg+xml;charset=UTF-8,${svg}`,
-    scaledSize: new window.google.maps.Size(44, 44),
-    anchor: new window.google.maps.Point(22, 22),
+    scaledSize: new window.google.maps.Size(58, 58),
+    anchor: new window.google.maps.Point(29, 29),
   };
 }
 
@@ -285,6 +330,13 @@ function sampleWaypoints(path?: GeoPoint[] | null, maxWaypoints = 20) {
   return Array.from({ length: maxWaypoints }, (_, index) => middle[Math.floor(index * step)]);
 }
 
+function routeHeading(previous: GeoPoint, current: GeoPoint) {
+  return (
+    Math.atan2(current.lng - previous.lng, current.lat - previous.lat) *
+    (180 / Math.PI)
+  );
+}
+
 function FallbackMap({ routes, height }: { routes: ReturnType<typeof normalizeRoutes>; height: number }) {
   return (
     <Box
@@ -349,11 +401,12 @@ export default function GoogleRouteMap({
   enableSimulation = false,
   simulationRoute = null,
   simulationPath: simulationPathProp,
+  infoContent,
 }: Readonly<Props>) {
   const mapRef = React.useRef<HTMLDivElement>(null);
   const mapInstance = React.useRef<any>(null);
   const cleanupRef = React.useRef<(() => void) | null>(null);
-  const simulationCleanupRef = React.useRef<(() => void) | null>(null);
+  const simulationMarkerRef = React.useRef<any>(null);
   const metricsKeyRef = React.useRef("");
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const renderedRoutes = React.useMemo(() => normalizeRoutes(routes), [routes]);
@@ -361,6 +414,12 @@ export default function GoogleRouteMap({
   const [streetViewOpen, setStreetViewOpen] = React.useState(false);
   const [pendingClicks, setPendingClicks] = React.useState(0);
   const [isSimulating, setIsSimulating] = React.useState(false);
+  const [simulationStep, setSimulationStep] = React.useState(0);
+  const [simulationSpeed, setSimulationSpeed] = React.useState(1);
+  const [selectedVehicle, setSelectedVehicle] = React.useState<VehicleModel>("hyundai");
+  const [streetViewSimulation, setStreetViewSimulation] = React.useState(false);
+  const [simulationPanelOpen, setSimulationPanelOpen] = React.useState(false);
+  const [infoPanelOpen, setInfoPanelOpen] = React.useState(false);
   const simulationPath = React.useMemo(() => {
     if (simulationPathProp?.length) return simulationPathProp;
     if (!simulationRoute) return [];
@@ -368,6 +427,11 @@ export default function GoogleRouteMap({
       ? simulationRoute.waypoints
       : getRoutePoints(simulationRoute);
   }, [simulationPathProp, simulationRoute]);
+
+  React.useEffect(() => {
+    setSimulationStep(0);
+    setIsSimulating(false);
+  }, [simulationPath]);
 
   React.useEffect(() => {
     if (!apiKey) {
@@ -702,47 +766,74 @@ export default function GoogleRouteMap({
     };
   }, [apiKey, connections, editable, editableConnections, editingTarget, enableStreetView, markerPoints, onConnectionPathChange, onMapPoint, onRouteMetrics, renderedRoutes]);
 
+  React.useEffect(
+    () => () => {
+      simulationMarkerRef.current?.setMap(null);
+      simulationMarkerRef.current = null;
+    },
+    [],
+  );
+
   React.useEffect(() => {
-    simulationCleanupRef.current?.();
     const map = mapInstance.current;
     if (!map || !window.google?.maps || !enableSimulation || simulationPath.length <= 1) {
-      simulationCleanupRef.current = null;
+      simulationMarkerRef.current?.setMap(null);
+      simulationMarkerRef.current = null;
       return;
     }
 
-    let step = 0;
-    let interval: number | null = null;
-    const marker = new window.google.maps.Marker({
-      map,
-      position: simulationPath[0],
-      title: "Autobus en recorrido",
-      icon: busIcon(0),
-      zIndex: 999,
-    });
+    const boundedStep = Math.min(simulationStep, simulationPath.length - 1);
+    const current = simulationPath[boundedStep];
+    const previous = simulationPath[Math.max(0, boundedStep - 1)];
+    const next = simulationPath[Math.min(simulationPath.length - 1, boundedStep + 1)];
+    const heading = boundedStep === 0 ? routeHeading(current, next) : routeHeading(previous, current);
 
-    if (isSimulating) {
-      interval = window.setInterval(() => {
-        step = (step + 1) % simulationPath.length;
-        const current = simulationPath[step];
-        const previous = simulationPath[Math.max(0, step - 1)];
-        const heading =
-          Math.atan2(current.lng - previous.lng, current.lat - previous.lat) *
-          (180 / Math.PI);
-        marker.setPosition(current);
-        marker.setIcon(busIcon(heading));
-      }, 130);
+    if (!simulationMarkerRef.current) {
+      simulationMarkerRef.current = new window.google.maps.Marker({
+        map,
+        position: current,
+        title: "Autobus en recorrido",
+        icon: busIcon(heading, selectedVehicle),
+        zIndex: 999,
+      });
     }
 
-    simulationCleanupRef.current = () => {
-      if (interval) window.clearInterval(interval);
-      marker.setMap(null);
-    };
+    simulationMarkerRef.current.setMap(map);
+    simulationMarkerRef.current.setPosition(current);
+    simulationMarkerRef.current.setIcon(busIcon(heading, selectedVehicle));
+    simulationMarkerRef.current.setVisible(!streetViewSimulation);
 
-    return () => {
-      simulationCleanupRef.current?.();
-      simulationCleanupRef.current = null;
-    };
-  }, [enableSimulation, isSimulating, simulationPath]);
+    if (streetViewSimulation) {
+      const panorama = map.getStreetView();
+      panorama.setPosition(current);
+      panorama.setPov({ heading, pitch: 0 });
+      panorama.setVisible(true);
+      if (!streetViewOpen) setStreetViewOpen(true);
+    }
+  }, [
+    enableSimulation,
+    selectedVehicle,
+    simulationPath,
+    simulationStep,
+    streetViewOpen,
+    streetViewSimulation,
+  ]);
+
+  React.useEffect(() => {
+    if (!isSimulating || !enableSimulation || simulationPath.length <= 1) return undefined;
+
+    const interval = window.setInterval(() => {
+      setSimulationStep((current) => (current + 1) % simulationPath.length);
+    }, Math.max(180, (streetViewSimulation ? 2600 : 900) / simulationSpeed));
+
+    return () => window.clearInterval(interval);
+  }, [
+    enableSimulation,
+    isSimulating,
+    simulationPath.length,
+    simulationSpeed,
+    streetViewSimulation,
+  ]);
 
   const focusStreetView = () => {
     const map = mapInstance.current;
@@ -753,6 +844,11 @@ export default function GoogleRouteMap({
     panorama.setPov({ heading: 34, pitch: 0 });
     panorama.setVisible(!streetViewOpen);
     setStreetViewOpen(!streetViewOpen);
+  };
+
+  const resetSimulation = () => {
+    setIsSimulating(false);
+    setSimulationStep(0);
   };
 
   return (
@@ -787,6 +883,264 @@ export default function GoogleRouteMap({
         />
       )}
 
+      {(enableSimulation || infoContent) && (
+        <Stack
+          spacing={1}
+          sx={{
+            position: "absolute",
+            right: 16,
+            top: 16,
+            zIndex: 4,
+          }}
+        >
+          {enableSimulation && simulationPath.length > 1 && (
+            <Box
+              component="button"
+                onClick={() => {
+                  setSimulationPanelOpen((current) => !current);
+                  setInfoPanelOpen(false);
+                }}
+                sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                p: 0.5,
+                pr: 1,
+                border: 0,
+                borderRadius: "999px",
+                  color: "white",
+                  backgroundColor: "primary.main",
+                  boxShadow: "0 12px 26px rgba(15, 23, 42, 0.24)",
+                cursor: "pointer",
+                  "&:hover": { backgroundColor: "primary.dark" },
+                }}
+              >
+              <Box
+                sx={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
+                <DirectionsBusIcon fontSize="small" />
+              </Box>
+              <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                Simulacion
+              </Typography>
+            </Box>
+          )}
+          {infoContent && (
+            <Box
+              component="button"
+                onClick={() => {
+                  setInfoPanelOpen((current) => !current);
+                  setSimulationPanelOpen(false);
+                }}
+                sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                p: 0.5,
+                pr: 1,
+                border: "1px solid rgba(15, 23, 42, 0.10)",
+                borderRadius: "999px",
+                  color: "primary.main",
+                  backgroundColor: "rgba(255,255,255,0.96)",
+                  boxShadow: "0 12px 26px rgba(15, 23, 42, 0.18)",
+                cursor: "pointer",
+                  "&:hover": { backgroundColor: "white" },
+                }}
+              >
+              <Box
+                sx={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
+                <InfoOutlinedIcon fontSize="small" />
+              </Box>
+              <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                Informacion
+              </Typography>
+            </Box>
+          )}
+        </Stack>
+      )}
+
+      {enableSimulation && simulationPath.length > 1 && simulationPanelOpen && (
+        <Box
+          sx={{
+            position: "absolute",
+            right: 74,
+            top: 16,
+            width: { xs: 282, sm: 340 },
+            p: 0,
+            borderRadius: "8px",
+            overflow: "hidden",
+            backgroundColor: "rgba(255,255,255,0.98)",
+            boxShadow: "0 18px 36px rgba(15, 23, 42, 0.20)",
+            border: "1px solid",
+            borderColor: "rgba(15, 23, 42, 0.10)",
+            backdropFilter: "blur(8px)",
+            zIndex: 3,
+          }}
+        >
+          <Box
+            sx={{
+              p: 1.5,
+              color: "white",
+              background:
+                "linear-gradient(135deg, rgba(15,23,42,0.96), rgba(31,97,141,0.92))",
+            }}
+          >
+            <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "start" }}>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 900, lineHeight: 1.1 }}>
+                  Simulacion
+                </Typography>
+                <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.72)" }}>
+                  Punto {simulationStep + 1} de {simulationPath.length}
+                </Typography>
+              </Box>
+              <IconButton
+                size="small"
+                onClick={() => setSimulationPanelOpen(false)}
+                sx={{
+                  color: "white",
+                }}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Stack>
+            <Box sx={{ mt: 1.25 }}>
+              <VehicleModelPreview model={selectedVehicle} />
+            </Box>
+          </Box>
+
+          <Stack spacing={1.25} sx={{ p: 1.5 }}>
+            <Stack direction="row" spacing={1}>
+              <Button
+                size="small"
+                variant="contained"
+                fullWidth
+                startIcon={isSimulating ? <PauseIcon /> : <PlayArrowIcon />}
+                onClick={() => setIsSimulating((current) => !current)}
+              >
+                {isSimulating ? "Pausar" : "Play"}
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<RestartAltIcon />}
+                onClick={resetSimulation}
+              >
+                Inicio
+              </Button>
+            </Stack>
+
+            <FormControl size="small" fullWidth>
+              <InputLabel id="vehicle-model-label">Autobus</InputLabel>
+              <Select
+                labelId="vehicle-model-label"
+                label="Autobus"
+                value={selectedVehicle}
+                onChange={(event) => setSelectedVehicle(event.target.value as VehicleModel)}
+              >
+                {VEHICLE_MODELS.map((model) => (
+                  <MenuItem key={model.value} value={model.value}>
+                    {model.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <Box>
+              <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+                <Typography variant="caption" color="text.secondary">
+                  Velocidad
+                </Typography>
+                <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                  {simulationSpeed}x
+                </Typography>
+              </Stack>
+              <Slider
+                min={0}
+                max={SIMULATION_SPEEDS.length - 1}
+                step={1}
+                value={SIMULATION_SPEEDS.indexOf(simulationSpeed)}
+                marks={SIMULATION_SPEEDS.map((speed, index) => ({
+                  value: index,
+                  label: `${speed}x`,
+                }))}
+                onChange={(_, value) =>
+                  setSimulationSpeed(SIMULATION_SPEEDS[Number(value)] || 1)
+                }
+              />
+            </Box>
+
+            {enableStreetView && (
+              <Button
+                size="small"
+                variant={streetViewSimulation ? "contained" : "outlined"}
+                color={streetViewSimulation ? "secondary" : "primary"}
+                startIcon={<StreetviewIcon />}
+                onClick={() => {
+                  setStreetViewSimulation((current) => !current);
+                  if (streetViewSimulation && mapInstance.current) {
+                    mapInstance.current.getStreetView().setVisible(false);
+                    setStreetViewOpen(false);
+                  }
+                }}
+              >
+                {streetViewSimulation ? "Salir de Street View" : "Simular en Street View"}
+              </Button>
+            )}
+          </Stack>
+        </Box>
+      )}
+
+      {infoContent && infoPanelOpen && (
+        <Box
+          sx={{
+            position: "absolute",
+            right: 74,
+            top: 16,
+            width: { xs: 282, sm: 360 },
+            maxHeight: "calc(100% - 32px)",
+            overflow: "auto",
+            borderRadius: "8px",
+            backgroundColor: "rgba(255,255,255,0.98)",
+            boxShadow: "0 18px 36px rgba(15, 23, 42, 0.20)",
+            border: "1px solid",
+            borderColor: "rgba(15, 23, 42, 0.10)",
+            zIndex: 3,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              p: 1.5,
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
+              Informacion del viaje
+            </Typography>
+            <IconButton size="small" onClick={() => setInfoPanelOpen(false)}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+          <Divider />
+          <Box sx={{ p: 1.5 }}>{infoContent}</Box>
+        </Box>
+      )}
+
       <Box
         sx={{
           position: "absolute",
@@ -800,26 +1154,28 @@ export default function GoogleRouteMap({
           pointerEvents: "none",
         }}
       >
-        <Box
-          sx={{
-            maxWidth: 420,
-            p: 1.5,
-            borderRadius: "8px",
-            backgroundColor: "rgba(255,255,255,0.94)",
-            boxShadow: "0 12px 30px rgba(15, 23, 42, 0.18)",
-          }}
-        >
-          <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
-            {title}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {editable
-              ? renderedRoutes.length > 0
+        {editable ? (
+          <Box
+            sx={{
+              maxWidth: 420,
+              p: 1.5,
+              borderRadius: "8px",
+              backgroundColor: "rgba(255,255,255,0.94)",
+              boxShadow: "0 12px 30px rgba(15, 23, 42, 0.18)",
+            }}
+          >
+            <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
+              {title}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {renderedRoutes.length > 0
                 ? "Arrastra la linea de la ruta para ajustar el camino. Haz clic en el mapa solo para agregar puntos."
-                : "Busca una direccion o haz clic en el mapa segun el modo activo."
-              : "Cada ruta conserva su color en trazo y pines para distinguir recorridos."}
-          </Typography>
-        </Box>
+                : "Busca una direccion o haz clic en el mapa segun el modo activo."}
+            </Typography>
+          </Box>
+        ) : (
+          <Box />
+        )}
         <Stack direction="row" spacing={1} sx={{ pointerEvents: "auto", flexWrap: "wrap", justifyContent: "flex-end" }}>
           {editable && (
             <Chip
@@ -852,17 +1208,6 @@ export default function GoogleRouteMap({
               onClick={focusStreetView}
             >
               Street View
-            </Button>
-          )}
-          {enableSimulation && simulationPath.length > 1 && (
-            <Button
-              size="small"
-              variant="contained"
-              color={isSimulating ? "secondary" : "primary"}
-              startIcon={isSimulating ? <PauseIcon /> : <PlayArrowIcon />}
-              onClick={() => setIsSimulating((current) => !current)}
-            >
-              {isSimulating ? "Pausa" : "Simular"}
             </Button>
           )}
         </Stack>
