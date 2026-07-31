@@ -1,4 +1,4 @@
-import { PrismaClient } from 'generated/client';
+import { PrismaClient } from '../generated/prisma';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { privilegiosSeeds } from '../seeds/privilegiosSeed';
 import { rolesSeeds } from '../seeds/rolesSeed';
@@ -17,10 +17,10 @@ async function main() {
 
   //Reestablecer secuencias de IDs para evitar conflictos con seeds
   await prisma.$executeRawUnsafe(`
-    TRUNCATE TABLE "rol" RESTART IDENTITY CASCADE;
-    TRUNCATE TABLE "privilegio" RESTART IDENTITY CASCADE;
-    TRUNCATE TABLE "user_role" RESTART IDENTITY CASCADE;
-    TRUNCATE TABLE "role_privilege" RESTART IDENTITY CASCADE;
+    TRUNCATE TABLE "Rol" RESTART IDENTITY CASCADE;
+    TRUNCATE TABLE "Privilegio" RESTART IDENTITY CASCADE;
+    TRUNCATE TABLE "UserRole" RESTART IDENTITY CASCADE;
+    TRUNCATE TABLE "RolePrivilege" RESTART IDENTITY CASCADE;
 `);
 
   // Inserción de datos de prueba

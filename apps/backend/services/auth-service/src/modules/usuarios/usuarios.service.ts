@@ -8,7 +8,7 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { CreateUsuarioDto } from './dtos/create-usuario.dto';
 import { UpdateUsuarioDto } from './dtos/update-usuario.dto';
 import { ArgonPasswordHasher } from 'src/infra/crypto/argon-password.hasher';
-import { Prisma } from 'generated/client/edge';
+import { Prisma } from 'generated/prisma/edge';
 
 const LIST_CACHE_KEY = 'usuarios:list';
 

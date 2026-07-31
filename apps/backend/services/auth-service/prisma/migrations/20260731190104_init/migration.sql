@@ -1,34 +1,46 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE "Usuario" (
+    "id" SERIAL NOT NULL,
+    "nombres" VARCHAR(100) NOT NULL,
+    "apellido_paterno" VARCHAR(100) NOT NULL,
+    "apellido_materno" VARCHAR(100) NOT NULL,
+    "curp" VARCHAR(18) NOT NULL,
+    "fecha_nacimiento" DATE NOT NULL,
+    "telefono" VARCHAR(15) NOT NULL,
+    "email" VARCHAR(150) NOT NULL,
+    "foto_perfil" VARCHAR(255) NOT NULL,
+    "foto_base64" TEXT,
+    "contra" VARCHAR(255) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "estatus" BOOLEAN NOT NULL DEFAULT true,
 
-  - You are about to drop the column `rol_id` on the `Usuario` table. All the data in the column will be lost.
-  - You are about to drop the `_PrivilegioToUsuario` table. If the table is not empty, all the data it contains will be lost.
+    CONSTRAINT "Usuario_pkey" PRIMARY KEY ("id")
+);
 
-*/
--- DropForeignKey
-ALTER TABLE "Usuario" DROP CONSTRAINT "Usuario_rol_id_fkey";
+-- CreateTable
+CREATE TABLE "Rol" (
+    "id" SERIAL NOT NULL,
+    "nombre" VARCHAR(50) NOT NULL,
+    "descripcion" VARCHAR(255) NOT NULL,
+    "estatus" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "_PrivilegioToUsuario" DROP CONSTRAINT "_PrivilegioToUsuario_A_fkey";
+    CONSTRAINT "Rol_pkey" PRIMARY KEY ("id")
+);
 
--- DropForeignKey
-ALTER TABLE "_PrivilegioToUsuario" DROP CONSTRAINT "_PrivilegioToUsuario_B_fkey";
+-- CreateTable
+CREATE TABLE "Privilegio" (
+    "id" SERIAL NOT NULL,
+    "nombre" VARCHAR(50) NOT NULL,
+    "descripcion" VARCHAR(255) NOT NULL,
+    "estatus" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
--- DropIndex
-DROP INDEX "Privilegio_nombre_idx";
-
--- DropIndex
-DROP INDEX "Rol_nombre_idx";
-
--- DropIndex
-DROP INDEX "Usuario_rol_id_idx";
-
--- AlterTable
-ALTER TABLE "Usuario" DROP COLUMN "rol_id",
-ADD COLUMN     "foto_base64" TEXT;
-
--- DropTable
-DROP TABLE "_PrivilegioToUsuario";
+    CONSTRAINT "Privilegio_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "UserRole" (
@@ -82,6 +94,24 @@ CREATE TABLE "PasswordResetCode" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Usuario_curp_key" ON "Usuario"("curp");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Usuario_telefono_key" ON "Usuario"("telefono");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Usuario_email_key" ON "Usuario"("email");
+
+-- CreateIndex
+CREATE INDEX "Usuario_curp_email_telefono_idx" ON "Usuario"("curp", "email", "telefono");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Rol_nombre_key" ON "Rol"("nombre");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Privilegio_nombre_key" ON "Privilegio"("nombre");
+
+-- CreateIndex
 CREATE INDEX "UserRole_roleId_idx" ON "UserRole"("roleId");
 
 -- CreateIndex
@@ -95,9 +125,6 @@ CREATE INDEX "RefreshToken_familyId_idx" ON "RefreshToken"("familyId");
 
 -- CreateIndex
 CREATE INDEX "PasswordResetCode_userId_idx" ON "PasswordResetCode"("userId");
-
--- CreateIndex
-CREATE INDEX "Usuario_curp_email_telefono_idx" ON "Usuario"("curp", "email", "telefono");
 
 -- AddForeignKey
 ALTER TABLE "UserRole" ADD CONSTRAINT "UserRole_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Usuario"("id") ON DELETE CASCADE ON UPDATE CASCADE;

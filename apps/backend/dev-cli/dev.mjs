@@ -56,7 +56,6 @@ const SERVICES = {
         command: 'pnpm',
         args: ['start:dev'],
         port: 5003,
-        dockerDir: 'services/catalogo-service',
         prismaMigrate: true,
         prismaGenerate: true,
         color: 'green',
