@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["dashboard"]
+}
+
+model Reporte {
+  id Int @id @default(autoincrement())
+
+  // Datos del reporte
+  nombre      String   @db.VarChar(100)
+  descripcion String?  @db.VarChar(255)
+  fecha       DateTime @db.Date
+
+  // Auditoría
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  estatus Boolean @default(true)
+
+  @@schema("dashboard")
+}

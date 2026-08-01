@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
 import { CreateAutobusDto } from './dtos/create-autobus.dto';
@@ -7,10 +7,9 @@ import { UpdateAutobusDto } from './dtos/update-autobus.dto';
 import { Prisma } from '@prisma/client';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import Autobus from './autobus.entity';
-import { InstitucionesService } from '../instituciones/instituciones.service';
 import { ServiciosService } from '../servicios/servicios.service';
-import { TiposAutobusService } from '../tipos_autobus/tipo_bus.service';
 import slugify from 'slugify';
+import { ClientProxy } from '@nestjs/microservices/client/client-proxy';
 
 const LIST_CACHE_KEY = 'autobuses:list';
 
@@ -19,9 +18,9 @@ export class AutobusesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
-    private readonly instituciones: InstitucionesService,
     private readonly servicios: ServiciosService,
-    private readonly tipos: TiposAutobusService,
+    @Inject('RECORD_SERVICE')
+    private readonly client: ClientProxy,
     @InjectPinoLogger(AutobusesService.name)
     private readonly logger: PinoLogger,
   ) {}
@@ -102,6 +101,8 @@ export class AutobusesService {
         'Error al limpiar caché',
       );
     }
+
+    this.client.emit('bus.nuevo', this.findAll(true));
 
     this.logger.info(
       {
@@ -398,6 +399,8 @@ export class AutobusesService {
           })),
         });
       }
+
+      this.client.emit('bus.updated', this.findAll(true));
 
       return updated;
     });
