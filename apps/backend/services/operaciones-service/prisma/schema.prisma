@@ -146,18 +146,38 @@ model Compra {
 
   asientos Json
 
-  qrCodeUrl    String? @db.Text
-  qrCodeBase64 String? @db.Text
-
   fechaCompra DateTime @default(now())
   monto       Decimal  @db.Decimal(10, 2)
   rutaId      Int
   ruta        Ruta     @relation(fields: [rutaId], references: [id])
 
+  codigo String @unique @db.VarChar(20)
+
+  metodoPagoId Int
+  metodoPago   MetodoPago @relation(fields: [metodoPagoId], references: [id])
+
+  //Al momento de escanear el QR code, se debe marcar como abordado, y no permitir que se vuelva a escanear, para evitar duplicidad de abordaje.
+  abordado Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([compradorId, salidaId])
+  @@unique([salidaId, compradorId, fechaCompra])
+  @@index([compradorId, salidaId, fechaCompra])
+  @@schema("operaciones")
+}
+
+model MetodoPago {
+  id          Int     @id @default(autoincrement())
+  nombre      String  @unique @db.VarChar(50)
+  descripcion String  @db.VarChar(255)
+  estatus     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  compras   Compra[]
+
+  @@index([nombre])
   @@schema("operaciones")
 }
 
