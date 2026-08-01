@@ -27,6 +27,7 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  MenuItem,
   Stack,
   TextField,
   Typography,
@@ -42,6 +43,9 @@ import {
   useOperacionesData,
 } from "../api/operacionesHttp";
 import GeoPoint from "../types/GeoPoint";
+import {
+  CatalogSortOption,
+} from "../types/OperacionesApi";
 import RutaBase from "../types/RutaBase";
 import { isGoogleStreetViewImage, mapRutaApi, mapViajeApi } from "../utils/apiMappers";
 import {
@@ -56,6 +60,12 @@ interface Props extends CommonPageProps {
 
 const DEFAULT_VIAJE_IMAGE = "/imagen_defecto_viajes.jpg";
 const EMPTY_ROUTES: RutaBase[] = [];
+const SORT_OPTIONS: Array<{ value: CatalogSortOption; label: string }> = [
+  { value: "recent", label: "Mas recientes" },
+  { value: "oldest", label: "Mas antiguos" },
+  { value: "name_asc", label: "Nombre A-Z" },
+  { value: "name_desc", label: "Nombre Z-A" },
+];
 
 function readImageAsBase64(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -151,10 +161,13 @@ export default function NuevoViaje({
 
   const [nombreViaje, setNombreViaje] = React.useState("");
   const [descripcionViaje, setDescripcionViaje] = React.useState("");
+  const [estatusViaje, setEstatusViaje] = React.useState(true);
   const [margenViajeMin, setMargenViajeMin] = React.useState(0);
   const [imagenViajeBase64, setImagenViajeBase64] = React.useState("");
   const [imagenViajePreview, setImagenViajePreview] = React.useState("");
   const [routeSearch, setRouteSearch] = React.useState("");
+  const [routeSortOption, setRouteSortOption] =
+    React.useState<CatalogSortOption>("recent");
   const [routePage, setRoutePage] = React.useState(1);
   const [routePageData, setRoutePageData] = React.useState({
     total: 0,
@@ -181,6 +194,7 @@ export default function NuevoViaje({
         const viaje = mapViajeApi(response);
         setNombreViaje(viaje.nombre);
         setDescripcionViaje(viaje.descripcion || "");
+        setEstatusViaje(viaje.estatus);
         setMargenViajeMin(viaje.margenMin || 0);
         const storedImageUrl = isGoogleStreetViewImage(viaje.imagenUrl)
           ? ""
@@ -213,12 +227,16 @@ export default function NuevoViaje({
           limit: 5,
           search: routeSearch,
           active: false,
+          status: "active",
+          sort: routeSortOption,
         });
-        const mapped = response.data.map(mapRutaApi);
+        const mapped = response.data
+          .map(mapRutaApi)
+          .filter((ruta) => ruta.estatus !== false);
         setRoutePageRoutes(mapped);
         setRoutePageData({
-          total: response.total,
-          totalPages: response.totalPages,
+          total: mapped.length,
+          totalPages: mapped.length === 0 ? 1 : Math.max(1, response.totalPages),
         });
         setSelectedRouteMap((current) => {
           const next = new Map(current);
@@ -240,7 +258,14 @@ export default function NuevoViaje({
     }, 260);
 
     return () => window.clearTimeout(timeout);
-  }, [routePage, routeRefreshKey, routeSearch, selectedRouteKey, snack]);
+  }, [
+    routePage,
+    routeRefreshKey,
+    routeSearch,
+    routeSortOption,
+    selectedRouteKey,
+    snack,
+  ]);
 
   const toggleRoute = (routeId: number) => {
     const route = rutasById.get(routeId);
@@ -285,7 +310,7 @@ export default function NuevoViaje({
           storesImagesAsBase64 && imagenViajeBase64
             ? "base64"
             : "default-asset",
-        estatus: true,
+        estatus: estatusViaje,
         rutas: selectedRouteIds.map((rutaId, index) => ({
           rutaId,
           orden: index + 1,
@@ -728,16 +753,50 @@ export default function NuevoViaje({
                       >
                         Crear ruta
                       </Button>
-                      <TextField
-                        label="Buscar ruta"
-                        value={routeSearch}
-                        onChange={(event) => {
-                          setRouteSearch(event.target.value);
-                          setRoutePage(1);
+                      <Stack spacing={0.55}>
+                        <Typography variant="caption" color="text.secondary" sx={{ px: 0.5, fontWeight: 800 }}>
+                          Buscar
+                        </Typography>
+                        <TextField
+                          placeholder="Buscar ruta"
+                          value={routeSearch}
+                          onChange={(event) => {
+                            setRouteSearch(event.target.value);
+                            setRoutePage(1);
+                          }}
+                          size="small"
+                          fullWidth
+                        />
+                      </Stack>
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr",
+                          gap: 1,
                         }}
-                        size="small"
-                        fullWidth
-                      />
+                      >
+                        <Stack spacing={0.55}>
+                          <Typography variant="caption" color="text.secondary" sx={{ px: 0.5, fontWeight: 800 }}>
+                            Ordenar
+                          </Typography>
+                          <TextField
+                            select
+                            value={routeSortOption}
+                            onChange={(event) => {
+                              setRouteSortOption(event.target.value as CatalogSortOption);
+                              setRoutePage(1);
+                            }}
+                            size="small"
+                            fullWidth
+                          >
+                            {SORT_OPTIONS.map((option) => (
+                              <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                              </MenuItem>
+                            ))}
+                          </TextField>
+                        </Stack>
+                      </Box>
                       <Typography variant="caption" color="text.secondary">
                         {isLoadingRoutePage
                           ? "Buscando rutas..."

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { Prisma } from '../../../generated/prisma/client';
+import type { Prisma as PrismaTypes } from '../../../generated/prisma/client';
 import { ConfiguracionesService } from '../configuraciones/configuraciones.service';
 import { GeoPoint, distanceMeters } from '../geo/geo.utils';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -7,8 +7,12 @@ import { CreateViajeBaseDto } from './dtos/create-viaje-base.dto';
 import { UpdateViajeBaseDto } from './dtos/update-viaje-base.dto';
 import { ViajeBaseRutaDto } from './dtos/viaje-base-ruta.dto';
 
-function toJson(value: unknown): Prisma.InputJsonValue {
-  return value as Prisma.InputJsonValue;
+const { Prisma } = require(`${process.cwd()}/generated/prisma/client`) as {
+  Prisma: typeof PrismaTypes;
+};
+
+function toJson(value: unknown): PrismaTypes.InputJsonValue {
+  return value as PrismaTypes.InputJsonValue;
 }
 
 function sortRutas(rutas: ViajeBaseRutaDto[]) {
@@ -28,6 +32,8 @@ type FindAllOptions = {
   page?: number;
   limit?: number;
   search?: string;
+  status?: 'all' | 'active' | 'inactive';
+  sort?: 'recent' | 'oldest' | 'name_asc' | 'name_desc';
 };
 
 @Injectable()
@@ -36,6 +42,85 @@ export class ViajesBaseService {
     private readonly prisma: PrismaService,
     private readonly configuraciones: ConfiguracionesService,
   ) {}
+
+  private buildWhereSql(
+    search?: string,
+    status: 'all' | 'active' | 'inactive' = 'all',
+  ) {
+    const conditions: PrismaTypes.Sql[] = [];
+
+    if (status === 'active') {
+      conditions.push(Prisma.sql`"estatus" = true`);
+    } else if (status === 'inactive') {
+      conditions.push(Prisma.sql`"estatus" = false`);
+    }
+
+    if (search) {
+      const term = `%${search}%`;
+      conditions.push(
+        Prisma.sql`(
+          "nombre" ILIKE ${term}
+          OR COALESCE("descripcion", '') ILIKE ${term}
+        )`,
+      );
+    }
+
+    return conditions.length
+      ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+      : Prisma.empty;
+  }
+
+  private buildOrderSql(sort?: FindAllOptions['sort']) {
+    if (sort === 'oldest') {
+      return Prisma.sql`"createdAt" ASC, "id" ASC`;
+    }
+
+    if (sort === 'name_asc') {
+      return Prisma.sql`LOWER("nombre") ASC, "nombre" ASC, "id" ASC`;
+    }
+
+    if (sort === 'name_desc') {
+      return Prisma.sql`LOWER("nombre") DESC, "nombre" DESC, "id" DESC`;
+    }
+
+    return Prisma.sql`"createdAt" DESC, "id" DESC`;
+  }
+
+  private async findOrderedIds(
+    whereSql: PrismaTypes.Sql,
+    orderSql: PrismaTypes.Sql,
+    page?: number,
+    limit?: number,
+  ) {
+    const paginationSql =
+      page && limit
+        ? Prisma.sql`OFFSET ${(page - 1) * limit} LIMIT ${limit}`
+        : Prisma.empty;
+
+    const rows = await this.prisma.$queryRaw<Array<{ id: number }>>(Prisma.sql`
+      SELECT "id"
+      FROM "operaciones"."ViajeBase"
+      ${whereSql}
+      ORDER BY ${orderSql}
+      ${paginationSql}
+    `);
+
+    return rows.map((row) => row.id);
+  }
+
+  private async findManyByOrderedIds(ids: number[]) {
+    if (ids.length === 0) return [];
+
+    const viajes = await this.prisma.viajeBase.findMany({
+      where: { id: { in: ids } },
+      include: this.includeRutas(),
+    });
+    const byId = new Map(viajes.map((viaje) => [viaje.id, viaje]));
+
+    return ids
+      .map((id) => byId.get(id))
+      .filter((viaje): viaje is NonNullable<typeof viaje> => Boolean(viaje));
+  }
 
   async create(dto: CreateViajeBaseDto) {
     const rutasOrdenadas = sortRutas(dto.rutas);
@@ -66,38 +151,27 @@ export class ViajesBaseService {
 
   async findAll(active: boolean, options: FindAllOptions = {}) {
     const search = options.search?.trim();
-    const where: Prisma.ViajeBaseWhereInput = {
-      ...(active ? { estatus: true } : {}),
-      ...(search
-        ? {
-            OR: [
-              { nombre: { contains: search, mode: 'insensitive' } },
-              { descripcion: { contains: search, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
-    };
+    const status = options.status ?? (active ? 'active' : 'all');
+    const whereSql = this.buildWhereSql(search, status);
+    const orderSql = this.buildOrderSql(options.sort);
 
     if (!options.page && !options.limit && !search) {
-      return this.prisma.viajeBase.findMany({
-        where,
-        include: this.includeRutas(),
-        orderBy: { createdAt: 'desc' },
-      });
+      const ids = await this.findOrderedIds(whereSql, orderSql);
+      return this.findManyByOrderedIds(ids);
     }
 
     const page = Math.max(1, options.page || 1);
     const limit = Math.min(50, Math.max(1, options.limit || 5));
-    const [data, total] = await this.prisma.$transaction([
-      this.prisma.viajeBase.findMany({
-        where,
-        include: this.includeRutas(),
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      this.prisma.viajeBase.count({ where }),
+    const [ids, totalRows] = await Promise.all([
+      this.findOrderedIds(whereSql, orderSql, page, limit),
+      this.prisma.$queryRaw<Array<{ total: bigint | number }>>(Prisma.sql`
+        SELECT COUNT(*)::bigint AS "total"
+        FROM "operaciones"."ViajeBase"
+        ${whereSql}
+      `),
     ]);
+    const data = await this.findManyByOrderedIds(ids);
+    const total = Number(totalRows[0]?.total || 0);
 
     return {
       data,

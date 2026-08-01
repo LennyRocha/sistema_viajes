@@ -347,6 +347,11 @@ function fitMap(
   map.setZoom(5);
 }
 
+function setMexicoViewport(map: any) {
+  map.setCenter(DEFAULT_CENTER);
+  map.setZoom(5);
+}
+
 function markerSlotKey(point: GeoPoint) {
   return `${point.lat.toFixed(5)}:${point.lng.toFixed(5)}`;
 }
@@ -480,6 +485,7 @@ export default function GoogleRouteMap({
   const [streetViewSimulation, setStreetViewSimulation] = React.useState(false);
   const [simulationPanelOpen, setSimulationPanelOpen] = React.useState(false);
   const [infoPanelOpen, setInfoPanelOpen] = React.useState(false);
+  const [mapLoadAttempt, setMapLoadAttempt] = React.useState(0);
   const simulationPath = React.useMemo(() => {
     if (simulationPathProp?.length) return simulationPathProp;
     if (!simulationRoute) return [];
@@ -518,14 +524,21 @@ export default function GoogleRouteMap({
           });
 
         mapInstance.current = map;
-        window.setTimeout(() => {
+        const refreshTimers: number[] = [];
+        const stabilizeViewport = () => {
           if (!mapInstance.current || !window.google?.maps?.event) return;
           window.google.maps.event.trigger(mapInstance.current, "resize");
-          if (!hasMapContent) {
-            mapInstance.current.setCenter(DEFAULT_CENTER);
-            mapInstance.current.setZoom(5);
-          }
-        }, 80);
+          if (!hasMapContent) setMexicoViewport(mapInstance.current);
+        };
+        if (!hasMapContent) {
+          setMexicoViewport(map);
+          [80, 220, 520, 980].forEach((delay) => {
+            refreshTimers.push(window.setTimeout(stabilizeViewport, delay));
+          });
+          window.google.maps.event.addListenerOnce(map, "idle", stabilizeViewport);
+        } else {
+          refreshTimers.push(window.setTimeout(stabilizeViewport, 80));
+        }
         map.setOptions({
           draggableCursor: editable ? "crosshair" : undefined,
           draggingCursor: editable ? "grabbing" : undefined,
@@ -784,14 +797,14 @@ export default function GoogleRouteMap({
 
         fitMap(map, renderedRoutes, connections, markerPoints);
         if (!hasMapContent) {
-          map.setCenter(DEFAULT_CENTER);
-          map.setZoom(5);
-          window.setTimeout(() => {
-            if (!mapInstance.current || !window.google?.maps?.event) return;
-            window.google.maps.event.trigger(mapInstance.current, "resize");
-            mapInstance.current.setCenter(DEFAULT_CENTER);
-            mapInstance.current.setZoom(5);
-          }, 250);
+          setMexicoViewport(map);
+          refreshTimers.push(
+            window.setTimeout(() => {
+              if (!mapInstance.current || !window.google?.maps?.event) return;
+              window.google.maps.event.trigger(mapInstance.current, "resize");
+              setMexicoViewport(mapInstance.current);
+            }, 250),
+          );
         }
 
         const listener = editable
@@ -843,18 +856,29 @@ export default function GoogleRouteMap({
 
         cleanupRef.current = () => {
           listener?.remove();
+          refreshTimers.forEach((timer) => window.clearTimeout(timer));
           markers.forEach((marker) => marker.setMap(null));
           polylines.forEach((line) => line.setMap(null));
           directionsRenderers.forEach((renderer) => renderer.setMap(null));
         };
       })
-      .catch(() => setStatus("error"));
+      .catch(() => {
+        if (cancelled) return;
+        if (mapLoadAttempt < 2) {
+          setStatus("loading");
+          window.setTimeout(() => {
+            setMapLoadAttempt((current) => current + 1);
+          }, 320);
+          return;
+        }
+        setStatus("error");
+      });
 
     return () => {
       cancelled = true;
       cleanupRef.current?.();
     };
-  }, [apiKey, connections, editable, editableConnections, editingTarget, enableStreetView, hasMapContent, markerPoints, onConnectionPathChange, onMapPoint, onRouteMetrics, renderedRoutes]);
+  }, [apiKey, connections, editable, editableConnections, editingTarget, enableStreetView, hasMapContent, mapLoadAttempt, markerPoints, onConnectionPathChange, onMapPoint, onRouteMetrics, renderedRoutes]);
 
   React.useEffect(() => {
     if (!mapRef.current || !mapInstance.current || !window.google?.maps?.event) {
@@ -865,8 +889,7 @@ export default function GoogleRouteMap({
       if (!mapInstance.current || !window.google?.maps?.event) return;
       window.google.maps.event.trigger(mapInstance.current, "resize");
       if (!hasMapContent) {
-        mapInstance.current.setCenter(DEFAULT_CENTER);
-        mapInstance.current.setZoom(5);
+        setMexicoViewport(mapInstance.current);
       } else {
         fitMap(mapInstance.current, renderedRoutes, connections, markerPoints);
       }
@@ -1001,7 +1024,7 @@ export default function GoogleRouteMap({
           cursor: editable ? "crosshair" : "grab",
         }}
       />
-      {hasMapContent && (status === "error" || status === "missing-key") && (
+      {(status === "error" || status === "missing-key") && (
         <FallbackMap routes={renderedRoutes} height={height} />
       )}
       {status === "loading" && (

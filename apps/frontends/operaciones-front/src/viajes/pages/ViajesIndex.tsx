@@ -22,16 +22,26 @@ import {
   CircularProgress,
   Divider,
   IconButton,
+  MenuItem,
   Pagination,
   Stack,
+  Switch,
   TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
 import GoogleRouteMap from "../components/GoogleRouteMap";
 import ViajeDetails from "../components/ViajeDetails";
-import { getViajesBasePage, useOperacionesData } from "../api/operacionesHttp";
+import {
+  getViajesBasePage,
+  toggleViajeBaseStatus,
+  useOperacionesData,
+} from "../api/operacionesHttp";
 import GeoPoint from "../types/GeoPoint";
+import {
+  CatalogSortOption,
+  CatalogStatusFilter,
+} from "../types/OperacionesApi";
 import { mapRutaApi, mapViajeApi } from "../utils/apiMappers";
 import {
   buildConnectionSegments,
@@ -43,6 +53,17 @@ interface Props extends CommonPageProps {}
 
 const DEFAULT_VIAJE_IMAGE = "/imagen_defecto_viajes.jpg";
 const EMPTY_ROUTES: ReturnType<typeof mapRutaApi>[] = [];
+const STATUS_OPTIONS: Array<{ value: CatalogStatusFilter; label: string }> = [
+  { value: "all", label: "Todos" },
+  { value: "active", label: "Activos" },
+  { value: "inactive", label: "Inactivos" },
+];
+const SORT_OPTIONS: Array<{ value: CatalogSortOption; label: string }> = [
+  { value: "recent", label: "Mas recientes" },
+  { value: "oldest", label: "Mas antiguos" },
+  { value: "name_asc", label: "Nombre A-Z" },
+  { value: "name_desc", label: "Nombre Z-A" },
+];
 
 function JourneyInfoPanel({
   metrics,
@@ -179,6 +200,7 @@ export default function ViajesIndex({
   navigationFunction,
   openSidebar,
   snack,
+  showDialog,
 }: Readonly<Props>) {
   const {
     viajes: viajesData,
@@ -186,12 +208,17 @@ export default function ViajesIndex({
     isLoading: loadingViajes,
     isError,
     errorMessage,
+    reload,
   } = useOperacionesData();
 
   const viajes = React.useMemo(() => viajesData.map(mapViajeApi), [viajesData]);
   const rutas = React.useMemo(() => rutasData.map(mapRutaApi), [rutasData]);
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
   const [viajeSearch, setViajeSearch] = React.useState("");
+  const [statusFilter, setStatusFilter] =
+    React.useState<CatalogStatusFilter>("all");
+  const [sortOption, setSortOption] =
+    React.useState<CatalogSortOption>("recent");
   const [viajePage, setViajePage] = React.useState(1);
   const [viajePageData, setViajePageData] = React.useState({
     total: 0,
@@ -199,40 +226,117 @@ export default function ViajesIndex({
   });
   const [pageViajes, setPageViajes] = React.useState(viajes);
   const [isLoadingViajePage, setIsLoadingViajePage] = React.useState(false);
+  const [statusUpdatingId, setStatusUpdatingId] = React.useState<number | null>(null);
+
+  const loadViajesPage = React.useCallback(async () => {
+    setIsLoadingViajePage(true);
+    try {
+      const response = await getViajesBasePage({
+        page: viajePage,
+        limit: 5,
+        search: viajeSearch,
+        active: false,
+        status: statusFilter,
+        sort: sortOption,
+      });
+      const mapped = response.data.map(mapViajeApi);
+      setPageViajes(mapped);
+      setViajePageData({
+        total: response.total,
+        totalPages: response.totalPages,
+      });
+      setSelectedId((current) =>
+        current && mapped.some((viaje) => viaje.id === current)
+          ? current
+          : mapped[0]?.id || null,
+      );
+    } catch {
+      setPageViajes(viajes);
+      setViajePageData({ total: viajes.length, totalPages: 1 });
+      setSelectedId((current) =>
+        current && viajes.some((viaje) => viaje.id === current)
+          ? current
+          : viajes[0]?.id || null,
+      );
+    } finally {
+      setIsLoadingViajePage(false);
+    }
+  }, [sortOption, statusFilter, viajePage, viajeSearch, viajes]);
 
   React.useEffect(() => {
-    const timeout = window.setTimeout(async () => {
-      setIsLoadingViajePage(true);
-      try {
-        const response = await getViajesBasePage({
-          page: viajePage,
-          limit: 5,
-          search: viajeSearch,
-          active: false,
-        });
-        const mapped = response.data.map(mapViajeApi);
-        setPageViajes(mapped);
-        setViajePageData({
-          total: response.total,
-          totalPages: response.totalPages,
-        });
-        if (!mapped.some((viaje) => viaje.id === selectedId)) {
-          setSelectedId(mapped[0]?.id || null);
-        }
-      } catch {
-        setPageViajes(viajes);
-        setViajePageData({ total: viajes.length, totalPages: 1 });
-      } finally {
-        setIsLoadingViajePage(false);
-      }
+    const timeout = window.setTimeout(() => {
+      void loadViajesPage();
     }, 260);
-
     return () => window.clearTimeout(timeout);
-  }, [selectedId, viajePage, viajeSearch, viajes]);
+  }, [loadViajesPage]);
 
   React.useEffect(() => {
     if (!selectedId && pageViajes[0]) setSelectedId(pageViajes[0].id);
   }, [pageViajes, selectedId]);
+
+  React.useEffect(() => {
+    setConnectionOverrides(new Map());
+  }, [selectedId]);
+
+  const handleToggleStatus = React.useCallback(
+    async (viajeId: number) => {
+      setStatusUpdatingId(viajeId);
+      try {
+        const updated = await toggleViajeBaseStatus(viajeId);
+        snack?.success({
+          message: `Viaje base ${updated.estatus ? "activado" : "desactivado"}`,
+        });
+        await reload();
+        await loadViajesPage();
+      } catch (error) {
+        snack?.error({
+          message:
+            error instanceof Error
+              ? `No se pudo cambiar el estatus: ${error.message}`
+              : "No se pudo cambiar el estatus",
+        });
+      } finally {
+        setStatusUpdatingId(null);
+      }
+    },
+    [loadViajesPage, reload, snack],
+  );
+  const openStatusDialog = React.useCallback(
+    (viaje: ReturnType<typeof mapViajeApi>) => {
+      if (!showDialog) {
+        void handleToggleStatus(viaje.id);
+        return;
+      }
+
+      const nextStatusLabel = viaje.estatus ? "inactivo" : "activo";
+      showDialog({
+        title: "Confirmar cambio de estatus",
+        content: (
+          <Stack spacing={1.5} sx={{ minWidth: { sm: 360 } }}>
+            <Box>
+              <Typography variant="body1" sx={{ fontWeight: 900 }}>
+                {viaje.nombre}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Vas a cambiar este viaje base a estado {nextStatusLabel}.
+              </Typography>
+            </Box>
+          </Stack>
+        ),
+        confirmText: viaje.estatus ? "Desactivar" : "Activar",
+        cancelText: "Cancelar",
+        showCancelButton: true,
+        showCloseButton: true,
+        closeDialogOnBackdropClick: true,
+        submitOnEnter: true,
+        onConfirm: async () => {
+          await handleToggleStatus(viaje.id);
+        },
+        onClose: () => {},
+      });
+    },
+    [handleToggleStatus, showDialog],
+  );
 
   const selectedViaje = pageViajes.find((viaje) => viaje.id === selectedId) || pageViajes[0];
   const selectedRoutes = selectedViaje?.rutas || EMPTY_ROUTES;
@@ -312,7 +416,7 @@ export default function ViajesIndex({
             <Typography>Cargando viajes desde backend...</Typography>
           </Stack>
         </PaperBlock>
-      ) : pageViajes.length === 0 ? (
+      ) : viajes.length === 0 ? (
         <PaperBlock
           title="Aun no hay viajes base"
           subtitle="Crea primero rutas reutilizables y despues arma un viaje base con ellas"
@@ -363,16 +467,71 @@ export default function ViajesIndex({
               overflow: "hidden",
             }}
           >
-            <TextField
-              label="Buscar viaje"
-              value={viajeSearch}
-              onChange={(event) => {
-                setViajeSearch(event.target.value);
-                setViajePage(1);
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1fr) 170px 190px" },
+                gap: 1,
               }}
-              size="small"
-              fullWidth
-            />
+            >
+              <Stack spacing={0.55}>
+                <Typography variant="caption" color="text.secondary" sx={{ px: 0.5, fontWeight: 800 }}>
+                  Buscar
+                </Typography>
+                <TextField
+                  placeholder="Buscar viaje"
+                  value={viajeSearch}
+                  onChange={(event) => {
+                    setViajeSearch(event.target.value);
+                    setViajePage(1);
+                  }}
+                  size="small"
+                  fullWidth
+                />
+              </Stack>
+              <Stack spacing={0.55}>
+                <Typography variant="caption" color="text.secondary" sx={{ px: 0.5, fontWeight: 800 }}>
+                  Estatus
+                </Typography>
+                <TextField
+                  select
+                  value={statusFilter}
+                  onChange={(event) => {
+                    setStatusFilter(event.target.value as CatalogStatusFilter);
+                    setViajePage(1);
+                  }}
+                  size="small"
+                  fullWidth
+                >
+                  {STATUS_OPTIONS.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Stack>
+              <Stack spacing={0.55}>
+                <Typography variant="caption" color="text.secondary" sx={{ px: 0.5, fontWeight: 800 }}>
+                  Ordenar
+                </Typography>
+                <TextField
+                  select
+                  value={sortOption}
+                  onChange={(event) => {
+                    setSortOption(event.target.value as CatalogSortOption);
+                    setViajePage(1);
+                  }}
+                  size="small"
+                  fullWidth
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Stack>
+            </Box>
             <Typography variant="caption" color="text.secondary">
               {isLoadingViajePage
                 ? "Buscando viajes..."
@@ -389,7 +548,12 @@ export default function ViajesIndex({
                 gap: 1,
               }}
             >
-              {pageViajes.map((viaje) => (
+              {pageViajes.length === 0 ? (
+                <Alert severity="info">
+                  No hubo coincidencias para los filtros actuales. Ajusta la busqueda, el estatus o el orden.
+                </Alert>
+              ) : (
+                pageViajes.map((viaje) => (
                 <Box
                   key={viaje.id}
                   component="div"
@@ -417,7 +581,7 @@ export default function ViajesIndex({
                   <Box
                     sx={{
                       display: "grid",
-                      gridTemplateColumns: "112px minmax(0, 1fr) 42px",
+                      gridTemplateColumns: "112px minmax(0, 1fr) 58px",
                       minHeight: 92,
                     }}
                   >
@@ -487,6 +651,7 @@ export default function ViajesIndex({
                       sx={{
                         p: 0.5,
                         justifyContent: "center",
+                        alignItems: "center",
                         borderLeft: "1px solid",
                         borderColor: "divider",
                         backgroundColor: "rgba(255,255,255,0.62)",
@@ -517,10 +682,26 @@ export default function ViajesIndex({
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
+                      <Tooltip
+                        title={viaje.estatus ? "Desactivar viaje base" : "Activar viaje base"}
+                      >
+                        <Box
+                          onClick={(event) => event.stopPropagation()}
+                          sx={{ display: "flex", justifyContent: "center" }}
+                        >
+                          <Switch
+                            color="success"
+                            checked={viaje.estatus}
+                            disabled={statusUpdatingId === viaje.id}
+                            onChange={() => openStatusDialog(viaje)}
+                          />
+                        </Box>
+                      </Tooltip>
                     </Stack>
                   </Box>
                 </Box>
-              ))}
+                ))
+              )}
             </Box>
             {viajePageData.total > 0 && (
               <Box
@@ -561,6 +742,7 @@ export default function ViajesIndex({
               contentWrapperSx={{ p: 0 }}
             >
               <GoogleRouteMap
+                key={`viaje-map-${selectedViaje?.id ?? "empty"}`}
                 routes={selectedRoutes}
                 connections={mergedConnections}
                 height="calc(100vh - 220px)"

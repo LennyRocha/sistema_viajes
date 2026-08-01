@@ -2,6 +2,8 @@
 
 import React from "react";
 import {
+  CatalogSortOption,
+  CatalogStatusFilter,
   CreateRutaBody,
   CreateViajeBaseBody,
   PaginatedRutasApi,
@@ -136,16 +138,22 @@ export function getRutasPage({
   limit,
   search,
   active = false,
+  status = "all",
+  sort = "recent",
 }: {
   page: number;
   limit: number;
   search?: string;
   active?: boolean;
+  status?: CatalogStatusFilter;
+  sort?: CatalogSortOption;
 }) {
   const params = new URLSearchParams({
     active: String(active),
     page: String(page),
     limit: String(limit),
+    status,
+    sort,
   });
   if (search?.trim()) params.set("search", search.trim());
   return request<PaginatedRutasApi>(`/rutas?${params.toString()}`);
@@ -156,16 +164,22 @@ export function getViajesBasePage({
   limit,
   search,
   active = false,
+  status = "all",
+  sort = "recent",
 }: {
   page: number;
   limit: number;
   search?: string;
   active?: boolean;
+  status?: CatalogStatusFilter;
+  sort?: CatalogSortOption;
 }) {
   const params = new URLSearchParams({
     active: String(active),
     page: String(page),
     limit: String(limit),
+    status,
+    sort,
   });
   if (search?.trim()) params.set("search", search.trim());
   return request<PaginatedViajesBaseApi>(`/viajes-base?${params.toString()}`);
@@ -178,6 +192,19 @@ export function createViajeBase(body: CreateViajeBaseBody) {
   });
 }
 
+export function updateRuta(id: string | number, body: CreateRutaBody) {
+  return request<RutaApi>(`/rutas/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export function toggleRutaStatus(id: string | number) {
+  return request<RutaApi>(`/rutas/status/${id}`, {
+    method: "DELETE",
+  });
+}
+
 export function getViajeBase(id: string | number) {
   return request<ViajeBaseApi>(`/viajes-base/${id}`);
 }
@@ -186,5 +213,11 @@ export function updateViajeBase(id: string | number, body: CreateViajeBaseBody) 
   return request<ViajeBaseApi>(`/viajes-base/${id}`, {
     method: "PATCH",
     body: JSON.stringify(body),
+  });
+}
+
+export function toggleViajeBaseStatus(id: string | number) {
+  return request<ViajeBaseApi>(`/viajes-base/status/${id}`, {
+    method: "DELETE",
   });
 }

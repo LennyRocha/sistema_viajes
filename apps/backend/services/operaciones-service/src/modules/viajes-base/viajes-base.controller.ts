@@ -33,12 +33,16 @@ export class ViajesBaseController {
   @Get()
   @ApiOperation({ summary: 'Listar viajes base' })
   @ApiQuery({ name: 'active', required: false, example: true })
+  @ApiQuery({ name: 'status', required: false, example: 'active' })
+  @ApiQuery({ name: 'sort', required: false, example: 'recent' })
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 5 })
   @ApiQuery({ name: 'search', required: false, example: 'campus' })
   findAll(
     @Query('active', new DefaultValuePipe(false), ParseBoolPipe)
     active: boolean,
+    @Query('status') status?: 'all' | 'active' | 'inactive',
+    @Query('sort') sort?: 'recent' | 'oldest' | 'name_asc' | 'name_desc',
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('search') search?: string,
@@ -47,6 +51,8 @@ export class ViajesBaseController {
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
       search,
+      status,
+      sort,
     });
   }
 
