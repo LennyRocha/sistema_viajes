@@ -82,7 +82,7 @@ export default function DashboardHomeClient() {
           {modules.map((module) => (
             <Box
               key={module.title}
-              component="button"
+              // ELIMINADO: component="button" -> Ahora se renderiza como div y evita el Hydration Error
               onClick={() => router.push(module.href)}
               sx={{
                 textAlign: "left",
@@ -125,6 +125,7 @@ export default function DashboardHomeClient() {
               <Typography variant="body2" color="text.secondary">
                 {module.description}
               </Typography>
+              {/* Este es el botón interno que causaba conflicto al estar dentro de otro botón */}
               <Button variant="outlined" size="small" sx={{ alignSelf: "flex-start" }}>
                 Abrir modulo
               </Button>

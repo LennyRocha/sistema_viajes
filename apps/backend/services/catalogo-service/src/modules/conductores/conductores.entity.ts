@@ -4,17 +4,8 @@ import Licencia from 'src/modules/licencias/licencias.entity';
 
 export default interface Conductor extends Auditory {
   id?: number;
-
-  // Datos personales
-  nombres: string;
-  apellido_paterno: string;
-  apellido_materno: string;
-  curp: string;
-  fecha_nacimiento: Date;
-  telefono: string;
-  email: string;
-  foto_perfil: string;
-
+  usuario_id: number;
+  
   // Estado lógico
   estatus: boolean;
 

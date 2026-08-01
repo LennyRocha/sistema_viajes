@@ -8,8 +8,10 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export class CreateLicenciaDto {
-
+export class CreateLicenciaAloneDto {
+  @IsNotEmpty()
+  @IsNumber({}, { message: 'El ID del conductor debe ser un número' })
+  conductor_id!: number;
 
   @IsNotEmpty({ message: 'El número de licencia es obligatorio' })
   @MaxLength(30, {

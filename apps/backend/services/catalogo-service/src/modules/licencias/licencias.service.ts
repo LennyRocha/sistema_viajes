@@ -8,7 +8,7 @@ import { RedisService } from 'src/redis/redis.service';
 import { ConductoresService } from '../conductores/conductores.service';
 import { CACHE_KEY as CONDUCTOR_CACHE_KEY } from '../conductores/conductores.service';
 
-import { CreateLicenciaDto } from './dtos/create-licencia.dto';
+import { CreateLicenciaAloneDto } from './dtos/create-licencia-alone.dto';
 import { UpdateLicenciaDto } from './dtos/update-licencia.dto';
 
 const LIST_CACHE_KEY = (conductor_id = 0) =>
@@ -67,7 +67,7 @@ export class LicenciasService {
   /**
    * CREATE
    */
-  async create(dto: CreateLicenciaDto) {
+  async create(dto: CreateLicenciaAloneDto) {
     this.logger.info(
       { conductor_id: dto.conductor_id, numero_licencia: dto.numero_licencia },
       'Creando licencia',

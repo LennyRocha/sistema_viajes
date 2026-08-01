@@ -6,24 +6,24 @@ import { Chip } from "@mui/material";
 const buildConductoresColumns = () => {
   const columnas: GridColDef<Conductor>[] = [
     {
-      field: "nombre",
+      field: "nombres",
       headerName: "Nombre",
       flex: 1,
-      minWidth: 120,
+      minWidth: 160,
       valueGetter: (_, row) =>
-        `${row.nombre} ${row.apellido}`,
+        `${row.nombres} ${row.apellido_paterno} ${row.apellido_materno}`,
     },
     {
       field: "curp",
-      headerName: "Cédula",
+      headerName: "CURP",
       flex: 1,
-      minWidth: 120,
+      minWidth: 140,
     },
     {
       field: "email",
       headerName: "Email",
       flex: 1,
-      minWidth: 150,
+      minWidth: 180,
     },
     {
       field: "telefono",
@@ -33,10 +33,10 @@ const buildConductoresColumns = () => {
     {
       field: "licencia",
       headerName: "Licencia",
-      width: 120,
+      width: 140,
       sortable: false,
       disableColumnMenu: true,
-      valueGetter: (_, row) => row.licencia.numeroLicencia,
+      valueGetter: (_, row) => row.licencia?.numero_licencia ?? "Sin licencia",
     },
     {
       field: "estatus",
@@ -47,8 +47,8 @@ const buildConductoresColumns = () => {
       resizable: false,
       renderCell: (params) => (
         <Chip
-          label={params.row.estado ? "Activo" : "Inactivo"}
-          color={params.row.estado ? "success" : "error"}
+          label={params.row.estatus ? "Activo" : "Inactivo"}
+          color={params.row.estatus ? "success" : "error"}
           variant="outlined"
         />
       ),

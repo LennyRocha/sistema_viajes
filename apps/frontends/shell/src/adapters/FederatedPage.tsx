@@ -1,4 +1,5 @@
 "use client";
+import { useMemo } from "react"; // <-- Importar useMemo
 import { useDialog } from "../providers/DialogProvider";
 import { useSidebar } from "../providers/SidebarProvider";
 import {
@@ -26,6 +27,7 @@ const FederatedPage = ({
   const { showSidebar, hideSidebar } = useSidebar();
   const { showDialog } = useDialog();
   const pathname = usePathname();
+  
   const props = {
     navigationFunction: router.push,
     openSidebar: showSidebar,
@@ -38,11 +40,13 @@ const FederatedPage = ({
     userRoles: [],
     ...params,
   };
-  const Componente = federatedComponent(
-    remote,
-    exportName,
-    skeletonVariant,
+
+ 
+  const Componente = useMemo(
+    () => federatedComponent(remote, exportName, skeletonVariant),
+    [remote, exportName, skeletonVariant] 
   );
+
   return <Componente {...props} />;
 };
 

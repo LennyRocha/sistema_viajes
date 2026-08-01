@@ -1,18 +1,34 @@
-import Institucion from "../../instituciones/types/Institucion";
+// types/Conductor.ts
 import Licencia from "./Licencia";
-import ConductorEstado from "./ConductorEstado";
-import { Auditory } from "@nexoroute/commons";
 
-export default interface Conductor extends Auditory {
-  id?: number;
-  institucion: Institucion;
+interface InstitucionResumen {
+  id: number;
   nombre: string;
-  apellido: string;
+  descripcion: string;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string | null;
+  updatedBy: string | null;
+  estatus: boolean;
+}
+
+export default interface Conductor {
+  id: number;
+  nombres: string;
+  apellido_paterno: string;
+  apellido_materno: string;
   curp: string;
+  fecha_nacimiento: string; // ISO string
   telefono: string;
   email: string;
-  fecha_nacimiento: string;
-  licencia: Licencia;
-  estado: ConductorEstado;
-  fotoPerfil: string; // URL string
+  foto_perfil: string;
+  institucion_id: number;
+  institucion: InstitucionResumen;
+  licencia: Licencia | null; // ¡ojo! puede venir null, ver nota abajo
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string | null;
+  updatedBy: string | null;
+  estatus: boolean;
 }
