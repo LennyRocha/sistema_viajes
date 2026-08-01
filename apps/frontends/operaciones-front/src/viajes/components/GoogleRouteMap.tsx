@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   Divider,
   FormControl,
   IconButton,
@@ -20,7 +21,9 @@ import {
 import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt";
 import CloseIcon from "@mui/icons-material/Close";
 import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
+import FlagIcon from "@mui/icons-material/Flag";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
@@ -63,6 +66,7 @@ type Props = {
   title?: string;
   editable?: boolean;
   editingTarget?: EditingTarget;
+  onEditingTargetChange?: (target: EditingTarget) => void;
   onMapPoint?: (point: GeoPoint, target: EditingTarget, action?: MapPointAction) => void;
   onRouteMetrics?: (metrics: RouteMetrics) => void;
   editableConnections?: boolean;
@@ -72,6 +76,10 @@ type Props = {
   simulationRoute?: RutaBase | null;
   simulationPath?: GeoPoint[];
   infoContent?: React.ReactNode;
+  editablePanel?: React.ReactNode;
+  editableTargetStatus?: Partial<Record<EditingTarget, boolean>>;
+  showEditableHint?: boolean;
+  emptyMessage?: string;
 };
 
 const DEFAULT_CENTER = { lat: 23.6345, lng: -102.5528 };
@@ -101,13 +109,50 @@ export function ensureGoogleMaps(apiKey?: string) {
     return window.__nexorouteGoogleMapsPromise;
   }
 
+  const existingScript = document.querySelector<HTMLScriptElement>(
+    'script[src*="maps.googleapis.com/maps/api/js"]',
+  );
+
+  if (existingScript) {
+    window.__nexorouteGoogleMapsPromise = new Promise((resolve, reject) => {
+      const startedAt = Date.now();
+      const waitForGoogle = () => {
+        if (window.google?.maps) {
+          resolve();
+          return;
+        }
+        if (Date.now() - startedAt > 12000) {
+          window.__nexorouteGoogleMapsPromise = undefined;
+          reject(new Error("No se pudo cargar Google Maps"));
+          return;
+        }
+        window.setTimeout(waitForGoogle, 120);
+      };
+      existingScript.addEventListener("load", () => resolve(), { once: true });
+      existingScript.addEventListener(
+        "error",
+        () => {
+          window.__nexorouteGoogleMapsPromise = undefined;
+          reject(new Error("No se pudo cargar Google Maps"));
+        },
+        { once: true },
+      );
+      waitForGoogle();
+    });
+
+    return window.__nexorouteGoogleMapsPromise;
+  }
+
   window.__nexorouteGoogleMapsPromise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error("No se pudo cargar Google Maps"));
+    script.onerror = () => {
+      window.__nexorouteGoogleMapsPromise = undefined;
+      reject(new Error("No se pudo cargar Google Maps"));
+    };
     document.head.appendChild(script);
   });
 
@@ -399,6 +444,7 @@ export default function GoogleRouteMap({
   title = "Mapa",
   editable = false,
   editingTarget = "parada",
+  onEditingTargetChange,
   onMapPoint,
   onRouteMetrics,
   editableConnections = false,
@@ -408,6 +454,10 @@ export default function GoogleRouteMap({
   simulationRoute = null,
   simulationPath: simulationPathProp,
   infoContent,
+  editablePanel,
+  editableTargetStatus,
+  showEditableHint = true,
+  emptyMessage = "Selecciona rutas para visualizar el viaje",
 }: Readonly<Props>) {
   const mapRef = React.useRef<HTMLDivElement>(null);
   const mapInstance = React.useRef<any>(null);
@@ -416,6 +466,10 @@ export default function GoogleRouteMap({
   const metricsKeyRef = React.useRef("");
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const renderedRoutes = React.useMemo(() => normalizeRoutes(routes), [routes]);
+  const hasMapContent =
+    renderedRoutes.length > 0 ||
+    markerPoints.length > 0 ||
+    connections.length > 0;
   const [status, setStatus] = React.useState<"loading" | "ready" | "error" | "missing-key">("loading");
   const [streetViewOpen, setStreetViewOpen] = React.useState(false);
   const [pendingClicks, setPendingClicks] = React.useState(0);
@@ -464,6 +518,14 @@ export default function GoogleRouteMap({
           });
 
         mapInstance.current = map;
+        window.setTimeout(() => {
+          if (!mapInstance.current || !window.google?.maps?.event) return;
+          window.google.maps.event.trigger(mapInstance.current, "resize");
+          if (!hasMapContent) {
+            mapInstance.current.setCenter(DEFAULT_CENTER);
+            mapInstance.current.setZoom(5);
+          }
+        }, 80);
         map.setOptions({
           draggableCursor: editable ? "crosshair" : undefined,
           draggingCursor: editable ? "grabbing" : undefined,
@@ -602,6 +664,18 @@ export default function GoogleRouteMap({
           );
         });
 
+        if (!hasMapContent) {
+          markers.push(
+            new window.google.maps.Marker({
+              map,
+              position: DEFAULT_CENTER,
+              opacity: 0,
+              clickable: false,
+              zIndex: 1,
+            }),
+          );
+        }
+
         connections.forEach((segment, index) => {
           const publishConnection = (result: any) => {
             if (!result?.routes?.[0]) return;
@@ -709,6 +783,16 @@ export default function GoogleRouteMap({
         });
 
         fitMap(map, renderedRoutes, connections, markerPoints);
+        if (!hasMapContent) {
+          map.setCenter(DEFAULT_CENTER);
+          map.setZoom(5);
+          window.setTimeout(() => {
+            if (!mapInstance.current || !window.google?.maps?.event) return;
+            window.google.maps.event.trigger(mapInstance.current, "resize");
+            mapInstance.current.setCenter(DEFAULT_CENTER);
+            mapInstance.current.setZoom(5);
+          }, 250);
+        }
 
         const listener = editable
           ? map.addListener("click", (event: any) => {
@@ -770,7 +854,37 @@ export default function GoogleRouteMap({
       cancelled = true;
       cleanupRef.current?.();
     };
-  }, [apiKey, connections, editable, editableConnections, editingTarget, enableStreetView, markerPoints, onConnectionPathChange, onMapPoint, onRouteMetrics, renderedRoutes]);
+  }, [apiKey, connections, editable, editableConnections, editingTarget, enableStreetView, hasMapContent, markerPoints, onConnectionPathChange, onMapPoint, onRouteMetrics, renderedRoutes]);
+
+  React.useEffect(() => {
+    if (!mapRef.current || !mapInstance.current || !window.google?.maps?.event) {
+      return undefined;
+    }
+
+    const refreshMap = () => {
+      if (!mapInstance.current || !window.google?.maps?.event) return;
+      window.google.maps.event.trigger(mapInstance.current, "resize");
+      if (!hasMapContent) {
+        mapInstance.current.setCenter(DEFAULT_CENTER);
+        mapInstance.current.setZoom(5);
+      } else {
+        fitMap(mapInstance.current, renderedRoutes, connections, markerPoints);
+      }
+    };
+
+    refreshMap();
+    const timers = [120, 420, 900].map((delay) => window.setTimeout(refreshMap, delay));
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(refreshMap)
+        : null;
+    observer?.observe(mapRef.current);
+
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+      observer?.disconnect();
+    };
+  }, [connections, hasMapContent, markerPoints, renderedRoutes, status]);
 
   React.useEffect(
     () => () => {
@@ -877,9 +991,17 @@ export default function GoogleRouteMap({
         borderColor: "divider",
         backgroundColor: "background.default",
       }}
+      data-empty-message={emptyMessage}
     >
-      <Box ref={mapRef} sx={{ width: "100%", height: "100%" }} />
-      {(status === "error" || status === "missing-key") && (
+      <Box
+        ref={mapRef}
+        sx={{
+          width: "100%",
+          height: "100%",
+          cursor: editable ? "crosshair" : "grab",
+        }}
+      />
+      {hasMapContent && (status === "error" || status === "missing-key") && (
         <FallbackMap routes={renderedRoutes} height={height} />
       )}
       {status === "loading" && (
@@ -894,6 +1016,87 @@ export default function GoogleRouteMap({
             boxShadow: "0 8px 20px rgba(15, 23, 42, 0.12)",
           }}
         />
+      )}
+
+      {editable && onEditingTargetChange && (
+        <Stack
+          spacing={1}
+          sx={{
+            position: "absolute",
+            left: 16,
+            top: 16,
+            zIndex: 4,
+          }}
+        >
+          {[
+            { value: "origen" as const, label: "Seleccionar origen", icon: <MyLocationIcon fontSize="small" /> },
+            { value: "destino" as const, label: "Seleccionar destino", icon: <FlagIcon fontSize="small" /> },
+            { value: "parada" as const, label: "Crear parada", icon: <AddLocationAltIcon fontSize="small" /> },
+          ].map((control) => {
+            const selected = editingTarget === control.value;
+            const completed = Boolean(editableTargetStatus?.[control.value]);
+            const activeColor = completed && !selected ? "success.main" : "primary.main";
+            return (
+              <Tooltip key={control.value} title={`${control.label}: despues haz clic en el mapa`}>
+                <Box
+                  component="button"
+                  onClick={() => onEditingTargetChange(control.value)}
+                  sx={{
+                    minWidth: 170,
+                    height: 42,
+                    px: 1.25,
+                    borderRadius: "999px",
+                    border: "1px solid",
+                    borderColor: selected || completed ? activeColor : "rgba(15,23,42,0.14)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.75,
+                    color: selected ? "white" : activeColor,
+                    backgroundColor: selected ? activeColor : "rgba(255,255,255,0.96)",
+                    boxShadow: selected
+                      ? "0 14px 28px rgba(31, 97, 141, 0.28)"
+                      : "0 10px 22px rgba(15, 23, 42, 0.14)",
+                    cursor: "pointer",
+                    transition: "transform 120ms ease",
+                    "&:hover": { transform: "translateY(-1px)" },
+                  }}
+                >
+                  {control.icon}
+                  <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                    {control.label}
+                  </Typography>
+                </Box>
+              </Tooltip>
+            );
+          })}
+        </Stack>
+      )}
+
+      {editable && editablePanel && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: { xs: 16, md: 202 },
+            top:
+              editingTarget === "origen"
+                ? 16
+                : editingTarget === "destino"
+                  ? 66
+                  : 116,
+            zIndex: 4,
+            width: { xs: 292, sm: 380 },
+            maxHeight: "calc(100% - 98px)",
+            overflow: "auto",
+            borderRadius: "8px",
+            border: "1px solid",
+            borderColor: "rgba(15, 23, 42, 0.10)",
+            backgroundColor: "rgba(255,255,255,0.98)",
+            boxShadow: "0 18px 36px rgba(15, 23, 42, 0.18)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          {editablePanel}
+        </Box>
       )}
 
       {(enableSimulation || infoContent) && (
@@ -1167,7 +1370,7 @@ export default function GoogleRouteMap({
           pointerEvents: "none",
         }}
       >
-        {editable ? (
+        {editable && showEditableHint ? (
           <Box
             sx={{
               maxWidth: 420,
@@ -1200,7 +1403,8 @@ export default function GoogleRouteMap({
           )}
           {pendingClicks > 0 && (
             <Chip
-              label="Resolviendo direccion..."
+              icon={<CircularProgress size={14} color="inherit" />}
+              label="Resolviendo punto..."
               color="info"
               sx={{ backgroundColor: "rgba(255,255,255,0.94)" }}
             />

@@ -333,7 +333,7 @@ export default function ViajesIndex({
             display: "grid",
             gridTemplateColumns: {
               xs: "1fr",
-              xl: "420px minmax(0, 1fr)",
+              xl: "minmax(0, 1fr) 420px",
             },
             gap: 2,
             alignItems: "stretch",
@@ -351,6 +351,7 @@ export default function ViajesIndex({
                 minHeight: { xl: "calc(100vh - 190px)" },
                 display: "flex",
                 flexDirection: "column",
+                order: { xs: 2, xl: 2 },
               },
             }}
             contentWrapperSx={{
@@ -545,7 +546,7 @@ export default function ViajesIndex({
             )}
           </PaperBlock>
 
-          <Box sx={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", minHeight: 0, order: { xs: 1, xl: 1 } }}>
             <PaperBlock
               title={selectedViaje?.nombre}
               subtitle="Mapa del viaje base seleccionado"
@@ -562,7 +563,7 @@ export default function ViajesIndex({
               <GoogleRouteMap
                 routes={selectedRoutes}
                 connections={mergedConnections}
-                height="calc(100vh - 250px)"
+                height="calc(100vh - 220px)"
                 title={ready ? "Viaje conectado" : "Viaje con enlace operativo pendiente"}
                 enableStreetView
                 enableSimulation={journeySimulationPath.length > 1}
