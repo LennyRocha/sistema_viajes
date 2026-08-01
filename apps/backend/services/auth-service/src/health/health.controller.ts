@@ -7,6 +7,6 @@ export class HealthController {
   @Get()
   @ApiOperation({ summary: 'Health check del servicio' }) // ← NUEVO
   check() {
-    return { status: 'ok', service: 'catalogo-service' };
+    return { status: 'ok', service: 'auth-service' };
   }
 }

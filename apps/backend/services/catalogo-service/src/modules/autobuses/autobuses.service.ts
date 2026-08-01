@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
 import { CreateAutobusDto } from './dtos/create-autobus.dto';
@@ -7,10 +7,9 @@ import { UpdateAutobusDto } from './dtos/update-autobus.dto';
 import { Prisma } from '@prisma/client';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import Autobus from './autobus.entity';
-import { InstitucionesService } from '../instituciones/instituciones.service';
 import { ServiciosService } from '../servicios/servicios.service';
-import { TiposAutobusService } from '../tipos_autobus/tipo_bus.service';
 import slugify from 'slugify';
+import { ClientProxy } from '@nestjs/microservices/client/client-proxy';
 
 const LIST_CACHE_KEY = 'autobuses:list';
 
@@ -19,12 +18,12 @@ export class AutobusesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
-    private readonly instituciones: InstitucionesService,
     private readonly servicios: ServiciosService,
-    private readonly tipos: TiposAutobusService,
+    @Inject('RECORD_SERVICE')
+    private readonly client: ClientProxy,
     @InjectPinoLogger(AutobusesService.name)
     private readonly logger: PinoLogger,
-  ) {}
+  ) { }
 
   async create(dto: CreateAutobusDto) {
     this.logger.info(
@@ -103,6 +102,8 @@ export class AutobusesService {
       );
     }
 
+    this.client.emit('bus.nuevo', this.findAll(true));
+
     this.logger.info(
       {
         autobusId: autobus.id,
@@ -146,8 +147,8 @@ export class AutobusesService {
 
     const where: Prisma.AutobusWhereInput = active
       ? {
-          estatus: true,
-        }
+        estatus: true,
+      }
       : {};
 
     if (tipo_bus !== 0) {
@@ -346,7 +347,7 @@ export class AutobusesService {
     const payloadExceptServicios: Prisma.AutobusUpdateInput = {
       marca: dto.marca
         ? dto.marca.trim().at(0)?.toUpperCase() +
-          dto.marca.trim().slice(1).toLowerCase()
+        dto.marca.trim().slice(1).toLowerCase()
         : existing.marca,
       alias: dto.alias?.trim()?.replace(/\s+/g, ' ') ?? existing.alias,
       modelo: dto.modelo?.trim()?.replace(/\s+/g, ' ') ?? existing.modelo,
@@ -356,7 +357,7 @@ export class AutobusesService {
       color: dto.color ?? existing.color,
       descripcion: dto.descripcion
         ? dto.descripcion.at(0)?.toUpperCase() +
-          dto.descripcion.slice(1).toLowerCase().trim().replace(/\s+/g, ' ')
+        dto.descripcion.slice(1).toLowerCase().trim().replace(/\s+/g, ' ')
         : existing.descripcion,
       codigo_interno:
         dto.codigo_interno?.trim()?.replace(/\s+/g, ' ') ??
@@ -398,6 +399,8 @@ export class AutobusesService {
           })),
         });
       }
+
+      this.client.emit('bus.updated', this.findAll(true));
 
       return updated;
     });
@@ -477,5 +480,46 @@ export class AutobusesService {
     }
 
     return { deleted: true };
+  }
+
+  // find autobuses salidas
+  async findAutobusSalida(id: number) {
+    this.logger.debug(
+      { id },
+      'Obteniendo autobús para módulo de salidas',
+    );
+
+    const autobus = await this.prisma.autobus.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        alias: true,
+        codigo_interno: true,
+        marca: true,
+        modelo: true,
+        estatus: true,
+      },
+    });
+
+    if (!autobus) {
+      this.logger.warn(
+        { id },
+        'Autobús no encontrado',
+      );
+
+      throw new NotFoundException(
+        `Autobús ${id} no existe`,
+      );
+    }
+
+    return {
+      id: autobus.id,
+      estatus: autobus.estatus,
+      nombre: `${autobus.alias} (${autobus.codigo_interno})`,
+      marca: autobus.marca,
+      modelo: autobus.modelo,
+    };
   }
 }

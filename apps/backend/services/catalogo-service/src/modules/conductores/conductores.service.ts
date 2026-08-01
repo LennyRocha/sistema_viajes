@@ -461,11 +461,11 @@ export class ConductoresService {
 
     const previousUser = existing.usuario_id
       ? await fetch(`${AUTH_SERVICE_URL}/usuarios/${existing.usuario_id}`)
-          .then(async (response) => {
-            if (!response.ok) return null;
-            return response.json();
-          })
-          .catch(() => null)
+        .then(async (response) => {
+          if (!response.ok) return null;
+          return response.json();
+        })
+        .catch(() => null)
       : null;
 
     try {
@@ -615,6 +615,73 @@ export class ConductoresService {
     }
 
     return { deleted: true };
+  }
+
+
+  // find para salida
+  async findConductorSalida(id: number) {
+    this.logger.debug(
+      { id },
+      'Obteniendo conductor para módulo de salidas',
+    );
+
+    const conductor = await this.prisma.conductor.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        usuario_id: true,
+        estatus: true,
+      },
+    });
+
+    if (!conductor) {
+      this.logger.warn(
+        { id },
+        'Conductor no encontrado',
+      );
+
+      throw new NotFoundException(
+        `Conductor ${id} no existe`,
+      );
+    }
+
+    let usuario: {
+      nombres: string;
+      apellido_paterno: string;
+      apellido_materno: string;
+    };
+
+    try {
+      const response = await fetch(
+        `${process.env.AUTH_SERVICE_URL}/usuarios/${conductor.usuario_id}`,
+      );
+
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      usuario = await response.json();
+    } catch (error) {
+      this.logger.error(
+        {
+          err: error,
+          usuario_id: conductor.usuario_id,
+        },
+        'No fue posible obtener la información del usuario',
+      );
+
+      throw new BadRequestException(
+        'No fue posible obtener la información del conductor',
+      );
+    }
+
+    return {
+      id: conductor.id,
+      estatus: conductor.estatus,
+      nombre: `${usuario.nombres} ${usuario.apellido_paterno} ${usuario.apellido_materno}`,
+    };
   }
 }
 
