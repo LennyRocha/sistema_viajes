@@ -3,6 +3,7 @@ import NuevoAutobusPage from "./NuevoAutobus";
 import EditarAutobusPage from "./EditarAutobus";
 
 export { default as KonvaPage } from "./KonvaPage";
+export { default as SeatSelector } from "./SeatSelector";
 
 import { withProviders } from "../../store/withProviders";
 
