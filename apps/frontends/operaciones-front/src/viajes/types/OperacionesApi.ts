@@ -1,5 +1,8 @@
 import GeoPoint from "./GeoPoint";
 
+export type CatalogStatusFilter = "all" | "active" | "inactive";
+export type CatalogSortOption = "recent" | "oldest" | "name_asc" | "name_desc";
+
 export type RutaApi = {
   id: number;
   nombre: string;

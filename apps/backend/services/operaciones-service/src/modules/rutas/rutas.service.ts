@@ -1,11 +1,15 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import type { Prisma } from '../../../generated/prisma/client';
+import type { Prisma as PrismaTypes } from '../../../generated/prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateRutaDto } from './dtos/create-ruta.dto';
 import { UpdateRutaDto } from './dtos/update-ruta.dto';
 
-function toJson(value: unknown): Prisma.InputJsonValue {
-  return value as Prisma.InputJsonValue;
+const { Prisma } = require(`${process.cwd()}/generated/prisma/client`) as {
+  Prisma: typeof PrismaTypes;
+};
+
+function toJson(value: unknown): PrismaTypes.InputJsonValue {
+  return value as PrismaTypes.InputJsonValue;
 }
 
 function isUniqueConstraintError(error: unknown) {
@@ -21,11 +25,91 @@ type FindAllOptions = {
   page?: number;
   limit?: number;
   search?: string;
+  status?: 'all' | 'active' | 'inactive';
+  sort?: 'recent' | 'oldest' | 'name_asc' | 'name_desc';
 };
 
 @Injectable()
 export class RutasService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private buildWhereSql(
+    search?: string,
+    status: 'all' | 'active' | 'inactive' = 'all',
+  ) {
+    const conditions: PrismaTypes.Sql[] = [];
+
+    if (status === 'active') {
+      conditions.push(Prisma.sql`"estatus" = true`);
+    } else if (status === 'inactive') {
+      conditions.push(Prisma.sql`"estatus" = false`);
+    }
+
+    if (search) {
+      const term = `%${search}%`;
+      conditions.push(
+        Prisma.sql`(
+          "nombre" ILIKE ${term}
+          OR COALESCE("descripcion", '') ILIKE ${term}
+        )`,
+      );
+    }
+
+    return conditions.length
+      ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+      : Prisma.empty;
+  }
+
+  private buildOrderSql(sort?: FindAllOptions['sort']) {
+    if (sort === 'oldest') {
+      return Prisma.sql`"createdAt" ASC, "id" ASC`;
+    }
+
+    if (sort === 'name_asc') {
+      return Prisma.sql`LOWER("nombre") ASC, "nombre" ASC, "id" ASC`;
+    }
+
+    if (sort === 'name_desc') {
+      return Prisma.sql`LOWER("nombre") DESC, "nombre" DESC, "id" DESC`;
+    }
+
+    return Prisma.sql`"createdAt" DESC, "id" DESC`;
+  }
+
+  private async findOrderedIds(
+    whereSql: PrismaTypes.Sql,
+    orderSql: PrismaTypes.Sql,
+    page?: number,
+    limit?: number,
+  ) {
+    const paginationSql =
+      page && limit
+        ? Prisma.sql`OFFSET ${(page - 1) * limit} LIMIT ${limit}`
+        : Prisma.empty;
+
+    const rows = await this.prisma.$queryRaw<Array<{ id: number }>>(Prisma.sql`
+      SELECT "id"
+      FROM "operaciones"."Ruta"
+      ${whereSql}
+      ORDER BY ${orderSql}
+      ${paginationSql}
+    `);
+
+    return rows.map((row) => row.id);
+  }
+
+  private async findManyByOrderedIds(ids: number[]) {
+    if (ids.length === 0) return [];
+
+    const rutas = await this.prisma.ruta.findMany({
+      where: { id: { in: ids } },
+    });
+    const byId = new Map(rutas.map((ruta) => [ruta.id, ruta]));
+
+    return ids
+      .map((id) => byId.get(id))
+      .filter((ruta): ruta is NonNullable<typeof ruta> => Boolean(ruta));
+  }
 
   async create(dto: CreateRutaDto) {
     try {
@@ -53,36 +137,27 @@ export class RutasService {
 
   async findAll(active: boolean, options: FindAllOptions = {}) {
     const search = options.search?.trim();
-    const where: Prisma.RutaWhereInput = {
-      ...(active ? { estatus: true } : {}),
-      ...(search
-        ? {
-            OR: [
-              { nombre: { contains: search, mode: 'insensitive' } },
-              { descripcion: { contains: search, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
-    };
+    const status = options.status ?? (active ? 'active' : 'all');
+    const whereSql = this.buildWhereSql(search, status);
+    const orderSql = this.buildOrderSql(options.sort);
 
     if (!options.page && !options.limit && !search) {
-      return this.prisma.ruta.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-      });
+      const ids = await this.findOrderedIds(whereSql, orderSql);
+      return this.findManyByOrderedIds(ids);
     }
 
     const page = Math.max(1, options.page || 1);
     const limit = Math.min(50, Math.max(1, options.limit || 5));
-    const [data, total] = await this.prisma.$transaction([
-      this.prisma.ruta.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      this.prisma.ruta.count({ where }),
+    const [ids, totalRows] = await Promise.all([
+      this.findOrderedIds(whereSql, orderSql, page, limit),
+      this.prisma.$queryRaw<Array<{ total: bigint | number }>>(Prisma.sql`
+        SELECT COUNT(*)::bigint AS "total"
+        FROM "operaciones"."Ruta"
+        ${whereSql}
+      `),
     ]);
+    const data = await this.findManyByOrderedIds(ids);
+    const total = Number(totalRows[0]?.total || 0);
 
     return {
       data,
