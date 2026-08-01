@@ -61,6 +61,16 @@ const SERVICES = {
         color: 'green',
         seedAlways: true,
     },
+    'record-service': {
+        label: 'record-service - API de registros (:5004)',
+        dir: 'services/record-service',
+        command: 'pnpm',
+        args: ['start:dev'],
+        port: 5004,
+        prismaMigrate: true,
+        prismaGenerate: true,
+        color: 'red'
+    },
 };
 
 const children = [];

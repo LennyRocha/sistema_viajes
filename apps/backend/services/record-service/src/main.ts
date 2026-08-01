@@ -8,10 +8,11 @@ import { apiReference } from '@scalar/nestjs-api-reference'; // ← NUEVO
 import { AppModule } from './app.module';
 import { formatErrors, ErrorOrigin } from '@commons/utils';
 import { ValidationError } from 'class-validator';
+import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const port = process.env.PORT ?? 3002;
+  const port = process.env.PORT ?? 3004;
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -21,7 +22,6 @@ async function bootstrap() {
         return new BadRequestException({
           statusCode: 400,
           message: 'Error de validación',
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           errors: formatErrors(errors),
           errorOrigin: ErrorOrigin.VALIDATION,
         });
@@ -31,9 +31,9 @@ async function bootstrap() {
 
   // ← NUEVO: generar documento OpenAPI
   const config = new DocumentBuilder()
-    .setTitle('Catalogo Service')
+    .setTitle('Dashboard - reportes Service')
     .setDescription(
-      'API de entidades tipo catálogo con PostgreSQL + Redis para Nexoroute',
+      'API de gestión de reportes y visualización de dashboards con PostgreSQL + Redis + WebSockets para Nexoroute',
     )
     .setVersion('1.0')
     .build();
@@ -56,8 +56,22 @@ async function bootstrap() {
   // CORS: solo aceptamos el origen del api-gateway (allowlist).
   //app.enableCors({ origin: [process.env.GATEWAY_URL ?? 'http://localhost:5000'], methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'QUERY'], });
 
+  app.connectMicroservice({
+    transport: Transport.RMQ,
+    options: {
+      urls: ['amqp://admin:admin@localhost:5672'],
+      queue: 'record_queue',
+      queueOptions: {
+        durable: true,
+      },
+    },
+  });
+
+  await app.startAllMicroservices();
+
   await app.listen(port);
-  console.log(`catalogo-service escuchando en http://localhost:${port}`);
+  console.log(`record-service escuchando en http://localhost:${port}`);
+  console.log(`websockets escuchando en ws://localhost:${port}`);
   console.log(`Scalar docs en http://localhost:${port}/docs`); // ← NUEVO
   console.log(`OpenAPI JSON en http://localhost:${port}/api-json`); // ← NUEVO
 }

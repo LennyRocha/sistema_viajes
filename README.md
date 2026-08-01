@@ -172,6 +172,15 @@ PORT=5003
 DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=operaciones&options=--search_path%3Doperaciones"
 ```
 
+### apps/backend/services/record-service/.env
+
+```env
+DATABASE_URL="postgresql://postgres:root@localhost:5432/catalogos_db?schema=dashboard&options=--search_path%3Ddashboard"
+REDIS_URL="redis://localhost:6379"
+PORT=5002
+GATEWAY_URL="http://localhost:5000"
+```
+
 El modulo de Viajes usa `operaciones-service`. Si `gateway` esta prendido pero
 `operaciones-service` no esta en `5003`, el frontend puede mostrar errores 504.
 
