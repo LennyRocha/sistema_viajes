@@ -9,6 +9,7 @@ import {
 } from "@nexoroute/commons";
 import AltRouteIcon from "@mui/icons-material/AltRoute";
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import RouteIcon from "@mui/icons-material/Route";
 import {
   Alert,
@@ -16,10 +17,12 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
   Pagination,
   Stack,
-  Tab,
-  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -32,7 +35,6 @@ import { mapRutaApi } from "../utils/apiMappers";
 interface Props extends CommonPageProps {}
 
 export default function RutasIndex({ snack }: Readonly<Props>) {
-  const [tab, setTab] = React.useState(0);
   const [search, setSearch] = React.useState("");
   const [page, setPage] = React.useState(1);
   const [pageData, setPageData] = React.useState({ total: 0, totalPages: 1 });
@@ -40,6 +42,7 @@ export default function RutasIndex({ snack }: Readonly<Props>) {
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
+  const [routeModalOpen, setRouteModalOpen] = React.useState(false);
 
   const selectedRoute = routes.find((route) => route.id === selectedId) || routes[0] || null;
 
@@ -91,22 +94,10 @@ export default function RutasIndex({ snack }: Readonly<Props>) {
         iconname="route"
       />
 
-      <PaperBlock paperProps={{ sx: { p: 0 } }} contentWrapperSx={{ p: 0 }}>
-        <Tabs
-          value={tab}
-          onChange={(_, value) => setTab(value)}
-          sx={{ px: 2, borderBottom: "1px solid", borderColor: "divider" }}
-        >
-          <Tab label="Rutas guardadas" />
-          <Tab label="Crear ruta reutilizable" />
-        </Tabs>
-      </PaperBlock>
-
-      {tab === 0 && (
-        <Box
+      <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", xl: "420px minmax(0, 1fr)" },
+            gridTemplateColumns: { xs: "1fr", xl: "minmax(0, 1fr) 420px" },
             gap: 2,
             alignItems: "start",
           }}
@@ -115,6 +106,11 @@ export default function RutasIndex({ snack }: Readonly<Props>) {
             title="Rutas guardadas"
             subtitle="Busca y selecciona una ruta para ver su recorrido"
             contentMaxHeight={760}
+            paperProps={{
+              sx: {
+                order: { xs: 2, xl: 2 },
+              },
+            }}
             contentWrapperSx={{ display: "flex", flexDirection: "column", gap: 1 }}
           >
             <TextField
@@ -187,13 +183,13 @@ export default function RutasIndex({ snack }: Readonly<Props>) {
             <Button
               variant="contained"
               startIcon={<AddIcon />}
-              onClick={() => setTab(1)}
+              onClick={() => setRouteModalOpen(true)}
             >
               Nueva ruta
             </Button>
           </PaperBlock>
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, order: { xs: 1, xl: 1 } }}>
             <PaperBlock
               title={selectedRoute?.nombre || "Selecciona una ruta"}
               subtitle="El boton Simular mueve un autobus sobre el recorrido guardado"
@@ -223,17 +219,50 @@ export default function RutasIndex({ snack }: Readonly<Props>) {
             </PaperBlock>
           </Box>
         </Box>
-      )}
-
-      {tab === 1 && (
-        <RutaDesigner
-          snack={snack}
-          onSaved={async () => {
-            await loadRoutes();
-            setTab(0);
+      <Dialog
+        open={routeModalOpen}
+        onClose={() => setRouteModalOpen(false)}
+        fullWidth
+        maxWidth="xl"
+        slotProps={{
+          paper: {
+            sx: {
+              height: "calc(100vh - 48px)",
+              borderRadius: "8px",
+            },
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            pb: 1,
           }}
-        />
-      )}
+        >
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 950 }}>
+              Crear ruta reutilizable
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Define origen, destino, paradas y trazo operativo.
+            </Typography>
+          </Box>
+          <IconButton onClick={() => setRouteModalOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 2, overflow: "auto" }}>
+          <RutaDesigner
+            snack={snack}
+            onSaved={async () => {
+              await loadRoutes();
+              setRouteModalOpen(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
