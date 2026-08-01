@@ -525,6 +525,9 @@ importers:
       '@commons/filters':
         specifier: workspace:*
         version: link:../../commons/filters
+      '@commons/types':
+        specifier: workspace:*
+        version: link:../../commons/types
       '@commons/utils':
         specifier: workspace:*
         version: link:../../commons/utils
@@ -567,6 +570,9 @@ importers:
       class-validator:
         specifier: ^0.15.1
         version: 0.15.1
+      ioredis:
+        specifier: ^5.11.1
+        version: 5.11.1
       nestjs-pino:
         specifier: ^4.6.1
         version: 4.6.1(@nestjs/common@11.1.28(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.3.1)(rxjs@7.8.2)
@@ -788,12 +794,6 @@ importers:
       typescript-eslint:
         specifier: ^8.20.0
         version: 8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
-
-  apps/backend/services/record-service/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.8.0
-        version: 7.8.0
 
   apps/frontends: {}
 
@@ -4634,6 +4634,7 @@ packages:
   cron-parser@4.9.0:
     resolution: {integrity: sha512-p0SaNjrHOnQeR8/VnfGbmg9te2kfyYSQ7Sc/j/6DtPL3JQvKxmjO9TSjNFpujqV3vEYYBvNNvXSxzyksBWAx1Q==}
     engines: {node: '>=12.0.0'}
+    deprecated: v4 is no longer maintained, upgrade to v5
 
   cross-env@10.1.0:
     resolution: {integrity: sha512-GsYosgnACZTADcmEyJctkJIoqAhHjttw7RsFrVoJNXbsWWqaq6Ym+7kZjq6mS45O0jij6vtiReppKQEtqWy6Dw==}

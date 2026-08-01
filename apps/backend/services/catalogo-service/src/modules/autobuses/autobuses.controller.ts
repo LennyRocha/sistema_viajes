@@ -20,7 +20,7 @@ import { UpdateAutobusDto } from './dtos/update-autobus.dto';
 @ApiTags('autobuses')
 @Controller('autobuses')
 export class AutobusesController {
-  constructor(private readonly autobuses: AutobusesService) {}
+  constructor(private readonly autobuses: AutobusesService) { }
 
   @Post()
   @HttpCode(201)
@@ -69,6 +69,21 @@ export class AutobusesController {
   @ApiParam({ name: 'id', example: '1' })
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateAutobusDto) {
     return this.autobuses.update(id, dto);
+  }
+
+
+  @Get('/salidas/:id')
+  @ApiOperation({
+    summary: 'Obtener autobús para módulo de salidas',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+  })
+  findAutobusSalida(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.autobuses.findAutobusSalida(id);
   }
 
   @Delete('/status/:id')

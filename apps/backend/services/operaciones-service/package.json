@@ -15,6 +15,7 @@
   "dependencies": {
     "@commons/contracts": "workspace:*",
     "@commons/filters": "workspace:*",
+    "@commons/types": "workspace:*",
     "@commons/utils": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
@@ -29,6 +30,7 @@
     "amqplib": "^2.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "ioredis": "^5.11.1",
     "nestjs-pino": "^4.6.1",
     "pg": "^8.22.0",
     "pino-http": "^11.0.0",

@@ -9,26 +9,25 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log('🌱 Iniciando seed...');
 
-  // Limpieza opcional (útil en dev para reseedar sin duplicar)
-  await prisma.tipoAutobus.deleteMany();
-  await prisma.institucion.deleteMany();
-
-  //Reestablecer secuencias de IDs para evitar conflictos con seeds
+  // 1. Limpieza total y reinicio de IDs usando SQL Nativo con CASCADE.
+  // Esto elimina automáticamente registros dependientes (como Conductores) sin romper llaves foráneas.
   await prisma.$executeRawUnsafe(`
     TRUNCATE TABLE "Institucion" RESTART IDENTITY CASCADE;
     TRUNCATE TABLE "TipoAutobus" RESTART IDENTITY CASCADE;
-`);
+  `);
 
-  // Inserción de datos de prueba
+  // 2. Inserción de datos de prueba
   const buses = await prisma.tipoAutobus.createMany({
     data: tiposAutobusSeeds,
   });
 
-  await prisma.institucion.createMany({
+  const inst = await prisma.institucion.createMany({
     data: institucionesSeeds,
   });
 
-  console.log(`✅ Seed completado: ${buses.count} registros creados`);
+  console.log(`✅ Seed completado:`);
+  console.log(`   - Tipos de Autobús creados: ${buses.count}`);
+  console.log(`   - Instituciones creadas: ${inst.count}`);
 }
 
 main()

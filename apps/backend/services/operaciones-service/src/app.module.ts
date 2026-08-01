@@ -8,6 +8,7 @@ import { ConfiguracionesModule } from './modules/configuraciones/configuraciones
 import { RutasModule } from './modules/rutas/rutas.module';
 import { ViajesBaseModule } from './modules/viajes-base/viajes-base.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { SalidasModule } from './modules/salidas/salidas.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PrismaModule } from './prisma/prisma.module';
     ConfiguracionesModule,
     RutasModule,
     ViajesBaseModule,
+    SalidasModule,
   ],
   providers: [
     {
