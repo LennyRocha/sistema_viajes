@@ -23,7 +23,7 @@ export class UsuariosService {
     private readonly hasher: ArgonPasswordHasher,
     @InjectPinoLogger(UsuariosService.name)
     private readonly logger: PinoLogger,
-  ) {}
+  ) { }
 
   async create(dto: CreateUsuarioDto) {
     this.logger.info(
@@ -92,8 +92,8 @@ export class UsuariosService {
 
     const where: Prisma.UsuarioWhereInput = active
       ? {
-          estatus: true,
-        }
+        estatus: true,
+      }
       : {};
 
     // 2) no está → base de datos
@@ -163,7 +163,9 @@ export class UsuariosService {
       },
       'Usuario encontrado',
     );
-    return user;
+
+    const { contra, ...userRest } = user;
+    return userRest;
   }
 
   async findOneByEmail(email: string, includeSensitive = false) {

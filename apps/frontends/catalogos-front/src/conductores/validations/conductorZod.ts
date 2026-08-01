@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { licenciaBaseSchema } from "./licenciaZod";
 
+const CURP_REGEX =
+  /^[A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM](AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/;
+
 export const conductorSchema = z.object({
   nombres: z
     .string()
@@ -28,16 +31,27 @@ export const conductorSchema = z.object({
     }),
   curp: z
     .string()
+    .trim()
     .min(1, {
       message: "La CURP es obligatoria",
     })
     .max(18, {
       message: "La CURP no puede exceder los 18 caracteres",
+    })
+    .refine((value) => CURP_REGEX.test(value.toUpperCase()), {
+      message: "La CURP no tiene un formato válido",
     }),
   fecha_nacimiento: z
     .string()
+    .trim()
     .min(1, {
       message: "La fecha de nacimiento es obligatoria",
+    })
+    .refine((value) => {
+      const date = new Date(value);
+      return !Number.isNaN(date.getTime()) && date <= new Date();
+    }, {
+      message: "La fecha de nacimiento no es válida",
     })
     .transform((val) => new Date(val).toISOString()),
   telefono: z
@@ -87,7 +101,7 @@ export const updateConductorSchema = z.object({
   telefono: conductorSchema.shape.telefono.optional(),
   email: conductorSchema.shape.email.optional(),
   foto_perfil: conductorSchema.shape.foto_perfil.optional(),
-  institucion_id: conductorSchema.shape.institucion_id.optional()
+  institucion_id: conductorSchema.shape.institucion_id.optional(),
 });
 
 export type UpdateConductorSchema = z.infer<typeof updateConductorSchema>;

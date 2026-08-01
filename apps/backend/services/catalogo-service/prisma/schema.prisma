@@ -9,15 +9,8 @@ datasource db {
 model Conductor {
   id Int @id @default(autoincrement())
 
-  // Datos personales
-  nombres             String   @db.VarChar(100)
-  apellido_paterno    String   @db.VarChar(100)
-  apellido_materno    String   @db.VarChar(100)
-  curp                String   @unique @db.VarChar(18)
-  fecha_nacimiento    DateTime @db.Date
-  telefono            String   @db.VarChar(15)
-  email               String   @unique @db.VarChar(150)
-  foto_perfil         String   @db.VarChar(255)
+
+  usuario_id Int @unique
 
   // Relación con la institución
   institucion_id Int

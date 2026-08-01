@@ -60,13 +60,16 @@ export default function EditarConductor({
   useEffect(() => {
     if (!conductor) return;
 
+    const fechaNacimiento = conductor.fecha_nacimiento
+      ? new Date(conductor.fecha_nacimiento).toISOString().slice(0, 10)
+      : "";
+
     setForm({
       nombres: conductor.nombres,
       apellido_paterno: conductor.apellido_paterno,
       apellido_materno: conductor.apellido_materno,
       curp: conductor.curp,
-      fecha_nacimiento:
-        conductor.fecha_nacimiento?.slice(0, 10) ?? "",
+      fecha_nacimiento: fechaNacimiento,
       telefono: conductor.telefono,
       email: conductor.email,
       foto_perfil: conductor.foto_perfil,

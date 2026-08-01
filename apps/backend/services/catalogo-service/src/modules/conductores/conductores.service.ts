@@ -2,6 +2,7 @@
 import {
   Injectable,
   NotFoundException,
+  BadRequestException
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
@@ -31,18 +32,43 @@ export class ConductoresService {
     private readonly logger: PinoLogger,
   ) { }
 
-  /**
-   * Normaliza un texto:
-   *  - elimina espacios sobrantes
-   *  - convierte a minúsculas
-   *  - capitaliza cada palabra
-   */
   private normalizeText(value: string): string {
     return value
       .trim()
       .replace(/\s+/g, ' ')
       .toLowerCase()
       .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  private async getUsuariosMap(): Promise<Map<number, any>> {
+    const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001';
+
+    try {
+      const response = await fetch(`${AUTH_SERVICE_URL}/usuarios`);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        this.logger.warn(
+          {
+            status: response.status,
+            error: errorData,
+          },
+          'No fue posible obtener los usuarios desde auth_service',
+        );
+        return new Map();
+      }
+
+      const usuarios = await response.json();
+      return new Map((Array.isArray(usuarios) ? usuarios : []).map((usuario) => [usuario.id, usuario]));
+    } catch (error) {
+      this.logger.warn(
+        {
+          err: error,
+        },
+        'Error de comunicación con auth_service al obtener todos los usuarios',
+      );
+      return new Map();
+    }
   }
 
   /**
@@ -58,103 +84,164 @@ export class ConductoresService {
 
     const { licencia, ...conductorData } = dto;
 
-    // Validar existencia de la institución
+    // 1. Validar existencia de la institución
     await this.instituciones.findOne(conductorData.institucion_id);
 
-    const conductor = await this.prisma.$transaction(async (tx) => {
-      const nuevoConductor = await tx.conductor.create({
-        data: {
-          nombres: this.normalizeText(conductorData.nombres),
+    // ==============================================================
+    // 2. COMUNICACIÓN CON AUTH_SERVICE: CREAR EL USUARIO PRIMERO
+    // ==============================================================
+    let usuarioCreado: { id: number };
 
-          apellido_paterno: this.normalizeText(
-            conductorData.apellido_paterno,
-          ),
-
-          apellido_materno: this.normalizeText(
-            conductorData.apellido_materno,
-          ),
-
-          curp: conductorData.curp
-            .trim()
-            .replace(/\s+/g, '')
-            .toUpperCase(),
-
-          fecha_nacimiento: new Date(conductorData.fecha_nacimiento),
-
-          telefono: conductorData.telefono.trim(),
-
-          email: conductorData.email.trim().toLowerCase(),
-
-          foto_perfil: conductorData.foto_perfil.trim(),
-
-          institucion: {
-            connect: {
-              id: conductorData.institucion_id,
-            },
-          },
-        },
-      });
-
-      await tx.licencia.create({
-        data: {
-          conductor_id: nuevoConductor.id,
-
-          numero_licencia: licencia.numero_licencia
-            .trim()
-            .replace(/\s+/g, '')
-            .toUpperCase(),
-
-          categoria: licencia.categoria.trim().toUpperCase(),
-
-          fecha_expedicion: new Date(licencia.fecha_expedicion),
-
-          fecha_vencimiento: new Date(licencia.fecha_vencimiento),
-
-          estado_emisor: this.normalizeText(
-            licencia.estado_emisor,
-          ),
-
-          imagen_licencia: licencia.imagen_licencia.trim(),
-
-          vigente: true,
-        },
-      });
-
-      return nuevoConductor;
-    });
+    // Configura esta URL en tus variables de entorno (.env)
+    const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001';
 
     try {
-      await Promise.all([
-        this.redis.del(CACHE_KEY()),
-        this.redis.del(CACHE_KEY(conductor.institucion_id)),
-      ]);
+      this.logger.debug('Llamando a auth_service para crear Usuario');
 
-      this.logger.debug(
+      const passwordTemporal = `Temp.@123${conductorData.curp.substring(0, 4)}`;
+
+      // Preparamos los datos EXACTAMENTE como los espera el CreateUsuarioDto
+      const payloadUsuario = {
+        nombres: conductorData.nombres,
+        apellido_paterno: conductorData.apellido_paterno,
+        apellido_materno: conductorData.apellido_materno,
+        curp: conductorData.curp,
+        // Si conductorData.fecha_nacimiento es un objeto Date, lo pasamos a ISOString
+        // para que viaje correctamente por JSON
+        fecha_nacimiento: new Date(conductorData.fecha_nacimiento).toISOString(),
+        telefono: conductorData.telefono,
+        email: conductorData.email,
+        foto_perfil: conductorData.foto_perfil,
+        contra: passwordTemporal, // AHORA SÍ PASARÁ EL DTO
+      };
+
+      const response = await fetch(`${AUTH_SERVICE_URL}/usuarios`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadUsuario),
+      });
+
+      if (!response.ok) {
+        // Extraemos el error que lanzó el auth_service (ej. "El correo ya existe")
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error desconocido en auth_service');
+      }
+
+      usuarioCreado = await response.json();
+      this.logger.info({ usuario_id: usuarioCreado.id }, 'Usuario creado exitosamente en auth_service');
+
+    } catch (error: any) {
+      this.logger.error({ err: error }, 'Fallo al crear usuario en auth_service');
+      // Si falla la creación del usuario, detenemos todo y lanzamos error al Frontend
+      throw new BadRequestException(`No se pudo crear el usuario: ${error.message}`);
+    }
+
+    const rollbackUsuarioCreado = async (userId: number) => {
+      try {
+        const rollbackResponse = await fetch(`${AUTH_SERVICE_URL}/usuarios/${userId}`, {
+          method: 'DELETE',
+        });
+
+        if (!rollbackResponse.ok) {
+          const rollbackError = await rollbackResponse.json().catch(() => ({}));
+          this.logger.warn(
+            {
+              userId,
+              status: rollbackResponse.status,
+              error: rollbackError,
+            },
+            'No se pudo ejecutar el rollback del usuario en auth_service',
+          );
+          return;
+        }
+
+        this.logger.warn(
+          { userId },
+          'Rollback del usuario ejecutado en auth_service',
+        );
+      } catch (error) {
+        this.logger.error(
+          { userId, err: error },
+          'Error al intentar hacer rollback del usuario en auth_service',
+        );
+      }
+    };
+
+    try {
+      // 3. Crear el Conductor usando el ID del usuario recién creado
+      const conductor = await this.prisma.$transaction(async (tx) => {
+        const nuevoConductor = await tx.conductor.create({
+          data: {
+            usuario_id: usuarioCreado.id,
+            institucion: {
+              connect: { id: conductorData.institucion_id },
+            },
+          },
+        });
+
+        await tx.licencia.create({
+          data: {
+            conductor_id: nuevoConductor.id,
+            numero_licencia: licencia.numero_licencia.trim().replace(/\s+/g, '').toUpperCase(),
+            categoria: licencia.categoria.trim().toUpperCase(),
+            fecha_expedicion: new Date(licencia.fecha_expedicion),
+            fecha_vencimiento: new Date(licencia.fecha_vencimiento),
+            estado_emisor: this.normalizeText(licencia.estado_emisor),
+            imagen_licencia: licencia.imagen_licencia.trim(),
+            vigente: true,
+          },
+        });
+
+        return nuevoConductor;
+      });
+
+      try {
+        await Promise.all([
+          this.redis.del(CACHE_KEY()),
+          this.redis.del(CACHE_KEY(conductor.institucion_id)),
+        ]);
+
+        this.logger.debug(
+          {
+            keys: [
+              CACHE_KEY(),
+              CACHE_KEY(conductor.institucion_id),
+            ],
+          },
+          'Caché eliminada',
+        );
+      } catch (error) {
+        this.logger.error(
+          {
+            err: error,
+          },
+          'Error al limpiar caché',
+        );
+      }
+
+      this.logger.info(
         {
-          keys: [
-            CACHE_KEY(),
-            CACHE_KEY(conductor.institucion_id),
-          ],
+          conductorId: conductor.id,
         },
-        'Caché eliminada',
+        'Conductor creado',
       );
+
+      return conductor;
     } catch (error) {
+      if (usuarioCreado?.id) {
+        await rollbackUsuarioCreado(usuarioCreado.id);
+      }
+
       this.logger.error(
         {
           err: error,
+          usuario_id: usuarioCreado?.id,
         },
-        'Error al limpiar caché',
+        'Fallo al crear conductor; se ejecuta rollback del usuario en auth_service',
       );
+
+      throw error;
     }
-
-    this.logger.info(
-      {
-        conductorId: conductor.id,
-      },
-      'Conductor creado',
-    );
-
-    return conductor;
   }
 
   /**
@@ -171,6 +258,8 @@ export class ConductoresService {
         await this.redis.get<Conductor[]>(cacheKey);
 
       if (cached) {
+        const usuariosMap = await this.getUsuariosMap();
+
         this.logger.debug(
           {
             key: cacheKey,
@@ -180,11 +269,12 @@ export class ConductoresService {
           'Conductores obtenidos desde caché',
         );
 
-        return active
-          ? cached
-            .filter((c) => c.estatus)
-            .map((c) => this.mapConductorResponse(c))
-          : cached.map((c) => this.mapConductorResponse(c));
+        const mappedCached = (active ? cached.filter((c) => c.estatus) : cached).map((c) => {
+          const usuario = usuariosMap.get(c.usuario_id);
+          return this.mapConductorResponse(c, usuario);
+        });
+
+        return mappedCached;
       }
     } catch (error) {
       this.logger.error(
@@ -248,17 +338,49 @@ export class ConductoresService {
       'Conductores obtenidos desde base de datos',
     );
 
-    return conductores.map((c) =>
-      this.mapConductorResponse(c),
-    );
+    const usuariosMap = await this.getUsuariosMap();
+
+    const mapped = conductores.map((c) => {
+      const usuario = usuariosMap.get(c.usuario_id);
+      return this.mapConductorResponse(c, usuario);
+    });
+
+    return mapped;
   }
 
 
-  private mapConductorResponse(conductor: any) {
+  private mapConductorResponse(conductor: any, usuario?: any) {
     const { licencias, ...rest } = conductor;
+
+    const fechaNacimiento = usuario?.fecha_nacimiento
+      ? new Date(usuario.fecha_nacimiento).toISOString()
+      : rest.fecha_nacimiento
+        ? new Date(rest.fecha_nacimiento).toISOString()
+        : '';
 
     return {
       ...rest,
+      ...(usuario
+        ? {
+          nombres: usuario.nombres ?? rest.nombres ?? '',
+          apellido_paterno: usuario.apellido_paterno ?? rest.apellido_paterno ?? '',
+          apellido_materno: usuario.apellido_materno ?? rest.apellido_materno ?? '',
+          fecha_nacimiento: fechaNacimiento,
+          telefono: usuario.telefono ?? rest.telefono ?? '',
+          email: usuario.email ?? rest.email ?? '',
+          curp: usuario.curp ?? rest.curp ?? '',
+          foto_perfil: usuario.foto_perfil ?? rest.foto_perfil ?? '',
+        }
+        : {
+          nombres: rest.nombres ?? '',
+          apellido_paterno: rest.apellido_paterno ?? '',
+          apellido_materno: rest.apellido_materno ?? '',
+          fecha_nacimiento: fechaNacimiento,
+          telefono: rest.telefono ?? '',
+          email: rest.email ?? '',
+          curp: rest.curp ?? '',
+          foto_perfil: rest.foto_perfil ?? '',
+        }),
       licencia: licencias.length > 0 ? licencias[0] : null,
     };
   }
@@ -292,12 +414,14 @@ export class ConductoresService {
     this.logger.info(
       {
         id: conductor.id,
-        curp: conductor.curp,
+        usuario_id: conductor.usuario_id,
       },
       'Conductor encontrado',
     );
 
-    return this.mapConductorResponse(conductor);
+    const usuariosMap = await this.getUsuariosMap();
+    const usuario = usuariosMap.get(conductor.usuario_id);
+    return this.mapConductorResponse(conductor, usuario);
   }
 
   async update(id: number, dto: UpdateConductorDto) {
@@ -309,89 +433,110 @@ export class ConductoresService {
     );
 
     const existing = await this.findOne(id);
+    const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001';
 
-    const {...conductorData } = dto;
+    const usuarioPayload = Object.fromEntries(
+      Object.entries(dto)
+        .filter(([key, value]) => {
+          if (value === undefined || value === null || value === '') return false;
 
-    if (conductorData.institucion_id) {
-      await this.instituciones.findOne(
-        conductorData.institucion_id,
-      );
-    }
+          return [
+            'nombres',
+            'apellido_paterno',
+            'apellido_materno',
+            'curp',
+            'fecha_nacimiento',
+            'telefono',
+            'email',
+            'foto_perfil',
+          ].includes(key);
+        })
+        .map(([key, value]) => {
+          if (key === 'fecha_nacimiento' && typeof value === 'string') {
+            return [key, new Date(value).toISOString()];
+          }
+          return [key, value];
+        }),
+    );
 
-    const conductor = await this.prisma.$transaction(
-      async (tx) => {
+    const previousUser = existing.usuario_id
+      ? await fetch(`${AUTH_SERVICE_URL}/usuarios/${existing.usuario_id}`)
+          .then(async (response) => {
+            if (!response.ok) return null;
+            return response.json();
+          })
+          .catch(() => null)
+      : null;
+
+    try {
+      if (Object.keys(usuarioPayload).length > 0 && existing.usuario_id) {
+        const userResponse = await fetch(`${AUTH_SERVICE_URL}/usuarios/${existing.usuario_id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(usuarioPayload),
+        });
+
+        if (!userResponse.ok) {
+          const errorData = await userResponse.json().catch(() => ({}));
+          throw new Error(errorData.message || 'No se pudo actualizar el usuario en auth_service');
+        }
+      }
+
+      if (dto.institucion_id) {
+        await this.instituciones.findOne(dto.institucion_id);
+      }
+
+      const conductor = await this.prisma.$transaction(async (tx) => {
         const updated = await tx.conductor.update({
           where: { id },
           data: {
-            nombres: conductorData.nombres
-              ? this.normalizeText(conductorData.nombres)
-              : existing.nombres,
-
-            apellido_paterno:
-              conductorData.apellido_paterno
-                ? this.normalizeText(
-                  conductorData.apellido_paterno,
-                )
-                : existing.apellido_paterno,
-
-            apellido_materno:
-              conductorData.apellido_materno
-                ? this.normalizeText(
-                  conductorData.apellido_materno,
-                )
-                : existing.apellido_materno,
-
-            curp: conductorData.curp
-              ? conductorData.curp
-                .trim()
-                .replace(/\s+/g, '')
-                .toUpperCase()
-              : existing.curp,
-
-            fecha_nacimiento: conductorData.fecha_nacimiento
-              ? new Date(conductorData.fecha_nacimiento)
-              : existing.fecha_nacimiento,
-
-
-
-            telefono:
-              conductorData.telefono?.trim() ??
-              existing.telefono,
-
-            email:
-              conductorData.email?.trim().toLowerCase() ??
-              existing.email,
-
-            foto_perfil:
-              conductorData.foto_perfil ??
-              existing.foto_perfil,
-
             institucion: {
               connect: {
-                id:
-                  conductorData.institucion_id ??
-                  existing.institucion_id,
+                id: dto.institucion_id ?? existing.institucion_id,
               },
             },
           },
         });
 
-
         return updated;
-      },
-    );
+      });
 
-    await Promise.all([
-      this.redis.del(CACHE_KEY()),
-      this.redis.del(CACHE_KEY(existing.institucion_id)),
-      conductor.institucion_id !== existing.institucion_id
-        ? this.redis.del(
-          CACHE_KEY(conductor.institucion_id),
-        )
-        : Promise.resolve(),
-    ]);
+      await Promise.all([
+        this.redis.del(CACHE_KEY()),
+        this.redis.del(CACHE_KEY(existing.institucion_id)),
+        dto.institucion_id && dto.institucion_id !== existing.institucion_id
+          ? this.redis.del(CACHE_KEY(dto.institucion_id))
+          : Promise.resolve(),
+      ]);
 
-    return this.findOne(conductor.id);
+      return this.findOne(conductor.id);
+    } catch (error) {
+      if (previousUser && existing.usuario_id) {
+        try {
+          await fetch(`${AUTH_SERVICE_URL}/usuarios/${existing.usuario_id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(previousUser),
+          });
+        } catch (rollbackError) {
+          this.logger.warn(
+            { userId: existing.usuario_id, err: rollbackError },
+            'No se pudo devolver los datos del usuario tras un fallo en la actualización del conductor',
+          );
+        }
+      }
+
+      this.logger.error(
+        {
+          err: error,
+          usuario_id: existing.usuario_id,
+          conductor_id: id,
+        },
+        'Fallo al actualizar conductor',
+      );
+
+      throw error;
+    }
   }
 
 

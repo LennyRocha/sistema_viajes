@@ -11,6 +11,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { IsCURP } from '@commons/decorators';
+import { Type } from 'class-transformer';
 
 export class CreateUsuarioDto {
   @ApiProperty({
@@ -57,6 +58,7 @@ export class CreateUsuarioDto {
     example: '2000-01-01',
   })
   @IsNotEmpty({ message: 'La fecha de nacimiento del usuario es obligatoria' })
+  @Type(() => Date)
   @IsDate({
     message: 'La fecha de nacimiento del usuario debe ser una fecha válida',
   })

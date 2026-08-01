@@ -5,9 +5,9 @@ import {
   Tabla,
   CommonPageProps,
 } from "@nexoroute/commons";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Add, FilterList } from "@mui/icons-material";
-import { Box, IconButton, TextField } from "@mui/material";
+import { Alert, Box, IconButton, TextField } from "@mui/material";
 import buildConductoresColumns from "../utils/buildConductoresColumns";
 import ConductorDetails from "../components/ConductorDetails";
 import {
@@ -23,6 +23,8 @@ export default function ConductoresIndex({
   userPrivileges = [],
 }: Readonly<CommonPageProps>) {
   const columnas = buildConductoresColumns();
+  const [searchCurp, setSearchCurp] = useState("");
+  const [searchNombre, setSearchNombre] = useState("");
 
   const {
     data: conductores,
@@ -32,6 +34,33 @@ export default function ConductoresIndex({
   } = useGetConductoresQuery();
 
   const [changeStatus] = useChangeStatusConductorMutation();
+
+  const filteredConductores = useMemo(() => {
+    const curpFilter = searchCurp.trim().toLowerCase();
+    const nombreFilter = searchNombre.trim().toLowerCase();
+    const source = conductores ?? [];
+
+    if (!curpFilter && !nombreFilter) {
+      return source;
+    }
+
+    return source.filter((conductor) => {
+      const nombreCompleto = `${conductor.nombres ?? ""} ${
+        conductor.apellido_paterno ?? ""
+      } ${conductor.apellido_materno ?? ""}`.toLowerCase();
+
+      const matchesCurp =
+        !curpFilter ||
+        (conductor.curp ?? "").toLowerCase().includes(curpFilter);
+
+      const matchesNombre =
+        !nombreFilter || nombreCompleto.includes(nombreFilter);
+
+      return matchesCurp && matchesNombre;
+    });
+  }, [conductores, searchCurp, searchNombre]);
+
+  const hasActiveFilters = Boolean(searchCurp.trim() || searchNombre.trim());
 
   const handleToggleActive = async (row: { id: number }) => {
     try {
@@ -68,7 +97,7 @@ export default function ConductoresIndex({
         titulo="Conductores"
         subtitulo="Listado de conductores disponibles"
         columnas={columnas}
-        data={conductores ?? []}
+        data={filteredConductores}
         loading={isLoading || isFetching}
         onEditClick={(row) =>
           navigationFunction(`/dashboard/conductores/editar/${row.id}`)
@@ -86,12 +115,16 @@ export default function ConductoresIndex({
               label="Buscar por CURP"
               variant="outlined"
               size="small"
+              value={searchCurp}
+              onChange={(event) => setSearchCurp(event.target.value)}
               sx={{ flex: 1, minWidth: 200 }}
             />
             <TextField
               label="Buscar por nombre"
               variant="outlined"
               size="small"
+              value={searchNombre}
+              onChange={(event) => setSearchNombre(event.target.value)}
               sx={{ flex: 1, minWidth: 200 }}
             />
             <IconButton aria-label="Filtrar" size="small">
@@ -101,9 +134,19 @@ export default function ConductoresIndex({
         }
       />
       {isError && (
-        <Box sx={{ p: 2, color: "error.main" }}>
-          Ocurrió un error al cargar los conductores.
-        </Box>
+        <Alert severity="error" sx={{ mt: 2 }}>
+          Ocurrió un error al cargar los conductores. Intenta recargar la página.
+        </Alert>
+      )}
+      {!isLoading && !isFetching && !isError && hasActiveFilters && filteredConductores.length === 0 && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          No se encontraron conductores con los filtros aplicados.
+        </Alert>
+      )}
+      {!isLoading && !isFetching && !isError && !hasActiveFilters && (conductores ?? []).length === 0 && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          Aún no hay conductores registrados en el sistema.
+        </Alert>
       )}
     </>
   );

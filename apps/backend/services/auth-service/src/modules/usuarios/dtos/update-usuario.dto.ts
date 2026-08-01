@@ -8,6 +8,7 @@ import {
   IsUrl,
   MaxLength,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { IsCURP } from '@commons/decorators';
 
 export class UpdateUsuarioDto {
@@ -55,6 +56,7 @@ export class UpdateUsuarioDto {
     example: '2000-01-01',
   })
   @IsOptional()
+  @Type(() => Date)
   @IsDate({
     message: 'La fecha de nacimiento del usuario debe ser una fecha válida',
   })
