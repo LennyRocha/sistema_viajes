@@ -40,6 +40,11 @@ const ListLinks = [
     icon: "trip",
   },
   {
+    name: "Salidas",
+    href: "/dashboard/salidas/programacion",
+    icon: "event_available",
+  },
+  {
     name: "Calendario",
     href: "/dashboard/calendar",
     icon: "calendar_month",

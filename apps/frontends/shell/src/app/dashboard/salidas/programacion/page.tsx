@@ -3,18 +3,18 @@ import MainLayout from "@/src/layout/MainLayout";
 import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 
 export const metadata: Metadata = {
-  title: "Rutas y paradas | Nexoroute",
+  title: "Programacion de salidas | Nexoroute",
   description:
-    "Panel administrativo para gestionar rutas reutilizables, paradas y recorridos geograficos.",
+    "Flujo operativo para programar salidas a partir de viajes base, rutas, autobuses y conductores.",
 };
 
 export default function Page() {
   return (
     <MainLayout>
       <FederatedPage
-        remote="operaciones/ViajesModule"
-        exportName="RutasIndex"
-        skeletonVariant="table"
+        remote="operaciones/SalidasModule"
+        exportName="ProgramacionSalidas"
+        skeletonVariant="form"
       />
     </MainLayout>
   );

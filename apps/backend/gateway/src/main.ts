@@ -53,6 +53,7 @@ async function bootstrap() {
     '/operaciones/health',
     '/viajes-base',
     '/rutas',
+    '/salidas',
   ];
   app.use(
     createProxyMiddleware({
