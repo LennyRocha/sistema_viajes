@@ -146,13 +146,14 @@ const AsientoBus = ({
       <Text
         text={asiento.label}
         fontSize={10}
-        x={0}
-        y={5}
+        x={verticalRotation ? 0 : 7}
+        y={verticalRotation ? 5 :30}
         width={34}
         fontFamily="Nebulas"
         fill={fillText}
         align="center"
         padding={5}
+        rotation={verticalRotation ? 0 : -90}
       />
       <Rect
         x={0}

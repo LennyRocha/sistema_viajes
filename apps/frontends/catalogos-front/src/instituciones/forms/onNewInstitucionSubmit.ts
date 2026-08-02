@@ -22,6 +22,7 @@ export default async function onSubmit(
   const payload: InstitucionSchema = {
     nombre: data.nombre.trim(),
     descripcion: data.descripcion.trim(),
+    imagen_url: data.imagen_url.trim(),
   };
 
   try {

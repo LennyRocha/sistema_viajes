@@ -2,6 +2,7 @@
 
 import React, { forwardRef } from "react";
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -29,6 +30,8 @@ import {
 import CompraSummary from "../core/components/CompraSummary";
 import dynamic from "next/dynamic";
 import { MotionPaper } from "@nexoroute/commons";
+import useSetCompra from "../core/hooks/useSetCompra";
+import { Compra, Comprador } from "../core/types/Compra";
 
 const steps = [
   "Asientos",
@@ -58,155 +61,41 @@ const BusMap = dynamic(
   },
 );
 
-const components = {
-  0: (
-    <Box
-      sx={{
-        width: "100%",
-        minHeight: "100%",
-        display: "flex",
-        flexDirection: "column",
-        "@media(min-width: 945px)": {
-          flexDirection: "row",
-        },
-        gap: 2,
-        padding: "2px",
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          minWidth: 0,
-          minHeight: 0,
-          flex: 1,
-          gap: 4,
-        }}
-      >
-        <Typography
-          variant="h3"
-          className="font-brand"
-          sx={{
-            mx: "auto",
-            "@media(min-width: 900px)": {
-              mx: 0,
-            },
-          }}
-        >
-          Asientos de vuelta
-        </Typography>
-        <MotionPaper sx={{ p: 2, width: "100%" }}>
-          <Typography variant="body1">
-            Seleccione los asientos de su viaje
-          </Typography>
-        </MotionPaper>
-        <BusMap
-          tipo={2}
-          onSelect={(seat: any) =>
-            console.log("Asiento 2", seat)
-          }
-        />
-      </Box>
-      <CompraSummary tipo="ida" />
-    </Box>
-  ),
-  1: (
-    <div
-      style={{
-        backgroundColor: "yellow",
-        width: "100%",
-        height: "100%",
-      }}
-    >
-      Pasajeros
-    </div>
-  ),
-  2: (
-    <Box
-      sx={{
-        width: "100%",
-        minHeight: "100%",
-        display: "flex",
-        flexDirection: "column",
-        "@media(min-width: 1000px)": {
-          flexDirection: "row",
-        },
-        gap: 2,
-        padding: "2px",
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          minWidth: 0,
-          minHeight: 0,
-          flex: 1,
-          gap: 4,
-        }}
-      >
-        <Typography variant="h3" className="font-brand">
-          Datos del comprador
-        </Typography>
-        <TextField
-          label="Nombre (s)"
-          fullWidth
-          required
-          placeholder="Ej. José Armando"
-        />
-        <TextField
-          label="Apellido paterno"
-          fullWidth
-          required
-          placeholder="Ej. Trujillo"
-        />
-        <TextField
-          label="Apellido materno (opcional)"
-          fullWidth
-          placeholder="Ej. Guzmán"
-        />
-        <TextField
-          label="Correo electrónico"
-          fullWidth
-          required
-          placeholder="Ej. josetrujillo@gmail.com"
-          type="email"
-          inputMode="email"
-        />
-        <TextField
-          label="Teléfono"
-          fullWidth
-          required
-          placeholder="Ej. 777 123 45 67"
-          inputMode="tel"
-        />
-      </Box>
-      <CompraSummary tipo="vuelta" />
-    </Box>
-  ),
-  3: (
-    <div
-      style={{
-        backgroundColor: "red",
-        width: "100%",
-        height: "100%",
-      }}
-    >
-      Confirmación
-    </div>
-  ),
-  4: (
-    <div
-      style={{
-        backgroundColor: "blue",
-        width: "100%",
-        height: "100%",
-      }}
-    >
-      Pago
-    </div>
-  ),
-};
+const PasajeroCard = dynamic(
+  async () => {
+    const { loadRemote } =
+      await import("@module-federation/enhanced/runtime");
+
+    const mod = await loadRemote<Record<string, any>>(
+      "catalogos/AutobusesModule",
+    );
+    return {
+      default: mod!["SeatCard"] as React.ComponentType<any>,
+    };
+  },
+  {
+    ssr: false,
+    loading: () => <CircularProgress />,
+  },
+);
+
+const PasajeroBilling = dynamic(
+  async () => {
+    const { loadRemote } =
+      await import("@module-federation/enhanced/runtime");
+
+    const mod = await loadRemote<Record<string, any>>(
+      "catalogos/AutobusesModule",
+    );
+    return {
+      default: mod!["SeatBilling"] as React.ComponentType<any>,
+    };
+  },
+  {
+    ssr: false,
+    loading: () => <CircularProgress />,
+  },
+);
 
 const variants: Variants = {
   enter: (direction: number) => ({
@@ -250,6 +139,89 @@ export default function CompraForm() {
 
     setDirection(-1);
     setActiveStep((prev) => prev - 1);
+  };
+
+  const {
+    formData,
+    setField,
+    setCompradorField,
+    setPasajero,
+  } = useSetCompra();
+
+  const components = {
+    0: (
+      <Box
+        sx={{
+          width: "100%",
+          minHeight: "100%",
+          display: "flex",
+          flexDirection: "column",
+          "@media(min-width: 945px)": {
+            flexDirection: "row",
+          },
+          gap: 2,
+          padding: "2px",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            minHeight: 0,
+            flex: 1,
+            gap: 4,
+          }}
+        >
+          <Typography
+            variant="h3"
+            className="font-brand"
+            sx={{
+              mx: "auto",
+              "@media(min-width: 900px)": {
+                mx: 0,
+              },
+            }}
+          >
+            Asientos de vuelta
+          </Typography>
+          <PasajeroBilling />
+          <BusMap
+            tipo={2}
+            onSelect={(seat: any) =>
+              console.log("Asiento 2", seat)
+            }
+          />
+        </Box>
+        <CompraSummary tipo="ida" />
+      </Box>
+    ),
+    1: <Step2 />,
+    2: (
+      <Step3 data={formData} setField={setCompradorField} />
+    ),
+    3: (
+      <div
+        style={{
+          backgroundColor: "red",
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        Confirmación
+      </div>
+    ),
+    4: (
+      <div
+        style={{
+          backgroundColor: "blue",
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        Pago
+      </div>
+    ),
   };
 
   return (
@@ -447,5 +419,145 @@ const Header = () => {
         </Box>
       </Box>
     </MotionPaper>
+  );
+};
+
+const Step2 = ({}) => {
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "100%",
+        display: "flex",
+        flexDirection: "column",
+        "@media(min-width: 1000px)": {
+          flexDirection: "row",
+        },
+        gap: 2,
+        padding: "2px",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          minHeight: 0,
+          flex: 1,
+          gap: 4,
+        }}
+      >
+        <Typography variant="h3" className="font-brand">
+          Registro de pasajeros
+        </Typography>
+        <PasajeroCard />
+        <PasajeroCard />
+      </Box>
+      <CompraSummary tipo="vuelta" />
+    </Box>
+  );
+};
+
+const Step3 = ({
+  data,
+  setField,
+}: {
+  data: Compra;
+  setField: (field: keyof Comprador, value: any) => void;
+}) => {
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "100%",
+        display: "flex",
+        flexDirection: "column",
+        "@media(min-width: 1000px)": {
+          flexDirection: "row",
+        },
+        gap: 2,
+        padding: "2px",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          minHeight: 0,
+          flex: 1,
+          gap: 4,
+        }}
+      >
+        <Typography variant="h3" className="font-brand">
+          Datos del comprador
+        </Typography>
+        <TextField
+          label="Nombre (s)"
+          fullWidth
+          required
+          placeholder="Ej. José Armando"
+          value={data.comprador?.nombres}
+          onChange={(e) =>
+            setField("nombres", e.target.value.trim())
+          }
+        />
+        <TextField
+          label="Apellido paterno"
+          fullWidth
+          required
+          placeholder="Ej. Trujillo"
+          value={data.comprador?.apellido_paterno}
+          onChange={(e) =>
+            setField(
+              "apellido_paterno",
+              e.target.value.trim(),
+            )
+          }
+        />
+        <TextField
+          label="Apellido materno (opcional)"
+          fullWidth
+          placeholder="Ej. Guzmán"
+          value={data.comprador?.apellido_materno}
+          onChange={(e) =>
+            setField(
+              "apellido_materno",
+              e.target.value.trim(),
+            )
+          }
+        />
+        <TextField
+          label="Correo electrónico"
+          fullWidth
+          required
+          placeholder="Ej. josetrujillo@gmail.com"
+          type="email"
+          inputMode="email"
+          value={data.comprador?.email}
+          onChange={(e) =>
+            setField("email", e.target.value.trim())
+          }
+        />
+        <TextField
+          label="Teléfono"
+          fullWidth
+          required
+          placeholder="Ej. 777 123 45 67"
+          inputMode="tel"
+          value={data.comprador?.telefono}
+          onChange={(e) =>
+            setField("telefono", e.target.value.trim())
+          }
+        />
+        {data.comprador?.email && (
+          <Alert severity="success">
+            Los boletos serán enviados a{" "}
+            {data.comprador.email}
+          </Alert>
+        )}
+      </Box>
+      <CompraSummary tipo="vuelta" />
+    </Box>
   );
 };

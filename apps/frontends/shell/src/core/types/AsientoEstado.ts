@@ -1,0 +1,7 @@
+export enum AsientoEstado {
+  AVAILABLE = "AVAILABLE",
+  SELECTED = "SELECTED",
+  RESERVED = "RESERVED",
+  SOLD = "SOLD",
+  OUT_OF_SERVICE = "OUT_OF_SERVICE",
+}

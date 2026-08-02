@@ -9,12 +9,11 @@ datasource db {
 model Conductor {
   id Int @id @default(autoincrement())
 
-
   usuario_id Int @unique
 
   // Relación con la institución
   institucion_id Int
-  institucion Institucion @relation(fields: [institucion_id], references: [id])
+  institucion    Institucion @relation(fields: [institucion_id], references: [id])
 
   // Relaciones
   licencias Licencia[]
@@ -22,8 +21,8 @@ model Conductor {
   // Auditoría
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  createdBy String? @db.VarChar(50)
-  updatedBy String? @db.VarChar(50)
+  createdBy String?  @db.VarChar(50)
+  updatedBy String?  @db.VarChar(50)
 
   estatus Boolean @default(true)
 
@@ -34,7 +33,7 @@ model Licencia {
   id Int @id @default(autoincrement())
 
   conductor_id Int
-  conductor Conductor @relation(fields: [conductor_id], references: [id], onDelete: Cascade)
+  conductor    Conductor @relation(fields: [conductor_id], references: [id], onDelete: Cascade)
 
   numero_licencia   String   @unique @db.VarChar(30)
   categoria         String   @db.VarChar(20)
@@ -124,6 +123,7 @@ model Institucion {
   id          Int    @id @default(autoincrement())
   nombre      String @unique @db.VarChar(100)
   descripcion String @db.VarChar(255)
+  imagen_url  String @db.VarChar(255)
   slug        String @unique @db.VarChar(100)
 
   createdAt DateTime @default(now())

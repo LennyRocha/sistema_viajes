@@ -12,6 +12,7 @@ module.exports = {
                     filename: "static/chunks/remoteEntry.js",
                     exposes: {
                         "./ViajesModule": "./src/viajes/pages",
+                        "./MetodosPagoModule": "./src/metodos_pago /pages",
                     },
                     shared,
                     extraOptions: {

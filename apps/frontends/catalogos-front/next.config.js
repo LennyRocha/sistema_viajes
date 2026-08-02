@@ -5,6 +5,14 @@ const path = require("path");
 module.exports = {
     pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
     assetPrefix: 'http://localhost:3002',
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "*",
+            },
+        ],
+    },
     webpack(config, { isServer }) {
         if (!isServer) {
             config.resolve.alias = {
