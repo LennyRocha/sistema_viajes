@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
 import { Institucion } from './institucion.entity';
@@ -8,6 +8,7 @@ import { CreateInstitucionDto } from './dtos/create-institucion.dto';
 import { UpdateInstitucionDto } from './dtos/update-insticuion.dto';
 import slugify from 'slugify';
 import { Prisma } from '@prisma/client';
+import { ClientProxy } from '@nestjs/microservices/client/client-proxy';
 
 const LIST_CACHE_KEY = 'instituciones:list';
 
@@ -16,6 +17,8 @@ export class InstitucionesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
+    @Inject('RECORD_SERVICE')
+    private readonly client: ClientProxy,
     @InjectPinoLogger(InstitucionesService.name)
     private readonly logger: PinoLogger,
   ) {}

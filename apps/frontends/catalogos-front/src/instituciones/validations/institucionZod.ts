@@ -21,6 +21,19 @@ export const institucionSchema = z.object({
       message:
         "La descripción de la institución no puede exceder los 100 caracteres",
     }),
+  imagen_url: z
+    .url({
+      message:
+        "La URL de la imagen de la institución debe ser una URL válida",
+    })
+    .min(5, {
+      message:
+        "La URL de la imagen de la institución debe tener al menos 5 caracteres",
+    })
+    .max(255, {
+      message:
+        "La URL de la imagen de la institución no puede exceder los 255 caracteres",
+    }),
 });
 
 export type InstitucionSchema = z.infer<

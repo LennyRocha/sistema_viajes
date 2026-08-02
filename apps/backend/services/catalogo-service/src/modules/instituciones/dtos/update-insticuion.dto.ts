@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, MaxLength } from 'class-validator';
+import { IsOptional, IsUrl, MaxLength } from 'class-validator';
 
 export class UpdateInstitucionDto {
   @ApiPropertyOptional({
@@ -21,4 +21,15 @@ export class UpdateInstitucionDto {
       'La descripción de la institución no puede exceder los 255 caracteres',
   })
   descripcion!: string;
+  @ApiPropertyOptional({
+    description: 'La URL de la imagen de la institución',
+    example: 'https://ejemplo.com/imagen.png',
+  })
+  @IsOptional()
+  @MaxLength(255, {
+    message:
+      'La URL de la imagen de la institución no puede exceder los 255 caracteres',
+  })
+  @IsUrl({}, { message: 'La URL de la imagen de la institución no es válida' })
+  imagen_url!: string;
 }

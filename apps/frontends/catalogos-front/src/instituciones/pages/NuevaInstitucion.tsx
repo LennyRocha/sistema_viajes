@@ -9,7 +9,7 @@ import {
   PaperHeader,
 } from "@nexoroute/commons";
 import { ChevronLeft } from "@mui/icons-material";
-import { TextField } from "@mui/material";
+import { Avatar, Box, TextField } from "@mui/material";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useCreateInstitucionMutation } from "../api/institucionesApi";
@@ -137,6 +137,45 @@ export default function NuevaInstitucion({
           placeholder="Ingresa el nombre de la institución"
           autoFocus
         />
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+          }}
+        >
+          {watch("imagen_url").trim().length > 0 && (
+            <Avatar
+              alt="logo de la institucion"
+              src={watch("imagen_url").trim()}
+              sx={{ width: 56, height: 56 }}
+              variant="square"
+            />
+          )}
+          <TextField
+            label="Imagen de la institucion"
+            variant="outlined"
+            size="small"
+            type="url"
+            inputMode="url"
+            fullWidth
+            {...register("imagen_url", {
+              required:
+                "La imagen de la institución es requerida",
+            })}
+            error={
+              !!errors.imagen_url || !!errores.imagen_url
+            }
+            helperText={
+              errors.imagen_url?.message ||
+              errores.imagen_url?.join(", ") ||
+              `${watch("imagen_url").trim().length}/255`
+            }
+            required
+            disabled={res.isLoading}
+            placeholder="Ingresa la url de la imagen de la institución"
+            autoFocus
+          />
+        </Box>
         <TextField
           label="Descripcion *"
           variant="outlined"
