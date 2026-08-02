@@ -21,9 +21,11 @@ export default function SeatSelector({
         display: "flex",
         flexDirection: "column",
         gap: 4,
+        width: "100%",
+        position: "static",
       }}
     >
-      <Box sx={{ mx: "auto" }}>
+      <Box sx={{ mx: "auto", display: "block" }}>
         <BusMap
           idTipo={tipo}
           {...(seats && { asientos: seats })}

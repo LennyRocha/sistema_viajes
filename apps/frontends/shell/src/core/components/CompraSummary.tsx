@@ -29,15 +29,31 @@ const CompraSummary = ({
       }}
     >
       <Typography variant="h5" gutterBottom>
-        Viaje de {tipo}
+        Viaje de ida
       </Typography>
       <SummaryHeader
+        imageSize={tipo === "ida" ? "double" : "single"}
         institucionUrl="https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-original-577x577/s3/092010/estrelladeoro.png?itok=LhInlmU8"
         fecha="28 Jul 26"
         hora="08:00 AM"
         origen="Cuernavaca"
         destino="México Taxqueña"
       />
+      {tipo === "vuelta" && (
+        <>
+          <Typography variant="h5" gutterBottom>
+            Viaje de vuelta
+          </Typography>
+          <SummaryHeader
+            imageSize="single"
+            institucionUrl="https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-original-577x577/s3/092010/estrelladeoro.png?itok=LhInlmU8"
+            fecha="28 Jul 26"
+            hora="08:00 AM"
+            origen="Cuernavaca"
+            destino="México Taxqueña"
+          />
+        </>
+      )}
       <Typography variant="subtitle2" gutterBottom>
         01 adulto(s) $208.00
       </Typography>
@@ -118,13 +134,21 @@ const SummaryHeader = ({
   origen,
   destino,
   institucionUrl,
+  imageSize = "single",
 }: {
   fecha: string;
   hora: string;
   origen: string;
   destino: string;
   institucionUrl: string;
+  imageSize: "single" | "double" | "triple";
 }) => {
+  const sizes = {
+    single: { width: 50, height: 50 },
+    double: { width: 75, height: 75 },
+    triple: { width: 100, height: 100 },
+  };
+  const { width, height } = sizes[imageSize];
   return (
     <Box
       sx={{
@@ -135,8 +159,8 @@ const SummaryHeader = ({
       <Image
         src={institucionUrl}
         alt="Institución"
-        width={100}
-        height={100}
+        width={width}
+        height={height}
         style={{ objectFit: "contain" }}
       />
       <Divider sx={{ my: 1 }} />

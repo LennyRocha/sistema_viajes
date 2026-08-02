@@ -1,0 +1,27 @@
+{
+  "bundler": {
+    "name": "webpack"
+  },
+  "mfConfig": {
+    "name": "operaciones",
+    "exposes": {
+      "./ViajesModule": "./src/viajes/pages",
+      "./MetodosPagoModule": "./src/metodos_pago /pages"
+    }
+  },
+  "latestErrorEvent": {
+    "code": "BUILD-001",
+    "message": "Failed to find expose module. #BUILD-001\nargs: {\"exposeModules\":[{\"name\":\"./MetodosPagoModule\",\"module\":null,\"request\":\"./src/metodos_pago /pages\"}],\"FEDERATION_WEBPACK_PATH\":\"\"}\nView the docs to see how to solve: https://module-federation.io/guide/troubleshooting/build#build-001",
+    "args": {
+      "exposeModules": [
+        {
+          "name": "./MetodosPagoModule",
+          "module": null,
+          "request": "./src/metodos_pago /pages"
+        }
+      ],
+      "FEDERATION_WEBPACK_PATH": ""
+    },
+    "timestamp": 1785639001754
+  }
+}
