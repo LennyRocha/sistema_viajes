@@ -150,7 +150,7 @@ DASHBOARD_SERVICE_URL=http://localhost:5004
 ### apps/backend/services/auth-service/.env
 
 ```env
-DATABASE_URL="postgresql://postgres:root@localhost:5432/catalogos_db?schema=auth&options=--search_path%3Dauth"
+DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=auth&options=--search_path%3Dauth"
 REDIS_URL="redis://localhost:6379"
 PORT=5001
 GATEWAY_URL="http://localhost:5000"
@@ -179,9 +179,9 @@ CATALOGO_SERVICE_URL="http://localhost:5002"
 ### apps/backend/services/record-service/.env
 
 ```env
-DATABASE_URL="postgresql://postgres:root@localhost:5432/catalogos_db?schema=dashboard&options=--search_path%3Ddashboard"
+DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=dashboard&options=--search_path%3Ddashboard"
 REDIS_URL="redis://localhost:6379"
-PORT=5002
+PORT=5004
 GATEWAY_URL="http://localhost:5000"
 ```
 
