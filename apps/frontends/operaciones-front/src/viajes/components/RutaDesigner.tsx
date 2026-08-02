@@ -28,7 +28,7 @@ import GoogleRouteMap, {
   getPlaceDetails,
   searchPlacePredictions,
 } from "./GoogleRouteMap";
-import { createRuta } from "../api/operacionesHttp";
+import { createRuta, updateRuta } from "../api/operacionesHttp";
 import GeoPoint from "../types/GeoPoint";
 import RutaBase from "../types/RutaBase";
 
@@ -38,6 +38,8 @@ type MapPointAction = {
 
 type Props = {
   onSaved?: () => Promise<void> | void;
+  initialRoute?: RutaBase | null;
+  routeId?: number | null;
   snack?: {
     success?: (args: { message: string }) => void;
     error?: (args: { message: string }) => void;
@@ -85,8 +87,14 @@ function routeDraftFromPoints(
   };
 }
 
-export default function RutaDesigner({ onSaved, snack }: Readonly<Props>) {
+export default function RutaDesigner({
+  onSaved,
+  initialRoute = null,
+  routeId = null,
+  snack,
+}: Readonly<Props>) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const isEditing = Boolean(initialRoute && routeId);
   const [isSaving, setIsSaving] = React.useState(false);
   const [nombreRuta, setNombreRuta] = React.useState("");
   const [descripcionRuta, setDescripcionRuta] = React.useState("");
@@ -222,6 +230,42 @@ export default function RutaDesigner({ onSaved, snack }: Readonly<Props>) {
     setActivePanel("origen");
   }, []);
 
+  React.useEffect(() => {
+    if (!initialRoute) {
+      resetRouteForm();
+      return;
+    }
+
+    const stopMinutes = initialRoute.paradas.reduce(
+      (total, parada) => total + (parada.tiempoParadaMin ?? DEFAULT_STOP_MINUTES),
+      0,
+    );
+
+    setNombreRuta(initialRoute.nombre);
+    setDescripcionRuta(initialRoute.descripcion || "");
+    setOrigenInput(initialRoute.origen.direccion || "");
+    setDestinoInput(initialRoute.destino.direccion || "");
+    setOrigenOptions([]);
+    setDestinoOptions([]);
+    setOrigen({ ...initialRoute.origen, nombre: initialRoute.origen.nombre || "Origen" });
+    setDestino({ ...initialRoute.destino, nombre: initialRoute.destino.nombre || "Destino" });
+    setParadas(
+      initialRoute.paradas.map((parada, index) => ({
+        ...parada,
+        nombre: parada.nombre || `Parada ${index + 1}`,
+        tiempoParadaMin: parada.tiempoParadaMin ?? DEFAULT_STOP_MINUTES,
+      })),
+    );
+    setRouteMetrics({
+      distanciaMetros: Math.round((initialRoute.distanciaKm || 0) * 1000),
+      duracionSegundos: Math.max(0, (initialRoute.duracionMin - stopMinutes) * 60),
+      overviewPath: initialRoute.waypoints || [],
+    });
+    setRouteMissingFields([]);
+    setTarget("origen");
+    setActivePanel("origen");
+  }, [initialRoute, resetRouteForm]);
+
   const openMapPanel = React.useCallback((nextTarget: "origen" | "destino" | "parada") => {
     setTarget(nextTarget);
     setActivePanel(nextTarget);
@@ -282,7 +326,7 @@ export default function RutaDesigner({ onSaved, snack }: Readonly<Props>) {
 
     try {
       setIsSaving(true);
-      await createRuta({
+      const body = {
         nombre: nombreRuta.trim(),
         descripcion: descripcionRuta.trim(),
         origen: cleanPoint(origen),
@@ -297,10 +341,16 @@ export default function RutaDesigner({ onSaved, snack }: Readonly<Props>) {
               total + (parada.tiempoParadaMin ?? DEFAULT_STOP_MINUTES) * 60,
             0,
           ),
-        estatus: true,
-      });
-      snack?.success?.({ message: "Ruta guardada" });
-      resetRouteForm();
+        estatus: initialRoute?.estatus ?? true,
+      };
+
+      if (isEditing && routeId) {
+        await updateRuta(routeId, body);
+      } else {
+        await createRuta(body);
+      }
+      snack?.success?.({ message: isEditing ? "Ruta actualizada" : "Ruta guardada" });
+      if (!isEditing) resetRouteForm();
       await onSaved?.();
     } catch (error) {
       snack?.error?.({
@@ -723,7 +773,7 @@ export default function RutaDesigner({ onSaved, snack }: Readonly<Props>) {
             </Stack>
           </Box>
           <Button variant="contained" size="large" onClick={saveRoute} disabled={isSaving}>
-            Guardar ruta
+            {isEditing ? "Actualizar ruta" : "Guardar ruta"}
           </Button>
         </PaperBlock>
       </Box>

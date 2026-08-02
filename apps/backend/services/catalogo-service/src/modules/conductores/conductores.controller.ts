@@ -20,7 +20,7 @@ import { UpdateConductorDto } from './dtos/update-conductor.dto';
 @ApiTags('conductores')
 @Controller('conductores')
 export class ConductoresController {
-  constructor(private readonly conductores: ConductoresService) {}
+  constructor(private readonly conductores: ConductoresService) { }
 
   @Post()
   @HttpCode(201)
@@ -46,6 +46,20 @@ export class ConductoresController {
   @ApiParam({ name: 'id', example: '1' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.conductores.findOne(id);
+  }
+
+  @Get('/salidas/:id')
+  @ApiOperation({
+    summary: 'Obtener conductor para módulo de salidas',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+  })
+  findConductorSalida(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.conductores.findConductorSalida(id);
   }
 
   @Patch(':id')

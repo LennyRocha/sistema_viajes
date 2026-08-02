@@ -154,6 +154,7 @@ DATABASE_URL="postgresql://postgres:root@localhost:5432/catalogos_db?schema=auth
 REDIS_URL="redis://localhost:6379"
 PORT=5001
 GATEWAY_URL="http://localhost:5000"
+CATALOGO_SERVICE_URL="http://localhost:5002"
 ```
 
 ### apps/backend/services/catalogo-service/.env
@@ -163,6 +164,8 @@ PORT=5002
 DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=public"
 REDIS_URL="redis://localhost:6379"
 GATEWAY_URL="http://localhost:5000"
+AUTH_SERVICE_URL="http://localhost:5001"
+OPERACIONES_SERVICE_URL="http://localhost:5003"
 ```
 
 ### apps/backend/services/operaciones-service/.env
@@ -170,6 +173,7 @@ GATEWAY_URL="http://localhost:5000"
 ```env
 PORT=5003
 DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=operaciones&options=--search_path%3Doperaciones"
+CATALOGO_SERVICE_URL="http://localhost:5002"
 ```
 
 ### apps/backend/services/record-service/.env
