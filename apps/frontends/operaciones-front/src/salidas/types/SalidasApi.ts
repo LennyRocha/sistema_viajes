@@ -1,0 +1,100 @@
+import { ViajeBaseApi } from "../../viajes/types/OperacionesApi";
+
+export type TipoSalida = "UNICA" | "RECURRENTE" | "ESPECIAL";
+export type EstadoSalida = "PROGRAMADO" | "EN_CURSO" | "FINALIZADO" | "CANCELADO";
+
+export type InstitucionResumen = {
+  id: number;
+  nombre: string;
+  descripcion?: string | null;
+  slug?: string | null;
+  estatus?: boolean;
+};
+
+export type TipoAutobusResumen = {
+  id?: number;
+  nombre?: string;
+  descripcion?: string | null;
+  modelo?: string | null;
+  slug?: string | null;
+};
+
+export type AutobusResumen = {
+  id?: number;
+  alias?: string;
+  marca?: string;
+  modelo?: string;
+  descripcion?: string;
+  ano?: number;
+  capacidad?: number;
+  color?: string;
+  codigo_interno?: string;
+  estado?: string;
+  estatus?: boolean;
+  institucion_id?: number;
+  tipo_autobus_id?: number;
+  institucion?: InstitucionResumen;
+  tipoAutobus?: TipoAutobusResumen;
+};
+
+export type LicenciaResumen = {
+  numero_licencia?: string;
+  tipo?: string;
+  fecha_vencimiento?: string;
+  imagen_licencia?: string;
+};
+
+export type ConductorResumen = {
+  id: number;
+  nombres: string;
+  apellido_paterno?: string;
+  apellido_materno?: string;
+  curp?: string;
+  telefono?: string;
+  email?: string;
+  foto_perfil?: string;
+  institucion_id?: number;
+  institucion?: InstitucionResumen;
+  licencia?: LicenciaResumen | null;
+  estatus?: boolean;
+};
+
+export type PrecioRutaSalida = {
+  rutaId: number;
+  orden: number;
+  nombre: string;
+  precio: number;
+};
+
+export type CreateSalidaBody = {
+  autobusId: number;
+  conductorId: number;
+  viajeBaseId: number;
+  horario_configuracion: {
+    fecha: string;
+    hora: string;
+    fechaHoraLocal: string;
+    zonaHoraria: string;
+  };
+  tipoSalida: TipoSalida;
+  estadoSalida: EstadoSalida;
+  precios: {
+    moneda: "MXN";
+    rutas: PrecioRutaSalida[];
+  };
+};
+
+export type SalidaCreada = CreateSalidaBody & {
+  id?: number;
+  estatus?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type SalidaCatalogData = {
+  viajes: ViajeBaseApi[];
+  instituciones: InstitucionResumen[];
+  autobuses: AutobusResumen[];
+  conductores: ConductorResumen[];
+  errores?: string[];
+};

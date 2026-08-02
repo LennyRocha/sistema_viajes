@@ -11,6 +11,7 @@ module.exports = {
 
                 exposes: {
                     "./ViajesModule": "./src/viajes/pages",
+                    "./SalidasModule": "./src/salidas/pages",
                 },
 
                 shared,
