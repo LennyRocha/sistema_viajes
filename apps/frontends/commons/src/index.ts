@@ -7,11 +7,14 @@ export { default as OptionsDrawer } from "./drawers/OptionsDrawer";
 export { default as DrawerOptionsMenu } from "./drawers/DrawerOptionsMenu";
 export { default as NotificationsButton } from "./drawers/NotificationsButton";
 
+export { default as NumberField } from "./forms/NumberField";
+
 export { default as NavSidebarContent } from "./components/NavSidebarContent";
 export { default as MotionPaper } from "./components/MotionPaper";
 export { default as PaperBlock } from "./components/PaperBlock";
 export { default as Breadcrumb } from "./components/Breadcrumb";
 export { default as FormButtonsRow } from "./components/FormButtonsRow";
+export { default as CenteredDiv } from "./components/CenteredDiv";
 export { SnackBox } from "./components/SnackBox";
 export { snack } from "./components/SnackBox";
 

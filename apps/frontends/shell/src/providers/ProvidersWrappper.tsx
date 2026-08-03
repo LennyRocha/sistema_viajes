@@ -7,6 +7,8 @@ import { SidebarProvider } from "./SidebarProvider";
 import { DialogProvider } from "./DialogProvider";
 import { SnackBox } from "@nexoroute/commons";
 import { initFederation } from "@/src/lib/federation";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import PrintSaludo from "../utils/saludo";
 
 initFederation();
@@ -21,8 +23,12 @@ export default function ProvidersWrapper({
       <ThemeProvider theme={theme}>
         <SidebarProvider>
           <DialogProvider>
-            <CssBaseline />
-            {children}
+            <LocalizationProvider
+              dateAdapter={AdapterDayjs}
+            >
+              {children}
+              <CssBaseline />
+            </LocalizationProvider>
             <PrintSaludo />
             <SnackBox />
           </DialogProvider>

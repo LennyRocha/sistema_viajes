@@ -56,7 +56,7 @@ const FRONTS = {
         command: 'pnpm',
         args: ['dev'],
         port: 3003,
-        color: 'orange',
+        color: 'yellow',
     },
 };
 

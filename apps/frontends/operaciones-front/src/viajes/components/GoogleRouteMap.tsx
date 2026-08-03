@@ -17,6 +17,7 @@ import {
   Stack,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt";
 import CloseIcon from "@mui/icons-material/Close";
@@ -1001,6 +1002,8 @@ export default function GoogleRouteMap({
     setSimulationStep(0);
   };
 
+  const theme = useTheme();
+
   return (
     <Box
       sx={{
@@ -1113,7 +1116,7 @@ export default function GoogleRouteMap({
             borderRadius: "8px",
             border: "1px solid",
             borderColor: "rgba(15, 23, 42, 0.10)",
-            backgroundColor: "rgba(255,255,255,0.98)",
+            backgroundColor: theme.palette.background.default,
             boxShadow: "0 18px 36px rgba(15, 23, 42, 0.18)",
             backdropFilter: "blur(8px)",
           }}
@@ -1353,7 +1356,7 @@ export default function GoogleRouteMap({
             maxHeight: "calc(100% - 32px)",
             overflow: "auto",
             borderRadius: "8px",
-            backgroundColor: "rgba(255,255,255,0.98)",
+            backgroundColor: theme.palette.background.paper,
             boxShadow: "0 18px 36px rgba(15, 23, 42, 0.20)",
             border: "1px solid",
             borderColor: "rgba(15, 23, 42, 0.10)",
@@ -1399,7 +1402,7 @@ export default function GoogleRouteMap({
               maxWidth: 420,
               p: 1.5,
               borderRadius: "8px",
-              backgroundColor: "rgba(255,255,255,0.94)",
+              backgroundColor: theme.palette.background.paper,
               boxShadow: "0 12px 30px rgba(15, 23, 42, 0.18)",
             }}
           >

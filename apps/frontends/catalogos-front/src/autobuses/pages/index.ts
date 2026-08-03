@@ -1,6 +1,7 @@
 import AutobusesIndexPage from "./AutobusesIndex";
 import NuevoAutobusPage from "./NuevoAutobus";
 import EditarAutobusPage from "./EditarAutobus";
+import VehiculoCards from "../../tipos_autobus/components/VehiculoCards";
 
 export { default as KonvaPage } from "./KonvaPage";
 export { default as SeatSelector } from "./SeatSelector";
@@ -16,3 +17,6 @@ export const NuevoAutobus = withProviders(NuevoAutobusPage);
 export const EditarAutobus = withProviders(
   EditarAutobusPage,
 );
+
+export const VehiculoCardsPage =
+  withProviders(VehiculoCards);
