@@ -1273,19 +1273,41 @@ const DestinosSection = ({
                 title={item.title}
                 subtitle={item.author}
                 actionIcon={
-                  <Tooltip title="Ver viajes">
-                    <IconButton
-                      color="default"
-                      aria-label={`info about ${item.title}`}
-                      onClick={() =>
-                        router.push(
-                          "/viajes/terminal-san-casteabro-a-terminal-tempinotitlan",
-                        )
-                      }
-                    >
-                      <ConfirmationNumber />
-                    </IconButton>
-                  </Tooltip>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 0.5,
+                      alignItems: "center",
+                      width: "fit-content"
+                    }}
+                  >
+                    <Tooltip title="Simular viaje">
+                      <IconButton
+                        color="default"
+                        aria-label={`info about ${item.title}`}
+                        onClick={() =>
+                          router.push(
+                            "/simular_viaje/terminal-san-casteabro-a-terminal-tempinotitlan",
+                          )
+                        }
+                      >
+                        <Map />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Ver viajes">
+                      <IconButton
+                        color="default"
+                        aria-label={`info about ${item.title}`}
+                        onClick={() =>
+                          router.push(
+                            "/viajes/terminal-san-casteabro-a-terminal-tempinotitlan",
+                          )
+                        }
+                      >
+                        <ConfirmationNumber />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 }
               />
             </ImageListItem>
