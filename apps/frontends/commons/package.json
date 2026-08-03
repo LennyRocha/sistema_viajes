@@ -25,6 +25,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@base-ui/react": "^1.6.0",
     "@mui/x-data-grid": "^9.7.0",
     "react-data-table-component": "^8.4.0"
   }

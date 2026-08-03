@@ -412,7 +412,7 @@ export default function ProgramacionSalidas({ snack }: Readonly<Props>) {
       <PaperHeader
         title="Programacion de salidas"
         subtitle="Flujo guiado para elegir viaje base, configurar rutas, fecha, unidad y conductor."
-        iconname="calendar"
+        iconname="event_available"
         showButton={false}
       />
 

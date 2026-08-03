@@ -607,7 +607,7 @@ export default function NuevoViaje({
             <PaperBlock
               title="Vista previa del viaje"
               subtitle="El orden sale de tu seleccion. Si dos rutas no conectan, se dibuja un enlace operativo punteado."
-              paperProps={{ sx: { p: 0, overflow: "hidden" } }}
+              paperProps={{ sx: { p: 2, overflow: "hidden" } }}
               contentWrapperSx={{ p: 0 }}
             >
               {selectedRoutes.length === 0 && (
