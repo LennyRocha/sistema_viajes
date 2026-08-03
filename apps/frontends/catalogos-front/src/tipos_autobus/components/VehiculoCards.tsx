@@ -65,7 +65,6 @@ export default function VehiculoCards({
     <Grid container spacing={1}>
       <Grid size={{ xs: 12, md: 4 }}>
         <Card variant="outlined">
-          {" "}
           <CenteredDiv>
             {isLoaded ? (
               <Vehiculo3D
