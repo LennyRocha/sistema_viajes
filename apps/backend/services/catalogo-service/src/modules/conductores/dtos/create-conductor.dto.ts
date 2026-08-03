@@ -56,8 +56,8 @@ export class CreateConductorDto {
   email!: string;
 
   @IsNotEmpty({ message: 'La foto de perfil es obligatoria' })
-  @MaxLength(255, {
-    message: 'La ruta de la foto no puede exceder los 255 caracteres',
+  @MaxLength(3_000_000, {
+    message: 'La foto de perfil no puede exceder el tamano permitido',
   })
   foto_perfil!: string;
 

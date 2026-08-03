@@ -57,6 +57,26 @@ export default function NuevoConductor({
       }));
     };
 
+  const handleValueChange = (field: keyof FormState, value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleLicenciaValueChange = (
+    field: keyof FormState["licencia"],
+    value: string,
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      licencia: {
+        ...prev.licencia,
+        [field]: value,
+      },
+    }));
+  };
+
   // 1. Añadimos el evento como parámetro para prevenir la recarga
   const handleSubmit = async (e?: React.FormEvent | React.MouseEvent) => {
     // Evita que el navegador recargue la página
@@ -83,10 +103,7 @@ export default function NuevoConductor({
 
       setErrors(fieldErrors);
       
-      // 2. Validación más segura para evitar "snack is not a function"
-      if (typeof snack === "function") {
-        snack("Revisa los campos marcados en rojo", "error");
-      }
+      snack?.error?.({ message: "Revisa los campos marcados en rojo" });
       return;
     }
 
@@ -101,9 +118,7 @@ export default function NuevoConductor({
 
       console.log("Respuesta:", response);
 
-      if (typeof snack === "function") {
-        snack("Conductor creado correctamente", "success");
-      }
+      snack?.success?.({ message: "Conductor creado correctamente" });
 
       console.log("Navegando...");
 
@@ -115,12 +130,9 @@ export default function NuevoConductor({
       console.log("Ya navegué");
     } catch (err: any) {
       console.error(err);
-      if (typeof snack === "function") {
-        snack(
-          err?.data?.message ?? "No se pudo crear el conductor",
-          "error"
-        );
-      }
+      snack?.error?.({
+        message: err?.data?.message ?? "No se pudo crear el conductor",
+      });
     }
   };
 
@@ -164,6 +176,8 @@ export default function NuevoConductor({
         showLicencia
         onChange={handleChange}
         onLicenciaChange={handleLicenciaChange}
+        onValueChange={handleValueChange}
+        onLicenciaValueChange={handleLicenciaValueChange}
         onSubmit={handleSubmit}
         onCancel={() => {
           if (typeof navigationFunction === "function") {

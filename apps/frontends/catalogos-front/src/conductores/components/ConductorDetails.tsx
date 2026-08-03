@@ -1,12 +1,23 @@
 import React from "react";
-import Conductor from "../types/Conductor";
 import { Box, Divider, Typography } from "@mui/material";
+import Conductor from "../types/Conductor";
 
 type Props = {
   row: Conductor;
 };
 
+const formatDate = (value?: string) =>
+  value ? new Date(value).toLocaleDateString() : "Sin fecha";
+
 const ConductorDetails = ({ row }: Props) => {
+  const nombreCompleto = [
+    row.nombres,
+    row.apellido_paterno,
+    row.apellido_materno,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <>
       <Box
@@ -18,27 +29,23 @@ const ConductorDetails = ({ row }: Props) => {
           justifyContent: "center",
         }}
       >
-        <Typography
-          variant="h6"
-          color="secondary"
-          sx={{ fontWeight: "600" }}
-        >
+        <Typography variant="h6" color="secondary" sx={{ fontWeight: 600 }}>
           Datos personales
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          Nombre: {row.nombre} {row.apellido}
+          Nombre: {nombreCompleto}
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          Cédula: {row.curp}
+          CURP: {row.curp}
         </Typography>
         <Typography variant="caption" color="textSecondary">
           Email: {row.email}
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          Teléfono: {row.telefono}
+          Telefono: {row.telefono}
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          Fecha de nacimiento: {new Date(row.fecha_nacimiento).toLocaleDateString()}
+          Fecha de nacimiento: {formatDate(row.fecha_nacimiento)}
         </Typography>
         <Divider />
       </Box>
@@ -52,25 +59,29 @@ const ConductorDetails = ({ row }: Props) => {
           justifyContent: "center",
         }}
       >
-        <Typography
-          variant="h6"
-          color="secondary"
-          sx={{ fontWeight: "600" }}
-        >
+        <Typography variant="h6" color="secondary" sx={{ fontWeight: 600 }}>
           Licencia
         </Typography>
-        <Typography variant="caption" color="textSecondary">
-          Número: {row.licencia.numeroLicencia}
-        </Typography>
-        <Typography variant="caption" color="textSecondary">
-          Expedida: {new Date(row.licencia.fechaExpedicion).toLocaleDateString()}
-        </Typography>
-        <Typography variant="caption" color="textSecondary">
-          Vence: {new Date(row.licencia.fechaVencimiento).toLocaleDateString()}
-        </Typography>
-        <Typography variant="caption" color="textSecondary">
-          Estado emisor: {row.licencia.estadoEmisor}
-        </Typography>
+        {row.licencia ? (
+          <>
+            <Typography variant="caption" color="textSecondary">
+              Numero: {row.licencia.numero_licencia}
+            </Typography>
+            <Typography variant="caption" color="textSecondary">
+              Expedida: {formatDate(row.licencia.fecha_expedicion)}
+            </Typography>
+            <Typography variant="caption" color="textSecondary">
+              Vence: {formatDate(row.licencia.fecha_vencimiento)}
+            </Typography>
+            <Typography variant="caption" color="textSecondary">
+              Estado emisor: {row.licencia.estado_emisor}
+            </Typography>
+          </>
+        ) : (
+          <Typography variant="caption" color="textSecondary">
+            Sin licencia registrada
+          </Typography>
+        )}
         <Divider />
       </Box>
 
@@ -83,18 +94,14 @@ const ConductorDetails = ({ row }: Props) => {
           justifyContent: "center",
         }}
       >
-        <Typography
-          variant="h6"
-          color="secondary"
-          sx={{ fontWeight: "600" }}
-        >
-          Información administrativa
+        <Typography variant="h6" color="secondary" sx={{ fontWeight: 600 }}>
+          Informacion administrativa
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          Institución: {row.institucion.nombre}
+          Institucion: {row.institucion?.nombre || "Sin institucion"}
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          Estado: {row.estado}
+          Estado: {row.estatus ? "Activo" : "Inactivo"}
         </Typography>
       </Box>
     </>

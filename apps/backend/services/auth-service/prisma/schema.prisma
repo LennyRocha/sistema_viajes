@@ -19,7 +19,7 @@ model Usuario {
   fecha_nacimiento DateTime @db.Date
   telefono         String   @unique @db.VarChar(15)
   email            String   @unique @db.VarChar(150)
-  foto_perfil      String   @db.VarChar(255)
+  foto_perfil      String   @db.Text
   foto_base64      String?  @db.Text
   contra           String   @db.VarChar(255)
 

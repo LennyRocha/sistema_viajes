@@ -2,12 +2,8 @@ import {
   IsOptional,
   MaxLength,
   IsDateString,
-  ValidateNested,
   IsNumber,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-
-import { UpdateLicenciaDto } from 'src/modules/licencias/dtos/update-licencia.dto';
 export class UpdateConductorDto {
   // ==========================
   // Datos del conductor
@@ -42,7 +38,9 @@ export class UpdateConductorDto {
   email?: string;
 
   @IsOptional()
-  @MaxLength(255)
+  @MaxLength(3_000_000, {
+    message: 'La foto de perfil no puede exceder el tamano permitido',
+  })
   foto_perfil?: string;
 
   @IsOptional()

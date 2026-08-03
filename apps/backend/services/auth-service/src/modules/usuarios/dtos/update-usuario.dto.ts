@@ -5,7 +5,6 @@ import {
   IsEmail,
   IsOptional,
   IsPhoneNumber,
-  IsUrl,
   MaxLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -89,14 +88,10 @@ export class UpdateUsuarioDto {
     example: 'https://example.com/foto_perfil.jpg',
   })
   @IsOptional()
-  @MaxLength(255, {
+  @MaxLength(3_000_000, {
     message:
-      'La foto de perfil del usuario no puede exceder los 255 caracteres',
+      'La foto de perfil del usuario no puede exceder el tamano permitido',
   })
-  @IsUrl(
-    {},
-    { message: 'La foto de perfil del usuario debe ser una URL válida' },
-  )
   foto_perfil?: string;
   @ApiPropertyOptional({
     description: 'La foto de perfil del usuario en base64 (opcional)',
