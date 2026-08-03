@@ -7,6 +7,7 @@ import {
   InstitucionResumen,
   SalidaCatalogData,
   SalidaCreada,
+  SalidaDetalle,
 } from "../types/SalidasApi";
 import { ViajeBaseApi } from "../../viajes/types/OperacionesApi";
 
@@ -128,5 +129,26 @@ export function createSalida(body: CreateSalidaBody) {
   return request<SalidaCreada>("/salidas", {
     method: "POST",
     body: JSON.stringify(body),
+  });
+}
+
+export function getSalidas() {
+  return request<SalidaDetalle[]>("/salidas");
+}
+
+export function getSalida(id: number) {
+  return request<SalidaDetalle>(`/salidas/${id}`);
+}
+
+export function updateSalida(id: number, body: Partial<CreateSalidaBody>) {
+  return request<SalidaDetalle>(`/salidas/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export function cancelSalida(id: number) {
+  return request<SalidaDetalle>(`/salidas/${id}/cancelar`, {
+    method: "PATCH",
   });
 }

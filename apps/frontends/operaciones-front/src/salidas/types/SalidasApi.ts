@@ -91,6 +91,58 @@ export type SalidaCreada = CreateSalidaBody & {
   updatedAt?: string;
 };
 
+export type SalidaDetalle = {
+  id: number;
+  autobusId: number;
+  conductorId: number;
+  viajeBaseId: number;
+  tipoSalida: TipoSalida;
+  estadoSalida: EstadoSalida;
+  estatus: boolean;
+  horario_configuracion: Record<string, any>;
+  horaSalida: string | null;
+  lugarSalida: Record<string, any> | null;
+  lugarLlegada: Record<string, any> | null;
+  precio: number | null;
+  precios: Record<string, any>;
+  autobus: {
+    id: number;
+    alias?: string;
+    marca?: string;
+    modelo?: string;
+    codigo_interno?: string;
+    institucion?: {
+      id?: number | null;
+      nombre?: string | null;
+      imagen_url?: string | null;
+    } | null;
+    servicios: Array<{
+      id?: number | null;
+      nombre?: string | null;
+      descripcion?: string | null;
+      icono_nombre?: string | null;
+      activo?: boolean;
+      config_servicio?: Record<string, any> | null;
+    }>;
+  } | null;
+  viajeBase: {
+    id: number;
+    nombre?: string | null;
+    descripcion?: string | null;
+    estatus?: boolean;
+    rutas: Array<{
+      id: number;
+      orden: number;
+      rutaId: number;
+      nombre?: string | null;
+      origen?: Record<string, any> | null;
+      destino?: Record<string, any> | null;
+    }>;
+  } | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type SalidaCatalogData = {
   viajes: ViajeBaseApi[];
   instituciones: InstitucionResumen[];
