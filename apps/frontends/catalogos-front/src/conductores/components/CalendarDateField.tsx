@@ -8,6 +8,7 @@ import {
   Box,
   IconButton,
   InputAdornment,
+  MenuItem,
   Popover,
   TextField,
   Typography,
@@ -64,6 +65,16 @@ function getMonthCells(viewDate: Date) {
   });
 }
 
+function getYearOptions(viewDate: Date, value: string) {
+  const selected = parseDate(value);
+  const baseYear = selected?.getFullYear() || viewDate.getFullYear();
+  const currentYear = new Date().getFullYear();
+  const start = Math.min(baseYear, currentYear) - 80;
+  const end = Math.max(baseYear, currentYear) + 20;
+
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+}
+
 export default function CalendarDateField({
   label,
   value,
@@ -80,6 +91,10 @@ export default function CalendarDateField({
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [viewDate, setViewDate] = React.useState(() => parseDate(value) || new Date());
   const selectedValue = value;
+  const yearOptions = React.useMemo(
+    () => getYearOptions(viewDate, value),
+    [viewDate, value],
+  );
 
   React.useEffect(() => {
     const parsed = parseDate(value);
@@ -127,13 +142,46 @@ export default function CalendarDateField({
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
         <Box sx={{ width: 316, p: 1.25 }}>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "36px minmax(0, 1fr) 92px 36px",
+              gap: 0.75,
+              alignItems: "center",
+              mb: 1,
+            }}
+          >
             <IconButton aria-label="Mes anterior" onClick={() => moveMonth(-1)}>
               <ChevronLeftIcon />
             </IconButton>
-            <Typography sx={{ fontWeight: 950 }}>
-              {MONTHS[viewDate.getMonth()]} {viewDate.getFullYear()}
-            </Typography>
+            <TextField
+              select
+              size="small"
+              value={viewDate.getMonth()}
+              onChange={(event) =>
+                setViewDate((current) => new Date(current.getFullYear(), Number(event.target.value), 1))
+              }
+            >
+              {MONTHS.map((month, index) => (
+                <MenuItem key={month} value={index}>
+                  {month}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              select
+              size="small"
+              value={viewDate.getFullYear()}
+              onChange={(event) =>
+                setViewDate((current) => new Date(Number(event.target.value), current.getMonth(), 1))
+              }
+            >
+              {yearOptions.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </TextField>
             <IconButton aria-label="Mes siguiente" onClick={() => moveMonth(1)}>
               <ChevronRightIcon />
             </IconButton>
