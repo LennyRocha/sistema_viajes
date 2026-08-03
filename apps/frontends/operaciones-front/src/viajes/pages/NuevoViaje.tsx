@@ -70,7 +70,25 @@ const SORT_OPTIONS: Array<{ value: CatalogSortOption; label: string }> = [
 function readImageAsBase64(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const maxSize = 1280;
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(image.width * scale);
+        canvas.height = Math.round(image.height * scale);
+        const context = canvas.getContext("2d");
+        if (!context) {
+          resolve(String(reader.result));
+          return;
+        }
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.84));
+      };
+      image.onerror = () => reject(new Error("No se pudo procesar la imagen"));
+      image.src = String(reader.result);
+    };
     reader.onerror = () => reject(new Error("No se pudo leer la imagen"));
     reader.readAsDataURL(file);
   });
@@ -182,7 +200,10 @@ export default function NuevoViaje({
   const duracionTotalViajeMin = duracionCalculadaViajeMin + margenViajeMin;
   const viajeImage = imagenViajePreview || DEFAULT_VIAJE_IMAGE;
   const storesImagesAsBase64 =
-    (process.env.NEXT_PUBLIC_IMAGE_STORAGE_MODE || "base64") === "base64";
+    (
+      process.env.NEXT_PUBLIC_IMAGE_STORAGE_MODE ||
+      (process.env.NODE_ENV === "production" ? "url" : "base64")
+    ) === "base64";
 
   React.useEffect(() => {
     if (!isEditing || !viajeId) return;

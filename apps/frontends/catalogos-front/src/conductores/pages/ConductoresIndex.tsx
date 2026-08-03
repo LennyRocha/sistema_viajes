@@ -10,6 +10,7 @@ import { Add, FilterList } from "@mui/icons-material";
 import { Alert, Box, IconButton, TextField } from "@mui/material";
 import buildConductoresColumns from "../utils/buildConductoresColumns";
 import ConductorDetails from "../components/ConductorDetails";
+import Conductor from "../types/Conductor";
 import {
   useGetConductoresQuery,
   useChangeStatusConductorMutation,
@@ -65,10 +66,10 @@ export default function ConductoresIndex({
   const handleToggleActive = async (row: { id: number }) => {
     try {
       await changeStatus({ id: row.id }).unwrap();
-      snack?.("Estado actualizado correctamente", "success");
+      snack?.success?.({ message: "Estado actualizado correctamente" });
     } catch (error) {
       console.error(error);
-      snack?.("No se pudo cambiar el estado del conductor", "error");
+      snack?.error?.({ message: "No se pudo cambiar el estado del conductor" });
     }
   };
 
@@ -93,12 +94,12 @@ export default function ConductoresIndex({
         buttonTitle="Nuevo"
         leftIcon={<Add />}
       />
-      <Tabla
+      <Tabla<Conductor>
         titulo="Conductores"
         subtitulo="Listado de conductores disponibles"
         columnas={columnas}
         data={filteredConductores}
-        loading={isLoading || isFetching}
+        isLoading={isLoading || isFetching}
         onEditClick={(row) =>
           navigationFunction(`/dashboard/conductores/editar/${row.id}`)
         }

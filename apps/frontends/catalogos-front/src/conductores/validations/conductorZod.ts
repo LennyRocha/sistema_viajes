@@ -78,8 +78,8 @@ export const conductorSchema = z.object({
     .min(1, {
       message: "La foto de perfil es obligatoria",
     })
-    .max(255, {
-      message: "La ruta de la foto no puede exceder los 255 caracteres",
+    .max(3_000_000, {
+      message: "La foto no puede exceder el tamano permitido",
     }),
   institucion_id: z.number().min(1, {
     message: "El ID de la institución es obligatorio",

@@ -7,32 +7,36 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log('🌱 Iniciando seed...');
+  console.log('Iniciando seed de catalogo...');
 
-  // 1. Limpieza total y reinicio de IDs usando SQL Nativo con CASCADE.
-  // Esto elimina automáticamente registros dependientes (como Conductores) sin romper llaves foráneas.
-  await prisma.$executeRawUnsafe(`
-    TRUNCATE TABLE "Institucion" RESTART IDENTITY CASCADE;
-    TRUNCATE TABLE "TipoAutobus" RESTART IDENTITY CASCADE;
-  `);
+  const buses = await Promise.all(
+    tiposAutobusSeeds.map((tipo) =>
+      prisma.tipoAutobus.upsert({
+        where: { nombre: tipo.nombre },
+        update: tipo,
+        create: tipo,
+      }),
+    ),
+  );
 
-  // 2. Inserción de datos de prueba
-  const buses = await prisma.tipoAutobus.createMany({
-    data: tiposAutobusSeeds,
-  });
+  const inst = await Promise.all(
+    institucionesSeeds.map((institucion) =>
+      prisma.institucion.upsert({
+        where: { slug: institucion.slug },
+        update: institucion,
+        create: institucion,
+      }),
+    ),
+  );
 
-  const inst = await prisma.institucion.createMany({
-    data: institucionesSeeds,
-  });
-
-  console.log(`✅ Seed completado:`);
-  console.log(`   - Tipos de Autobús creados: ${buses.count}`);
-  console.log(`   - Instituciones creadas: ${inst.count}`);
+  console.log('Seed de catalogo completado:');
+  console.log(`   - Tipos de autobus sincronizados: ${buses.length}`);
+  console.log(`   - Instituciones sincronizadas: ${inst.length}`);
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error en el seed:', e);
+    console.error('Error en el seed:', e);
     process.exit(1);
   })
   .finally(async () => {

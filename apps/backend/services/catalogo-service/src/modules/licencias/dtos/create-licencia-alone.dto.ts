@@ -49,8 +49,8 @@ export class CreateLicenciaAloneDto {
   @IsString({
     message: 'La imagen de la licencia debe ser una cadena de texto',
   })
-  @MaxLength(255, {
-    message: 'La ruta de la imagen no puede exceder los 255 caracteres',
+  @MaxLength(3_000_000, {
+    message: 'La imagen de la licencia no puede exceder el tamano permitido',
   })
   imagen_licencia!: string;
 

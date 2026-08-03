@@ -87,6 +87,8 @@ NEXT_PRIVATE_LOCAL_WEBPACK=true
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
 NEXT_PRIVATE_LOCAL_WEBPACK=true
+NEXT_PUBLIC_IMAGE_STORAGE_MODE=base64
+#NEXT_PUBLIC_IMAGE_STORAGE_MODE=aws
 ```
 
 #### apps/frontends/dashboard-reportes-front/.env.local
@@ -102,15 +104,17 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 NEXT_PRIVATE_LOCAL_WEBPACK=true
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_api_key_de_google_maps
 NEXT_PUBLIC_IMAGE_STORAGE_MODE=base64
+#NEXT_PUBLIC_IMAGE_STORAGE_MODE=aws
 ```
 
 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` se usa para el mapa de viajes. Debe ser una
 key restringida en Google Cloud y no debe subirse al repo.
 
 `NEXT_PUBLIC_IMAGE_STORAGE_MODE` es opcional. En local usa `base64` para que las
-imagenes subidas de viajes se guarden directo en la base. En produccion puede
-usarse `aws`/`aws-url`: el frontend mandara URL y no base64, dejando listo el
-flujo para S3 u otro storage.
+imagenes subidas de viajes, conductores y licencias se guarden directo en la
+base. Deja `#NEXT_PUBLIC_IMAGE_STORAGE_MODE=aws` comentado mientras no exista el
+servicio de storage; cuando se conecte S3/u otro proveedor, cualquier modo que
+no sea `base64` hara que el frontend trabaje con URL en vez de enviar base64.
 
 Para el modulo de rutas/viajes, la API key debe tener habilitadas estas APIs en
 Google Cloud:
@@ -155,6 +159,7 @@ REDIS_URL="redis://localhost:6379"
 PORT=5001
 GATEWAY_URL="http://localhost:5000"
 CATALOGO_SERVICE_URL="http://localhost:5002"
+JSON_BODY_LIMIT=10mb
 ```
 
 ### apps/backend/services/catalogo-service/.env
@@ -166,6 +171,7 @@ REDIS_URL="redis://localhost:6379"
 GATEWAY_URL="http://localhost:5000"
 AUTH_SERVICE_URL="http://localhost:5001"
 OPERACIONES_SERVICE_URL="http://localhost:5003"
+JSON_BODY_LIMIT=10mb
 ```
 
 ### apps/backend/services/operaciones-service/.env
@@ -174,6 +180,7 @@ OPERACIONES_SERVICE_URL="http://localhost:5003"
 PORT=5003
 DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=operaciones&options=--search_path%3Doperaciones"
 CATALOGO_SERVICE_URL="http://localhost:5002"
+JSON_BODY_LIMIT=10mb
 ```
 
 ### apps/backend/services/record-service/.env
@@ -509,14 +516,20 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_api_key_de_google_maps
 
 Despues reinicia `operaciones-front`.
 
-### La imagen del viaje
+### Imagenes de viajes, conductores y licencias
 
-La imagen del viaje se sube manualmente desde el formulario. En local se guarda
+Las imagenes se suben manualmente desde los formularios. En local se guardan
 como base64 si tienes:
 
 ```env
 NEXT_PUBLIC_IMAGE_STORAGE_MODE=base64
+#NEXT_PUBLIC_IMAGE_STORAGE_MODE=aws
 ```
+
+Deja la opcion `aws` comentada hasta conectar el servicio de storage. Si ves
+`request entity too large`, revisa que `JSON_BODY_LIMIT=10mb` este en los `.env`
+de `auth-service`, `catalogo-service` y `operaciones-service`, y reinicia los
+procesos backend.
 
 ### Viajes muestra HTTP 504
 

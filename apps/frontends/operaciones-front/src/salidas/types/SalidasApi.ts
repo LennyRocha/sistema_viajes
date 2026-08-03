@@ -66,16 +66,55 @@ export type PrecioRutaSalida = {
   precio: number;
 };
 
+export type HorarioConfiguracionSalida =
+  | {
+      tipo: "UNICA";
+      zonaHoraria: string;
+      duracionMin: number;
+      inicio: {
+        fecha: string;
+        hora: string;
+        fechaHoraLocal: string;
+      };
+      finCalculado: {
+        fecha: string;
+        hora: string;
+        fechaHoraLocal: string;
+      };
+    }
+  | {
+      tipo: "RECURRENTE";
+      zonaHoraria: string;
+      duracionMin: number;
+      dias: Array<{
+        dia: string;
+        horarios: Array<{
+          horaInicio: string;
+          horaFinEstimada: string;
+        }>;
+      }>;
+    }
+  | {
+      tipo: "ESPECIAL";
+      zonaHoraria: string;
+      duracionMin: number;
+      ocurrencias: Array<{
+        fecha: string;
+        horaInicio: string;
+        fechaHoraLocal: string;
+        finCalculado: {
+          fecha: string;
+          hora: string;
+          fechaHoraLocal: string;
+        };
+      }>;
+    };
+
 export type CreateSalidaBody = {
   autobusId: number;
   conductorId: number;
   viajeBaseId: number;
-  horario_configuracion: {
-    fecha: string;
-    hora: string;
-    fechaHoraLocal: string;
-    zonaHoraria: string;
-  };
+  horario_configuracion: HorarioConfiguracionSalida;
   tipoSalida: TipoSalida;
   estadoSalida: EstadoSalida;
   precios: {

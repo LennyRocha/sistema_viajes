@@ -40,7 +40,7 @@ model Licencia {
   fecha_expedicion  DateTime @db.Date
   fecha_vencimiento DateTime @db.Date
   estado_emisor     String   @db.VarChar(100)
-  imagen_licencia   String   @db.VarChar(255)
+  imagen_licencia   String   @db.Text
 
   vigente Boolean @default(true)
 

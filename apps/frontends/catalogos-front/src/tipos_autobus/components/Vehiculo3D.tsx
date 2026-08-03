@@ -46,6 +46,7 @@ function CameraUpdater({ fov }: { fov: number }) {
   const { camera } = useThree();
 
   React.useEffect(() => {
+    if (!(camera instanceof THREE.PerspectiveCamera)) return;
     camera.fov = fov;
     camera.updateProjectionMatrix();
   }, [camera, fov]);
@@ -124,6 +125,7 @@ function Scene({
 
   React.useLayoutEffect(() => {
     camera.position.set(...cameraPosition);
+    if (!(camera instanceof THREE.PerspectiveCamera)) return;
     camera.fov = fovMemo;
     camera.updateProjectionMatrix();
   }, [cameraPosition, fovMemo, camera]);

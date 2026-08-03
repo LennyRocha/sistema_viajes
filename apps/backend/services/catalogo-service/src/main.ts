@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'; // ← NUEVO
 import { apiReference } from '@scalar/nestjs-api-reference'; // ← NUEVO
@@ -10,8 +11,13 @@ import { formatErrors, ErrorOrigin } from '@commons/utils';
 import { ValidationError } from 'class-validator';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bodyParser: false });
   const port = process.env.PORT ?? 3002;
+  const bodyLimit = process.env.JSON_BODY_LIMIT ?? '10mb';
+
+  app.useBodyParser('json', { limit: bodyLimit });
+  app.useBodyParser('urlencoded', { extended: true, limit: bodyLimit });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
