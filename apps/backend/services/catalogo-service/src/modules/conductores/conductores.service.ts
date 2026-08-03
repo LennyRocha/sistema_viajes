@@ -90,7 +90,13 @@ export class ConductoresService {
     // ==============================================================
     // 2. COMUNICACIÓN CON AUTH_SERVICE: CREAR EL USUARIO PRIMERO
     // ==============================================================
-    let usuarioCreado: { id: number };
+    let usuarioCreado: {
+      id: number;
+      curp?: string;
+      email?: string;
+      telefono?: string;
+    } | null = null;
+    let usuarioCreadoEnAuth = false;
 
     // Configura esta URL en tus variables de entorno (.env)
     const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001';
@@ -127,13 +133,60 @@ export class ConductoresService {
         throw new Error(errorData.message || 'Error desconocido en auth_service');
       }
 
-      usuarioCreado = await response.json();
-      this.logger.info({ usuario_id: usuarioCreado.id }, 'Usuario creado exitosamente en auth_service');
+      const createdUser = await response.json();
+      usuarioCreado = createdUser;
+      usuarioCreadoEnAuth = true;
+      this.logger.info({ usuario_id: createdUser.id }, 'Usuario creado exitosamente en auth_service');
 
     } catch (error: any) {
-      this.logger.error({ err: error }, 'Fallo al crear usuario en auth_service');
+      const originalMessage =
+        error instanceof Error ? error.message : 'Error desconocido en auth_service';
+
+      this.logger.warn(
+        { err: error, curp: conductorData.curp },
+        'No se pudo crear usuario; buscando posible usuario huerfano por CURP',
+      );
       // Si falla la creación del usuario, detenemos todo y lanzamos error al Frontend
-      throw new BadRequestException(`No se pudo crear el usuario: ${error.message}`);
+      try {
+        const existingResponse = await fetch(
+          `${AUTH_SERVICE_URL}/usuarios/curp/${encodeURIComponent(conductorData.curp)}`,
+        );
+
+        if (!existingResponse.ok) {
+          throw new Error(originalMessage);
+        }
+
+        const existingUser = await existingResponse.json();
+        const sameEmail =
+          String(existingUser.email || '').toLowerCase() ===
+          String(conductorData.email || '').toLowerCase();
+        const sameTelefono =
+          String(existingUser.telefono || '') === String(conductorData.telefono || '');
+
+        if (!sameEmail || !sameTelefono) {
+          throw new Error(originalMessage);
+        }
+
+        const existingConductor = await this.prisma.conductor.findUnique({
+          where: { usuario_id: existingUser.id },
+        });
+
+        if (existingConductor) {
+          throw new Error('Ya existe un conductor ligado a esos datos.');
+        }
+
+        usuarioCreado = existingUser;
+        usuarioCreadoEnAuth = false;
+        this.logger.warn(
+          { usuario_id: existingUser.id },
+          'Se reutiliza usuario huerfano de auth_service para crear conductor',
+        );
+      } catch (lookupError: any) {
+        this.logger.error({ err: lookupError }, 'Fallo al crear usuario en auth_service');
+        throw new BadRequestException(
+          `No se pudo crear el usuario: ${lookupError.message || originalMessage}`,
+        );
+      }
     }
 
     const rollbackUsuarioCreado = async (userId: number) => {
@@ -166,6 +219,10 @@ export class ConductoresService {
         );
       }
     };
+
+    if (!usuarioCreado) {
+      throw new BadRequestException('No se pudo resolver el usuario del conductor');
+    }
 
     try {
       // 3. Crear el Conductor usando el ID del usuario recién creado
@@ -228,7 +285,7 @@ export class ConductoresService {
 
       return conductor;
     } catch (error) {
-      if (usuarioCreado?.id) {
+      if (usuarioCreadoEnAuth && usuarioCreado?.id) {
         await rollbackUsuarioCreado(usuarioCreado.id);
       }
 
@@ -257,7 +314,7 @@ export class ConductoresService {
       const cached =
         await this.redis.get<Conductor[]>(cacheKey);
 
-      if (cached) {
+      if (cached && process.env.CONDUCTORES_CACHE === 'true') {
         const usuariosMap = await this.getUsuariosMap();
 
         this.logger.debug(

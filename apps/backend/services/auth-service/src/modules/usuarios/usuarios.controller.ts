@@ -39,15 +39,8 @@ export class UsuariosController {
     return this.usuarios.findAll(active);
   }
 
-  @ApiOperation({ summary: 'Obtener usuario por id' })
-  @ApiParam({ name: 'id', example: '1' })
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usuarios.findOne(id);
-  }
-
   @Get('/email/:email')
-  @ApiOperation({ summary: 'Obtener usuario por correo electrónico' })
+  @ApiOperation({ summary: 'Obtener usuario por correo electronico' })
   @ApiParam({ name: 'email', example: 'user@example.com' })
   findOneByEmail(@Param('email') email: string) {
     return this.usuarios.findOneByEmail(email);
@@ -61,10 +54,17 @@ export class UsuariosController {
   }
 
   @Get('/telefono/:telefono')
-  @ApiOperation({ summary: 'Obtener usuario por teléfono' })
+  @ApiOperation({ summary: 'Obtener usuario por telefono' })
   @ApiParam({ name: 'telefono', example: '1234567890' })
   findOneByTelefono(@Param('telefono') telefono: string) {
     return this.usuarios.findOneByTelefono(telefono);
+  }
+
+  @ApiOperation({ summary: 'Obtener usuario por id' })
+  @ApiParam({ name: 'id', example: '1' })
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.usuarios.findOne(id);
   }
 
   @Patch(':id')

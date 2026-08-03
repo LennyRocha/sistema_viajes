@@ -12,7 +12,7 @@ export default function Page() {
   return (
     <MainLayout>
       <FederatedPage
-        remote="catalogos/UsuariosModule"
+        remote="auth/UsuariosModule"
         exportName="NuevoUsuario"
         skeletonVariant="form"
       />
