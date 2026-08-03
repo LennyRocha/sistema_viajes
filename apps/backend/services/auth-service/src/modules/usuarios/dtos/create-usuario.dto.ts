@@ -7,7 +7,6 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsStrongPassword,
-  IsUrl,
   MaxLength,
 } from 'class-validator';
 import { IsCURP } from '@commons/decorators';
@@ -91,14 +90,10 @@ export class CreateUsuarioDto {
     example: 'https://example.com/foto_perfil.jpg',
   })
   @IsNotEmpty({ message: 'La foto de perfil del usuario es obligatoria' })
-  @MaxLength(255, {
+  @MaxLength(3_000_000, {
     message:
-      'La foto de perfil del usuario no puede exceder los 255 caracteres',
+      'La foto de perfil del usuario no puede exceder el tamano permitido',
   })
-  @IsUrl(
-    {},
-    { message: 'La foto de perfil del usuario debe ser una URL válida' },
-  )
   foto_perfil!: string;
   @ApiPropertyOptional({
     description: 'La foto de perfil del usuario en base64 (opcional)',

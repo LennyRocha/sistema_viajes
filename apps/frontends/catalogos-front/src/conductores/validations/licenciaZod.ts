@@ -44,8 +44,8 @@ export const licenciaBaseSchema = z.object({
     .min(1, {
       message: "La imagen de la licencia es obligatoria",
     })
-    .max(255, {
-      message: "La ruta de la imagen no puede exceder los 255 caracteres",
+    .max(3_000_000, {
+      message: "La imagen de la licencia no puede exceder el tamano permitido",
     }),
   vigente: z.boolean(),
 });

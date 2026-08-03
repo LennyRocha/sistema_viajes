@@ -100,6 +100,26 @@ export default function EditarConductor({
         }));
       };
 
+  const handleValueChange = (field: keyof FormState, value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleLicenciaValueChange = (
+    field: keyof FormState["licencia"],
+    value: string,
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      licencia: {
+        ...prev.licencia,
+        [field]: value,
+      },
+    }));
+  };
+
   const handleSubmit = async (
     e?: React.FormEvent | React.MouseEvent
   ) => {
@@ -123,7 +143,7 @@ export default function EditarConductor({
 
       setErrors(fieldErrors);
 
-      snack?.error?.("Revisa los campos marcados.");
+      snack?.error?.({ message: "Revisa los campos marcados." });
 
       return;
     }
@@ -136,16 +156,17 @@ export default function EditarConductor({
         ...(result.data as UpdateConductorSchema),
       }).unwrap();
 
-      snack?.success?.("Conductor actualizado correctamente");
+      snack?.success?.({ message: "Conductor actualizado correctamente" });
 
       navigationFunction("/dashboard/conductores");
     } catch (err: any) {
       console.error(err);
 
-      snack?.error?.(
-        err?.data?.message ??
-        "No se pudo actualizar el conductor"
-      );
+      snack?.error?.({
+        message:
+          err?.data?.message ??
+          "No se pudo actualizar el conductor",
+      });
     }
   };
 
@@ -205,6 +226,8 @@ export default function EditarConductor({
         showLicencia={false}
         onChange={handleChange}
         onLicenciaChange={handleLicenciaChange}
+        onValueChange={handleValueChange}
+        onLicenciaValueChange={handleLicenciaValueChange}
         onSubmit={handleSubmit}
         onCancel={() => {
           if (typeof navigationFunction === "function") {
