@@ -26,12 +26,24 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
+  CreditCard,
 } from "@mui/icons-material";
 import CompraSummary from "../core/components/CompraSummary";
 import dynamic from "next/dynamic";
-import { MotionPaper } from "@nexoroute/commons";
+import {
+  CenteredDiv,
+  MotionPaper,
+} from "@nexoroute/commons";
 import useSetCompra from "../core/hooks/useSetCompra";
 import { Compra, Comprador } from "../core/types/Compra";
+import {
+  formatCardNumber,
+  formatPhoneNumber,
+} from "../adapters/formatPayment";
+
+import Visa from "../assets/visa.svg";
+import MasterCard from "../assets/mastercard.svg";
+import PayPal from "../assets/paypal.svg";
 
 const steps = [
   "Asientos",
@@ -57,7 +69,11 @@ const BusMap = dynamic(
   },
   {
     ssr: false,
-    loading: () => <CircularProgress />,
+    loading: () => (
+      <CenteredDiv>
+        <CircularProgress />
+      </CenteredDiv>
+    ),
   },
 );
 
@@ -75,7 +91,11 @@ const PasajeroCard = dynamic(
   },
   {
     ssr: false,
-    loading: () => <CircularProgress />,
+    loading: () => (
+      <CenteredDiv>
+        <CircularProgress />
+      </CenteredDiv>
+    ),
   },
 );
 
@@ -88,12 +108,18 @@ const PasajeroBilling = dynamic(
       "catalogos/AutobusesModule",
     );
     return {
-      default: mod!["SeatBilling"] as React.ComponentType<any>,
+      default: mod![
+        "SeatBilling"
+      ] as React.ComponentType<any>,
     };
   },
   {
     ssr: false,
-    loading: () => <CircularProgress />,
+    loading: () => (
+      <CenteredDiv>
+        <CircularProgress />
+      </CenteredDiv>
+    ),
   },
 );
 
@@ -156,7 +182,7 @@ export default function CompraForm() {
           minHeight: "100%",
           display: "flex",
           flexDirection: "column",
-          "@media(min-width: 945px)": {
+          "@media(min-width: 1000px)": {
             flexDirection: "row",
           },
           gap: 2,
@@ -167,9 +193,6 @@ export default function CompraForm() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            width: "100%",
-            minHeight: 0,
-            flex: 1,
             gap: 4,
           }}
         >
@@ -211,17 +234,7 @@ export default function CompraForm() {
         Confirmación
       </div>
     ),
-    4: (
-      <div
-        style={{
-          backgroundColor: "blue",
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        Pago
-      </div>
-    ),
+    4: <Step5 />,
   };
 
   return (
@@ -450,8 +463,24 @@ const Step2 = ({}) => {
         <Typography variant="h3" className="font-brand">
           Registro de pasajeros
         </Typography>
-        <PasajeroCard />
-        <PasajeroCard />
+        <PasajeroCard
+          numero={1}
+          asientoIda="A1"
+          asientoVuelta="A1"
+          nombre=""
+          apellido=""
+          setNombre={() => {}}
+          setApellido={() => {}}
+        />
+        <PasajeroCard
+          numero={2}
+          asientoIda="A2"
+          asientoVuelta="A2"
+          nombre=""
+          apellido=""
+          setNombre={() => {}}
+          setApellido={() => {}}
+        />
       </Box>
       <CompraSummary tipo="vuelta" />
     </Box>
@@ -465,6 +494,10 @@ const Step3 = ({
   data: Compra;
   setField: (field: keyof Comprador, value: any) => void;
 }) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const isEmailValid = emailRegex.test(
+    data.comprador?.email || "",
+  );
   return (
     <Box
       sx={{
@@ -498,9 +531,21 @@ const Step3 = ({
           required
           placeholder="Ej. José Armando"
           value={data.comprador?.nombres}
-          onChange={(e) =>
-            setField("nombres", e.target.value.trim())
-          }
+          onChange={(e) => {
+            const value = e.target.value.replace(
+              /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+              "",
+            );
+
+            setField("nombres", value.trim());
+          }}
+          slotProps={{
+            htmlInput: {
+              maxLength: 50,
+            },
+          }}
+          autoCapitalize="words"
+          autoFocus
         />
         <TextField
           label="Apellido paterno"
@@ -508,24 +553,38 @@ const Step3 = ({
           required
           placeholder="Ej. Trujillo"
           value={data.comprador?.apellido_paterno}
-          onChange={(e) =>
-            setField(
-              "apellido_paterno",
-              e.target.value.trim(),
-            )
-          }
+          onChange={(e) => {
+            const value = e.target.value.replace(
+              /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+              "",
+            );
+            setField("apellido_paterno", value.trim());
+          }}
+          slotProps={{
+            htmlInput: {
+              maxLength: 50,
+            },
+          }}
+          autoCapitalize="words"
         />
         <TextField
           label="Apellido materno (opcional)"
           fullWidth
           placeholder="Ej. Guzmán"
           value={data.comprador?.apellido_materno}
-          onChange={(e) =>
-            setField(
-              "apellido_materno",
-              e.target.value.trim(),
-            )
-          }
+          onChange={(e) => {
+            const value = e.target.value.replace(
+              /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+              "",
+            );
+            setField("apellido_materno", value.trim());
+          }}
+          slotProps={{
+            htmlInput: {
+              maxLength: 50,
+            },
+          }}
+          autoCapitalize="words"
         />
         <TextField
           label="Correo electrónico"
@@ -538,6 +597,11 @@ const Step3 = ({
           onChange={(e) =>
             setField("email", e.target.value.trim())
           }
+          slotProps={{
+            htmlInput: {
+              maxLength: 100,
+            },
+          }}
         />
         <TextField
           label="Teléfono"
@@ -545,17 +609,97 @@ const Step3 = ({
           required
           placeholder="Ej. 777 123 45 67"
           inputMode="tel"
-          value={data.comprador?.telefono}
+          value={formatPhoneNumber(
+            data.comprador?.telefono || "",
+          )}
           onChange={(e) =>
             setField("telefono", e.target.value.trim())
           }
+          slotProps={{
+            htmlInput: {
+              maxLength: 13,
+            },
+          }}
         />
-        {data.comprador?.email && (
+        {data.comprador?.email && isEmailValid && (
           <Alert severity="success">
             Los boletos serán enviados a{" "}
             {data.comprador.email}
           </Alert>
         )}
+      </Box>
+      <CompraSummary tipo="vuelta" />
+    </Box>
+  );
+};
+
+const Step5 = ({}) => {
+  const [cardnum, setCardnum] = React.useState<string>("");
+  const [expiry, setExpiry] = React.useState<string>("");
+  const [cvv, setCvv] = React.useState<string>("");
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "100%",
+        display: "flex",
+        flexDirection: "column",
+        "@media(min-width: 1000px)": {
+          flexDirection: "row",
+        },
+        gap: 2,
+        padding: "2px",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          minHeight: 0,
+          flex: 1,
+          gap: 4,
+        }}
+      >
+        <Typography variant="h3" className="font-brand">
+          Pago
+        </Typography>
+        <Image
+          priority
+          src={Visa}
+          alt="Follow us on Twitter"
+        />
+        <TextField
+          size="small"
+          fullWidth
+          label="Títular de la tarjeta"
+          autoFocus
+          placeholder="Ingresa el nombre completo"
+          autoCapitalize="words"
+          required
+        />
+        <TextField
+          size="small"
+          fullWidth
+          label="Número de la tarjeta"
+          placeholder="XXXX XXXX XXXX XXXX"
+          type="text"
+          inputMode="numeric"
+          slotProps={{
+            htmlInput: {
+              maxLength: 19,
+              pattern: String.raw`[0-9\s]{13,19}`,
+            },
+            input: {
+              endAdornment: <CreditCard />,
+            },
+          }}
+          required
+          value={cardnum}
+          onChange={(e) =>
+            setCardnum(formatCardNumber(e.target.value))
+          }
+        />
       </Box>
       <CompraSummary tipo="vuelta" />
     </Box>

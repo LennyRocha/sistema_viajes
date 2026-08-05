@@ -15,16 +15,17 @@ const CompraSummary = ({
 }: {
   tipo: TipoViaje;
 }) => {
-  const isLargeScreen = useMediaQuery("(min-width: 945px)");
   return (
     <MotionPaper
       layoutId="summary"
       sx={{
         display: "flex",
         flexDirection: "column",
-        width: isLargeScreen ? "350px" : "100%",
+        width: { xs: "100%", md: 350 },
         height: "fit-content",
         gap: 2,
+        flexGrow: 0,
+        flexShrink: 0,
         padding: 2,
       }}
     >
