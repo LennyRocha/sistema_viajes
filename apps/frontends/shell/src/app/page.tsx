@@ -1,7 +1,6 @@
 "use client";
 import {
   CalendarToday,
-  ConfirmationNumber,
   LocationOn,
   Map,
   Menu as MenuIcon,
@@ -18,9 +17,6 @@ import {
   TextField,
   Tabs,
   Tab,
-  ImageListItem,
-  ImageListItemBar,
-  Tooltip,
   CircularProgress,
   Alert,
   Divider,
@@ -100,6 +96,40 @@ const ServicioCards = dynamic(
       return {
         default: mod![
           "ServiciosCardPage"
+        ] as React.ComponentType<any>,
+      };
+    } catch {
+      return {
+        default: () => (
+          <Alert severity="error">
+            Error al cargar el componente
+          </Alert>
+        ),
+      };
+    }
+  },
+  {
+    ssr: false,
+    loading: () => (
+      <CenteredDiv>
+        <CircularProgress />
+      </CenteredDiv>
+    ),
+  },
+);
+
+const RutasCarrusel = dynamic(
+  async () => {
+    try {
+      const { loadRemote } =
+        await import("@module-federation/enhanced/runtime");
+
+      const mod = await loadRemote<Record<string, any>>(
+        "operaciones/ViajesModule",
+      );
+      return {
+        default: mod![
+          "RutasCarrusel"
         ] as React.ComponentType<any>,
       };
     } catch {
@@ -405,16 +435,66 @@ function a11yProps(typex: string) {
 }
 
 const Buscador = () => {
+  const day = new Date().getDay() || 0;
+  const month = new Date().getMonth() || 0;
+  const year = new Date().getFullYear() || 0;
+  const [searchParams, setSearchParams] = React.useState({
+    from: "",
+    to: "",
+    fechaIda: new Date(year, month, day),
+    fechaVuelta: new Date(year, month, day + 2),
+    pasajeros: 1,
+  });
+  const addParam = (
+    key: keyof typeof searchParams,
+    value: string,
+  ) => {
+    setSearchParams((prev) => {
+      return {
+        ...prev,
+        [key]: value,
+      };
+    });
+  };
+  const removeParam = (key: keyof typeof searchParams) => {
+    setSearchParams((prev: any) => {
+      const newParams = { ...prev };
+      delete newParams[key];
+      return newParams;
+    });
+  };
+  const getParam = (key: keyof typeof searchParams) => {
+    return searchParams[key];
+  };
   const [tab, setTab] = React.useState(0);
   const handleChange = (
     event: React.SyntheticEvent,
     newValue: number,
   ) => {
+    if (newValue === 1) {
+      removeParam("fechaVuelta");
+    } else {
+      addParam(
+        "fechaVuelta",
+        new Date(year, month, day + 2).toISOString(),
+      );
+    }
     setTab(newValue);
   };
-  const day = new Date().getDay() || 0;
-  const month = new Date().getMonth() || 0;
-  const year = new Date().getFullYear() || 0;
+  const shapeParams = () => {
+    const params = new URLSearchParams();
+    Object.entries(searchParams).forEach(([key, value]) => {
+      if (
+        value !== undefined &&
+        value !== null &&
+        value !== ""
+      ) {
+        params.set(key, value.toString().toLowerCase());
+      }
+    });
+    return params;
+  };
+
   const { push } = useRouter();
   return (
     <MotionPaper
@@ -483,9 +563,20 @@ const Buscador = () => {
           variant="outlined"
           size="small"
           sx={{ flex: 1 }}
+          value={getParam("from") ?? ""}
+          onChange={(e) => {
+            const value = e.target.value.replace(
+              /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+              "",
+            );
+            addParam("from", value);
+          }}
           slotProps={{
             input: {
               endAdornment: <LocationOn />,
+            },
+            htmlInput: {
+              maxLength: 100,
             },
           }}
         />
@@ -494,9 +585,20 @@ const Buscador = () => {
           variant="outlined"
           size="small"
           sx={{ flex: 1 }}
+          value={getParam("to") ?? ""}
+          onChange={(e) => {
+            const value = e.target.value.replace(
+              /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+              "",
+            );
+            addParam("to", value);
+          }}
           slotProps={{
             input: {
               endAdornment: <Map />,
+            },
+            htmlInput: {
+              maxLength: 100,
             },
           }}
         />
@@ -504,7 +606,10 @@ const Buscador = () => {
           label="Fecha de ida"
           variant="outlined"
           format="DD/MM/YYYY"
-          defaultValue={dayjs(new Date(year, month, day))}
+          defaultValue={dayjs(
+            getParam("fechaIda") ??
+              new Date(year, month, day),
+          )}
           size="small"
           sx={{ flex: 1 }}
           endAdornment={<CalendarToday />}
@@ -514,6 +619,10 @@ const Buscador = () => {
             label="Fecha de vuelta"
             variant="outlined"
             format="DD/MM/YYYY"
+            defaultValue={dayjs(
+              getParam("fechaVuelta") ??
+                new Date(year, month, day + 2),
+            )}
             size="small"
             sx={{ flex: 1 }}
             endAdornment={<CalendarToday />}
@@ -524,9 +633,19 @@ const Buscador = () => {
           label="Pasajeros"
           min={0}
           max={8}
-          defaultValue={1}
+          defaultValue={Number(getParam("pasajeros") ?? 0)}
           size="small"
           error={false}
+          onValueChange={(value) => {
+            if (value == null) {
+              addParam("pasajeros", "");
+              return;
+            }
+
+            if (value >= 1 && value <= 8) {
+              addParam("pasajeros", String(value));
+            }
+          }}
         />
         <Button
           variant="contained"
@@ -534,7 +653,7 @@ const Buscador = () => {
           sx={{ flex: 1 }}
           onClick={() =>
             push(
-              "/viajes/terminal-mexico-taxquena-a-terminal-chilpancingo",
+              `viajes/${shapeParams()?.toString ? `?${shapeParams()?.toString()}` : ""}`,
             )
           }
         >
@@ -791,7 +910,7 @@ const Nav = ({ scrollToRef }: { scrollToRef: any }) => {
           <Button
             variant="text"
             color="primary"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/login")}
           >
             Iniciar sesión
           </Button>
@@ -966,80 +1085,6 @@ const Footer = ({ scrollToRef }: { scrollToRef: any }) => {
     </Box>
   );
 };
-
-const itemData = [
-  {
-    img: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e",
-    title: "Breakfast",
-    author: "@bkristastucchio",
-    rows: 2,
-    cols: 2,
-    featured: true,
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d",
-    title: "Burger",
-    author: "@rollelflex_graphy726",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1522770179533-24471fcdba45",
-    title: "Camera",
-    author: "@helloimnik",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c",
-    title: "Coffee",
-    author: "@nolanissac",
-    cols: 2,
-  },
-  {
-    img: "https://images.unsplash.com/photo-1533827432537-70133748f5c8",
-    title: "Hats",
-    author: "@hjrc33",
-    cols: 2,
-  },
-  {
-    img: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62",
-    title: "Honey",
-    author: "@arwinneil",
-    rows: 2,
-    cols: 2,
-    featured: true,
-  },
-  {
-    img: "https://images.unsplash.com/photo-1516802273409-68526ee1bdd6",
-    title: "Basketball",
-    author: "@tjdragotta",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f",
-    title: "Fern",
-    author: "@katie_wasserman",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1597645587822-e99fa5d45d25",
-    title: "Mushrooms",
-    author: "@silverdalex",
-    rows: 2,
-    cols: 2,
-  },
-  {
-    img: "https://images.unsplash.com/photo-1567306301408-9b74779a11af",
-    title: "Tomato basil",
-    author: "@shelleypauls",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1471357674240-e1a485acb3e1",
-    title: "Sea star",
-    author: "@peterlaster",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1589118949245-7d38baf380d6",
-    title: "Bike",
-    author: "@southside_customs",
-    cols: 2,
-  },
-];
 
 const BeneficiosSection = ({
   titleRef,
@@ -1218,6 +1263,7 @@ const DestinosSection = ({
 }: {
   titleRef: any;
 }) => {
+  const [disabled, setDisabled] = React.useState(true);
   const ref = React.useRef(null);
   const { scrollXProgress } = useScroll({ container: ref });
   const maskImage = useScrollOverflowMask(scrollXProgress);
@@ -1237,6 +1283,26 @@ const DestinosSection = ({
         Destinos populares
       </MotionText>
       <motion.div
+        ref={ref}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ ease: "easeInOut", duration: 1 }}
+        style={{
+          margin: "0 auto",
+          width: "100%",
+          overflowX: "scroll",
+          overflowY: "hidden",
+          height: 250,
+          maskImage,
+        }}
+      >
+        <RutasCarrusel
+          disabledFunction={setDisabled}
+          router={router}
+        />
+      </motion.div>
+      {/*<motion.div
         ref={ref}
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -1278,7 +1344,7 @@ const DestinosSection = ({
                       display: "flex",
                       gap: 0.5,
                       alignItems: "center",
-                      width: "fit-content"
+                      width: "fit-content",
                     }}
                   >
                     <Tooltip title="Simular viaje">
@@ -1313,7 +1379,7 @@ const DestinosSection = ({
             </ImageListItem>
           ))}
         </Box>
-      </motion.div>
+      </motion.div>*/}
       <MotionButton
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -1329,6 +1395,7 @@ const DestinosSection = ({
           margin: "0 auto",
         }}
         onClick={() => router.push("/viajes")}
+        disabled={disabled}
       >
         Ver todos los destinos
       </MotionButton>
@@ -1377,6 +1444,7 @@ const ServicesSection = ({
   titleRef: any;
 }) => {
   const [disabled, setDisabled] = React.useState(true);
+  const { push } = useRouter();
   return (
     <>
       <MotionText
@@ -1418,8 +1486,9 @@ const ServicesSection = ({
           margin: "0 auto",
         }}
         disabled={disabled}
+        onClick={() => push("/servicios")}
       >
-        Conoce todos los beneficios
+        Conocer los beneficios
       </MotionButton>
     </>
   );

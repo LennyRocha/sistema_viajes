@@ -9,7 +9,15 @@ import AsientoBus from "../components/AsientoBus";
 import { AsientoEstado } from "../types/AsientoEstado";
 import { Layer, Stage } from "react-konva";
 
-const PasajeroCard = ({}) => {
+const PasajeroCard = ({
+  numero,
+  asientoIda,
+  asientoVuelta,
+  nombre,
+  apellido,
+  setNombre,
+  setApellido,
+}) => {
   return (
     <MotionPaper
       sx={{
@@ -31,7 +39,9 @@ const PasajeroCard = ({}) => {
           width: "100%",
         }}
       >
-        <Typography variant="h5">Pasajero 01</Typography>
+        <Typography variant="h5">
+          Pasajero 0{numero}
+        </Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
           <Stage width={40} height={38}>
             <Layer>
@@ -59,11 +69,13 @@ const PasajeroCard = ({}) => {
             }}
           >
             <Typography variant="caption">
-              Adulto, Asiento A1 ida
+              Adulto, Asiento {asientoIda} ida
             </Typography>
-            <Typography variant="caption">
-              Adulto, Asiento A1 vuelta
-            </Typography>
+            {asientoVuelta && (
+              <Typography variant="caption">
+                Adulto, Asiento {asientoVuelta} vuelta
+              </Typography>
+            )}
           </Box>
         </Box>
       </Box>
@@ -79,16 +91,46 @@ const PasajeroCard = ({}) => {
           label="Nombre(s)"
           fullWidth
           size="small"
+          value={nombre}
+          onChange={(e) => {
+            const value = e.target.value.replace(
+              /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+              "",
+            );
+            setNombre(value);
+          }}
+          slotProps={{
+            htmlInput: {
+              maxLength: 50,
+            },
+          }}
         />
         <TextField
           label="Apellido(s)"
           fullWidth
           size="small"
+          value={apellido}
+          onChange={(e) => {
+            const value = e.target.value.replace(
+              /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+              "",
+            );
+            setApellido(value);
+          }}
+          slotProps={{
+            htmlInput: {
+              maxLength: 50,
+            },
+          }}
         />
         <Button
           variant="outlined"
           color="secondary"
           fullWidth
+          onClick={() => {
+            setNombre("");
+            setApellido("");
+          }}
         >
           Limpiar
         </Button>
