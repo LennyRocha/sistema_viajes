@@ -14,6 +14,7 @@ module.exports = {
                         "./ViajesModule": "./src/viajes/pages",
                         "./SalidasModule": "./src/salidas/pages",
                         "./MetodosPagoModule": "./src/metodos_pago/pages",
+                        "./exports": "./src/federation",
                     },
                     shared,
                     extraOptions: {
