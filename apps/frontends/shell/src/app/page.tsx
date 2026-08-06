@@ -755,6 +755,7 @@ const Buscador = () => {
                   sx={{ flex: 1 }}
                   fullWidth
                   required
+                  placeholder="Escribe al menos 3 letras para buscar"
                 />
               )}
             />
@@ -846,6 +847,7 @@ const Buscador = () => {
                   sx={{ flex: 1 }}
                   fullWidth
                   required
+                  placeholder="Escribe al menos 3 letras para buscar"
                 />
               )}
             />
