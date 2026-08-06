@@ -23,6 +23,7 @@ import {
   Grid,
   Menu,
   MenuItem,
+  Autocomplete,
 } from "@mui/material";
 import {
   CenteredDiv,
@@ -46,6 +47,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { DateField } from "@mui/x-date-pickers/DateField";
 import dayjs from "dayjs";
+import { PlaceSuggestion } from "../core/types/PlaceSuggestions";
 
 const MotionText = motion.create(Typography);
 const MotionButton = motion.create(Button);
@@ -186,6 +188,13 @@ export default function Page() {
     [0, 1],
     ["0%", "-25%"],
   );
+
+  const { scrollY } = useScroll();
+
+  const backgroundY = useTransform(
+    scrollY,
+    (value) => value * 0.5,
+  );
   return (
     <Box
       component={"main"}
@@ -208,7 +217,8 @@ export default function Page() {
           flexShrink: 0,
         }}
       >
-        <Hero />
+        <HeroV2 imageY={backgroundY} />
+
         <Box
           sx={{
             position: "absolute",
@@ -427,6 +437,38 @@ function Hero() {
   );
 }
 
+const HeroV2 = ({ imageY }: { imageY: any }) => {
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: "100dvh",
+        position: "absolute",
+        inset: 0,
+        zIndex: 0,
+        overflow: "hidden",
+      }}
+      id="hero"
+    >
+      <motion.div
+        style={{ translateY: imageY }}
+        className="relative w-full h-full"
+      >
+        <Image
+          src={"/landing.png"}
+          fill
+          alt="image"
+          style={{
+            objectFit: "cover",
+            objectPosition: "center bottom",
+          }}
+          priority
+        />
+      </motion.div>
+    </Box>
+  );
+};
+
 function a11yProps(typex: string) {
   return {
     id: `viaje-tab-${typex}`,
@@ -495,6 +537,99 @@ const Buscador = () => {
     return params;
   };
 
+  const [isLoadingFrom, setIsLoadingFrom] =
+    React.useState(false);
+  const [isLoadingTo, setIsLoadingTo] =
+    React.useState(false);
+
+  const [origenOptions, setOrigenOptions] = React.useState<
+    PlaceSuggestion[]
+  >([]);
+  const [destinoOptions, setDestinoOptions] =
+    React.useState<PlaceSuggestion[]>([]);
+
+  const [autoCompleteFunction, setAutoCompleteFunction] =
+    React.useState<
+      null | ((input: string) => Promise<any>)
+    >(null);
+
+  const loadAutoComplete = async () => {
+    try {
+      const { loadRemote } =
+        await import("@module-federation/enhanced/runtime");
+
+      const mod = await loadRemote<any>(
+        "operaciones/exports",
+      );
+      setAutoCompleteFunction(
+        () => mod.searchPlacePredictions,
+      );
+    } catch (error) {
+      console.warn(
+        "No se pudo cargar el autocomplete de Google Maps",
+        error,
+      );
+    }
+  };
+
+  const searchPredictions = React.useCallback(
+    async (input: string) => {
+      if (!autoCompleteFunction) return;
+      return autoCompleteFunction(input);
+    },
+    [autoCompleteFunction],
+  );
+
+  React.useEffect(() => {
+    loadAutoComplete();
+  }, []);
+
+  React.useEffect(() => {
+    if (
+      !autoCompleteFunction ||
+      searchParams["from"].trim().length < 3
+    ) {
+      setOrigenOptions([]);
+      return;
+    }
+
+    const timeout = window.setTimeout(async () => {
+      setIsLoadingFrom(true);
+      try {
+        setOrigenOptions(
+          await searchPredictions(searchParams["from"]),
+        );
+      } finally {
+        setIsLoadingFrom(false);
+      }
+    }, 280);
+
+    return () => window.clearTimeout(timeout);
+  }, [searchPredictions, searchParams["from"]]);
+
+  React.useEffect(() => {
+    if (
+      !autoCompleteFunction ||
+      searchParams["to"].trim().length < 3
+    ) {
+      setDestinoOptions([]);
+      return;
+    }
+
+    const timeout = window.setTimeout(async () => {
+      setIsLoadingTo(true);
+      try {
+        setDestinoOptions(
+          await searchPredictions(searchParams["to"]),
+        );
+      } finally {
+        setIsLoadingTo(false);
+      }
+    }, 280);
+
+    return () => window.clearTimeout(timeout);
+  }, [searchPredictions, searchParams["to"]]);
+
   const { push } = useRouter();
   return (
     <MotionPaper
@@ -558,50 +693,188 @@ const Buscador = () => {
           },
         }}
       >
-        <TextField
-          label="Origen"
-          variant="outlined"
-          size="small"
-          sx={{ flex: 1 }}
-          value={getParam("from") ?? ""}
-          onChange={(e) => {
-            const value = e.target.value.replace(
-              /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
-              "",
-            );
-            addParam("from", value);
-          }}
-          slotProps={{
-            input: {
-              endAdornment: <LocationOn />,
-            },
-            htmlInput: {
-              maxLength: 100,
-            },
-          }}
-        />
-        <TextField
-          label="Destino"
-          variant="outlined"
-          size="small"
-          sx={{ flex: 1 }}
-          value={getParam("to") ?? ""}
-          onChange={(e) => {
-            const value = e.target.value.replace(
-              /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
-              "",
-            );
-            addParam("to", value);
-          }}
-          slotProps={{
-            input: {
-              endAdornment: <Map />,
-            },
-            htmlInput: {
-              maxLength: 100,
-            },
-          }}
-        />
+        <Box sx={{ flex: 1 }}>
+          {autoCompleteFunction ? (
+            <Autocomplete
+              freeSolo
+              options={origenOptions}
+              loading={isLoadingFrom}
+              loadingText="Buscando lugares..."
+              noOptionsText={
+                searchParams["from"].trim().length < 3
+                  ? "Escribe al menos 3 letras"
+                  : "Sin resultados"
+              }
+              filterOptions={(items) => items}
+              getOptionLabel={(option) =>
+                typeof option === "string"
+                  ? option
+                  : option.description
+              }
+              onChange={(_, option) => {
+                if (typeof option === "string") {
+                  addParam("from", option);
+                } else if (option) {
+                  addParam("from", option.description);
+                }
+              }}
+              inputValue={searchParams["from"]}
+              onInputChange={(_, value) => {
+                const val = value.replace(
+                  /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+                  "",
+                );
+                addParam("from", val);
+              }}
+              renderOption={(props, option) => {
+                const { key, ...rest } = props;
+                return (
+                  <Box component="li" {...rest} key={key}>
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 800 }}
+                      >
+                        {option.mainText}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                      >
+                        {option.secondaryText}
+                      </Typography>
+                    </Box>
+                  </Box>
+                );
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Origen"
+                  size="small"
+                  sx={{ flex: 1 }}
+                  fullWidth
+                  required
+                />
+              )}
+            />
+          ) : (
+            <TextField
+              label="Origen"
+              variant="outlined"
+              size="small"
+              sx={{ flex: 1 }}
+              fullWidth
+              value={getParam("from") ?? ""}
+              onChange={(e) => {
+                const value = e.target.value.replace(
+                  /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+                  "",
+                );
+                addParam("from", value);
+              }}
+              slotProps={{
+                input: {
+                  endAdornment: <LocationOn />,
+                },
+                htmlInput: {
+                  maxLength: 100,
+                },
+              }}
+            />
+          )}
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          {autoCompleteFunction ? (
+            <Autocomplete
+              freeSolo
+              options={destinoOptions}
+              loading={isLoadingTo}
+              loadingText="Buscando lugares..."
+              noOptionsText={
+                searchParams["to"].trim().length < 3
+                  ? "Escribe al menos 3 letras"
+                  : "Sin resultados"
+              }
+              filterOptions={(items) => items}
+              getOptionLabel={(option) =>
+                typeof option === "string"
+                  ? option
+                  : option.description
+              }
+              onChange={(_, option) => {
+                if (typeof option === "string") {
+                  addParam("to", option);
+                } else if (option) {
+                  addParam("to", option.description);
+                }
+              }}
+              inputValue={searchParams["to"]}
+              onInputChange={(_, value) => {
+                const val = value.replace(
+                  /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+                  "",
+                );
+                addParam("to", val);
+              }}
+              renderOption={(props, option) => {
+                const { key, ...rest } = props;
+                return (
+                  <Box component="li" {...rest} key={key}>
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 800 }}
+                      >
+                        {option.mainText}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                      >
+                        {option.secondaryText}
+                      </Typography>
+                    </Box>
+                  </Box>
+                );
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Destino"
+                  size="small"
+                  sx={{ flex: 1 }}
+                  fullWidth
+                  required
+                />
+              )}
+            />
+          ) : (
+            <TextField
+              label="Destino"
+              variant="outlined"
+              size="small"
+              sx={{ flex: 1 }}
+              fullWidth
+              value={getParam("to") ?? ""}
+              onChange={(e) => {
+                const value = e.target.value.replace(
+                  /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+                  "",
+                );
+                addParam("to", value);
+              }}
+              slotProps={{
+                input: {
+                  endAdornment: <Map />,
+                },
+                htmlInput: {
+                  maxLength: 100,
+                },
+              }}
+            />
+          )}
+        </Box>
         <DateField
           label="Fecha de ida"
           variant="outlined"
@@ -653,7 +926,7 @@ const Buscador = () => {
           sx={{ flex: 1 }}
           onClick={() =>
             push(
-              `viajes/${shapeParams()?.toString ? `?${shapeParams()?.toString()}` : ""}`,
+              `viajes/${shapeParams()?.toString ? "?" + shapeParams()?.toString() : ""}`,
             )
           }
         >
@@ -1293,8 +1566,8 @@ const DestinosSection = ({
           width: "100%",
           overflowX: "scroll",
           overflowY: "hidden",
-          height: 250,
-          maskImage,
+          height: disabled ? "fit-content" : 250,
+          ...(disabled && { maskImage }),
         }}
       >
         <RutasCarrusel
