@@ -20,7 +20,7 @@ export default function ProvidersWrapper({
 }>) {
   return (
     <AppRouterCacheProvider>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={theme} defaultMode="system">
         <SidebarProvider>
           <DialogProvider>
             <LocalizationProvider

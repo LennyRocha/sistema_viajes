@@ -127,7 +127,7 @@ export default function RutasCarrusel({
     >
       {rutas.map((item) => (
         <ImageListItem
-          key={item.img}
+          key={item.id}
           sx={{ width: "max(25vw, 300px)" }}
         >
           <img
