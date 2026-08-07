@@ -23,7 +23,7 @@ export class AutobusesService {
     private readonly client: ClientProxy,
     @InjectPinoLogger(AutobusesService.name)
     private readonly logger: PinoLogger,
-  ) { }
+  ) {}
 
   async create(dto: CreateAutobusDto) {
     this.logger.info(
@@ -147,8 +147,8 @@ export class AutobusesService {
 
     const where: Prisma.AutobusWhereInput = active
       ? {
-        estatus: true,
-      }
+          estatus: true,
+        }
       : {};
 
     if (tipo_bus !== 0) {
@@ -347,7 +347,7 @@ export class AutobusesService {
     const payloadExceptServicios: Prisma.AutobusUpdateInput = {
       marca: dto.marca
         ? dto.marca.trim().at(0)?.toUpperCase() +
-        dto.marca.trim().slice(1).toLowerCase()
+          dto.marca.trim().slice(1).toLowerCase()
         : existing.marca,
       alias: dto.alias?.trim()?.replace(/\s+/g, ' ') ?? existing.alias,
       modelo: dto.modelo?.trim()?.replace(/\s+/g, ' ') ?? existing.modelo,
@@ -357,7 +357,7 @@ export class AutobusesService {
       color: dto.color ?? existing.color,
       descripcion: dto.descripcion
         ? dto.descripcion.at(0)?.toUpperCase() +
-        dto.descripcion.slice(1).toLowerCase().trim().replace(/\s+/g, ' ')
+          dto.descripcion.slice(1).toLowerCase().trim().replace(/\s+/g, ' ')
         : existing.descripcion,
       codigo_interno:
         dto.codigo_interno?.trim()?.replace(/\s+/g, ' ') ??
@@ -484,10 +484,7 @@ export class AutobusesService {
 
   // find autobuses salidas
   async findAutobusSalida(id: number) {
-    this.logger.debug(
-      { id },
-      'Obteniendo autobús para módulo de salidas',
-    );
+    this.logger.debug({ id }, 'Obteniendo autobús para módulo de salidas');
 
     const autobus = await this.prisma.autobus.findUnique({
       where: {
@@ -500,18 +497,14 @@ export class AutobusesService {
         marca: true,
         modelo: true,
         estatus: true,
+        asientos: true,
       },
     });
 
     if (!autobus) {
-      this.logger.warn(
-        { id },
-        'Autobús no encontrado',
-      );
+      this.logger.warn({ id }, 'Autobús no encontrado');
 
-      throw new NotFoundException(
-        `Autobús ${id} no existe`,
-      );
+      throw new NotFoundException(`Autobús ${id} no existe`);
     }
 
     return {
@@ -520,6 +513,7 @@ export class AutobusesService {
       nombre: `${autobus.alias} (${autobus.codigo_interno})`,
       marca: autobus.marca,
       modelo: autobus.modelo,
+      asientos: autobus.asientos,
     };
   }
 }
