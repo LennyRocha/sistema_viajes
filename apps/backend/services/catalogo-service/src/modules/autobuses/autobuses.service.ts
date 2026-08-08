@@ -10,6 +10,9 @@ import Autobus from './autobus.entity';
 import { ServiciosService } from '../servicios/servicios.service';
 import slugify from 'slugify';
 import { ClientProxy } from '@nestjs/microservices/client/client-proxy';
+import { Asiento } from './types/Asiento';
+import { AutobusEstado } from './types/AutobusEstado';
+import { AsientoEstado } from './types/AsientoEstado';
 
 const LIST_CACHE_KEY = 'autobuses:list';
 
@@ -515,5 +518,106 @@ export class AutobusesService {
       modelo: autobus.modelo,
       asientos: autobus.asientos,
     };
+  }
+
+  async setAutobusOcupado(id: number, asientosOcupados: Asiento[]) {
+    this.logger.debug(
+      { id, asientosOcupados },
+      'Actualizando asientos ocupados del autobús',
+    );
+    const existing = await this.findOne(id); // 404 si no existe
+    const newAsientos =
+      existing.asientos ??
+      [].map((asiento: Asiento) => {
+        const ocupado = asientosOcupados.find((a) => a.id === asiento.id);
+        if (ocupado) {
+          return {
+            ...asiento,
+            estado: ocupado.estado,
+          };
+        }
+        return asiento;
+      });
+    await this.prisma.autobus.update({
+      where: { id },
+      data: {
+        asientos: newAsientos as unknown as Prisma.InputJsonValue,
+      },
+    });
+    this.logger.info(
+      { id, asientosOcupados },
+      'Asientos ocupados del autobús actualizados',
+    );
+    return { ocupados: true };
+  }
+
+  async setAutobusDesocupado(id: number) {
+    this.logger.debug({ id }, 'Liberando los asientos del autobús');
+    const existing = await this.findOne(id); // 404 si no existe
+    if (!existing.asientos) {
+      this.logger.warn({ id }, 'No se encontraron asientos para liberar');
+      return { desocupados: false };
+    } else {
+      const newAsientos =
+        existing.asientos ??
+        [].map((asiento: Asiento) => ({
+          ...asiento,
+          estado: AsientoEstado.AVAILABLE,
+        }));
+      await this.prisma.autobus.update({
+        where: { id },
+        data: {
+          asientos: newAsientos,
+          estado: AutobusEstado.DISPONIBLE,
+        },
+      });
+      this.logger.info({ id }, 'Asientos del autobús liberados');
+      return { desocupados: true };
+    }
+  }
+
+  async setAutobusEnRuta(id: number) {
+    this.logger.debug({ id }, 'Cambiando estado del autobús a EN_RUTA');
+    await this.findOne(id); // 404 si no existe
+    await this.prisma.autobus.update({
+      where: { id },
+      data: {
+        estado: AutobusEstado.EN_RUTA,
+      },
+    });
+    this.logger.info({ id }, 'Estado del autobús cambiado a EN_RUTA');
+    return { enRuta: true };
+  }
+
+  async setAutobusEnMantenimiento(id: number) {
+    this.logger.debug(
+      { id },
+      'Cambiando estado del autobús a EN_MANTENIMIENTO',
+    );
+    await this.findOne(id);
+    await this.prisma.autobus.update({
+      where: { id },
+      data: {
+        estado: AutobusEstado.EN_MANTENIMIENTO,
+      },
+    });
+    this.logger.info({ id }, 'Estado del autobús cambiado a EN_MANTENIMIENTO');
+    return { enMantenimiento: true };
+  }
+
+  async setAutobusFueraDeServicio(id: number) {
+    this.logger.debug(
+      { id },
+      'Cambiando estado del autobús a FUERA_DE_SERVICIO',
+    );
+    await this.findOne(id);
+    await this.prisma.autobus.update({
+      where: { id },
+      data: {
+        estado: AutobusEstado.FUERA_DE_SERVICIO,
+      },
+    });
+    this.logger.info({ id }, 'Estado del autobús cambiado a FUERA_DE_SERVICIO');
+    return { fueraDeServicio: true };
   }
 }

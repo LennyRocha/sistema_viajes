@@ -32,6 +32,12 @@ import {
   TextField,
   Typography,
   Pagination,
+  useTheme,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Radio,
+  RadioGroup,
 } from "@mui/material";
 import GoogleRouteMap from "../components/GoogleRouteMap";
 import RutaDesigner from "../components/RutaDesigner";
@@ -43,16 +49,19 @@ import {
   useOperacionesData,
 } from "../api/operacionesHttp";
 import GeoPoint from "../types/GeoPoint";
-import {
-  CatalogSortOption,
-} from "../types/OperacionesApi";
+import { CatalogSortOption } from "../types/OperacionesApi";
 import RutaBase from "../types/RutaBase";
-import { isGoogleStreetViewImage, mapRutaApi, mapViajeApi } from "../utils/apiMappers";
+import {
+  isGoogleStreetViewImage,
+  mapRutaApi,
+  mapViajeApi,
+} from "../utils/apiMappers";
 import {
   buildConnectionSegments,
   buildJourneySimulationPath,
   getJourneyMetrics,
 } from "../utils/routeUtils";
+import { RutaTipo } from "../types/RutaTipo";
 
 interface Props extends CommonPageProps {
   viajeId?: string;
@@ -60,7 +69,10 @@ interface Props extends CommonPageProps {
 
 const DEFAULT_VIAJE_IMAGE = "/imagen_defecto_viajes.jpg";
 const EMPTY_ROUTES: RutaBase[] = [];
-const SORT_OPTIONS: Array<{ value: CatalogSortOption; label: string }> = [
+const SORT_OPTIONS: Array<{
+  value: CatalogSortOption;
+  label: string;
+}> = [
   { value: "recent", label: "Mas recientes" },
   { value: "oldest", label: "Mas antiguos" },
   { value: "name_asc", label: "Nombre A-Z" },
@@ -74,7 +86,10 @@ function readImageAsBase64(file: File) {
       const image = new Image();
       image.onload = () => {
         const maxSize = 1280;
-        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const scale = Math.min(
+          1,
+          maxSize / Math.max(image.width, image.height),
+        );
         const canvas = document.createElement("canvas");
         canvas.width = Math.round(image.width * scale);
         canvas.height = Math.round(image.height * scale);
@@ -83,13 +98,21 @@ function readImageAsBase64(file: File) {
           resolve(String(reader.result));
           return;
         }
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        context.drawImage(
+          image,
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        );
         resolve(canvas.toDataURL("image/jpeg", 0.84));
       };
-      image.onerror = () => reject(new Error("No se pudo procesar la imagen"));
+      image.onerror = () =>
+        reject(new Error("No se pudo procesar la imagen"));
       image.src = String(reader.result);
     };
-    reader.onerror = () => reject(new Error("No se pudo leer la imagen"));
+    reader.onerror = () =>
+      reject(new Error("No se pudo leer la imagen"));
     reader.readAsDataURL(file);
   });
 }
@@ -108,39 +131,95 @@ export default function NuevoViaje({
   } = useOperacionesData();
   const [isSaving, setIsSaving] = React.useState(false);
 
-  const rutas = React.useMemo(() => rutasData.map(mapRutaApi), [rutasData]);
-  const [routePageRoutes, setRoutePageRoutes] = React.useState<RutaBase[]>([]);
-  const [selectedRouteIds, setSelectedRouteIds] = React.useState<number[]>([]);
-  const [selectedRouteMap, setSelectedRouteMap] = React.useState<Map<number, RutaBase>>(
-    () => new Map(),
+  const rutas = React.useMemo(
+    () => rutasData.map(mapRutaApi),
+    [rutasData],
   );
+  const [routePageRoutes, setRoutePageRoutes] =
+    React.useState<RutaBase[]>([]);
+  const [selectedRouteIds, setSelectedRouteIds] =
+    React.useState<number[]>([]);
+  const [selectedRouteMap, setSelectedRouteMap] =
+    React.useState<Map<number, RutaBase>>(() => new Map());
+  const [selectedRouteTipo, setSelectedRouteTipo] =
+    React.useState<RutaTipo[]>([]);
+  React.useEffect(() => {
+    if (selectedRouteIds.length > 0) {
+      setSelectedRouteTipo((prev) => {
+        const newSelected = selectedRouteIds
+          .filter(
+            (id) =>
+              !prev.some((ruta) => ruta.id_ruta === id),
+          )
+          .map((id) => ({
+            id_ruta: id,
+            estado: "ida-vuelta" as const,
+          }));
+        const updatedSelected = prev.filter((ruta) =>
+          selectedRouteIds.includes(ruta.id_ruta),
+        );
+        return [...updatedSelected, ...newSelected];
+      });
+    }
+  }, [selectedRouteIds, selectedRouteMap]);
+  const handleChangeRouteTipo = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const found = selectedRouteTipo.find(
+      (ruta) => ruta.id_ruta === Number(event.target.name),
+    );
+    if (found) {
+      setSelectedRouteTipo((prev) =>
+        prev.map((ruta) =>
+          ruta.id_ruta === found.id_ruta
+            ? {
+                ...ruta,
+                estado: event.target.value as
+                  | "ida-vuelta"
+                  | "solo-ida",
+              }
+            : ruta,
+        ),
+      );
+    }
+  };
   const rutasById = React.useMemo(
-    () => new Map([...rutas, ...routePageRoutes].map((ruta) => [ruta.id, ruta])),
+    () =>
+      new Map(
+        [...rutas, ...routePageRoutes].map((ruta) => [
+          ruta.id,
+          ruta,
+        ]),
+      ),
     [routePageRoutes, rutas],
   );
   const selectedRouteKey = selectedRouteIds.join("|");
-  const selectedRoutes = React.useMemo(
-    () => {
-      if (!selectedRouteKey) return EMPTY_ROUTES;
-      return (
-      selectedRouteIds
-        .map((id) => selectedRouteMap.get(id) || rutasById.get(id))
-        .filter((ruta): ruta is RutaBase => Boolean(ruta))
-      );
-    },
-    [rutasById, selectedRouteKey, selectedRouteMap],
-  );
+  const selectedRoutes = React.useMemo(() => {
+    if (!selectedRouteKey) return EMPTY_ROUTES;
+    return selectedRouteIds
+      .map(
+        (id) =>
+          selectedRouteMap.get(id) || rutasById.get(id),
+      )
+      .filter((ruta): ruta is RutaBase => Boolean(ruta));
+  }, [rutasById, selectedRouteKey, selectedRouteMap]);
   const connections = React.useMemo(
     () => buildConnectionSegments(selectedRoutes),
     [selectedRoutes],
   );
-  const [connectionOverrides, setConnectionOverrides] = React.useState<
-    Map<string, { path: GeoPoint[]; distanceMeters: number }>
-  >(() => new Map());
+  const [connectionOverrides, setConnectionOverrides] =
+    React.useState<
+      Map<
+        string,
+        { path: GeoPoint[]; distanceMeters: number }
+      >
+    >(() => new Map());
   const mergedConnections = React.useMemo(
     () =>
       connections.map((connection) => {
-        const override = connectionOverrides.get(connection.id);
+        const override = connectionOverrides.get(
+          connection.id,
+        );
         return override
           ? {
               ...connection,
@@ -152,15 +231,24 @@ export default function NuevoViaje({
     [connectionOverrides, connections],
   );
   const metrics = React.useMemo(
-    () => getJourneyMetrics(selectedRoutes, mergedConnections),
+    () =>
+      getJourneyMetrics(selectedRoutes, mergedConnections),
     [mergedConnections, selectedRoutes],
   );
   const journeySimulationPath = React.useMemo(
-    () => buildJourneySimulationPath(selectedRoutes, mergedConnections),
+    () =>
+      buildJourneySimulationPath(
+        selectedRoutes,
+        mergedConnections,
+      ),
     [mergedConnections, selectedRoutes],
   );
   const updateConnectionPath = React.useCallback(
-    (connectionId: string, path: GeoPoint[], distanceMeters: number) => {
+    (
+      connectionId: string,
+      path: GeoPoint[],
+      distanceMeters: number,
+    ) => {
       setConnectionOverrides((current) => {
         const existing = current.get(connectionId);
         if (
@@ -178,11 +266,16 @@ export default function NuevoViaje({
   );
 
   const [nombreViaje, setNombreViaje] = React.useState("");
-  const [descripcionViaje, setDescripcionViaje] = React.useState("");
-  const [estatusViaje, setEstatusViaje] = React.useState(true);
-  const [margenViajeMin, setMargenViajeMin] = React.useState(0);
-  const [imagenViajeBase64, setImagenViajeBase64] = React.useState("");
-  const [imagenViajePreview, setImagenViajePreview] = React.useState("");
+  const [descripcionViaje, setDescripcionViaje] =
+    React.useState("");
+  const [estatusViaje, setEstatusViaje] =
+    React.useState(true);
+  const [margenViajeMin, setMargenViajeMin] =
+    React.useState(0);
+  const [imagenViajeBase64, setImagenViajeBase64] =
+    React.useState("");
+  const [imagenViajePreview, setImagenViajePreview] =
+    React.useState("");
   const [routeSearch, setRouteSearch] = React.useState("");
   const [routeSortOption, setRouteSortOption] =
     React.useState<CatalogSortOption>("recent");
@@ -191,19 +284,27 @@ export default function NuevoViaje({
     total: 0,
     totalPages: 1,
   });
-  const [isLoadingRoutePage, setIsLoadingRoutePage] = React.useState(false);
-  const [routeModalOpen, setRouteModalOpen] = React.useState(false);
-  const [routePanelOpen, setRoutePanelOpen] = React.useState(true);
-  const [routeRefreshKey, setRouteRefreshKey] = React.useState(0);
+  const [isLoadingRoutePage, setIsLoadingRoutePage] =
+    React.useState(false);
+  const [routeModalOpen, setRouteModalOpen] =
+    React.useState(false);
+  const [routePanelOpen, setRoutePanelOpen] =
+    React.useState(true);
+  const [routeRefreshKey, setRouteRefreshKey] =
+    React.useState(0);
 
-  const duracionCalculadaViajeMin = Math.round(metrics.durationMin);
-  const duracionTotalViajeMin = duracionCalculadaViajeMin + margenViajeMin;
-  const viajeImage = imagenViajePreview || DEFAULT_VIAJE_IMAGE;
+  const duracionCalculadaViajeMin = Math.round(
+    metrics.durationMin,
+  );
+  const duracionTotalViajeMin =
+    duracionCalculadaViajeMin + margenViajeMin;
+  const viajeImage =
+    imagenViajePreview || DEFAULT_VIAJE_IMAGE;
   const storesImagesAsBase64 =
-    (
-      process.env.NEXT_PUBLIC_IMAGE_STORAGE_MODE ||
-      (process.env.NODE_ENV === "production" ? "url" : "base64")
-    ) === "base64";
+    (process.env.NEXT_PUBLIC_IMAGE_STORAGE_MODE ||
+      (process.env.NODE_ENV === "production"
+        ? "url"
+        : "base64")) === "base64";
 
   React.useEffect(() => {
     if (!isEditing || !viajeId) return;
@@ -217,13 +318,23 @@ export default function NuevoViaje({
         setDescripcionViaje(viaje.descripcion || "");
         setEstatusViaje(viaje.estatus);
         setMargenViajeMin(viaje.margenMin || 0);
-        const storedImageUrl = isGoogleStreetViewImage(viaje.imagenUrl)
+        const storedImageUrl = isGoogleStreetViewImage(
+          viaje.imagenUrl,
+        )
           ? ""
           : viaje.imagenUrl || "";
         setImagenViajeBase64(viaje.imagenBase64 || "");
-        setImagenViajePreview(viaje.imagenBase64 || storedImageUrl);
-        setSelectedRouteIds(viaje.rutas.map((ruta) => ruta.id));
-        setSelectedRouteMap(new Map(viaje.rutas.map((ruta) => [ruta.id, ruta])));
+        setImagenViajePreview(
+          viaje.imagenBase64 || storedImageUrl,
+        );
+        setSelectedRouteIds(
+          viaje.rutas.map((ruta) => ruta.id),
+        );
+        setSelectedRouteMap(
+          new Map(
+            viaje.rutas.map((ruta) => [ruta.id, ruta]),
+          ),
+        );
       })
       .catch((error) => {
         snack?.error({
@@ -257,12 +368,16 @@ export default function NuevoViaje({
         setRoutePageRoutes(mapped);
         setRoutePageData({
           total: mapped.length,
-          totalPages: mapped.length === 0 ? 1 : Math.max(1, response.totalPages),
+          totalPages:
+            mapped.length === 0
+              ? 1
+              : Math.max(1, response.totalPages),
         });
         setSelectedRouteMap((current) => {
           const next = new Map(current);
           mapped.forEach((ruta) => {
-          if (selectedRouteIds.includes(ruta.id)) next.set(ruta.id, ruta);
+            if (selectedRouteIds.includes(ruta.id))
+              next.set(ruta.id, ruta);
           });
           return next;
         });
@@ -304,8 +419,13 @@ export default function NuevoViaje({
   };
 
   const saveViaje = async () => {
-    if (!nombreViaje.trim() || selectedRouteIds.length === 0) {
-      snack?.error({ message: "Necesitas nombre y al menos una ruta" });
+    if (
+      !nombreViaje.trim() ||
+      selectedRouteIds.length === 0
+    ) {
+      snack?.error({
+        message: "Necesitas nombre y al menos una ruta",
+      });
       return;
     }
     try {
@@ -316,6 +436,7 @@ export default function NuevoViaje({
         duracionCalculadaMin: duracionCalculadaViajeMin,
         margenMin: margenViajeMin,
         duracionTotalMin: duracionTotalViajeMin,
+        config_rutas: selectedRouteTipo,
         imagenUrl:
           !storesImagesAsBase64 &&
           imagenViajePreview &&
@@ -335,16 +456,22 @@ export default function NuevoViaje({
         rutas: selectedRouteIds.map((rutaId, index) => ({
           rutaId,
           orden: index + 1,
-          conexion: mergedConnections.find((connection) => connection.toRouteId === rutaId)
-            ?.path,
+          conexion: mergedConnections.find(
+            (connection) => connection.toRouteId === rutaId,
+          )?.path,
           distanciaConexionMetros: mergedConnections.find(
             (connection) => connection.toRouteId === rutaId,
           )?.distanceMeters,
         })),
       };
-      if (isEditing && viajeId) await updateViajeBase(viajeId, body);
+      if (isEditing && viajeId)
+        await updateViajeBase(viajeId, body);
       else await createViajeBase(body);
-      snack?.success({ message: isEditing ? "Viaje base actualizado" : "Viaje base creado" });
+      snack?.success({
+        message: isEditing
+          ? "Viaje base actualizado"
+          : "Viaje base creado",
+      });
       navigationFunction("/dashboard/trips");
     } catch (error) {
       snack?.error({
@@ -357,6 +484,8 @@ export default function NuevoViaje({
       setIsSaving(false);
     }
   };
+
+  const theme = useTheme();
 
   return (
     <>
@@ -374,11 +503,17 @@ export default function NuevoViaje({
         ]}
       />
       <PaperHeader
-        title={isEditing ? "Editar viaje base" : "Nuevo viaje base"}
+        title={
+          isEditing
+            ? "Editar viaje base"
+            : "Nuevo viaje base"
+        }
         subtitle="Crea trayectos reutilizables y arma la composicion operativa del viaje"
         iconname={isEditing ? "edit" : "add"}
         showButton
-        onButtonClick={() => navigationFunction("/dashboard/trips")}
+        onButtonClick={() =>
+          navigationFunction("/dashboard/trips")
+        }
         buttonTitle="Volver"
         leftIcon={<ChevronLeftIcon />}
       />
@@ -391,502 +526,813 @@ export default function NuevoViaje({
       )}
 
       <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            xl: "minmax(0, 1fr) 360px",
+          },
+          gap: 2,
+          alignItems: "start",
+        }}
+      >
+        <Box
           sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", xl: "minmax(0, 1fr) 360px" },
+            display: "flex",
+            flexDirection: "column",
             gap: 2,
-            alignItems: "start",
+            order: { xs: 2, xl: 2 },
+            position: { xl: "sticky" },
+            top: 16,
           }}
         >
-          <Box
-            sx={{
+          <PaperBlock
+            title="Datos del viaje"
+            contentWrapperSx={{
               display: "flex",
               flexDirection: "column",
-              gap: 2,
-              order: { xs: 2, xl: 2 },
-              position: { xl: "sticky" },
-              top: 16,
+              gap: 1.5,
             }}
           >
-            <PaperBlock
-              title="Datos del viaje"
-              contentWrapperSx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{ alignItems: "center" }}
             >
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <AssignmentIcon color="primary" fontSize="small" />
-                <Typography variant="body1" sx={{ fontWeight: 950 }}>
-                  Informacion principal
+              <AssignmentIcon
+                color="primary"
+                fontSize="small"
+              />
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: 950 }}
+              >
+                Informacion principal
+              </Typography>
+            </Stack>
+            <TextField
+              label="Nombre del viaje base"
+              value={nombreViaje}
+              onChange={(event) =>
+                setNombreViaje(event.target.value)
+              }
+              size="small"
+              fullWidth
+            />
+            <TextField
+              label="Descripcion"
+              value={descripcionViaje}
+              onChange={(event) =>
+                setDescripcionViaje(event.target.value)
+              }
+              size="small"
+              multiline
+              rows={2}
+              fullWidth
+            />
+            <Stack spacing={1.25}>
+              <Stack
+                direction="row"
+                spacing={0.75}
+                sx={{ alignItems: "center" }}
+              >
+                <TimerIcon
+                  color="primary"
+                  fontSize="small"
+                />
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 850 }}
+                >
+                  Duracion operativa
                 </Typography>
               </Stack>
-              <TextField
-                label="Nombre del viaje base"
-                value={nombreViaje}
-                onChange={(event) => setNombreViaje(event.target.value)}
-                size="small"
-                fullWidth
-              />
-              <TextField
-                label="Descripcion"
-                value={descripcionViaje}
-                onChange={(event) => setDescripcionViaje(event.target.value)}
-                size="small"
-                multiline
-                rows={2}
-                fullWidth
-              />
-              <Stack spacing={1.25}>
-                <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
-                  <TimerIcon color="primary" fontSize="small" />
-                  <Typography variant="body2" sx={{ fontWeight: 850 }}>
-                    Duracion operativa
-                  </Typography>
-                </Stack>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 1,
+                }}
+              >
                 <Box
                   sx={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 1,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      gridColumn: "1 / -1",
-                      p: 1.25,
-                      borderRadius: "8px",
-                      border: "1px solid",
-                      borderColor: "rgba(31, 97, 141, 0.20)",
-                      color: "primary.main",
-                      backgroundColor: "rgba(31, 97, 141, 0.08)",
-                    }}
-                  >
-                    <Typography variant="caption" color="text.secondary">
-                      Tiempo calculado por Google Directions
-                    </Typography>
-                    <Typography variant="h4" sx={{ fontWeight: 950, lineHeight: 1.1 }}>
-                      {duracionCalculadaViajeMin} min
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      p: 1,
-                      border: "1px solid",
-                      borderColor: "divider",
-                      borderRadius: "8px",
-                      backgroundColor: "background.paper",
-                    }}
-                  >
-                    <Typography variant="caption" color="text.secondary">
-                      Margen adicional
-                    </Typography>
-                    <TextField
-                      type="number"
-                      value={margenViajeMin}
-                      onChange={(event) =>
-                        setMargenViajeMin(Math.max(0, Number(event.target.value) || 0))
-                      }
-                      size="small"
-                      slotProps={{
-                        input: {
-                          endAdornment: (
-                            <Typography variant="caption" color="text.secondary">
-                              min
-                            </Typography>
-                          ),
-                        },
-                      }}
-                    />
-                  </Box>
-                  <Box
-                    sx={{
-                      p: 1,
-                      border: "1px solid",
-                      borderColor: "primary.main",
-                      borderRadius: "8px",
-                      color: "white",
-                      background:
-                        "linear-gradient(135deg, rgba(31,97,141,0.96), rgba(25,56,92,0.94))",
-                    }}
-                  >
-                    <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.72)" }}>
-                      Total del viaje
-                    </Typography>
-                    <Typography
-                      variant="h6"
-                      sx={{ fontWeight: 950, color: "white", lineHeight: 1.15 }}
-                    >
-                      {duracionTotalViajeMin} min
-                    </Typography>
-                  </Box>
-                </Box>
-              </Stack>
-
-              <Stack spacing={1}>
-                <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
-                  <ImageIcon color="primary" fontSize="small" />
-                  <Typography variant="body2" sx={{ fontWeight: 850 }}>
-                    Imagen del viaje
-                  </Typography>
-                </Stack>
-                <Box
-                  component="img"
-                  src={viajeImage}
-                  alt="Imagen del viaje"
-                  sx={{
-                    width: "100%",
-                    height: 118,
-                    objectFit: "cover",
+                    gridColumn: "1 / -1",
+                    p: 1.25,
                     borderRadius: "8px",
                     border: "1px solid",
-                    borderColor: "divider",
+                    borderColor: "rgba(31, 97, 141, 0.20)",
+                    color: "primary.main",
+                    backgroundColor:
+                      "rgba(31, 97, 141, 0.08)",
                   }}
-                />
-                {!imagenViajePreview && (
-                  <Alert severity="info">
-                    Si no subes imagen, se guardara la imagen institucional por defecto.
-                  </Alert>
-                )}
-                <Button
-                  component="label"
-                  variant="outlined"
-                  startIcon={<AddPhotoAlternateIcon />}
                 >
-                  Cambiar imagen
-                  <input
-                    hidden
-                    accept="image/*"
-                    type="file"
-                    onChange={async (event) => {
-                      const file = event.target.files?.[0];
-                      if (!file) return;
-                      try {
-                        const base64 = await readImageAsBase64(file);
-                        setImagenViajeBase64(base64);
-                        setImagenViajePreview(base64);
-                      } catch (error) {
-                        snack?.error({
-                          message:
-                            error instanceof Error
-                              ? error.message
-                              : "No se pudo cargar la imagen",
-                        });
-                      }
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                  >
+                    Tiempo calculado por Google Directions
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 950,
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    {duracionCalculadaViajeMin} min
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    p: 1,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: "8px",
+                    backgroundColor: "background.paper",
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                  >
+                    Margen adicional
+                  </Typography>
+                  <TextField
+                    type="number"
+                    value={margenViajeMin}
+                    onChange={(event) =>
+                      setMargenViajeMin(
+                        Math.max(
+                          0,
+                          Number(event.target.value) || 0,
+                        ),
+                      )
+                    }
+                    size="small"
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                          >
+                            min
+                          </Typography>
+                        ),
+                      },
                     }}
                   />
-                </Button>
-              </Stack>
-              <Divider />
-              <Stack direction="row" spacing={1}>
-                <Button
-                  variant="outlined"
-                  startIcon={<ChevronLeftIcon />}
-                  onClick={() => navigationFunction("/dashboard/trips")}
-                  disabled={isSaving}
-                  sx={{ flex: 1 }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  startIcon={<SaveIcon />}
-                  onClick={saveViaje}
-                  disabled={isSaving}
+                </Box>
+                <Box
                   sx={{
-                    flex: 1.4,
-                    fontWeight: 950,
-                    boxShadow: "0 12px 24px rgba(31, 45, 94, 0.22)",
+                    p: 1,
+                    border: "1px solid",
+                    borderColor: "primary.main",
+                    borderRadius: "8px",
+                    color: "white",
+                    background:
+                      "linear-gradient(135deg, rgba(31,97,141,0.96), rgba(25,56,92,0.94))",
                   }}
                 >
-                  Guardar viaje
-                </Button>
-              </Stack>
-            </PaperBlock>
-          </Box>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "rgba(255,255,255,0.72)",
+                    }}
+                  >
+                    Total del viaje
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 950,
+                      color: "white",
+                      lineHeight: 1.15,
+                    }}
+                  >
+                    {duracionTotalViajeMin} min
+                  </Typography>
+                </Box>
+              </Box>
+            </Stack>
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, order: { xs: 1, xl: 1 } }}>
-            <PaperBlock
-              title="Vista previa del viaje"
-              subtitle="El orden sale de tu seleccion. Si dos rutas no conectan, se dibuja un enlace operativo punteado."
-              paperProps={{ sx: { p: 2, overflow: "hidden" } }}
-              contentWrapperSx={{ p: 0 }}
-            >
-              {selectedRoutes.length === 0 && (
-                <Alert severity="info" sx={{ m: 1.25, mb: 0 }}>
-                  Abre el control Rutas del mapa y selecciona una o mas rutas para armar el viaje base.
+            <Stack spacing={1}>
+              <Stack
+                direction="row"
+                spacing={0.75}
+                sx={{ alignItems: "center" }}
+              >
+                <ImageIcon
+                  color="primary"
+                  fontSize="small"
+                />
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 850 }}
+                >
+                  Imagen del viaje
+                </Typography>
+              </Stack>
+              <Box
+                component="img"
+                src={viajeImage}
+                alt="Imagen del viaje"
+                sx={{
+                  width: "100%",
+                  height: 118,
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              />
+              {!imagenViajePreview && (
+                <Alert severity="info">
+                  Si no subes imagen, se guardara la imagen
+                  institucional por defecto.
                 </Alert>
               )}
-              <Box sx={{ position: "relative" }}>
-                <GoogleRouteMap
-                  routes={selectedRoutes}
-                  connections={mergedConnections}
-                  height="calc(100vh - 270px)"
-                  title={
-                    mergedConnections.length === 0
-                      ? "Viaje conectado"
-                      : "Viaje con enlaces pendientes"
-                  }
-                  enableStreetView
-                  enableSimulation={journeySimulationPath.length > 1}
-                  simulationPath={journeySimulationPath}
-                  editableConnections
-                  onConnectionPathChange={updateConnectionPath}
-                  infoContent={
-                    <Stack spacing={1.5}>
-                      <Box
+              <Button
+                component="label"
+                variant="outlined"
+                startIcon={<AddPhotoAlternateIcon />}
+              >
+                Cambiar imagen
+                <input
+                  hidden
+                  accept="image/*"
+                  type="file"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const base64 =
+                        await readImageAsBase64(file);
+                      setImagenViajeBase64(base64);
+                      setImagenViajePreview(base64);
+                    } catch (error) {
+                      snack?.error({
+                        message:
+                          error instanceof Error
+                            ? error.message
+                            : "No se pudo cargar la imagen",
+                      });
+                    }
+                  }}
+                />
+              </Button>
+            </Stack>
+            <Divider />
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                startIcon={<ChevronLeftIcon />}
+                onClick={() =>
+                  navigationFunction("/dashboard/trips")
+                }
+                disabled={isSaving}
+                sx={{ flex: 1 }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                startIcon={<SaveIcon />}
+                onClick={saveViaje}
+                disabled={isSaving}
+                sx={{
+                  flex: 1.4,
+                  fontWeight: 950,
+                  boxShadow:
+                    "0 12px 24px rgba(31, 45, 94, 0.22)",
+                }}
+              >
+                Guardar viaje
+              </Button>
+            </Stack>
+          </PaperBlock>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            order: { xs: 1, xl: 1 },
+          }}
+        >
+          <PaperBlock
+            title="Vista previa del viaje"
+            subtitle="El orden sale de tu seleccion. Si dos rutas no conectan, se dibuja un enlace operativo punteado."
+            paperProps={{
+              sx: { p: 2, overflow: "hidden" },
+            }}
+            contentWrapperSx={{ p: 0 }}
+          >
+            {selectedRoutes.length === 0 && (
+              <Alert
+                severity="info"
+                sx={{ m: 1.25, mb: 0 }}
+              >
+                Abre el control Rutas del mapa y selecciona
+                una o mas rutas para armar el viaje base.
+              </Alert>
+            )}
+            <Box sx={{ position: "relative" }}>
+              <GoogleRouteMap
+                routes={selectedRoutes}
+                connections={mergedConnections}
+                height="calc(100vh - 270px)"
+                title={
+                  mergedConnections.length === 0
+                    ? "Viaje conectado"
+                    : "Viaje con enlaces pendientes"
+                }
+                enableStreetView
+                enableSimulation={
+                  journeySimulationPath.length > 1
+                }
+                simulationPath={journeySimulationPath}
+                editableConnections
+                onConnectionPathChange={
+                  updateConnectionPath
+                }
+                infoContent={
+                  <Stack spacing={1.5}>
+                    <Box
+                      sx={{
+                        p: 1.5,
+                        borderRadius: "8px",
+                        color: "white",
+                        background:
+                          "linear-gradient(135deg, rgba(15,23,42,0.96), rgba(31,97,141,0.92))",
+                      }}
+                    >
+                      <Typography
+                        variant="overline"
                         sx={{
-                          p: 1.5,
-                          borderRadius: "8px",
-                          color: "white",
-                          background:
-                            "linear-gradient(135deg, rgba(15,23,42,0.96), rgba(31,97,141,0.92))",
+                          letterSpacing: 0,
+                          opacity: 0.72,
                         }}
                       >
-                        <Typography variant="overline" sx={{ letterSpacing: 0, opacity: 0.72 }}>
-                          Resumen del viaje
-                        </Typography>
-                        <Box
-                          sx={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(2, 1fr)",
-                            gap: 1,
-                            mt: 0.5,
-                          }}
-                        >
-                          <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 950 }}>
-                              {selectedRoutes.length}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.72)" }}>
-                              Rutas
-                            </Typography>
-                          </Box>
-                          <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 950 }}>
-                              {metrics.distanceKm.toFixed(1)} km
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.72)" }}>
-                              Distancia
-                            </Typography>
-                          </Box>
-                          <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 950 }}>
-                              {duracionCalculadaViajeMin} min
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.72)" }}>
-                              Calculado
-                            </Typography>
-                          </Box>
-                          <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 950 }}>
-                              {duracionTotalViajeMin} min
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.72)" }}>
-                              Total
-                            </Typography>
-                          </Box>
+                        Resumen del viaje
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(2, 1fr)",
+                          gap: 1,
+                          mt: 0.5,
+                        }}
+                      >
+                        <Box>
+                          <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 950 }}
+                          >
+                            {selectedRoutes.length}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color:
+                                "rgba(255,255,255,0.72)",
+                            }}
+                          >
+                            Rutas
+                          </Typography>
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 950 }}
+                          >
+                            {metrics.distanceKm.toFixed(1)}{" "}
+                            km
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color:
+                                "rgba(255,255,255,0.72)",
+                            }}
+                          >
+                            Distancia
+                          </Typography>
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 950 }}
+                          >
+                            {duracionCalculadaViajeMin} min
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color:
+                                "rgba(255,255,255,0.72)",
+                            }}
+                          >
+                            Calculado
+                          </Typography>
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 950 }}
+                          >
+                            {duracionTotalViajeMin} min
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color:
+                                "rgba(255,255,255,0.72)",
+                            }}
+                          >
+                            Total
+                          </Typography>
                         </Box>
                       </Box>
-                      <Stack spacing={1}>
-                        {selectedRoutes.map((ruta, index) => {
-                          const previousConnection = mergedConnections.find(
-                            (connection) => connection.toRouteId === ruta.id,
-                          );
-                          return (
-                            <Box key={ruta.id}>
-                              {previousConnection && (
-                                <Alert severity="warning" sx={{ mb: 1 }}>
-                                  Enlace antes de ruta {index + 1}: traslado sin pasajeros hasta el siguiente inicio.
-                                </Alert>
-                              )}
-                              <Box
-                                sx={{
-                                  p: 1,
-                                  borderRadius: "8px",
-                                  border: "1px solid",
-                                  borderColor: "divider",
-                                }}
-                              >
-                                <Typography variant="body2" sx={{ fontWeight: 900 }}>
-                                  {index + 1}. {ruta.nombre}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {ruta.origen.nombre} -&gt; {ruta.destino.nombre}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          );
-                        })}
-                      </Stack>
-                      {mergedConnections.length > 0 && (
-                        <Alert severity="warning">
-                          Hay rutas que no conectan directamente; el tramo punteado indica el enlace operativo.
-                        </Alert>
-                      )}
-                    </Stack>
-                  }
-                />
-                <Stack sx={{ position: "absolute", left: 16, top: 16, zIndex: 5 }}>
-                  <Button
-                    variant="contained"
-                    startIcon={<RouteIcon />}
-                    onClick={() => setRoutePanelOpen((current) => !current)}
-                    sx={{
-                      borderRadius: "999px",
-                      fontWeight: 900,
-                      boxShadow: "0 14px 28px rgba(15,23,42,0.22)",
-                    }}
-                  >
-                    Rutas
-                  </Button>
-                </Stack>
-                {routePanelOpen && (
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      left: 16,
-                      top: 68,
-                      zIndex: 5,
-                      width: { xs: 310, sm: 390 },
-                      maxHeight: "calc(100% - 92px)",
-                      overflow: "auto",
-                      p: 1.25,
-                      borderRadius: "8px",
-                      border: "1px solid",
-                      borderColor: "rgba(15,23,42,0.12)",
-                      backgroundColor: "rgba(255,255,255,0.98)",
-                      boxShadow: "0 18px 36px rgba(15,23,42,0.20)",
-                    }}
-                  >
+                    </Box>
                     <Stack spacing={1}>
-                      <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 950 }}>
-                          Rutas del viaje
-                        </Typography>
-                        <IconButton size="small" onClick={() => setRoutePanelOpen(false)}>
-                          <CloseIcon fontSize="small" />
-                        </IconButton>
-                      </Stack>
-                      <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => setRouteModalOpen(true)}
-                        sx={{ fontWeight: 900 }}
+                      {selectedRoutes.map((ruta, index) => {
+                        const previousConnection =
+                          mergedConnections.find(
+                            (connection) =>
+                              connection.toRouteId ===
+                              ruta.id,
+                          );
+                        return (
+                          <Box key={ruta.id}>
+                            {previousConnection && (
+                              <Alert
+                                severity="warning"
+                                sx={{ mb: 1 }}
+                              >
+                                Enlace antes de ruta{" "}
+                                {index + 1}: traslado sin
+                                pasajeros hasta el siguiente
+                                inicio.
+                              </Alert>
+                            )}
+                            <Box
+                              sx={{
+                                p: 1,
+                                borderRadius: "8px",
+                                border: "1px solid",
+                                borderColor: "divider",
+                              }}
+                            >
+                              <Typography
+                                variant="body2"
+                                sx={{ fontWeight: 900 }}
+                              >
+                                {index + 1}. {ruta.nombre}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {ruta.origen.nombre} -&gt;{" "}
+                                {ruta.destino.nombre}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        );
+                      })}
+                    </Stack>
+                    {mergedConnections.length > 0 && (
+                      <Alert severity="warning">
+                        Hay rutas que no conectan
+                        directamente; el tramo punteado
+                        indica el enlace operativo.
+                      </Alert>
+                    )}
+                  </Stack>
+                }
+              />
+              <Stack
+                sx={{
+                  position: "absolute",
+                  left: 16,
+                  top: 16,
+                  zIndex: 5,
+                }}
+              >
+                <Button
+                  variant="contained"
+                  startIcon={<RouteIcon />}
+                  onClick={() =>
+                    setRoutePanelOpen((current) => !current)
+                  }
+                  sx={{
+                    borderRadius: "999px",
+                    fontWeight: 900,
+                    boxShadow:
+                      "0 14px 28px rgba(15,23,42,0.22)",
+                  }}
+                >
+                  Rutas
+                </Button>
+              </Stack>
+              {routePanelOpen && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    left: 16,
+                    top: 68,
+                    zIndex: 5,
+                    width: { xs: 310, sm: 390 },
+                    maxHeight: "calc(100% - 92px)",
+                    overflow: "auto",
+                    p: 1.25,
+                    borderRadius: "8px",
+                    border: "1px solid",
+                    borderColor: "rgba(15,23,42,0.12)",
+                    backgroundColor:
+                      theme.palette.background.default,
+                    boxShadow:
+                      "0 18px 36px rgba(15,23,42,0.20)",
+                  }}
+                >
+                  <Stack spacing={1}>
+                    <Stack
+                      direction="row"
+                      sx={{
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ fontWeight: 950 }}
                       >
-                        Crear ruta
-                      </Button>
+                        Rutas del viaje
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setRoutePanelOpen(false)
+                        }
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Stack>
+                    <Button
+                      variant="contained"
+                      startIcon={<AddIcon />}
+                      onClick={() =>
+                        setRouteModalOpen(true)
+                      }
+                      sx={{ fontWeight: 900 }}
+                    >
+                      Crear ruta
+                    </Button>
+                    <Stack spacing={0.55}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ px: 0.5, fontWeight: 800 }}
+                      >
+                        Buscar
+                      </Typography>
+                      <TextField
+                        placeholder="Buscar ruta"
+                        value={routeSearch}
+                        onChange={(event) => {
+                          setRouteSearch(
+                            event.target.value,
+                          );
+                          setRoutePage(1);
+                        }}
+                        size="small"
+                        fullWidth
+                      />
+                    </Stack>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr",
+                        gap: 1,
+                      }}
+                    >
                       <Stack spacing={0.55}>
-                        <Typography variant="caption" color="text.secondary" sx={{ px: 0.5, fontWeight: 800 }}>
-                          Buscar
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            px: 0.5,
+                            fontWeight: 800,
+                          }}
+                        >
+                          Ordenar
                         </Typography>
                         <TextField
-                          placeholder="Buscar ruta"
-                          value={routeSearch}
+                          select
+                          value={routeSortOption}
                           onChange={(event) => {
-                            setRouteSearch(event.target.value);
+                            setRouteSortOption(
+                              event.target
+                                .value as CatalogSortOption,
+                            );
                             setRoutePage(1);
                           }}
                           size="small"
                           fullWidth
-                        />
+                        >
+                          {SORT_OPTIONS.map((option) => (
+                            <MenuItem
+                              key={option.value}
+                              value={option.value}
+                            >
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </TextField>
                       </Stack>
-                      <Box
-                        sx={{
-                          display: "grid",
-                          gridTemplateColumns: "1fr",
-                          gap: 1,
-                        }}
-                      >
-                        <Stack spacing={0.55}>
-                          <Typography variant="caption" color="text.secondary" sx={{ px: 0.5, fontWeight: 800 }}>
-                            Ordenar
-                          </Typography>
-                          <TextField
-                            select
-                            value={routeSortOption}
-                            onChange={(event) => {
-                              setRouteSortOption(event.target.value as CatalogSortOption);
-                              setRoutePage(1);
-                            }}
-                            size="small"
-                            fullWidth
-                          >
-                            {SORT_OPTIONS.map((option) => (
-                              <MenuItem key={option.value} value={option.value}>
-                                {option.label}
-                              </MenuItem>
-                            ))}
-                          </TextField>
-                        </Stack>
-                      </Box>
-                      <Typography variant="caption" color="text.secondary">
-                        {isLoadingRoutePage
-                          ? "Buscando rutas..."
-                          : `${routePageData.total} ruta(s) encontradas`}
-                      </Typography>
-                      {routePageRoutes.length === 0 ? (
-                        <Alert severity="info">
-                          No hay rutas para esta busqueda.
-                        </Alert>
-                      ) : (
-                        routePageRoutes.map((ruta) => (
-                          <Box
-                            key={ruta.id}
-                            sx={{
-                              p: 1,
-                              borderRadius: "8px",
-                              border: "1px solid",
-                              borderColor: selectedRouteIds.includes(ruta.id)
+                    </Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                    >
+                      {isLoadingRoutePage
+                        ? "Buscando rutas..."
+                        : `${routePageData.total} ruta(s) encontradas`}
+                    </Typography>
+                    {routePageRoutes.length === 0 ? (
+                      <Alert severity="info">
+                        No hay rutas para esta busqueda.
+                      </Alert>
+                    ) : (
+                      routePageRoutes.map((ruta) => (
+                        <Box
+                          key={ruta.id}
+                          sx={{
+                            p: 1,
+                            borderRadius: "8px",
+                            border: "1px solid",
+                            borderColor:
+                              selectedRouteIds.includes(
+                                ruta.id,
+                              )
                                 ? ruta.color
                                 : "divider",
-                              backgroundColor: selectedRouteIds.includes(ruta.id)
+                            backgroundColor:
+                              selectedRouteIds.includes(
+                                ruta.id,
+                              )
                                 ? "rgba(31, 97, 141, 0.06)"
                                 : "background.paper",
+                          }}
+                        >
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            sx={{
+                              alignItems: "flex-start",
                             }}
                           >
-                            <Stack direction="row" spacing={1} sx={{ alignItems: "flex-start" }}>
-                              <Checkbox
-                                checked={selectedRouteIds.includes(ruta.id)}
-                                onChange={() => toggleRoute(ruta.id)}
-                              />
-                              <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <Typography sx={{ fontWeight: 900 }} noWrap>
-                                  {ruta.nombre}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {ruta.origen.direccion} a {ruta.destino.direccion}
-                                </Typography>
-                                <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap", gap: 0.75 }}>
-                                  {selectedRouteIds.includes(ruta.id) && (
-                                    <Chip
-                                      label={`R${selectedRouteIds.indexOf(ruta.id) + 1}`}
-                                      color="primary"
-                                      size="small"
-                                    />
-                                  )}
-                                  <Chip label={`${ruta.distanciaKm || "-"} km`} size="small" />
-                                  <Chip label={`${ruta.duracionMin || "-"} min`} size="small" />
-                                  <Chip label={`${ruta.paradas.length} parada(s)`} size="small" />
+                            <Checkbox
+                              checked={selectedRouteIds.includes(
+                                ruta.id,
+                              )}
+                              onChange={() =>
+                                toggleRoute(ruta.id)
+                              }
+                            />
+                            <Box
+                              sx={{
+                                flex: 1,
+                                minWidth: 0,
+                              }}
+                            >
+                              <Typography
+                                sx={{ fontWeight: 900 }}
+                                noWrap
+                              >
+                                {ruta.nombre}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {ruta.origen.direccion} a{" "}
+                                {ruta.destino.direccion}
+                              </Typography>
+                              <Stack
+                                direction="row"
+                                spacing={1}
+                                sx={{
+                                  mt: 1,
+                                  flexWrap: "wrap",
+                                  gap: 0.75,
+                                }}
+                              >
+                                {selectedRouteIds.includes(
+                                  ruta.id,
+                                ) && (
+                                  <Chip
+                                    label={`R${selectedRouteIds.indexOf(ruta.id) + 1}`}
+                                    color="primary"
+                                    size="small"
+                                  />
+                                )}
+                                <Chip
+                                  label={`${ruta.distanciaKm || "-"} km`}
+                                  size="small"
+                                />
+                                <Chip
+                                  label={`${ruta.duracionMin || "-"} min`}
+                                  size="small"
+                                />
+                                <Chip
+                                  label={`${ruta.paradas.length} parada(s)`}
+                                  size="small"
+                                />
+                              </Stack>
+                              {selectedRouteIds.includes(
+                                ruta.id,
+                              ) && (
+                                <Stack
+                                  direction="row"
+                                  spacing={1}
+                                  sx={{
+                                    mt: 1,
+                                    flexWrap: "wrap",
+                                    gap: 0.75,
+                                  }}
+                                >
+                                  <FormControl>
+                                    <FormLabel
+                                      id={`${ruta.id}-label`}
+                                    >
+                                      Tipo de ruta
+                                    </FormLabel>
+                                    <RadioGroup
+                                      aria-labelledby={`${ruta.id}-label`}
+                                      name={`${ruta.id}`}
+                                      value={
+                                        selectedRouteTipo.find(
+                                          (
+                                            tipo: RutaTipo,
+                                          ) =>
+                                            tipo.id_ruta ===
+                                            ruta.id,
+                                        )?.estado || ""
+                                      }
+                                      onChange={
+                                        handleChangeRouteTipo
+                                      }
+                                    >
+                                      <FormControlLabel
+                                        value="solo-ida"
+                                        control={<Radio />}
+                                        label="Solo ida"
+                                      />
+                                      <FormControlLabel
+                                        value="ida-vuelta"
+                                        control={<Radio />}
+                                        label="Ida y vuelta"
+                                      />
+                                    </RadioGroup>
+                                  </FormControl>
                                 </Stack>
-                              </Box>
-                            </Stack>
-                          </Box>
-                        ))
+                              )}
+                            </Box>
+                          </Stack>
+                        </Box>
+                      ))
+                    )}
+                    <Pagination
+                      count={Math.max(
+                        1,
+                        routePageData.totalPages,
                       )}
-                      <Pagination
-                        count={Math.max(1, routePageData.totalPages)}
-                        page={Math.min(routePage, Math.max(1, routePageData.totalPages))}
-                        onChange={(_, page) => setRoutePage(page)}
-                        color="primary"
-                        size="small"
-                        sx={{ alignSelf: "center" }}
-                      />
-                    </Stack>
-                  </Box>
-                )}
-              </Box>
-            </PaperBlock>
-          </Box>
+                      page={Math.min(
+                        routePage,
+                        Math.max(
+                          1,
+                          routePageData.totalPages,
+                        ),
+                      )}
+                      onChange={(_, page) =>
+                        setRoutePage(page)
+                      }
+                      color="primary"
+                      size="small"
+                      sx={{ alignSelf: "center" }}
+                    />
+                  </Stack>
+                </Box>
+              )}
+            </Box>
+          </PaperBlock>
         </Box>
+      </Box>
       <Dialog
         open={routeModalOpen}
         onClose={() => setRouteModalOpen(false)}
@@ -910,18 +1356,30 @@ export default function NuevoViaje({
           }}
         >
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 950 }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 950 }}
+            >
               Crear ruta reutilizable
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Define origen, destino, paradas y trazo operativo.
+            <Typography
+              variant="body2"
+              color="text.secondary"
+            >
+              Define origen, destino, paradas y trazo
+              operativo.
             </Typography>
           </Box>
-          <IconButton onClick={() => setRouteModalOpen(false)}>
+          <IconButton
+            onClick={() => setRouteModalOpen(false)}
+          >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent dividers sx={{ p: 2, overflow: "auto" }}>
+        <DialogContent
+          dividers
+          sx={{ p: 2, overflow: "auto" }}
+        >
           <RutaDesigner
             snack={snack}
             onSaved={async () => {

@@ -53,6 +53,7 @@ model ViajeBase {
   imagenUrl            String?  @db.Text
   imagenBase64         String?  @db.Text
   imagenStorage        String?  @db.VarChar(20)
+  config_rutas         Json
   estatus              Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
