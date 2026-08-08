@@ -3,6 +3,7 @@
 import React, { forwardRef } from "react";
 import {
   Alert,
+  Backdrop,
   Box,
   Button,
   CircularProgress,
@@ -44,6 +45,8 @@ import {
 import Visa from "../assets/visa.svg";
 import MasterCard from "../assets/mastercard.svg";
 import PayPal from "../assets/paypal.svg";
+import { useSalida } from "../providers/ViajeProvider";
+import { useRouter } from "next/navigation";
 
 const steps = [
   "Asientos",
@@ -153,6 +156,47 @@ export default function CompraForm() {
     1,
   );
 
+  const router = useRouter();
+
+  const {
+    getSalidaId,
+    fetchSalida,
+    cleanSalida,
+    pasajeros,
+  } = useSalida();
+  const [loading, setLoading] = React.useState(false);
+  const [salidaData, setSalidaData] =
+    React.useState<any>(null);
+
+  const fetchOrRedirect = async () => {
+    const id = getSalidaId();
+    console.log("Salida ID from sessionStorage:", id);
+    if (id) {
+      setLoading(true);
+      try {
+        const data = await fetchSalida(id);
+        console.log(
+          "Fetched salida data:",
+          data,
+          JSON.stringify(data),
+        );
+        setSalidaData(data);
+      } catch (error) {
+        console.error("Error fetching salida:", error);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      console.log("No salidaId available to fetch");
+      // router.replace("/");
+    }
+  };
+
+  React.useEffect(() => {
+    fetchOrRedirect();
+    return () => cleanSalida();
+  }, []);
+
   const handleNext = () => {
     if (activeStep >= steps.length - 1) return;
 
@@ -239,6 +283,15 @@ export default function CompraForm() {
 
   return (
     <>
+      <Backdrop
+        sx={(theme) => ({
+          color: "#fff",
+          zIndex: theme.zIndex.drawer + 1,
+        })}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Header />
       <Box
         component="main"

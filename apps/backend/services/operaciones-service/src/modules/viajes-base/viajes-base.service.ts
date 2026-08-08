@@ -1,17 +1,25 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { Prisma as PrismaTypes } from '../../../generated/prisma/client';
-import { ConfiguracionesService } from '../configuraciones/configuraciones.service';
-import { GeoPoint, distanceMeters } from '../geo/geo.utils';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CreateViajeBaseDto } from './dtos/create-viaje-base.dto';
-import { UpdateViajeBaseDto } from './dtos/update-viaje-base.dto';
-import { ViajeBaseRutaDto } from './dtos/viaje-base-ruta.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import type { Prisma as PrismaTypes } from "../../../generated/prisma/client";
+import { ConfiguracionesService } from "../configuraciones/configuraciones.service";
+import { GeoPoint, distanceMeters } from "../geo/geo.utils";
+import { PrismaService } from "../../prisma/prisma.service";
+import { CreateViajeBaseDto } from "./dtos/create-viaje-base.dto";
+import { UpdateViajeBaseDto } from "./dtos/update-viaje-base.dto";
+import { ViajeBaseRutaDto } from "./dtos/viaje-base-ruta.dto";
 
-const { Prisma } = require(`${process.cwd()}/generated/prisma/client`) as {
+const { Prisma } = require(
+  `${process.cwd()}/generated/prisma/client`,
+) as {
   Prisma: typeof PrismaTypes;
 };
 
-function toJson(value: unknown): PrismaTypes.InputJsonValue {
+function toJson(
+  value: unknown,
+): PrismaTypes.InputJsonValue {
   return value as PrismaTypes.InputJsonValue;
 }
 
@@ -32,8 +40,8 @@ type FindAllOptions = {
   page?: number;
   limit?: number;
   search?: string;
-  status?: 'all' | 'active' | 'inactive';
-  sort?: 'recent' | 'oldest' | 'name_asc' | 'name_desc';
+  status?: "all" | "active" | "inactive";
+  sort?: "recent" | "oldest" | "name_asc" | "name_desc";
 };
 
 @Injectable()
@@ -45,13 +53,13 @@ export class ViajesBaseService {
 
   private buildWhereSql(
     search?: string,
-    status: 'all' | 'active' | 'inactive' = 'all',
+    status: "all" | "active" | "inactive" = "all",
   ) {
     const conditions: PrismaTypes.Sql[] = [];
 
-    if (status === 'active') {
+    if (status === "active") {
       conditions.push(Prisma.sql`"estatus" = true`);
-    } else if (status === 'inactive') {
+    } else if (status === "inactive") {
       conditions.push(Prisma.sql`"estatus" = false`);
     }
 
@@ -66,20 +74,20 @@ export class ViajesBaseService {
     }
 
     return conditions.length
-      ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+      ? Prisma.sql`WHERE ${Prisma.join(conditions, " AND ")}`
       : Prisma.empty;
   }
 
-  private buildOrderSql(sort?: FindAllOptions['sort']) {
-    if (sort === 'oldest') {
+  private buildOrderSql(sort?: FindAllOptions["sort"]) {
+    if (sort === "oldest") {
       return Prisma.sql`"createdAt" ASC, "id" ASC`;
     }
 
-    if (sort === 'name_asc') {
+    if (sort === "name_asc") {
       return Prisma.sql`LOWER("nombre") ASC, "nombre" ASC, "id" ASC`;
     }
 
-    if (sort === 'name_desc') {
+    if (sort === "name_desc") {
       return Prisma.sql`LOWER("nombre") DESC, "nombre" DESC, "id" DESC`;
     }
 
@@ -97,7 +105,9 @@ export class ViajesBaseService {
         ? Prisma.sql`OFFSET ${(page - 1) * limit} LIMIT ${limit}`
         : Prisma.empty;
 
-    const rows = await this.prisma.$queryRaw<Array<{ id: number }>>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Array<{ id: number }>
+    >(Prisma.sql`
       SELECT "id"
       FROM "operaciones"."ViajeBase"
       ${whereSql}
@@ -115,17 +125,24 @@ export class ViajesBaseService {
       where: { id: { in: ids } },
       include: this.includeRutas(),
     });
-    const byId = new Map(viajes.map((viaje) => [viaje.id, viaje]));
+    const byId = new Map(
+      viajes.map((viaje) => [viaje.id, viaje]),
+    );
 
     return ids
       .map((id) => byId.get(id))
-      .filter((viaje): viaje is NonNullable<typeof viaje> => Boolean(viaje));
+      .filter((viaje): viaje is NonNullable<typeof viaje> =>
+        Boolean(viaje),
+      );
   }
 
   async create(dto: CreateViajeBaseDto) {
     const rutasOrdenadas = sortRutas(dto.rutas);
-    await this.assertRutasExist(rutasOrdenadas.map((ruta) => ruta.rutaId));
-    const segmentos = await this.buildSegmentos(rutasOrdenadas);
+    await this.assertRutasExist(
+      rutasOrdenadas.map((ruta) => ruta.rutaId),
+    );
+    const segmentos =
+      await this.buildSegmentos(rutasOrdenadas);
 
     return this.prisma.viajeBase.create({
       data: {
@@ -136,7 +153,8 @@ export class ViajesBaseService {
         margenMin: dto.margenMin ?? 0,
         duracionTotalMin:
           dto.duracionTotalMin ??
-          ((dto.duracionCalculadaMin ?? 0) + (dto.margenMin ?? 0)),
+          (dto.duracionCalculadaMin ?? 0) +
+            (dto.margenMin ?? 0),
         imagenUrl: dto.imagenUrl,
         imagenBase64: dto.imagenBase64,
         imagenStorage: dto.imagenStorage,
@@ -144,27 +162,40 @@ export class ViajesBaseService {
         rutas: {
           create: segmentos,
         },
+        config_rutas: toJson(dto.config_rutas),
       },
       include: this.includeRutas(),
     });
   }
 
-  async findAll(active: boolean, options: FindAllOptions = {}) {
+  async findAll(
+    active: boolean,
+    options: FindAllOptions = {},
+  ) {
     const search = options.search?.trim();
-    const status = options.status ?? (active ? 'active' : 'all');
+    const status =
+      options.status ?? (active ? "active" : "all");
     const whereSql = this.buildWhereSql(search, status);
     const orderSql = this.buildOrderSql(options.sort);
 
     if (!options.page && !options.limit && !search) {
-      const ids = await this.findOrderedIds(whereSql, orderSql);
+      const ids = await this.findOrderedIds(
+        whereSql,
+        orderSql,
+      );
       return this.findManyByOrderedIds(ids);
     }
 
     const page = Math.max(1, options.page || 1);
-    const limit = Math.min(50, Math.max(1, options.limit || 5));
+    const limit = Math.min(
+      50,
+      Math.max(1, options.limit || 5),
+    );
     const [ids, totalRows] = await Promise.all([
       this.findOrderedIds(whereSql, orderSql, page, limit),
-      this.prisma.$queryRaw<Array<{ total: bigint | number }>>(Prisma.sql`
+      this.prisma.$queryRaw<
+        Array<{ total: bigint | number }>
+      >(Prisma.sql`
         SELECT COUNT(*)::bigint AS "total"
         FROM "operaciones"."ViajeBase"
         ${whereSql}
@@ -189,7 +220,9 @@ export class ViajesBaseService {
     });
 
     if (!viaje) {
-      throw new NotFoundException(`Viaje base ${id} no existe`);
+      throw new NotFoundException(
+        `Viaje base ${id} no existe`,
+      );
     }
 
     return viaje;
@@ -198,14 +231,20 @@ export class ViajesBaseService {
   async update(id: number, dto: UpdateViajeBaseDto) {
     await this.findOne(id);
 
-    const rutas = dto.rutas ? sortRutas(dto.rutas) : undefined;
+    const rutas = dto.rutas
+      ? sortRutas(dto.rutas)
+      : undefined;
     if (rutas) {
-      await this.assertRutasExist(rutas.map((ruta) => ruta.rutaId));
+      await this.assertRutasExist(
+        rutas.map((ruta) => ruta.rutaId),
+      );
     }
 
     return this.prisma.$transaction(async (tx) => {
       if (rutas) {
-        await tx.viajeBaseRuta.deleteMany({ where: { viajeBaseId: id } });
+        await tx.viajeBaseRuta.deleteMany({
+          where: { viajeBaseId: id },
+        });
       }
 
       return tx.viajeBase.update({
@@ -221,6 +260,7 @@ export class ViajesBaseService {
           imagenBase64: dto.imagenBase64,
           imagenStorage: dto.imagenStorage,
           estatus: dto.estatus,
+          config_rutas: toJson(dto.config_rutas),
           rutas: rutas
             ? {
                 create: await this.buildSegmentos(rutas),
@@ -260,7 +300,7 @@ export class ViajesBaseService {
     return {
       rutas: {
         include: { ruta: true },
-        orderBy: { orden: 'asc' as const },
+        orderBy: { orden: "asc" as const },
       },
     };
   }
@@ -272,7 +312,9 @@ export class ViajesBaseService {
     });
 
     if (count !== uniqueIds.length) {
-      throw new BadRequestException('Una o mas rutas no existen');
+      throw new BadRequestException(
+        "Una o mas rutas no existen",
+      );
     }
   }
 
@@ -284,11 +326,16 @@ export class ViajesBaseService {
       return {
         ruta: { connect: { id: ruta.rutaId } },
         orden: ruta.orden,
-        conexion: ruta.conexion ? toJson(ruta.conexion) : undefined,
-        conexionEncodedPolyline: ruta.conexionEncodedPolyline,
+        conexion: ruta.conexion
+          ? toJson(ruta.conexion)
+          : undefined,
+        conexionEncodedPolyline:
+          ruta.conexionEncodedPolyline,
         distanciaConexionMetros:
-          ruta.distanciaConexionMetros ?? conexion?.distanciaMetros,
-        requiereConexion: conexion?.requiereConexion ?? false,
+          ruta.distanciaConexionMetros ??
+          conexion?.distanciaMetros,
+        requiereConexion:
+          conexion?.requiereConexion ?? false,
       };
     });
   }
@@ -297,9 +344,13 @@ export class ViajesBaseService {
     const toleranciaMetros =
       await this.configuraciones.getToleranciaConexionMetros();
     const entities = await this.prisma.ruta.findMany({
-      where: { id: { in: rutas.map((ruta) => ruta.rutaId) } },
+      where: {
+        id: { in: rutas.map((ruta) => ruta.rutaId) },
+      },
     });
-    const byId = new Map(entities.map((ruta) => [ruta.id, ruta]));
+    const byId = new Map(
+      entities.map((ruta) => [ruta.id, ruta]),
+    );
     const conexiones: ConexionValidada[] = [];
 
     for (let index = 1; index < rutas.length; index += 1) {
@@ -324,7 +375,9 @@ export class ViajesBaseService {
 
     return {
       toleranciaMetros,
-      valido: conexiones.every((conexion) => conexion.conectado),
+      valido: conexiones.every(
+        (conexion) => conexion.conectado,
+      ),
       conexiones,
     };
   }

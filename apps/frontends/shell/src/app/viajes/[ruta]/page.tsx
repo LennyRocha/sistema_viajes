@@ -1,3 +1,4 @@
+import ViajesList from "@/src/layout/ViajesList";
 import { Metadata } from "next";
 import React from "react";
 
@@ -15,5 +16,10 @@ export const metadata: Metadata = {
 
 export default function Page({ params }: Readonly<Props>) {
   const { ruta } = React.use(params);
-  return <div>page{ruta ? ` - ${ruta}` : ""}</div>;
+  return (
+    <div>
+      page{ruta ? ` - ${ruta}` : ""}
+      <ViajesList />
+    </div>
+  );
 }

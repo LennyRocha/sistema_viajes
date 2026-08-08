@@ -10,6 +10,7 @@ import { initFederation } from "@/src/lib/federation";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import PrintSaludo from "../utils/saludo";
+import { SalidaProvider } from "./ViajeProvider";
 
 initFederation();
 
@@ -23,14 +24,16 @@ export default function ProvidersWrapper({
       <ThemeProvider theme={theme} defaultMode="system">
         <SidebarProvider>
           <DialogProvider>
-            <LocalizationProvider
-              dateAdapter={AdapterDayjs}
-            >
-              {children}
-              <CssBaseline />
-            </LocalizationProvider>
-            <PrintSaludo />
-            <SnackBox />
+            <SalidaProvider>
+              <LocalizationProvider
+                dateAdapter={AdapterDayjs}
+              >
+                {children}
+                <CssBaseline />
+              </LocalizationProvider>
+              <PrintSaludo />
+              <SnackBox />
+            </SalidaProvider>
           </DialogProvider>
         </SidebarProvider>
       </ThemeProvider>

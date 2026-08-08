@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Type } from "class-transformer";
 import {
   ArrayMinSize,
   IsArray,
@@ -10,8 +10,9 @@ import {
   MaxLength,
   Min,
   ValidateNested,
-} from 'class-validator';
-import { ViajeBaseRutaDto } from './viaje-base-ruta.dto';
+} from "class-validator";
+import { ViajeBaseRutaDto } from "./viaje-base-ruta.dto";
+import { RutaTipo } from "../types/RutaTipo";
 
 export class CreateViajeBaseDto {
   @IsString()
@@ -66,4 +67,8 @@ export class CreateViajeBaseDto {
   @ValidateNested({ each: true })
   @Type(() => ViajeBaseRutaDto)
   rutas!: ViajeBaseRutaDto[];
+
+  @IsArray()
+  @ArrayMinSize(1)
+  config_rutas!: RutaTipo[];
 }

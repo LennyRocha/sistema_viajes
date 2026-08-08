@@ -1,4 +1,5 @@
 import RutaBase from "./RutaBase";
+import { RutaTipo } from "./RutaTipo";
 
 export default interface ViajeBase {
   id: number;
@@ -12,5 +13,6 @@ export default interface ViajeBase {
   imagenUrl?: string | null;
   imagenBase64?: string | null;
   imagenStorage?: string | null;
+  config_rutas: RutaTipo[];
   estatus: boolean;
 }
