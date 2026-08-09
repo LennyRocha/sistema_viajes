@@ -1,8 +1,9 @@
 /*
   Warnings:
 
-  - Added the required column `config_rutas` to the `ViajeBase` table without a default value. This is not possible if the table is not empty.
+  - Existing `ViajeBase` rows are initialized with an empty route config.
 
 */
 -- AlterTable
-ALTER TABLE "ViajeBase" ADD COLUMN     "config_rutas" JSONB NOT NULL;
+ALTER TABLE "ViajeBase" ADD COLUMN "config_rutas" JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE "ViajeBase" ALTER COLUMN "config_rutas" DROP DEFAULT;
