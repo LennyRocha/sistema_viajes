@@ -8,13 +8,23 @@ import {
 import { MotionPaper } from "@nexoroute/commons";
 import Image from "next/image";
 
+export type CompraSummaryProps = {
+  tipo: TipoViaje;
+  buttonDisbaled?: boolean;
+  buttonLoading?: boolean;
+  buttonText?: string;
+  onClickButton?: () => void;
+};
+
 type TipoViaje = "ida" | "vuelta";
 
 const CompraSummary = ({
   tipo = "ida",
-}: {
-  tipo: TipoViaje;
-}) => {
+  buttonDisbaled = false,
+  buttonLoading = false,
+  buttonText = "Continuar",
+  onClickButton,
+}: CompraSummaryProps) => {
   return (
     <MotionPaper
       layoutId="summary"
@@ -95,8 +105,14 @@ const CompraSummary = ({
           Todos los precios incluyen IVA
         </Typography>
       </Box>
-      <Button size="large" variant="contained">
-        Continuar
+      <Button
+        size="large"
+        variant="contained"
+        disabled={buttonDisbaled}
+        loading={buttonLoading}
+        onClick={onClickButton}
+      >
+        {buttonText}
       </Button>
     </MotionPaper>
   );

@@ -8,11 +8,15 @@ import {
   Button,
   CircularProgress,
   IconButton,
+  MenuItem,
   MobileStepper,
   Step,
   StepLabel,
   Stepper,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
@@ -25,28 +29,46 @@ import {
   Variants,
 } from "motion/react";
 import {
+  AccountBalanceOutlined,
   ChevronLeft,
   ChevronRight,
   CreditCard,
+  PaymentsOutlined,
+  Schedule,
+  Visibility,
+  VisibilityOff,
 } from "@mui/icons-material";
-import CompraSummary from "../core/components/CompraSummary";
+import CompraSummary, {
+  CompraSummaryProps,
+} from "../core/components/CompraSummary";
 import dynamic from "next/dynamic";
 import {
   CenteredDiv,
   MotionPaper,
+  snack,
 } from "@nexoroute/commons";
 import useSetCompra from "../core/hooks/useSetCompra";
 import { Compra, Comprador } from "../core/types/Compra";
 import {
   formatCardNumber,
+  formatCVV,
+  formatExpiryDate,
   formatPhoneNumber,
+  formatZipCode,
+  isExpiryDateValid,
 } from "../adapters/formatPayment";
 
 import Visa from "../assets/visa.svg";
 import MasterCard from "../assets/mastercard.svg";
-import PayPal from "../assets/paypal.svg";
+import AmericanExpress from "../assets/american-express.svg";
+import OXXO from "../assets/oxxo.svg";
+import BVVA from "../assets/bbva.svg";
+
 import { useSalida } from "../providers/ViajeProvider";
 import { useRouter } from "next/navigation";
+import Asiento from "../core/types/Asiento";
+import { estadosDeMexico } from "../utils/estadosDeMexico";
+import theme from "@/theme";
 
 const steps = [
   "Asientos",
@@ -167,34 +189,38 @@ export default function CompraForm() {
   const [loading, setLoading] = React.useState(false);
   const [salidaData, setSalidaData] =
     React.useState<any>(null);
+  const [plantillaBus, setPlantillaBus] = React.useState<{
+    idTipoBus: number;
+    asientos: Asiento[];
+  } | null>(null);
 
   const fetchOrRedirect = async () => {
     const id = getSalidaId();
-    console.log("Salida ID from sessionStorage:", id);
-    if (id) {
-      setLoading(true);
+    setLoading(true);
+
+    if (id !== null) {
       try {
-        const data = await fetchSalida(id);
-        console.log(
-          "Fetched salida data:",
-          data,
-          JSON.stringify(data),
-        );
+        const data: any = await fetchSalida(id);
         setSalidaData(data);
-      } catch (error) {
-        console.error("Error fetching salida:", error);
+        if (data.autobus) {
+          setPlantillaBus({
+            idTipoBus: data.autobus.tipoAutobus.id,
+            asientos: data.autobus.asientos || [],
+          });
+        }
+      } catch {
+        router.replace("/");
       } finally {
         setLoading(false);
       }
     } else {
-      console.log("No salidaId available to fetch");
-      // router.replace("/");
+      router.replace("/");
     }
   };
 
   React.useEffect(() => {
     fetchOrRedirect();
-    return () => cleanSalida();
+    //return () => cleanSalida();
   }, []);
 
   const handleNext = () => {
@@ -254,7 +280,10 @@ export default function CompraForm() {
           </Typography>
           <PasajeroBilling />
           <BusMap
-            tipo={2}
+            tipo={plantillaBus?.idTipoBus ?? 1}
+            {...(plantillaBus?.asientos && {
+              seats: plantillaBus.asientos,
+            })}
             onSelect={(seat: any) =>
               console.log("Asiento 2", seat)
             }
@@ -263,36 +292,49 @@ export default function CompraForm() {
         <CompraSummary tipo="ida" />
       </Box>
     ),
-    1: <Step2 />,
+    1: <Step2 pasajeros={pasajeros} />,
     2: (
-      <Step3 data={formData} setField={setCompradorField} />
+      <Step3
+        data={formData}
+        setField={setCompradorField}
+        summaryProps={{
+          buttonText: "Siguiente",
+          onClickButton() {
+            handleNext();
+          },
+          tipo: "ida",
+        }}
+      />
     ),
     3: (
-      <div
-        style={{
-          backgroundColor: "red",
-          width: "100%",
-          height: "100%",
+      <Step4
+        summaryProps={{
+          buttonText: "Continuar",
+          onClickButton() {
+            handleNext();
+          },
+          tipo: "vuelta",
         }}
-      >
-        Confirmación
-      </div>
+      />
     ),
-    4: <Step5 />,
+    4: (
+      <Step5
+        summaryProps={{
+          buttonText: "Confirmar compra",
+          onClickButton() {
+            console.log("Confirmar compra", formData);
+          },
+          tipo: "ida",
+        }}
+        metodoPagoId={formData.metodoPagoId}
+        setField={setField}
+      />
+    ),
   };
 
   return (
     <>
-      <Backdrop
-        sx={(theme) => ({
-          color: "#fff",
-          zIndex: theme.zIndex.drawer + 1,
-        })}
-        open={loading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
-      <Header />
+      <Header isFetching={loading} />
       <Box
         component="main"
         sx={{
@@ -317,27 +359,39 @@ export default function CompraForm() {
           </Stepper>
         )}
 
-        <Box
-          sx={{
-            flex: 1,
-            position: "relative",
-            overflow: "auto",
-          }}
-        >
-          <AnimatePresence
-            mode="wait"
-            initial={false}
-            custom={direction}
+        {loading ? (
+          <Backdrop
+            sx={(theme) => ({
+              color: "#fff",
+              zIndex: theme.zIndex.drawer + 1,
+            })}
+            open
           >
-            <AnimatedStep key={activeStep}>
-              {
-                components[
-                  activeStep as keyof typeof components
-                ]
-              }
-            </AnimatedStep>
-          </AnimatePresence>
-        </Box>
+            <CircularProgress color="inherit" />
+          </Backdrop>
+        ) : (
+          <Box
+            sx={{
+              flex: 1,
+              position: "relative",
+              overflow: "auto",
+            }}
+          >
+            <AnimatePresence
+              mode="wait"
+              initial={false}
+              custom={direction}
+            >
+              <AnimatedStep key={activeStep}>
+                {
+                  components[
+                    activeStep as keyof typeof components
+                  ]
+                }
+              </AnimatedStep>
+            </AnimatePresence>
+          </Box>
+        )}
 
         {isLargeScreen && (
           <Box
@@ -431,7 +485,11 @@ const AnimatedStep = forwardRef<
   );
 });
 
-const Header = () => {
+const Header = ({
+  isFetching,
+}: {
+  isFetching: boolean;
+}) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   return (
@@ -441,6 +499,9 @@ const Header = () => {
           maxWidth: "1400px",
           width: "100%",
           mx: "auto",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
         <Box
@@ -483,12 +544,21 @@ const Header = () => {
             </Typography>
           </Box>
         </Box>
+        {!isFetching && <TimerText />}
       </Box>
     </MotionPaper>
   );
 };
 
-const Step2 = ({}) => {
+const Step2 = ({ pasajeros }: { pasajeros: number }) => {
+  const pasajerosArray = Array.from(
+    { length: pasajeros },
+    (_, i) => ({
+      nombres: "",
+      apellidos: "",
+      asientos: [],
+    }),
+  );
   return (
     <Box
       sx={{
@@ -516,24 +586,18 @@ const Step2 = ({}) => {
         <Typography variant="h3" className="font-brand">
           Registro de pasajeros
         </Typography>
-        <PasajeroCard
-          numero={1}
-          asientoIda="A1"
-          asientoVuelta="A1"
-          nombre=""
-          apellido=""
-          setNombre={() => {}}
-          setApellido={() => {}}
-        />
-        <PasajeroCard
-          numero={2}
-          asientoIda="A2"
-          asientoVuelta="A2"
-          nombre=""
-          apellido=""
-          setNombre={() => {}}
-          setApellido={() => {}}
-        />
+        {pasajerosArray.map((_, index) => (
+          <PasajeroCard
+            key={index + 1}
+            numero={index + 1}
+            asientoIda={`A${index + 1}`}
+            asientoVuelta={`A${index + 1}`}
+            nombre={_.nombres}
+            apellido={_.apellidos}
+            setNombre={() => {}}
+            setApellido={() => {}}
+          />
+        ))}
       </Box>
       <CompraSummary tipo="vuelta" />
     </Box>
@@ -543,14 +607,31 @@ const Step2 = ({}) => {
 const Step3 = ({
   data,
   setField,
+  summaryProps,
 }: {
   data: Compra;
   setField: (field: keyof Comprador, value: any) => void;
+  summaryProps: CompraSummaryProps;
 }) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const isEmailValid = emailRegex.test(
     data.comprador?.email || "",
   );
+  const isValid = React.useMemo(() => {
+    return (
+      data.comprador?.nombres &&
+      data.comprador?.apellido_paterno &&
+      data.comprador?.email &&
+      data.comprador?.telefono &&
+      isEmailValid
+    );
+  }, [
+    data.comprador?.nombres,
+    data.comprador?.apellido_paterno,
+    data.comprador?.email,
+    data.comprador?.telefono,
+    isEmailValid,
+  ]);
   return (
     <Box
       sx={{
@@ -580,6 +661,7 @@ const Step3 = ({
         </Typography>
         <TextField
           label="Nombre (s)"
+          size="small"
           fullWidth
           required
           placeholder="Ej. José Armando"
@@ -602,6 +684,7 @@ const Step3 = ({
         />
         <TextField
           label="Apellido paterno"
+          size="small"
           fullWidth
           required
           placeholder="Ej. Trujillo"
@@ -622,6 +705,7 @@ const Step3 = ({
         />
         <TextField
           label="Apellido materno (opcional)"
+          size="small"
           fullWidth
           placeholder="Ej. Guzmán"
           value={data.comprador?.apellido_materno}
@@ -641,6 +725,7 @@ const Step3 = ({
         />
         <TextField
           label="Correo electrónico"
+          size="small"
           fullWidth
           required
           placeholder="Ej. josetrujillo@gmail.com"
@@ -658,6 +743,7 @@ const Step3 = ({
         />
         <TextField
           label="Teléfono"
+          size="small"
           fullWidth
           required
           placeholder="Ej. 777 123 45 67"
@@ -680,16 +766,464 @@ const Step3 = ({
             {data.comprador.email}
           </Alert>
         )}
+        <Typography variant="caption" color="error">
+          <b style={{ color: "red" }}>*</b> Campos
+          obligatorios
+        </Typography>
       </Box>
-      <CompraSummary tipo="vuelta" />
+      <CompraSummary
+        {...summaryProps}
+        buttonDisbaled={!isValid}
+      />
     </Box>
   );
 };
 
-const Step5 = ({}) => {
+const Step4 = ({
+  summaryProps,
+}: {
+  summaryProps: CompraSummaryProps;
+}) => {
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "100%",
+        display: "flex",
+        flexDirection: "column",
+        "@media(min-width: 1000px)": {
+          flexDirection: "row",
+        },
+        gap: 2,
+        padding: "2px",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          minHeight: 0,
+          flex: 1,
+          gap: 4,
+        }}
+      >
+        <Typography variant="h3" className="font-brand">
+          Confirmar información
+        </Typography>
+      </Box>
+      <CompraSummary {...summaryProps} />
+    </Box>
+  );
+};
+
+const Step5 = ({
+  summaryProps,
+  metodoPagoId,
+  setField,
+}: {
+  summaryProps: CompraSummaryProps;
+  metodoPagoId: number;
+  setField: (field: keyof Compra, value: any) => void;
+}) => {
+  const theme = useTheme();
+
   const [cardnum, setCardnum] = React.useState<string>("");
   const [expiry, setExpiry] = React.useState<string>("");
   const [cvv, setCvv] = React.useState<string>("");
+  const [zipCode, setZipCode] = React.useState<string>("");
+  const [cardHolder, setCardHolder] =
+    React.useState<string>("");
+  const [city, setCity] = React.useState<string>("");
+  const [state, setState] = React.useState<string>("");
+
+  const sm = useMediaQuery("(max-width: 600px)");
+  const [inpType, setInpType] = React.useState<
+    "password" | "text"
+  >("password");
+
+  const handleTipoPago = (
+    event: React.MouseEvent<HTMLElement>,
+    newAlignment: string | null,
+  ) => {
+    setField(
+      "metodoPagoId",
+      newAlignment ? Number.parseInt(newAlignment) : null,
+    );
+  };
+
+  const [expiryError, setExpiryError] =
+    React.useState(false);
+
+  const toggleButtonSx = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  };
+
+  React.useEffect(() => {
+    if (metodoPagoId !== 1) {
+      setCardHolder("");
+      setCardnum("");
+      setZipCode("");
+      setExpiry("");
+      setState("");
+      setCity("");
+      setCvv("");
+      setField("metodoPago", null);
+    } else {
+      setField("metodoPago", {
+        cardnum,
+        expiry,
+        cvv,
+        cardHolder,
+        zipCode,
+        state,
+        city,
+      });
+    }
+  }, [metodoPagoId, cardnum, expiry, cvv]);
+
+  const isValid = React.useMemo(() => {
+    if (metodoPagoId === 1) {
+      return (
+        cardnum.replace(/\s/g, "").length >= 13 &&
+        expiry.length === 5 &&
+        (cvv.length === 3 || cvv.length === 4) &&
+        cardHolder.length > 0 &&
+        zipCode.length >= 5 &&
+        state.length > 0 &&
+        city.length > 0 &&
+        !expiryError
+      );
+    }
+    return true;
+  }, [
+    metodoPagoId,
+    cardnum,
+    expiry,
+    cvv,
+    cardHolder,
+    zipCode,
+    state,
+    city,
+    expiryError,
+  ]);
+
+  const forms = {
+    1: (
+      <Box
+        sx={{
+          width: "100%",
+          minHeight: "100%",
+          display: "flex",
+          gap: 2,
+          flexDirection: "column",
+        }}
+      >
+        <Typography variant="subtitle2">
+          Pago con tarjeta de crédito o débito
+        </Typography>
+        <TextField
+          size="small"
+          fullWidth
+          label="Títular de la tarjeta"
+          autoFocus
+          placeholder="Ingresa el nombre completo"
+          autoCapitalize="words"
+          required
+          value={cardHolder}
+          onChange={(e) => {
+            const value = e.target.value.replace(
+              /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+              "",
+            );
+            setCardHolder(value.trim());
+          }}
+        />
+        <TextField
+          size="small"
+          fullWidth
+          label="Número de la tarjeta"
+          placeholder="XXXX XXXX XXXX XXXX"
+          type="text"
+          inputMode="numeric"
+          slotProps={{
+            htmlInput: {
+              maxLength: 19,
+              pattern: String.raw`[0-9\s]{13,19}`,
+            },
+            input: {
+              endAdornment: (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    width: "fit-content",
+                    mr: { xs: 2, sm: 0 },
+                  }}
+                >
+                  <Image
+                    priority
+                    src={Visa}
+                    alt="visa"
+                    width={20}
+                  />
+                  <Image
+                    priority
+                    src={MasterCard}
+                    alt="mastercard"
+                    width={20}
+                  />
+                  <Image
+                    priority
+                    src={AmericanExpress}
+                    alt="american express"
+                    width={20}
+                  />
+                </Box>
+              ),
+            },
+          }}
+          required
+          value={cardnum}
+          onChange={(e) =>
+            setCardnum(formatCardNumber(e.target.value))
+          }
+        />
+        <Box
+          sx={{
+            display: "flex",
+            width: "100%",
+            gap: 2,
+            "@media(max-width: 600px)": {
+              flexDirection: "column",
+            },
+          }}
+        >
+          <TextField
+            size="small"
+            fullWidth
+            label="Fecha de vencimiento"
+            placeholder="MM/AA"
+            type="text"
+            inputMode="numeric"
+            slotProps={{
+              htmlInput: {
+                maxLength: 5,
+                pattern: "[0-9]{2}/[0-9]{2}",
+              },
+            }}
+            required
+            error={expiryError}
+            helperText={expiryError ? "Fecha inválida" : ""}
+            value={expiry}
+            onChange={(e) => {
+              setExpiry(formatExpiryDate(e.target.value));
+              setExpiryError(false); // limpia el error mientras edita
+            }}
+            onBlur={() => {
+              if (expiry.length === 5) {
+                setExpiryError(!isExpiryDateValid(expiry));
+              }
+            }}
+          />
+          <TextField
+            size="small"
+            fullWidth
+            label="CVV"
+            placeholder="XXX"
+            type="text"
+            inputMode="numeric"
+            slotProps={{
+              htmlInput: {
+                maxLength: 4,
+                pattern: "[0-9]{3,4}",
+                autoComplete: "off",
+                style: {
+                  WebkitTextSecurity:
+                    inpType === "password"
+                      ? "disc"
+                      : "none",
+                } as React.CSSProperties,
+              },
+              input: {
+                endAdornment: (
+                  <Tooltip
+                    title={
+                      inpType === "password"
+                        ? "Mostrar"
+                        : "Ocultar"
+                    }
+                  >
+                    <IconButton
+                      onClick={() =>
+                        setInpType(
+                          inpType === "password"
+                            ? "text"
+                            : "password",
+                        )
+                      }
+                    >
+                      {inpType === "password" ? (
+                        <Visibility />
+                      ) : (
+                        <VisibilityOff />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                ),
+              },
+            }}
+            required
+            value={cvv}
+            onChange={(e) => {
+              setCvv(formatCVV(e.target.value));
+            }}
+          />
+          <TextField
+            size="small"
+            fullWidth
+            label="Código postal"
+            placeholder="XXXXX"
+            type="text"
+            inputMode="numeric"
+            slotProps={{
+              htmlInput: {
+                maxLength: 6,
+                pattern: "[0-9]{6}",
+              },
+            }}
+            required
+            value={zipCode}
+            onChange={(e) =>
+              setZipCode(formatZipCode(e.target.value))
+            }
+          />
+        </Box>
+        <TextField
+          size="small"
+          fullWidth
+          label="Ciudad"
+          placeholder="Ingresa la ciudad"
+          autoCapitalize="words"
+          required
+          value={city}
+          onChange={(e) => {
+            const value = e.target.value.replace(
+              /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
+              "",
+            );
+            setCity(value.trim());
+          }}
+        />
+        <TextField
+          size="small"
+          fullWidth
+          label="Estado"
+          placeholder="Selecciona el estado"
+          required
+          value={state}
+          onChange={(e) => setState(e.target.value)}
+          select
+        >
+          {estadosDeMexico.map((estado) => (
+            <MenuItem
+              key={estado.clave}
+              value={estado.clave}
+            >
+              {estado.nombre}
+            </MenuItem>
+          ))}
+        </TextField>
+        <Typography variant="caption" color="error">
+          <b style={{ color: "red" }}>*</b> Campos
+          obligatorios
+        </Typography>
+      </Box>
+    ),
+    2: (
+      <Box
+        sx={{
+          width: "100%",
+          minHeight: "100%",
+          display: "flex",
+          gap: 1,
+          flexDirection: "column",
+        }}
+      >
+        <Typography variant="subtitle2">
+          Pago por transferencia
+        </Typography>
+        <Image priority src={BVVA} alt="bbva" width={125} />
+        <Typography variant="caption">
+          <b>Títular:</b> Nexoroute S.A. de C.V. <br />
+          <b>Banco:</b> BBVA <br />
+          <b>Cuenta:</b> 1234567890 <br />
+          <b>CLABE:</b> 012345678901234567 <br />
+          <b>Referencia:</b>{" "}
+          <i
+            style={{ color: theme.palette.text.secondary }}
+          >
+            Se generará al confirmar la compra
+          </i>
+        </Typography>
+      </Box>
+    ),
+    3: (
+      <Box
+        sx={{
+          width: "100%",
+          minHeight: "100%",
+          display: "flex",
+          gap: 1,
+          flexDirection: "column",
+        }}
+      >
+        <Typography variant="subtitle2">
+          Pago en la tienda OXXO más cercana
+        </Typography>
+        <Typography variant="caption">
+          1- Mencionale al cajero que desea realizar un pago
+          a Nexoroute y proporcione el código de referencia
+          que se generará al confirmar la compra. <br />
+          2- Realice el pago en efectivo. <br />
+          3- Conserve el recibo de pago que le entregará el
+          cajero. <br />
+        </Typography>
+        <Typography
+          variant="caption"
+          color="textSecondary"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <Schedule fontSize="small" />
+          <i>Acreditación inmediata</i>
+        </Typography>
+      </Box>
+    ),
+    4: (
+      <Box
+        sx={{
+          width: "100%",
+          minHeight: "100%",
+          display: "flex",
+          gap: 1,
+          flexDirection: "column",
+        }}
+      >
+        <Alert severity="success">
+          El pago en efectivo se realizará en ventanilla
+        </Alert>
+      </Box>
+    ),
+  };
+
   return (
     <Box
       sx={{
@@ -717,44 +1251,135 @@ const Step5 = ({}) => {
         <Typography variant="h3" className="font-brand">
           Pago
         </Typography>
-        <Image
-          priority
-          src={Visa}
-          alt="Follow us on Twitter"
-        />
-        <TextField
-          size="small"
-          fullWidth
-          label="Títular de la tarjeta"
-          autoFocus
-          placeholder="Ingresa el nombre completo"
-          autoCapitalize="words"
-          required
-        />
-        <TextField
-          size="small"
-          fullWidth
-          label="Número de la tarjeta"
-          placeholder="XXXX XXXX XXXX XXXX"
-          type="text"
-          inputMode="numeric"
-          slotProps={{
-            htmlInput: {
-              maxLength: 19,
-              pattern: String.raw`[0-9\s]{13,19}`,
-            },
-            input: {
-              endAdornment: <CreditCard />,
-            },
+        <ToggleButtonGroup
+          value={metodoPagoId}
+          exclusive
+          onChange={handleTipoPago}
+          aria-label="tipo de pago"
+          sx={{
+            width: "100%",
           }}
-          required
-          value={cardnum}
-          onChange={(e) =>
-            setCardnum(formatCardNumber(e.target.value))
-          }
-        />
+        >
+          <ToggleButton
+            value={1}
+            aria-label="crédito/débito"
+            sx={toggleButtonSx}
+          >
+            <CreditCard fontSize="large" />
+            {!sm && (
+              <Typography variant="caption">
+                Crédito/Débito
+              </Typography>
+            )}
+          </ToggleButton>
+          <ToggleButton
+            value={2}
+            aria-label="transferencia"
+            sx={toggleButtonSx}
+          >
+            <AccountBalanceOutlined fontSize="large" />
+            {!sm && (
+              <Typography variant="caption">
+                Transferencia
+              </Typography>
+            )}
+          </ToggleButton>
+          <ToggleButton
+            value={3}
+            aria-label="oxxo"
+            sx={toggleButtonSx}
+          >
+            <Image
+              priority
+              src={OXXO}
+              alt="oxxo"
+              width={40}
+            />
+            {!sm && (
+              <Typography variant="caption">
+                OXXO
+              </Typography>
+            )}
+          </ToggleButton>
+          <ToggleButton
+            value={4}
+            aria-label="efectivo"
+            sx={toggleButtonSx}
+          >
+            <PaymentsOutlined fontSize="large" />
+            {!sm && (
+              <Typography variant="caption">
+                Efectivo
+              </Typography>
+            )}
+          </ToggleButton>
+        </ToggleButtonGroup>
+        {forms[metodoPagoId as keyof typeof forms]}
       </Box>
-      <CompraSummary tipo="vuelta" />
+      <CompraSummary
+        {...summaryProps}
+        buttonDisbaled={!isValid}
+      />
     </Box>
+  );
+};
+
+const TimerText = () => {
+  const theme = useTheme();
+
+  const [minutes, setMinutes] = React.useState(10);
+  const [seconds, setSeconds] = React.useState(60);
+
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      if (seconds > 0) {
+        setSeconds(seconds - 1);
+      } else if (minutes > 0) {
+        setMinutes(minutes - 1);
+        setSeconds(59);
+      }
+    }, 1000);
+
+    const timeout = setTimeout(
+      () => {
+        clearInterval(timer);
+        router.replace("/");
+        snack.warning({
+          message:
+            "Se agotó el tiempo para completar la compra.",
+          duration: 2500,
+        });
+      },
+      10 * 60 * 1000,
+    ); // 10 minutos
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(timeout);
+    };
+  }, [minutes, seconds]);
+
+  const displaySeconds =
+    seconds < 10 ? `0${seconds}` : seconds;
+
+  return (
+    <Tooltip title="Tiempo restante para completar la compra">
+      <Typography
+        variant="subtitle2"
+        sx={{
+          color: theme.palette.text.primary,
+          transition: "all 03s ease",
+          "&:hover": {
+            color: theme.palette.accent.main,
+            fontWeight: "bold",
+          },
+        }}
+      >
+        {minutes >= 10 ? minutes : `0${minutes}`}:
+        {seconds === 60 ? "00" : displaySeconds}
+      </Typography>
+    </Tooltip>
   );
 };

@@ -15,6 +15,7 @@ export interface Compra {
   abordado: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  metodoPago?: Record<string, any> | null;
 }
 
 export interface Comprador {
@@ -30,7 +31,12 @@ export interface Comprador {
 
 export interface Pasajero {
   nombres: string;
-  apellido_paterno: string;
-  apellido_materno?: string;
+  apellidos: string;
+  asiento: PasajerAsientos[];
+}
+
+export interface PasajerAsientos {
   asiento: Asiento;
+  rutaId: number;
+  trayecto: "ida" | "vuelta";
 }
