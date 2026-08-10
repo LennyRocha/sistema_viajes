@@ -448,10 +448,9 @@ const HeroV2 = ({ imageY }: { imageY: any }) => {
         zIndex: 0,
         overflow: "hidden",
       }}
-      id="hero"
     >
       <motion.div
-        style={{ translateY: imageY }}
+        style={{ y: imageY }}
         className="relative w-full h-full"
       >
         <Image
@@ -1569,7 +1568,10 @@ const DestinosSection = ({
           overflowX: "scroll",
           overflowY: "hidden",
           height: disabled ? "fit-content" : 250,
-          ...(disabled && { maskImage }),
+          ...(!disabled && {
+            maskImage,
+            WebkitMaskImage: maskImage,
+          }),
         }}
       >
         <RutasCarrusel
@@ -1577,84 +1579,6 @@ const DestinosSection = ({
           router={router}
         />
       </motion.div>
-      {/*<motion.div
-        ref={ref}
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ ease: "easeInOut", duration: 1 }}
-        style={{
-          margin: "0 auto",
-          width: "100%",
-          overflowX: "scroll",
-          overflowY: "hidden",
-          height: 250,
-          maskImage,
-        }}
-      >
-        <Box
-          sx={{
-            display: "inline-flex",
-            gap: "8px",
-            height: "100%",
-          }}
-        >
-          {itemData.map((item) => (
-            <ImageListItem
-              key={item.img}
-              sx={{ width: "max(25vw, 300px)" }}
-            >
-              <img
-                srcSet={`${item.img}?w=248&fit=crop&auto=format&dpr=2 2x`}
-                src={`${item.img}?w=248&fit=crop&auto=format`}
-                alt={item.title}
-                loading="lazy"
-              />
-              <ImageListItemBar
-                title={item.title}
-                subtitle={item.author}
-                actionIcon={
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 0.5,
-                      alignItems: "center",
-                      width: "fit-content",
-                    }}
-                  >
-                    <Tooltip title="Simular viaje">
-                      <IconButton
-                        color="default"
-                        aria-label={`info about ${item.title}`}
-                        onClick={() =>
-                          router.push(
-                            "/simular_viaje/terminal-san-casteabro-a-terminal-tempinotitlan",
-                          )
-                        }
-                      >
-                        <Map />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Ver viajes">
-                      <IconButton
-                        color="default"
-                        aria-label={`info about ${item.title}`}
-                        onClick={() =>
-                          router.push(
-                            "/viajes/terminal-san-casteabro-a-terminal-tempinotitlan",
-                          )
-                        }
-                      >
-                        <ConfirmationNumber />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                }
-              />
-            </ImageListItem>
-          ))}
-        </Box>
-      </motion.div>*/}
       <MotionButton
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}

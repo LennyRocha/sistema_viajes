@@ -63,6 +63,7 @@ const template: Compra = {
   asientos: [],
   monto: 0,
   rutaId: 0,
-  metodoPagoId: 0,
+  metodoPagoId: 1,
+  metodoPago: null,
   abordado: false,
 };

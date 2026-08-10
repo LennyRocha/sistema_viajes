@@ -215,6 +215,7 @@ export class SalidasService {
             nombre: viaje.nombre,
             descripcion: viaje.descripcion,
             estatus: viaje.estatus,
+            config_rutas: viaje.config_rutas,
             rutas: orderedRoutes.map((ruta) => ({
               id: ruta.id,
               orden: ruta.orden,
