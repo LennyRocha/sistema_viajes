@@ -11,8 +11,7 @@ import { Layer, Stage } from "react-konva";
 
 const PasajeroCard = ({
   numero,
-  asientoIda,
-  asientoVuelta,
+  asiento,
   nombre,
   apellido,
   setNombre,
@@ -69,13 +68,8 @@ const PasajeroCard = ({
             }}
           >
             <Typography variant="caption">
-              Adulto, Asiento {asientoIda} ida
+              Adulto, Asiento {asiento} ida
             </Typography>
-            {asientoVuelta && (
-              <Typography variant="caption">
-                Adulto, Asiento {asientoVuelta} vuelta
-              </Typography>
-            )}
           </Box>
         </Box>
       </Box>
@@ -131,6 +125,7 @@ const PasajeroCard = ({
             setNombre("");
             setApellido("");
           }}
+          disabled={nombre === "" && apellido === ""}
         >
           Limpiar
         </Button>

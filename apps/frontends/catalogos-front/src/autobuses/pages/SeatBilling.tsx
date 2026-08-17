@@ -1,14 +1,21 @@
-import {
-  Box,
-  Typography,
-  Divider,
-} from "@mui/material";
+import { Box, Typography, Divider } from "@mui/material";
 import { MotionPaper } from "@nexoroute/commons";
 import AsientoBus from "../components/AsientoBus";
 import { AsientoEstado } from "../types/AsientoEstado";
 import { Layer, Stage } from "react-konva";
+import React from "react";
 
-const PasajeroBilling = ({}) => {
+const PasajeroBilling = ({
+  pasajero_index,
+  asiento_label,
+  precio_ruta,
+  moneda,
+  asientos_restantes,
+  setIsMounting,
+}) => {
+  React.useEffect(() => {
+      setIsMounting(false);
+  }, []);
   return (
     <MotionPaper
       sx={{
@@ -48,8 +55,23 @@ const PasajeroBilling = ({}) => {
           </Layer>
         </Stage>
         <Divider orientation="vertical" />
-        <Typography variant="h6">
-          Pasajero 01 - Adulto Asiento A2
+        <Typography
+          variant="h6"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <span>Pasajero 0{pasajero_index} - Adulto</span>
+
+          {asiento_label && (
+            <Divider orientation="vertical" flexItem />
+          )}
+
+          {asiento_label && (
+            <span>Asiento {asiento_label}</span>
+          )}
         </Typography>
       </Box>
       <Box
@@ -60,10 +82,15 @@ const PasajeroBilling = ({}) => {
         }}
       >
         <Typography variant="caption">
-          Precio: <b>$680,00</b> MXN
+          Precio: <b>${precio_ruta.toFixed(2)}</b> {moneda}
         </Typography>
         <Typography variant="caption">
-          Quedan 03 asientos
+          Quedan{" "}
+          {asientos_restantes > 9 &&
+          asientos_restantes !== 0
+            ? `${asientos_restantes}`
+            : `0${asientos_restantes}`}{" "}
+          asientos
         </Typography>
       </Box>
     </MotionPaper>
