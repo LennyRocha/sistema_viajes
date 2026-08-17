@@ -9,6 +9,7 @@ type ViajeProviderValues = {
   >;
   cleanSalida: () => void;
   addSalidaId: (id: number) => void;
+  addPasajeros: (count: number) => void;
   fetchSalida: (id: number) => Promise<void>;
 };
 
@@ -39,11 +40,27 @@ export function SalidaProvider({
 
   const cleanSalida = () => {
     sessionStorage.removeItem("salidaId");
+    sessionStorage.removeItem("pasajeros");
     setPasajeros(0);
   };
 
+  React.useEffect(() => {
+    if (sessionStorage.getItem("pasajeros") === null) {
+      setPasajeros(1);
+    } else {
+      setPasajeros(
+        Number(sessionStorage.getItem("pasajeros")),
+      );
+    }
+  }, []);
+
   const addSalidaId = (id: number) => {
     sessionStorage.setItem("salidaId", id.toString());
+  };
+
+  const addPasajeros = (count: number) => {
+    sessionStorage.setItem("pasajeros", count.toString());
+    setPasajeros(count);
   };
 
   const fetchSalida = useCallback(async (id: number) => {
@@ -59,6 +76,7 @@ export function SalidaProvider({
     () => ({
       getSalidaId,
       pasajeros,
+      addPasajeros,
       setPasajeros,
       cleanSalida,
       addSalidaId,
@@ -67,6 +85,7 @@ export function SalidaProvider({
     [
       getSalidaId,
       pasajeros,
+      addPasajeros,
       setPasajeros,
       cleanSalida,
       addSalidaId,

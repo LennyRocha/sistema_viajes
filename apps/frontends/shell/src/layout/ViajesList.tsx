@@ -10,7 +10,7 @@ type Props = {};
 
 export default function ViajesList({}: Props) {
   const router = useRouter();
-  const { addSalidaId, setPasajeros } = useSalida();
+  const { addSalidaId, addPasajeros } = useSalida();
   const params = useSearchParams();
   return (
     <div>
@@ -19,7 +19,7 @@ export default function ViajesList({}: Props) {
       <Button
         variant="contained"
         onClick={() => {
-          setPasajeros(2);
+          addPasajeros(2);
           addSalidaId(1);
           router.push("/compra-tus-boletos");
         }}

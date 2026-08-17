@@ -7,6 +7,7 @@ import {
   Box,
   Button,
   CircularProgress,
+  Grid,
   IconButton,
   MenuItem,
   MobileStepper,
@@ -20,6 +21,12 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 import Image from "next/image";
 import {
@@ -48,7 +55,11 @@ import {
   snack,
 } from "@nexoroute/commons";
 import useSetCompra from "../core/hooks/useSetCompra";
-import { Compra, Comprador } from "../core/types/Compra";
+import {
+  Compra,
+  Comprador,
+  Pasajero,
+} from "../core/types/Compra";
 import {
   formatCardNumber,
   formatCVV,
@@ -68,7 +79,8 @@ import { useSalida } from "../providers/ViajeProvider";
 import { useRouter } from "next/navigation";
 import Asiento from "../core/types/Asiento";
 import { estadosDeMexico } from "../utils/estadosDeMexico";
-import theme from "@/theme";
+import { customFormatDate } from "../utils/customFormatDate";
+import { AsientoEstado } from "../core/types/AsientoEstado";
 
 const steps = [
   "Asientos",
@@ -186,27 +198,50 @@ export default function CompraForm() {
     cleanSalida,
     pasajeros,
   } = useSalida();
-  const [loading, setLoading] = React.useState(false);
+
+  const [loading, setLoading] = React.useState(true);
   const [salidaData, setSalidaData] =
     React.useState<any>(null);
+
   const [plantillaBus, setPlantillaBus] = React.useState<{
     idTipoBus: number;
     asientos: Asiento[];
   } | null>(null);
 
+  const {
+    formData,
+    setField,
+    setCompradorField,
+    setPasajero,
+  } = useSetCompra();
+
   const fetchOrRedirect = async () => {
     const id = getSalidaId();
-    setLoading(true);
 
     if (id !== null) {
       try {
         const data: any = await fetchSalida(id);
         setSalidaData(data);
+        setField("salidaId", data.id);
         if (data.autobus) {
           setPlantillaBus({
             idTipoBus: data.autobus.tipoAutobus.id,
             asientos: data.autobus.asientos || [],
           });
+        }
+        setField(
+          "asientos",
+          Array.from({ length: pasajeros }, () => ({
+            nombres: "",
+            apellidos: "",
+            asiento: null,
+          })),
+        );
+        if (data.precio) {
+          setField(
+            "monto",
+            (data.precio * pasajeros * 1.16).toFixed(2),
+          );
         }
       } catch {
         router.replace("/");
@@ -219,8 +254,51 @@ export default function CompraForm() {
   };
 
   React.useEffect(() => {
+    if (!formData.asientos.length || !plantillaBus) return;
+
+    setPlantillaBus((prev) => {
+      if (!prev) return null;
+
+      let hasChanges = false;
+
+      const updatedAsientos = prev.asientos.map(
+        (asiento) => {
+          const isSelected = formData.asientos.some(
+            (pasajero) =>
+              pasajero?.asiento?.id === asiento.id,
+          );
+
+          const nuevoEstado = isSelected
+            ? AsientoEstado.SELECTED
+            : AsientoEstado.AVAILABLE;
+
+          if (asiento.estado !== nuevoEstado) {
+            hasChanges = true;
+            return {
+              ...asiento,
+              estado: nuevoEstado,
+            };
+          }
+
+          return asiento;
+        },
+      );
+
+      if (!hasChanges) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        asientos: updatedAsientos,
+      };
+    });
+  }, [formData.asientos]);
+
+  React.useEffect(() => {
     fetchOrRedirect();
     //return () => cleanSalida();
+    //TODO: Descomentar cuando se suba a producción
   }, []);
 
   const handleNext = () => {
@@ -237,94 +315,95 @@ export default function CompraForm() {
     setActiveStep((prev) => prev - 1);
   };
 
-  const {
-    formData,
-    setField,
-    setCompradorField,
-    setPasajero,
-  } = useSetCompra();
+  const props = React.useMemo(() => {
+    if (!salidaData) return {} as CompraSummaryProps;
+    return {
+      tipo: "ida",
+      institucion_url: salidaData?.institucion?.imagen_url,
+      precio_salida: salidaData?.precio || 208,
+      pasajeros,
+      origen:
+        salidaData?.lugarSalida?.direccion.split(",")[0] ??
+        "",
+      destino:
+        salidaData?.lugarLlegada?.direccion.split(",")[0] ??
+        "",
+      moneda: salidaData?.precios?.moneda,
+      rutas: salidaData?.precios?.rutas || [],
+      duracion:
+        salidaData?.horario_configuracion?.duracionMin,
+      hora_inicio:
+        salidaData?.horario_configuracion?.inicio?.hora ??
+        "",
+      fecha_inicio: customFormatDate(
+        salidaData?.horario_configuracion?.inicio?.fecha ??
+          "",
+      ),
+    } as CompraSummaryProps;
+  }, [salidaData, pasajeros]);
 
   const components = {
     0: (
-      <Box
-        sx={{
-          width: "100%",
-          minHeight: "100%",
-          display: "flex",
-          flexDirection: "column",
-          "@media(min-width: 1000px)": {
-            flexDirection: "row",
-          },
-          gap: 2,
-          padding: "2px",
+      <Step1
+        setPlantillaBus={setPlantillaBus}
+        summaryProps={{
+          ...props,
         }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-          }}
-        >
-          <Typography
-            variant="h3"
-            className="font-brand"
-            sx={{
-              mx: "auto",
-              "@media(min-width: 900px)": {
-                mx: 0,
-              },
-            }}
-          >
-            Asientos de vuelta
-          </Typography>
-          <PasajeroBilling />
-          <BusMap
-            tipo={plantillaBus?.idTipoBus ?? 1}
-            {...(plantillaBus?.asientos && {
-              seats: plantillaBus.asientos,
-            })}
-            onSelect={(seat: any) =>
-              console.log("Asiento 2", seat)
-            }
-          />
-        </Box>
-        <CompraSummary tipo="ida" />
-      </Box>
+        list={formData.asientos}
+        setPasajero={setPasajero}
+        plantillaBus={plantillaBus}
+        pasajeros={pasajeros}
+        nextStep={handleNext}
+        precio={salidaData?.precio || 0}
+        moneda={salidaData?.precios?.moneda}
+      />
     ),
-    1: <Step2 pasajeros={pasajeros} />,
+    1: (
+      <Step2
+        summaryProps={{
+          ...props,
+          buttonText: "Siguiente",
+          onClickButton() {
+            handleNext();
+          },
+        }}
+        list={formData.asientos}
+        setPasajero={setPasajero}
+      />
+    ),
     2: (
       <Step3
         data={formData}
         setField={setCompradorField}
         summaryProps={{
+          ...props,
           buttonText: "Siguiente",
           onClickButton() {
             handleNext();
           },
-          tipo: "ida",
         }}
       />
     ),
     3: (
       <Step4
         summaryProps={{
-          buttonText: "Continuar",
+          ...props,
+          buttonText: "Siguiente",
           onClickButton() {
             handleNext();
           },
-          tipo: "vuelta",
         }}
+        formData={formData}
       />
     ),
     4: (
       <Step5
         summaryProps={{
+          ...props,
           buttonText: "Confirmar compra",
           onClickButton() {
             console.log("Confirmar compra", formData);
           },
-          tipo: "ida",
         }}
         metodoPagoId={formData.metodoPagoId}
         setField={setField}
@@ -391,65 +470,6 @@ export default function CompraForm() {
               </AnimatedStep>
             </AnimatePresence>
           </Box>
-        )}
-
-        {isLargeScreen && (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-          >
-            <Button
-              variant="outlined"
-              onClick={handleBack}
-              disabled={activeStep === 0}
-            >
-              Anterior
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={handleNext}
-              disabled={activeStep === steps.length - 1}
-            >
-              Siguiente
-            </Button>
-          </Box>
-        )}
-
-        {!isLargeScreen && (
-          <MobileStepper
-            variant="text"
-            steps={steps.length}
-            position="static"
-            activeStep={activeStep}
-            sx={{ width: "100%" }}
-            slotProps={{
-              progress: {
-                "aria-label": "stepper linear progress",
-              },
-            }}
-            nextButton={
-              <IconButton
-                size="small"
-                onClick={handleNext}
-                disabled={activeStep === steps.length - 1}
-              >
-                <ChevronRight />
-              </IconButton>
-            }
-            backButton={
-              <IconButton
-                size="small"
-                onClick={handleBack}
-                disabled={activeStep === 0}
-              >
-                <ChevronLeft />
-              </IconButton>
-            }
-          />
         )}
       </Box>
     </>
@@ -550,15 +570,175 @@ const Header = ({
   );
 };
 
-const Step2 = ({ pasajeros }: { pasajeros: number }) => {
-  const pasajerosArray = Array.from(
-    { length: pasajeros },
-    (_, i) => ({
-      nombres: "",
-      apellidos: "",
-      asientos: [],
-    }),
+const Step1 = ({
+  plantillaBus,
+  setPlantillaBus,
+  summaryProps,
+  list,
+  setPasajero,
+  pasajeros,
+  nextStep,
+  moneda,
+  precio,
+}: {
+  plantillaBus: {
+    idTipoBus: number;
+    asientos: Asiento[];
+  } | null;
+  setPlantillaBus: React.Dispatch<
+    React.SetStateAction<{
+      idTipoBus: number;
+      asientos: Asiento[];
+    } | null>
+  >;
+  summaryProps: CompraSummaryProps;
+  list: Pasajero[];
+  setPasajero: (
+    index: number,
+    field: keyof Pasajero,
+    value: any,
+  ) => void;
+  pasajeros: number;
+  nextStep: () => void;
+  moneda: string;
+  precio: number;
+}) => {
+  const [isMounting, setIsMounting] = React.useState(true);
+  const [currentPasajeroIndex, setCurrentPasajeroIndex] =
+    React.useState(0);
+  const isValid = React.useMemo(() => {
+    if (isMounting) return false;
+    return list.every((pasajero) => pasajero.asiento);
+  }, [list, isMounting]);
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "100%",
+        display: "flex",
+        flexDirection: "column",
+        "@media(min-width: 1000px)": {
+          flexDirection: "row",
+        },
+        gap: 2,
+        padding: "2px",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+        }}
+      >
+        <Typography
+          variant="h3"
+          className="font-brand"
+          sx={{
+            mx: "auto",
+            "@media(min-width: 900px)": {
+              mx: 0,
+            },
+          }}
+        >
+          Selección de asientos
+        </Typography>
+        <PasajeroBilling
+          moneda={moneda}
+          pasajero_index={currentPasajeroIndex + 1}
+          asiento_label={
+            list[currentPasajeroIndex]?.asiento?.label
+          }
+          precio_ruta={precio}
+          asientos_restantes={
+            plantillaBus?.asientos?.filter(
+              (asiento: Asiento) =>
+                asiento.estado === AsientoEstado.AVAILABLE,
+            ).length
+          }
+          setIsMounting={setIsMounting}
+        />
+        <BusMap
+          tipo={plantillaBus?.idTipoBus ?? 1}
+          {...(plantillaBus?.asientos && {
+            seats: plantillaBus.asientos,
+          })}
+          onSelect={(seat: Asiento) => {
+            if (
+              seat.estado === AsientoEstado.RESERVED ||
+              seat.estado === AsientoEstado.SOLD
+            )
+              return;
+            if (seat.estado !== AsientoEstado.SELECTED) {
+              setPasajero(currentPasajeroIndex, "asiento", {
+                ...seat,
+                estado: AsientoEstado.AVAILABLE,
+              });
+            } else {
+              setPasajero(
+                currentPasajeroIndex,
+                "asiento",
+                null,
+              );
+              setPlantillaBus((prev: any) => {
+                if (!prev) return null;
+                return {
+                  ...prev,
+                  asientos: prev.asientos.map(
+                    (asiento: Asiento) =>
+                      asiento.id === seat.id
+                        ? {
+                            ...asiento,
+                            estado: AsientoEstado.AVAILABLE,
+                          }
+                        : asiento,
+                  ),
+                };
+              });
+            }
+          }}
+        />
+      </Box>
+      <CompraSummary
+        {...summaryProps}
+        buttonDisbaled={!isValid}
+        onClickButton={() => {
+          if (currentPasajeroIndex < pasajeros - 1) {
+            setCurrentPasajeroIndex(
+              currentPasajeroIndex + 1,
+            );
+          } else {
+            nextStep();
+          }
+        }}
+        buttonText={
+          currentPasajeroIndex < pasajeros - 1
+            ? "Siguiente pasajero"
+            : "Siguiente"
+        }
+      />
+    </Box>
   );
+};
+
+const Step2 = ({
+  summaryProps,
+  list,
+  setPasajero,
+}: {
+  summaryProps: CompraSummaryProps;
+  list: Pasajero[];
+  setPasajero: (
+    index: number,
+    field: keyof Pasajero,
+    value: any,
+  ) => void;
+}) => {
+  const isValid = React.useMemo(() => {
+    return list.every(
+      (pasajero) => pasajero.nombres && pasajero.apellidos,
+    );
+  }, [list]);
   return (
     <Box
       sx={{
@@ -586,20 +766,26 @@ const Step2 = ({ pasajeros }: { pasajeros: number }) => {
         <Typography variant="h3" className="font-brand">
           Registro de pasajeros
         </Typography>
-        {pasajerosArray.map((_, index) => (
+        {list.map((_, index) => (
           <PasajeroCard
             key={index + 1}
             numero={index + 1}
-            asientoIda={`A${index + 1}`}
-            asientoVuelta={`A${index + 1}`}
+            asiento={_.asiento?.label || `A${index + 1}`}
             nombre={_.nombres}
             apellido={_.apellidos}
-            setNombre={() => {}}
-            setApellido={() => {}}
+            setNombre={(e: any) =>
+              setPasajero(index, "nombres", e)
+            }
+            setApellido={(e: any) =>
+              setPasajero(index, "apellidos", e)
+            }
           />
         ))}
       </Box>
-      <CompraSummary tipo="vuelta" />
+      <CompraSummary
+        {...summaryProps}
+        buttonDisbaled={!isValid}
+      />
     </Box>
   );
 };
@@ -613,7 +799,7 @@ const Step3 = ({
   setField: (field: keyof Comprador, value: any) => void;
   summaryProps: CompraSummaryProps;
 }) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   const isEmailValid = emailRegex.test(
     data.comprador?.email || "",
   );
@@ -781,8 +967,10 @@ const Step3 = ({
 
 const Step4 = ({
   summaryProps,
+  formData,
 }: {
   summaryProps: CompraSummaryProps;
+  formData: Compra;
 }) => {
   return (
     <Box
@@ -805,12 +993,112 @@ const Step4 = ({
           minWidth: 0,
           minHeight: 0,
           flex: 1,
-          gap: 4,
+          gap: 2,
         }}
       >
         <Typography variant="h3" className="font-brand">
           Confirmar información
         </Typography>
+        <Typography variant="h6">
+          Datos del comprador:
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid size={6}>
+            <Typography
+              variant="caption"
+              color="textSecondary"
+            >
+              Nombre (s):
+            </Typography>
+            <Typography variant="body2">
+              {formData.comprador?.nombres || "-"}
+            </Typography>
+          </Grid>
+
+          <Grid size={6}>
+            <Typography
+              variant="caption"
+              color="textSecondary"
+            >
+              Apellido paterno:
+            </Typography>
+            <Typography variant="body2">
+              {formData.comprador?.apellido_paterno || "-"}
+            </Typography>
+          </Grid>
+
+          <Grid size={6}>
+            <Typography
+              variant="caption"
+              color="textSecondary"
+            >
+              Apellido materno:
+            </Typography>
+            <Typography variant="body2">
+              {formData.comprador?.apellido_materno || "-"}
+            </Typography>
+          </Grid>
+
+          <Grid size={6}>
+            <Typography
+              variant="caption"
+              color="textSecondary"
+            >
+              Correo electrónico:
+            </Typography>
+            <Typography variant="body2">
+              {formData.comprador?.email || "-"}
+            </Typography>
+          </Grid>
+
+          <Grid size={6}>
+            <Typography
+              variant="caption"
+              color="textSecondary"
+            >
+              Teléfono:
+            </Typography>
+            <Typography variant="body2">
+              {formData.comprador?.telefono || "-"}
+            </Typography>
+          </Grid>
+        </Grid>
+        <Typography variant="h6">
+          Asientos seleccionados:
+        </Typography>
+        <TableContainer component={MotionPaper}>
+          <Table
+            sx={{ flex: 1, minWidth: 650 }}
+            aria-label="simple table"
+          >
+            <TableHead>
+              <TableRow>
+                <TableCell>Nombres</TableCell>
+                <TableCell>Apellidos</TableCell>
+                <TableCell>Asiento</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {formData.asientos.map((row) => (
+                <TableRow
+                  key={row.nombres + row.apellidos}
+                  sx={{
+                    "&:last-child td, &:last-child th": {
+                      border: 0,
+                    },
+                  }}
+                >
+                  <TableCell>{row.nombres}</TableCell>
+                  <TableCell>{row.apellidos}</TableCell>
+                  <TableCell>
+                    {row.asiento?.label ||
+                      "No seleccionado"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
       <CompraSummary {...summaryProps} />
     </Box>
@@ -1326,59 +1614,54 @@ const Step5 = ({
 
 const TimerText = () => {
   const theme = useTheme();
-
-  const [minutes, setMinutes] = React.useState(10);
-  const [seconds, setSeconds] = React.useState(60);
-
   const router = useRouter();
+
+  const [remaining, setRemaining] = React.useState(10 * 60);
 
   React.useEffect(() => {
     const timer = setInterval(() => {
-      if (seconds > 0) {
-        setSeconds(seconds - 1);
-      } else if (minutes > 0) {
-        setMinutes(minutes - 1);
-        setSeconds(59);
-      }
+      setRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+
+          router.replace("/");
+
+          snack.warning({
+            message: "Se agotó el tiempo para completar la compra.",
+            duration: 2500,
+          });
+
+          return 0;
+        }
+
+        return prev - 1;
+      });
     }, 1000);
 
-    const timeout = setTimeout(
-      () => {
-        clearInterval(timer);
-        router.replace("/");
-        snack.warning({
-          message:
-            "Se agotó el tiempo para completar la compra.",
-          duration: 2500,
-        });
-      },
-      10 * 60 * 1000,
-    ); // 10 minutos
+    return () => clearInterval(timer);
+  }, [router]);
 
-    return () => {
-      clearInterval(timer);
-      clearTimeout(timeout);
-    };
-  }, [minutes, seconds]);
-
-  const displaySeconds =
-    seconds < 10 ? `0${seconds}` : seconds;
+  const minutes = Math.floor(remaining / 60);
+  const seconds = remaining % 60;
 
   return (
     <Tooltip title="Tiempo restante para completar la compra">
       <Typography
         variant="subtitle2"
         sx={{
-          color: theme.palette.text.primary,
-          transition: "all 03s ease",
+          color:
+            remaining <= 30
+              ? theme.palette.error.main
+              : theme.palette.text.primary,
+          transition: "all 0.3s ease",
           "&:hover": {
             color: theme.palette.accent.main,
             fontWeight: "bold",
           },
         }}
       >
-        {minutes >= 10 ? minutes : `0${minutes}`}:
-        {seconds === 60 ? "00" : displaySeconds}
+        {String(minutes).padStart(2, "0")}:
+        {String(seconds).padStart(2, "0")}
       </Typography>
     </Tooltip>
   );

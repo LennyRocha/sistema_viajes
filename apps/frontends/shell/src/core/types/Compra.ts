@@ -32,7 +32,7 @@ export interface Comprador {
 export interface Pasajero {
   nombres: string;
   apellidos: string;
-  asiento: PasajerAsientos[];
+  asiento: Asiento | null;
 }
 
 export interface PasajerAsientos {
