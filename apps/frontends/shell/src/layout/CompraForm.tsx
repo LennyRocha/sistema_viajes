@@ -1614,48 +1614,35 @@ const Step5 = ({
 
 const TimerText = () => {
   const theme = useTheme();
-
-  const [minutes, setMinutes] = React.useState(10);
-  const [seconds, setSeconds] = React.useState(60);
-
   const router = useRouter();
+
+  const [remaining, setRemaining] = React.useState(10 * 60);
 
   React.useEffect(() => {
     const timer = setInterval(() => {
-      if (minutes === 10 && seconds === 60) {
-        setMinutes(9);
-      }
-      if (seconds > 0) {
-        setSeconds(seconds - 1);
-      } else if (minutes > 0) {
-        setMinutes(minutes - 1);
-        setSeconds(59);
-      }
+      setRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+
+          router.replace("/");
+
+          snack.warning({
+            message: "Se agotó el tiempo para completar la compra.",
+            duration: 2500,
+          });
+
+          return 0;
+        }
+
+        return prev - 1;
+      });
     }, 1000);
 
-    const timeout = setTimeout(
-      () => {
-        clearInterval(timer);
-        router.replace("/");
-        snack.warning({
-          message:
-            "Se agotó el tiempo para completar la compra.",
-          duration: 2500,
-        });
-        clearTimeout(timeout);
-        clearInterval(timer);
-      },
-      10 * 60 * 1000,
-    ); // 10 minutos
+    return () => clearInterval(timer);
+  }, [router]);
 
-    return () => {
-      clearInterval(timer);
-      clearTimeout(timeout);
-    };
-  }, []);
-
-  const displaySeconds =
-    seconds < 10 ? `0${seconds}` : seconds;
+  const minutes = Math.floor(remaining / 60);
+  const seconds = remaining % 60;
 
   return (
     <Tooltip title="Tiempo restante para completar la compra">
@@ -1663,18 +1650,18 @@ const TimerText = () => {
         variant="subtitle2"
         sx={{
           color:
-            minutes === 0 && seconds <= 30
+            remaining <= 30
               ? theme.palette.error.main
               : theme.palette.text.primary,
-          transition: "all 03s ease",
+          transition: "all 0.3s ease",
           "&:hover": {
             color: theme.palette.accent.main,
             fontWeight: "bold",
           },
         }}
       >
-        {minutes >= 10 ? minutes : `0${minutes}`}:
-        {seconds === 60 ? "00" : displaySeconds}
+        {String(minutes).padStart(2, "0")}:
+        {String(seconds).padStart(2, "0")}
       </Typography>
     </Tooltip>
   );

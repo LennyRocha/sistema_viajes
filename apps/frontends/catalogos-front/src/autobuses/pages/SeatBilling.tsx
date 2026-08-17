@@ -14,8 +14,8 @@ const PasajeroBilling = ({
   setIsMounting,
 }) => {
   React.useEffect(() => {
-      setIsMounting(false);
-  }, []);
+    setIsMounting(false);
+  }, [setIsMounting]);
   return (
     <MotionPaper
       sx={{
