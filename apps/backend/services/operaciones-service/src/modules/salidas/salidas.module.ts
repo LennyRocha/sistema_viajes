@@ -13,5 +13,6 @@ import { RedisModule } from 'src/redis/redis.module';
   ],
   controllers: [SalidasController],
   providers: [SalidasService],
+  exports: [SalidasService],
 })
 export class SalidasModule {}

@@ -37,7 +37,7 @@ model Ruta {
   updatedBy        String?  @db.VarChar(50)
 
   viajes  ViajeBaseRuta[]
-  boletos Compra[]
+  
 
   @@schema("operaciones")
 }
@@ -160,8 +160,7 @@ model Compra {
 
   fechaCompra DateTime @default(now())
   monto       Decimal  @db.Decimal(10, 2)
-  rutaId      Int
-  ruta        Ruta     @relation(fields: [rutaId], references: [id])
+
 
   codigo String @unique @db.VarChar(20)
 
