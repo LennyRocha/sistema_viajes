@@ -2,7 +2,7 @@ import { Auditory } from '@commons/types';
 import {
   EstadoSalida,
   TipoSalida,
-} from 'generated/prisma';
+} from '../../../generated/prisma/client';
 
 export default interface Salida extends Auditory {
   id?: number;

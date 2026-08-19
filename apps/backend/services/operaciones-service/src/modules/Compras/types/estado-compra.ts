@@ -1,0 +1,5 @@
+export enum EstadoCompra {
+  PENDIENTE = 'PENDIENTE',
+  CONFIRMADA = 'CONFIRMADA',
+  CANCELADA = 'CANCELADA',
+}
