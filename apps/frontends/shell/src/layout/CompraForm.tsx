@@ -297,8 +297,7 @@ export default function CompraForm() {
 
   React.useEffect(() => {
     fetchOrRedirect();
-    //return () => cleanSalida();
-    //TODO: Descomentar cuando se suba a producción
+    return () => cleanSalida();
   }, []);
 
   const handleNext = () => {
@@ -341,6 +340,44 @@ export default function CompraForm() {
       ),
     } as CompraSummaryProps;
   }, [salidaData, pasajeros]);
+
+  const [loadingCompra, setLoadingCompra] =
+    React.useState(false);
+
+  const postCompra = async () => {
+    setLoadingCompra(true);
+    const payload = {
+      ...formData,
+      monto: Number.parseFloat(
+        Number(formData.monto).toFixed(2),
+      ),
+      asientos: formData.asientos.map((pasajero) => ({
+        ...pasajero,
+        asiento: {
+          ...pasajero.asiento,
+          estado: AsientoEstado.SOLD,
+        },
+      })),
+    };
+    try {
+      // Aquí iría la lógica para enviar la compra al backend
+      console.log("Confirmar compra", payload);
+      snack.success({
+        message:
+          "¡Compra realizada!, revisa tu correo electrónico para más detalles.",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error(error);
+      snack.error({
+        message:
+          "Ocurrió un error al procesar la compra. Por favor, inténtalo de nuevo.",
+        duration: 3000,
+      });
+    } finally {
+      setLoadingCompra(false);
+    }
+  };
 
   const components = {
     0: (
@@ -401,9 +438,10 @@ export default function CompraForm() {
         summaryProps={{
           ...props,
           buttonText: "Confirmar compra",
-          onClickButton() {
-            console.log("Confirmar compra", formData);
+          onClickButton: async () => {
+            await postCompra();
           },
+          buttonLoading: loadingCompra,
         }}
         metodoPagoId={formData.metodoPagoId}
         setField={setField}
@@ -441,7 +479,7 @@ export default function CompraForm() {
         {loading ? (
           <Backdrop
             sx={(theme) => ({
-              color: "#fff",
+              color: theme.palette.text.primary,
               zIndex: theme.zIndex.drawer + 1,
             })}
             open
@@ -1627,7 +1665,8 @@ const TimerText = () => {
           router.replace("/");
 
           snack.warning({
-            message: "Se agotó el tiempo para completar la compra.",
+            message:
+              "Se agotó el tiempo para completar la compra.",
             duration: 2500,
           });
 
