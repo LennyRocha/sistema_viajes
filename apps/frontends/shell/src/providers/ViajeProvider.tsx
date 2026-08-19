@@ -9,7 +9,9 @@ type ViajeProviderValues = {
   >;
   cleanSalida: () => void;
   addSalidaId: (id: number) => void;
+  addPasajeros: (count: number) => void;
   fetchSalida: (id: number) => Promise<void>;
+  fetchSalidas: (params?: string) => Promise<void>;
 };
 
 type SalidaProviderProps = {
@@ -39,11 +41,27 @@ export function SalidaProvider({
 
   const cleanSalida = () => {
     sessionStorage.removeItem("salidaId");
+    sessionStorage.removeItem("pasajeros");
     setPasajeros(0);
   };
 
+  React.useEffect(() => {
+    if (sessionStorage.getItem("pasajeros") === null) {
+      setPasajeros(1);
+    } else {
+      setPasajeros(
+        Number(sessionStorage.getItem("pasajeros")),
+      );
+    }
+  }, []);
+
   const addSalidaId = (id: number) => {
     sessionStorage.setItem("salidaId", id.toString());
+  };
+
+  const addPasajeros = (count: number) => {
+    sessionStorage.setItem("pasajeros", count.toString());
+    setPasajeros(count);
   };
 
   const fetchSalida = useCallback(async (id: number) => {
@@ -55,22 +73,39 @@ export function SalidaProvider({
     return res.json();
   }, []);
 
+  const fetchSalidas = async (params?: string) => {
+    const res = await fetch(
+      params
+        ? `${gatewayUrl}/salidas/buscar?${params}`
+        : `${gatewayUrl}/salidas`,
+    );
+    if (!res.ok) {
+      throw new Error("Error fetching salidas");
+    }
+    const data = await res.json();
+    return data;
+  };
+
   const contextValue = React.useMemo(
     () => ({
       getSalidaId,
       pasajeros,
+      addPasajeros,
       setPasajeros,
       cleanSalida,
       addSalidaId,
       fetchSalida,
+      fetchSalidas,
     }),
     [
       getSalidaId,
       pasajeros,
+      addPasajeros,
       setPasajeros,
       cleanSalida,
       addSalidaId,
       fetchSalida,
+      fetchSalidas,
     ],
   );
 

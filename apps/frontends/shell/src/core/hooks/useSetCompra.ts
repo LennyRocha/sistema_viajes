@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { Compra, Comprador } from "../types/Compra";
+import {
+  Compra,
+  Comprador,
+  Pasajero,
+} from "../types/Compra";
 
 const useSetCompra = () => {
   const [formData, setFormData] =
@@ -24,7 +28,7 @@ const useSetCompra = () => {
 
   const setPasajero = (
     index: number,
-    field: keyof Comprador,
+    field: keyof Pasajero,
     value: any,
   ) => {
     setFormData((prev: Compra) => {

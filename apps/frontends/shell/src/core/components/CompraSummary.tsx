@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import { MotionPaper } from "@nexoroute/commons";
 import Image from "next/image";
+import { RutaPrecio } from "../types/RutaPrecios";
 
 export type CompraSummaryProps = {
   tipo: TipoViaje;
@@ -14,6 +15,16 @@ export type CompraSummaryProps = {
   buttonLoading?: boolean;
   buttonText?: string;
   onClickButton?: () => void;
+  institucion_url?: string;
+  precio_salida: number;
+  pasajeros: number;
+  origen: string;
+  destino: string;
+  moneda?: string;
+  rutas: RutaPrecio[];
+  duracion: number;
+  fecha_inicio: string;
+  hora_inicio: string;
 };
 
 type TipoViaje = "ida" | "vuelta";
@@ -24,7 +35,18 @@ const CompraSummary = ({
   buttonLoading = false,
   buttonText = "Continuar",
   onClickButton,
+  institucion_url,
+  precio_salida = 208,
+  pasajeros = 1,
+  origen,
+  destino,
+  moneda = "MXN",
+  rutas = [],
+  duracion,
+  fecha_inicio,
+  hora_inicio,
 }: CompraSummaryProps) => {
+  const iva = precio_salida * 0.16;
   return (
     <MotionPaper
       layoutId="summary"
@@ -40,38 +62,45 @@ const CompraSummary = ({
       }}
     >
       <Typography variant="h5" gutterBottom>
-        Viaje de ida
+        Viaje por {rutas.length} rutas
       </Typography>
       <SummaryHeader
-        imageSize={tipo === "ida" ? "double" : "single"}
-        institucionUrl="https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-original-577x577/s3/092010/estrelladeoro.png?itok=LhInlmU8"
-        fecha="28 Jul 26"
-        hora="08:00 AM"
-        origen="Cuernavaca"
-        destino="México Taxqueña"
+        imageSize={"double"}
+        institucionUrl={
+          institucion_url ||
+          "https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-original-577x577/s3/092010/estrelladeoro.png?itok=LhInlmU8"
+        }
+        fecha={fecha_inicio}
+        hora={`${hora_inicio} ${Number(hora_inicio.split(":")[0]) >= 12 ? "PM" : "AM"}`}
+        origen={origen}
+        destino={destino}
       />
-      {tipo === "vuelta" && (
-        <>
-          <Typography variant="h5" gutterBottom>
-            Viaje de vuelta
-          </Typography>
-          <SummaryHeader
-            imageSize="single"
-            institucionUrl="https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-original-577x577/s3/092010/estrelladeoro.png?itok=LhInlmU8"
-            fecha="28 Jul 26"
-            hora="08:00 AM"
-            origen="Cuernavaca"
-            destino="México Taxqueña"
-          />
-        </>
-      )}
       <Typography variant="subtitle2" gutterBottom>
-        01 adulto(s) $208.00
+        0{pasajeros} adulto(s) $
+        {(precio_salida * pasajeros).toFixed(2)} {moneda}
       </Typography>
       <Divider />
-      <SummaryRow label="Viaje de ida" value="$208.00" />
-      <SummaryRow label="Subtotal" value="$208.00" />
-      <SummaryRow label="IVA" value="$33.28" />
+      <SummaryRow
+        label="Duración aproximada"
+        value={`${Math.floor(duracion / 60)} h ${duracion % 60}m`}
+      />
+      {rutas
+        .toSorted((a, b) => a.orden - b.orden)
+        .map((ruta) => (
+          <SummaryRow
+            key={ruta.orden}
+            label={`Ruta '${ruta.nombre}'`}
+            value={`$${ruta.precio.toFixed(2)} ${moneda} *`}
+          />
+        ))}
+      <SummaryRow
+        label="Subtotal"
+        value={`$${precio_salida.toFixed(2)} ${moneda}`}
+      />
+      <SummaryRow
+        label="IVA"
+        value={`$${(iva * pasajeros).toFixed(2)} ${moneda}`}
+      />
       <Divider />
       <Box
         sx={{
@@ -98,11 +127,14 @@ const CompraSummary = ({
             variant="body2"
             sx={{ fontWeight: "bold" }}
           >
-            $212.00 MXN
+            $
+            {((precio_salida + iva) * pasajeros).toFixed(2)}{" "}
+            {moneda}
           </Typography>
         </Box>
         <Typography variant="caption">
-          Todos los precios incluyen IVA
+          * Precio individual por pasajero, incluye IVA y
+          cargos por servicio.
         </Typography>
       </Box>
       <Button
@@ -179,6 +211,7 @@ const SummaryHeader = ({
         width={width}
         height={height}
         style={{ objectFit: "contain" }}
+        loading="eager"
       />
       <Divider sx={{ my: 1 }} />
       <Box
