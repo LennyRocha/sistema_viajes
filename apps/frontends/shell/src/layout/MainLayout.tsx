@@ -21,7 +21,7 @@ import {
   NotificationsButton,
 } from "@nexoroute/commons";
 import { useSidebar } from "../providers/SidebarProvider";
-import sampleUserData from "../core/constants/sampleUserData";
+import ListLinks from "../core/constants/ListLinks";
 import { usePathname } from "next/navigation";
 import NextLinkForCommons from "../adapters/NextLinkForCommons";
 import DrawerMenuHandlers from "../core/constants/DrawerMenuHandlers";
@@ -38,6 +38,24 @@ export default function MainLayout({
   const openLeftDrawer = () => setLeftDrawerOpen(true);
   const closeLeftDrawer = () => setLeftDrawerOpen(false);
   const sidebar = useSidebar();
+  const [sessionUser, setSessionUser] = React.useState<any>(null);
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem("nexoroute.user");
+      setSessionUser(stored ? JSON.parse(stored) : null);
+    } catch {
+      setSessionUser(null);
+    }
+  }, []);
+  const userRoles = Array.isArray(sessionUser?.roles) ? sessionUser.roles : [];
+  const userPrivileges = Array.isArray(sessionUser?.privileges) ? sessionUser.privileges : [];
+  const canSee = (privilege?: string) => !privilege || userRoles.includes("ROLE_ADMIN") || userPrivileges.includes(privilege);
+  const userData = {
+    name: `${sessionUser?.nombres ?? ""} ${sessionUser?.apellido_paterno ?? ""}`.trim() || "Usuario",
+    role: userRoles.join(", ") || "Sin rol",
+    links: ListLinks.filter((link) => canSee(link.privilege)),
+    img: sessionUser?.foto_perfil || "/assets/placeholder.png",
+  };
   React.useEffect(() => {
     if (!isLargeScreen && leftDrawerOpen) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -121,7 +139,7 @@ export default function MainLayout({
                 handleNotificationsClick,
               notificationsCount,
             }}
-            user={sampleUserData}
+            user={userData}
             LinkComponent={NextLinkForCommons as any}
             pathname={pathname}
             drawerCallbacks={DrawerMenuHandlers}
@@ -226,7 +244,7 @@ export default function MainLayout({
         leftDrawerOpen={leftDrawerOpen}
         setLeftDrawerOpen={setLeftDrawerOpen}
         closeLeftDrawer={closeLeftDrawer}
-        user={sampleUserData}
+        user={userData}
         LinkComponent={NextLinkForCommons}
         pathname={pathname}
         drawerCallbacks={DrawerMenuHandlers}

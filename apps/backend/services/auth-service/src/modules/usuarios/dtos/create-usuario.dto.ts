@@ -3,10 +3,12 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDate,
   IsEmail,
+  IsArray,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
   IsStrongPassword,
+  IsString,
   MaxLength,
 } from 'class-validator';
 import { IsCURP } from '@commons/decorators';
@@ -124,4 +126,14 @@ export class CreateUsuarioDto {
     },
   )
   contra!: string;
+
+  @ApiPropertyOptional({
+    description: 'Roles iniciales. Solo debe usarse desde la administracion.',
+    example: ['ROLE_CONDUCTOR'],
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  roleNames?: string[];
 }

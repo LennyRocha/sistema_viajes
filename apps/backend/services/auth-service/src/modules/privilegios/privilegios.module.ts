@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
+import { PrivilegiosController } from './privilegios.controller';
+import { PrivilegiosService } from './privilegios.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  providers: [],
-  controllers: [],
-  exports: [],
+  imports: [AuthModule],
+  providers: [PrivilegiosService],
+  controllers: [PrivilegiosController],
+  exports: [PrivilegiosService],
 })
 export class PrivilegiosModule {}

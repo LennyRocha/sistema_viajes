@@ -1,0 +1,29 @@
+
+> record-service@0.0.1 start:dev
+> nest start --watch
+
+[2J[3J[H[[90m1:13:37 a.m.[0m] Starting compilation in watch mode...
+
+[[90m1:13:50 a.m.[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:05 a.m. [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:05 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRedisModule dependencies initialized[39m[38;5;3m +22ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:05 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +4ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:05 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mReportesModule dependencies initialized[39m[38;5;3m +2ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:05 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +5ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:05 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mLoggerModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:05 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPrismaModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:05 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[NestMicroservice] [39m[32mNest microservice successfully started[39m[38;5;3m +8294ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[WebSocketsController] [39m[32mDashboardGateway subscribed to the "join" message[39m[38;5;3m +110ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[WebSocketsController] [39m[32mDashboardGateway subscribed to the "leave" message[39m[38;5;3m +0ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHealthController {/health}:[39m[38;5;3m +10ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/health, GET} route[39m[38;5;3m +4ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mReportesController {/reportes}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 24544  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +268ms[39m
+record-service escuchando en http://localhost:5004
+websockets escuchando en ws://localhost:5004
+Scalar docs en http://localhost:5004/docs
+OpenAPI JSON en http://localhost:5004/api-json
+[2J[3J[H[[90m1:22:37 a.m.[0m] File change detected. Starting incremental compilation...
+

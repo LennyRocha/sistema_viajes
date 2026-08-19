@@ -1,0 +1,75 @@
+
+> dev
+> next dev --webpack
+
+▲ Next.js 16.2.7 (webpack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.14:3000
+- Environments: .env.local
+✓ Ready in 1100ms
+
+○ Compiling / ...
+Initializing module federation runtime...
+ GET /login 200 in 31.0s (next.js: 26.5s, application-code: 4.5s)
+ GET /login 200 in 123ms (next.js: 11ms, application-code: 112ms)
+ GET / 200 in 205ms (next.js: 17ms, application-code: 188ms)
+ GET / 200 in 343ms (next.js: 149ms, application-code: 194ms)
+○ Compiling /signup ...
+ GET /signup 200 in 13.7s (next.js: 13.3s, application-code: 395ms)
+ GET /signup 200 in 294ms (next.js: 8ms, application-code: 286ms)
+ GET / 200 in 477ms (next.js: 27ms, application-code: 450ms)
+ GET /signup 200 in 297ms (next.js: 8ms, application-code: 289ms)
+ GET /signup 200 in 245ms (next.js: 9ms, application-code: 236ms)
+ GET /signup 200 in 197ms (next.js: 7ms, application-code: 189ms)
+ GET /signup 200 in 159ms (next.js: 7ms, application-code: 152ms)
+ GET /signup 200 in 114ms (next.js: 6ms, application-code: 108ms)
+ GET /signup 200 in 70ms (next.js: 7ms, application-code: 63ms)
+○ Compiling /login ...
+ GET /signup 200 in 5.5s (next.js: 5.3s, application-code: 202ms)
+ GET /login 200 in 8.2s (next.js: 7.9s, application-code: 208ms)
+ GET /login 200 in 111ms (next.js: 8ms, application-code: 103ms)
+ GET /login 200 in 54ms (next.js: 7ms, application-code: 47ms)
+○ Compiling /dashboard ...
+ GET /dashboard 200 in 21.9s (next.js: 21.8s, application-code: 133ms)
+ GET /dashboard 200 in 94ms (next.js: 13ms, application-code: 81ms)
+○ Compiling /dashboard/buses ...
+ GET /dashboard/buses 200 in 7.0s (next.js: 6.9s, application-code: 118ms)
+Initializing module federation runtime...
+ GET /dashboard/buses 200 in 7.8s (next.js: 25ms, application-code: 7.8s)
+ GET /dashboard/buses 200 in 755ms (next.js: 498ms, application-code: 256ms)
+ GET /dashboard/buses 200 in 719ms (next.js: 440ms, application-code: 279ms)
+ GET /dashboard/buses 200 in 124ms (next.js: 25ms, application-code: 98ms)
+Initializing module federation runtime...
+ GET /dashboard/buses 200 in 15.7s (next.js: 223ms, application-code: 15.5s)
+ GET /dashboard/buses 200 in 995ms (next.js: 44ms, application-code: 951ms)
+ GET /dashboard 200 in 367ms (next.js: 199ms, application-code: 167ms)
+ GET /dashboard 200 in 657ms (next.js: 45ms, application-code: 612ms)
+ GET /dashboard 200 in 1097ms (next.js: 18ms, application-code: 1079ms)
+ GET /dashboard 200 in 276ms (next.js: 13ms, application-code: 263ms)
+ GET /dashboard 200 in 118ms (next.js: 24ms, application-code: 94ms)
+○ Compiling /dashboard/routes ...
+ GET /dashboard/routes 200 in 105s (next.js: 105s, application-code: 392ms)
+ GET /dashboard/routes 200 in 105s (next.js: 105s, application-code: 396ms)
+ GET /dashboard/routes 200 in 104s (next.js: 104s, application-code: 398ms)
+ GET /dashboard/trips 200 in 2.1min (next.js: 2.1min, application-code: 399ms)
+ GET /dashboard/trips 200 in 30.9s (next.js: 30.5s, application-code: 400ms)
+ GET /dashboard/routes 200 in 2.2min (next.js: 2.2min, application-code: 402ms)
+Initializing module federation runtime...
+ GET /dashboard/buses 200 in 17.8s (next.js: 729ms, application-code: 17.0s)
+ GET /dashboard/routes 200 in 152ms (next.js: 16ms, application-code: 136ms)
+ GET /dashboard/trips 200 in 78ms (next.js: 9ms, application-code: 69ms)
+ GET /dashboard/trips 200 in 1100ms (next.js: 113ms, application-code: 987ms)
+ GET /dashboard/trips 200 in 228ms (next.js: 12ms, application-code: 216ms)
+ GET /dashboard/routes 200 in 121ms (next.js: 17ms, application-code: 104ms)
+ GET /dashboard 200 in 225ms (next.js: 153ms, application-code: 72ms)
+ GET /dashboard/routes 200 in 56ms (next.js: 6ms, application-code: 50ms)
+ GET /dashboard/routes 200 in 773ms (next.js: 50ms, application-code: 723ms)
+ GET /dashboard/routes 200 in 18.0s (next.js: 8.4s, application-code: 9.6s)
+○ Compiling /login ...
+Initializing module federation runtime...
+ GET /login 200 in 17.7s (next.js: 12.9s, application-code: 4.8s)
+ GET /login 200 in 616ms (next.js: 57ms, application-code: 559ms)
+ GET /signup 200 in 237ms (next.js: 184ms, application-code: 52ms)
+ GET /dashboard 200 in 144ms (next.js: 33ms, application-code: 110ms)
+ GET /dashboard/routes 200 in 155ms (next.js: 48ms, application-code: 107ms)
+ GET /login 200 in 250ms (next.js: 8ms, application-code: 243ms)

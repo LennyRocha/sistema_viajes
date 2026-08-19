@@ -1,0 +1,13 @@
+
+> @nexoroute/operaciones-front@1.0.0 dev
+> next dev -p 3004
+
+   ▲ Next.js 15.3.4
+   - Local:        http://localhost:3004
+   - Network:      http://192.168.0.14:3004
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 42s
+ ✓ Compiled in 5.5s (13055 modules)
+ ✓ Compiled in 3.3s (13055 modules)

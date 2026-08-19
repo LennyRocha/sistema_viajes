@@ -105,7 +105,9 @@ const VehicleModelPreview = dynamic(() => import("./VehicleModelPreview"), {
 export function ensureGoogleMaps(apiKey?: string) {
   if (typeof window === "undefined") return Promise.resolve();
   if (window.google?.maps) return Promise.resolve();
-  if (!apiKey) return Promise.reject(new Error("Falta Google Maps API key"));
+  if (!isUsableGoogleMapsApiKey(apiKey)) {
+    return Promise.reject(new Error("Falta una Google Maps API key valida"));
+  }
   if (window.__nexorouteGoogleMapsPromise) {
     return window.__nexorouteGoogleMapsPromise;
   }
@@ -158,6 +160,11 @@ export function ensureGoogleMaps(apiKey?: string) {
   });
 
   return window.__nexorouteGoogleMapsPromise;
+}
+
+export function isUsableGoogleMapsApiKey(apiKey?: string): apiKey is string {
+  const normalized = apiKey?.trim() ?? "";
+  return normalized.length > 20 && !normalized.toLowerCase().includes("tu_api_key");
 }
 
 export async function geocodeAddress(address: string, apiKey?: string): Promise<GeoPoint> {
@@ -501,7 +508,7 @@ export default function GoogleRouteMap({
   }, [simulationPath]);
 
   React.useEffect(() => {
-    if (!apiKey) {
+    if (!isUsableGoogleMapsApiKey(apiKey)) {
       setStatus("missing-key");
       return;
     }

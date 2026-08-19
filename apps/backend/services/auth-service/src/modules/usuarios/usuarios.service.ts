@@ -25,7 +25,7 @@ export class UsuariosService {
     private readonly logger: PinoLogger,
   ) { }
 
-  async create(dto: CreateUsuarioDto) {
+  async create(dto: CreateUsuarioDto, defaultRole = 'ROLE_CONDUCTOR') {
     this.logger.info(
       {
         nombre: dto.nombres,
@@ -34,10 +34,26 @@ export class UsuariosService {
       'Creando usuario',
     );
 
+    const { roleNames, ...userData } = dto;
+    const requestedRoles = roleNames?.length ? roleNames : [defaultRole];
+    const roles = await this.prisma.rol.findMany({
+      where: { nombre: { in: requestedRoles }, estatus: true },
+      select: { id: true, nombre: true },
+    });
+    if (roles.length !== requestedRoles.length) {
+      throw new NotFoundException('Uno o mas roles no existen o estan inactivos');
+    }
+
     const user = await this.prisma.usuario.create({
       data: {
-        ...dto,
-        contra: await this.hasher.hash(dto.contra),
+        ...userData,
+        contra: await this.hasher.hash(userData.contra),
+        roles: {
+          create: roles.map((role) => ({ roleId: role.id })),
+        },
+      },
+      include: {
+        roles: { include: { role: true } },
       },
     });
 
@@ -60,7 +76,12 @@ export class UsuariosService {
       },
       'Usuario creada',
     );
-    return user;
+    return this.sanitizeUser(user);
+  }
+
+  private sanitizeUser<T extends object>(user: T) {
+    const { contra: _contra, ...safeUser } = user as T & { contra?: string };
+    return safeUser;
   }
 
   async findAll(active: boolean) {
@@ -100,9 +121,7 @@ export class UsuariosService {
     const users = await this.prisma.usuario.findMany({
       orderBy: { createdAt: 'desc' },
       where,
-      omit: {
-        contra: false,
-      },
+      omit: { contra: true },
       include: {
         refreshTokens: false,
         passwordResetCodes: false,
@@ -129,7 +148,7 @@ export class UsuariosService {
       },
       'Usuarios  obtenidos desde base de datos y guardadas en caché',
     );
-    return users;
+    return users.map((user) => this.sanitizeUser(user));
   }
 
   async findOne(id: number) {
@@ -137,9 +156,7 @@ export class UsuariosService {
 
     const user = await this.prisma.usuario.findUnique({
       where: { id },
-      omit: {
-        contra: false,
-      },
+      omit: { contra: true },
       include: {
         refreshTokens: false,
         passwordResetCodes: false,
@@ -164,8 +181,7 @@ export class UsuariosService {
       'Usuario encontrado',
     );
 
-    const { contra, ...userRest } = user;
-    return userRest;
+    return this.sanitizeUser(user);
   }
 
   async findOneByEmail(email: string, includeSensitive = false) {
@@ -177,9 +193,7 @@ export class UsuariosService {
         refreshTokens: includeSensitive,
         passwordResetCodes: includeSensitive,
       },
-      omit: {
-        contra: includeSensitive,
-      },
+      omit: { contra: !includeSensitive },
     });
 
     if (!user) {
@@ -211,9 +225,7 @@ export class UsuariosService {
         refreshTokens: false,
         passwordResetCodes: false,
       },
-      omit: {
-        contra: false,
-      },
+      omit: { contra: true },
     });
 
     if (!user) {
@@ -233,7 +245,7 @@ export class UsuariosService {
       },
       'Usuario encontrado',
     );
-    return user;
+    return this.sanitizeUser(user);
   }
 
   async findOneByTelefono(telefono: string) {
@@ -245,9 +257,7 @@ export class UsuariosService {
         refreshTokens: false,
         passwordResetCodes: false,
       },
-      omit: {
-        contra: false,
-      },
+      omit: { contra: true },
     });
 
     if (!user) {
@@ -267,7 +277,7 @@ export class UsuariosService {
       },
       'Usuario encontrado',
     );
-    return user;
+    return this.sanitizeUser(user);
   }
 
   async checkEmailExists(email: string) {
@@ -303,12 +313,59 @@ export class UsuariosService {
   async login(email: string, password: string) {
     this.logger.debug({ email }, 'Intentando iniciar sesión');
     const user = await this.findOneByEmail(email, true); // Incluye campos sensibles para la verificación de contraseña
-    const isMatch = await this.hasher.verify(password, user.contra);
-    if (!isMatch) {
+    const isMatch = await this.hasher.verify(user.contra, password);
+    if (!isMatch || !user.estatus) {
       this.logger.warn({ email }, 'Contraseña incorrecta');
       throw new NotFoundException('Credenciales inválidas');
     }
     return user;
+  }
+
+  async findAuthUser(id: number) {
+    const user = await this.prisma.usuario.findUnique({
+      where: { id },
+      include: {
+        roles: {
+          where: { role: { estatus: true } },
+          include: {
+            role: {
+              include: {
+                privilegios: {
+                  where: { privilege: { estatus: true } },
+                  include: { privilege: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!user || !user.estatus) {
+      throw new NotFoundException('Usuario no encontrado o inactivo');
+    }
+    return user;
+  }
+
+  async getAuthView(id: number) {
+    const user = await this.findAuthUser(id);
+    const roles = user.roles.map(({ role }) => role.nombre);
+    const privileges = [
+      ...new Set(
+        user.roles.flatMap(({ role }) =>
+          role.privilegios.map(({ privilege }) => privilege.nombre),
+        ),
+      ),
+    ];
+    return {
+      id: user.id,
+      email: user.email,
+      nombres: user.nombres,
+      apellido_paterno: user.apellido_paterno,
+      apellido_materno: user.apellido_materno,
+      estatus: user.estatus,
+      roles,
+      privileges,
+    };
   }
 
   async update(id: number, dto: UpdateUsuarioDto) {
@@ -350,7 +407,7 @@ export class UsuariosService {
       );
     }
 
-    return user;
+    return this.sanitizeUser(user);
   }
 
   async updatePassword(id: number, newPassword: string) {

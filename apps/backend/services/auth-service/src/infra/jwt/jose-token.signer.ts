@@ -6,7 +6,8 @@
  * (u otro entorno) también pasaría la verificación de firma en este API.
  */
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
+import { generateKeyPair, randomUUID } from 'node:crypto';
+import { promisify } from 'node:util';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
@@ -33,10 +34,22 @@ export class JoseTokenSigner implements TokenSignerPort, OnModuleInit {
   async onModuleInit() {
     const privatePath = resolve(process.env.JWT_PRIVATE_KEY_PATH ?? '../../keys/jwt_private.pem');
     const publicPath = resolve(process.env.JWT_PUBLIC_KEY_PATH ?? '../../keys/jwt_public.pem');
-    const privatePem = readFileSync(privatePath, 'utf8');
-    const publicPem = readFileSync(publicPath, 'utf8');
-    this.privateKey = await importPKCS8(privatePem, 'RS256');
-    this.publicKey = await importSPKI(publicPem, 'RS256');
+    try {
+      const privatePem = readFileSync(privatePath, 'utf8');
+      const publicPem = readFileSync(publicPath, 'utf8');
+      this.privateKey = await importPKCS8(privatePem, 'RS256');
+      this.publicKey = await importSPKI(publicPem, 'RS256');
+    } catch (error) {
+      if (process.env.NODE_ENV === 'production') throw error;
+      const generated = await promisify(generateKeyPair)('rsa', {
+        modulusLength: 2048,
+        publicExponent: 0x10001,
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+      });
+      this.privateKey = await importPKCS8(generated.privateKey, 'RS256');
+      this.publicKey = await importSPKI(generated.publicKey, 'RS256');
+    }
     const jwk = await exportJWK(this.publicKey);
     // kid = thumbprint RFC 7638 del JWK: estable ante cambios de formato del PEM
     // (un hash del archivo cambiaría con un salto de línea; el thumbprint no).

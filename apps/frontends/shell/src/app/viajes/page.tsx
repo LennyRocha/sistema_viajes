@@ -1,5 +1,6 @@
 import ViajesList from "@/src/layout/ViajesList";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Búsqueda de viajes | Nexoroute",
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
 export default function page() {
   return (
     <div>
-      <ViajesList />
+      <Suspense fallback={<div> Cargando viajes... </div>}>
+        <ViajesList />
+      </Suspense>
     </div>
   );
 }

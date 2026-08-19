@@ -38,12 +38,14 @@ async function readErrorMessage(response: Response) {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
+  const token = typeof window !== "undefined" ? localStorage.getItem("nexoroute.accessToken") : null;
 
   try {
     response = await fetch(`${API_URL}${path}`, {
       ...init,
       headers: {
         "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(init?.headers || {}),
       },
     });
