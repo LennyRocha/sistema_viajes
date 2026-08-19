@@ -80,7 +80,7 @@ export function SnackBox() {
           onClose={handleClose}
           severity={snack.snackSeverity || "info"}
           variant={snack.snackAlertVariant || "filled"}
-          sx={{ width: "100%" }}
+          sx={{ width: "100%", color: "white" }}
         >
           {snack.message}
         </Alert>

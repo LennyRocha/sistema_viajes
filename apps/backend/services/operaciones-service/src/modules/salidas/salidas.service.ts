@@ -3,7 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../../../generated/prisma";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { PrismaService } from "src/prisma/prisma.service";
@@ -379,6 +379,113 @@ export class SalidasService {
     return Promise.all(
       salidas.map((salida) => this.mapSalida(salida)),
     );
+  }
+
+  async findSalidas(
+    from?: string,
+    to?: string,
+    fromId?: string,
+    toId?: string,
+    fechaIda?: string,
+    fechaVuelta?: string,
+    pasajeros: number = 1,
+  ) {
+    const where: Prisma.SalidaWhereInput = {};
+
+    if (fechaIda) {
+      where.horario_configuracion = {
+        path: ["inicio", "fecha"],
+        equals: fechaIda,
+      };
+    }
+
+    if (fechaVuelta) {
+      where.horario_configuracion = {
+        path: ["finCalculado", "fecha"],
+        equals: fechaVuelta,
+      };
+    }
+
+    const salidas = await this.prisma.salida.findMany({
+      where,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        viaje: {
+          include: {
+            rutas: {
+              include: {
+                ruta: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    let list = await Promise.all(
+      salidas.map((salida) => this.mapSalida(salida)),
+    );
+
+    if (fromId) {
+      list = list.filter((salida) => {
+        const origen = salida.viajeBase?.rutas[0]?.origen;
+
+        if (
+          typeof origen !== "object" ||
+          origen === null ||
+          Array.isArray(origen)
+        ) {
+          return false;
+        }
+
+        return (
+          (origen as Record<string, unknown>).placeId ===
+          fromId
+        );
+      });
+    }
+
+    if (toId) {
+      list = list.filter((salida) => {
+        const origen =
+          salida.viajeBase?.rutas[
+            salida.viajeBase.rutas.length - 1
+          ]?.origen;
+
+        if (
+          typeof origen !== "object" ||
+          origen === null ||
+          Array.isArray(origen)
+        ) {
+          return false;
+        }
+
+        return (
+          (origen as Record<string, unknown>).placeId ===
+          toId
+        );
+      });
+    }
+
+    if (from && !fromId) {
+      list = list.filter(
+        (salida) =>
+          salida.viajeBase?.rutas[0]?.nombre === from,
+      );
+    }
+
+    if (to && !toId) {
+      list = list.filter(
+        (salida) =>
+          salida.viajeBase?.rutas[
+            salida.viajeBase.rutas.length - 1
+          ]?.nombre === to,
+      );
+    }
+
+    return list;
   }
 
   async findOne(id: number) {

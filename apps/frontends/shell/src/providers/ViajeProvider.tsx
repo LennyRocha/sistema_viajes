@@ -11,6 +11,7 @@ type ViajeProviderValues = {
   addSalidaId: (id: number) => void;
   addPasajeros: (count: number) => void;
   fetchSalida: (id: number) => Promise<void>;
+  fetchSalidas: (params?: string) => Promise<void>;
 };
 
 type SalidaProviderProps = {
@@ -72,6 +73,19 @@ export function SalidaProvider({
     return res.json();
   }, []);
 
+  const fetchSalidas = async (params?: string) => {
+    const res = await fetch(
+      params
+        ? `${gatewayUrl}/salidas/buscar?${params}`
+        : `${gatewayUrl}/salidas`,
+    );
+    if (!res.ok) {
+      throw new Error("Error fetching salidas");
+    }
+    const data = await res.json();
+    return data;
+  };
+
   const contextValue = React.useMemo(
     () => ({
       getSalidaId,
@@ -81,6 +95,7 @@ export function SalidaProvider({
       cleanSalida,
       addSalidaId,
       fetchSalida,
+      fetchSalidas,
     }),
     [
       getSalidaId,
@@ -90,6 +105,7 @@ export function SalidaProvider({
       cleanSalida,
       addSalidaId,
       fetchSalida,
+      fetchSalidas,
     ],
   );
 
