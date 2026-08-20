@@ -28,16 +28,24 @@ const FederatedPage = ({
   const { showDialog } = useDialog();
   const pathname = usePathname();
   
+  let sessionUser: { roles?: string[]; privileges?: string[] } = {};
+  if (typeof window !== "undefined") {
+    try {
+      sessionUser = JSON.parse(localStorage.getItem("nexoroute.user") || "{}");
+    } catch {
+      sessionUser = {};
+    }
+  }
   const props = {
     navigationFunction: router.push,
     openSidebar: showSidebar,
     closeSidebar: hideSidebar,
-    userPrivileges: [],
+    userPrivileges: sessionUser.privileges ?? [],
     showDialog: showDialog,
     snack,
     pathname,
     router,
-    userRoles: [],
+    userRoles: sessionUser.roles ?? [],
     ...params,
   };
 

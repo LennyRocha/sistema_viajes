@@ -11,6 +11,7 @@ import { HttpExceptionFilter } from '@commons/filters';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { PrivilegiosModule } from './modules/privilegios/privilegios.module';
+import { AuthModule } from './modules/auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -20,6 +21,7 @@ import { PrivilegiosModule } from './modules/privilegios/privilegios.module';
     UsuariosModule,
     RolesModule,
     PrivilegiosModule,
+    AuthModule,
   ],
   providers: [
     {

@@ -1,0 +1,86 @@
+
+> operaciones-service@0.0.1 start:dev
+> nest start --watch
+
+[2J[3J[H[[90m1:13:37 a.m.[0m] Starting compilation in watch mode...
+
+[96msrc/modules/salidas/salidas.service.ts[0m:[93m218[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'config_rutas' does not exist on type '{ rutas: ({ ruta: { id: number; descripcion: string | null; createdAt: Date; updatedAt: Date; nombre: string; origen: JsonValue; destino: JsonValue; paradas: JsonValue; ... 6 more ...; updatedBy: string | null; }; } & { ...; })[]; } & { ...; }'.
+
+[7m218[0m             config_rutas: viaje.config_rutas,
+[7m   [0m [91m                                ~~~~~~~~~~~~[0m
+
+[96msrc/modules/viajes-base/viajes-base.service.ts[0m:[93m165[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'config_rutas' does not exist in type '(Without<ViajeBaseCreateInput, ViajeBaseUncheckedCreateInput> & ViajeBaseUncheckedCreateInput) | (Without<...> & ViajeBaseCreateInput)'.
+
+[7m165[0m         config_rutas: toJson(dto.config_rutas),
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+
+  [96mgenerated/prisma/index.d.ts[0m:[93m5055[0m:[93m5[0m
+    [7m5055[0m     data: XOR<ViajeBaseCreateInput, ViajeBaseUncheckedCreateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: ViajeBaseSelect<DefaultArgs> | null | undefined; omit?: ViajeBaseOmit<DefaultArgs> | null | undefined; include?: ViajeBaseInclude<...> | ... 1 more ... | undefined; data: (Without<...> & ViajeBaseUncheckedCreateInput) | (Without<...> & ViajeBaseCreateInput); }'
+
+[96msrc/modules/viajes-base/viajes-base.service.ts[0m:[93m263[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'config_rutas' does not exist in type '(Without<ViajeBaseUpdateInput, ViajeBaseUncheckedUpdateInput> & ViajeBaseUncheckedUpdateInput) | (Without<...> & ViajeBaseUpdateInput)'.
+
+[7m263[0m           config_rutas: toJson(dto.config_rutas),
+[7m   [0m [91m          ~~~~~~~~~~~~[0m
+
+  [96mgenerated/prisma/index.d.ts[0m:[93m5107[0m:[93m5[0m
+    [7m5107[0m     data: XOR<ViajeBaseUpdateInput, ViajeBaseUncheckedUpdateInput>
+    [7m    [0m [96m    ~~~~[0m
+    The expected type comes from property 'data' which is declared here on type '{ select?: ViajeBaseSelect<DefaultArgs> | null | undefined; omit?: ViajeBaseOmit<DefaultArgs> | null | undefined; include?: ViajeBaseInclude<...> | ... 1 more ... | undefined; data: (Without<...> & ViajeBaseUncheckedUpdateInput) | (Without<...> & ViajeBaseUpdateInput); where: ViajeBaseWhereUniqueInput; }'
+
+[[90m1:13:50 a.m.[0m] Found 3 errors. Watching for file changes.
+
+[2J[3J[H[[90m1:15:25 a.m.[0m] File change detected. Starting incremental compilation...
+
+[[90m1:15:27 a.m.[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRedisModule dependencies initialized[39m[38;5;3m +19ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +4ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +6ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mLoggerModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPrismaModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfiguracionesModule dependencies initialized[39m[38;5;3m +2ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRutasModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSalidasModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMetodosPagoModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mViajesBaseModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHealthController {/operaciones/health}:[39m[38;5;3m +52ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/operaciones/health, GET} route[39m[38;5;3m +4ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mConfiguracionesController {/configuraciones-operaciones}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/configuraciones-operaciones, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/configuraciones-operaciones/:clave, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/configuraciones-operaciones/:clave, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mRutasController {/rutas}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/rutas, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/rutas, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/rutas/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/rutas/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/rutas/status/:id, DELETE} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/rutas/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mViajesBaseController {/viajes-base}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/viajes-base, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/viajes-base, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/viajes-base/validar-conexion, GET} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/viajes-base/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/viajes-base/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/viajes-base/status/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/viajes-base/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSalidasController {/salidas}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/salidas, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/salidas, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/salidas/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/salidas/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/salidas/:id/cancelar, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mMetodosPagoController {/metodos-pago}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/metodos-pago, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/metodos-pago/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 10152  - [39m19/08/2026, 1:15:31 a.m. [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +271ms[39m
+operaciones-service escuchando en http://localhost:5003
+Scalar docs en http://localhost:5003/docs
+OpenAPI JSON en http://localhost:5003/api-json
+{"level":30,"time":1787123744167,"pid":10152,"hostname":"Salems","req":{"id":1,"method":"GET","url":"/operaciones/health","query":{},"params":{"path":["operaciones","health"]},"headers":{"user-agent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; es-MX) WindowsPowerShell/5.1.26100.9168","host":"localhost:5003","connection":"Keep-Alive"},"remoteAddress":"::1","remotePort":59328},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","access-control-allow-origin":"*","content-type":"application/json; charset=utf-8","content-length":"47","etag":"W/\"2f-dQI1LUbnh9mVG3OvIwKsF0hTOmM\""}},"responseTime":7,"msg":"request completed"}
+[2J[3J[H[[90m1:22:37 a.m.[0m] File change detected. Starting incremental compilation...
+

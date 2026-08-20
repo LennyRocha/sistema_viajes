@@ -1,0 +1,51 @@
+
+> auth-service@0.0.1 start:dev
+> nest start --watch
+
+[2J[3J[H[[90m1:13:37 a.m.[0m] Starting compilation in watch mode...
+
+[[90m1:13:52 a.m.[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRedisModule dependencies initialized[39m[38;5;3m +21ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mClientsModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +3ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +6ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mLoggerModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPrismaModule dependencies initialized[39m[38;5;3m +3ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +2ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRolesModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPrivilegiosModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mUsuariosModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHealthController {/health}:[39m[38;5;3m +52ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/health, GET} route[39m[38;5;3m +3ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mUsuariosController {/usuarios}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/usuarios, POST} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/usuarios, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/usuarios/email/:email, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/usuarios/curp/:curp, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/usuarios/telefono/:telefono, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/usuarios/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/usuarios/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/usuarios/status/:id, DELETE} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/usuarios/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mRolesController {/roles}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/roles, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/auth}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/register, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/login, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/refresh, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/logout, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/me, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/introspect, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/jwks.json, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPrivilegiosController {/privilegios}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:15 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/privilegios, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 2284  - [39m19/08/2026, 1:14:16 a.m. [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +401ms[39m
+auth-service escuchando en http://localhost:5001
+Scalar docs en http://localhost:5001/docs
+OpenAPI JSON en http://localhost:5001/api-json
+{"level":30,"time":1787123744119,"pid":2284,"hostname":"Salems","req":{"id":1,"method":"GET","url":"/health","query":{},"params":{"path":["health"]},"headers":{"user-agent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; es-MX) WindowsPowerShell/5.1.26100.9168","host":"localhost:5001","connection":"Keep-Alive"},"remoteAddress":"::1","remotePort":59327},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"40","etag":"W/\"28-iaMczxo63qSUiLIXB+OXB4ylSGg\""}},"responseTime":8,"msg":"request completed"}
+[2J[3J[H[[90m1:22:37 a.m.[0m] File change detected. Starting incremental compilation...
+

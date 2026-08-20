@@ -153,6 +153,34 @@ DASHBOARD_SERVICE_URL=http://localhost:5004
 
 ### apps/backend/services/auth-service/.env
 
+El servicio de autenticacion usa RS256. En desarrollo, si no se configuran
+rutas de llaves, genera un par efimero en memoria; en produccion deben
+configurarse `JWT_PRIVATE_KEY_PATH` y `JWT_PUBLIC_KEY_PATH` con llaves PEM
+PKCS8/SPKI. `INTERNAL_SERVICE_TOKEN` es exclusivo para llamadas servicio a
+servicio desde catalogo.
+
+Variables relevantes:
+
+```env
+JWT_PRIVATE_KEY_PATH=../../keys/jwt_private.pem
+JWT_PUBLIC_KEY_PATH=../../keys/jwt_public.pem
+JWT_ACCESS_TTL_SECONDS=900
+JWT_REFRESH_TTL_SECONDS=604800
+JWT_ISSUER=nexoroute-auth
+JWT_AUDIENCE=nexoroute-api
+INTERNAL_SERVICE_TOKEN=cambia-este-token-interno
+```
+
+Endpoints disponibles por el gateway:
+
+- `POST /auth/register`: registro publico, asigna `ROLE_CONDUCTOR`.
+- `POST /auth/login`: access token RS256 y refresh token opaco.
+- `POST /auth/refresh`: rotacion de refresh token.
+- `POST /auth/logout`: revoca la familia de refresh y el access token actual.
+- `GET /auth/me`: identidad, roles y privilegios del usuario autenticado.
+- `GET /auth/jwks.json`: llave publica para verificadores RS256.
+- `GET /roles` y `GET /privilegios`: catalogos protegidos.
+
 ```env
 DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=auth&options=--search_path%3Dauth"
 REDIS_URL="redis://localhost:6379"

@@ -1,0 +1,87 @@
+
+> catalogo-service@0.0.1 start:dev
+> nest start --watch
+
+[2J[3J[H[[90m1:13:37 a.m.[0m] Starting compilation in watch mode...
+
+[[90m1:13:53 a.m.[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRedisModule dependencies initialized[39m[38;5;3m +39ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mClientsModule dependencies initialized[39m[38;5;3m +2ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mClientsModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:13 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +4ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +8ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mLoggerModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPrismaModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +3ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTiposAutobusModule dependencies initialized[39m[38;5;3m +2ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mServiciosModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mInstitucionesModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConductoresModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDisponibilidadServiciosModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAutobusesModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mLicenciasModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHealthController {/health}:[39m[38;5;3m +83ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/health, GET} route[39m[38;5;3m +3ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mTiposAutobusController {/tipos-autobus}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tipos-autobus, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tipos-autobus/:id, GET} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mServiciosController {/servicios}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/servicios, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/servicios, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/servicios/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/servicios/nombre/:nombre, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/servicios/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/servicios/status/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/servicios/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAutobusesController {/autobuses}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/autobuses, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/autobuses, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/autobuses/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/autobuses/codigo/:codigo_interno, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/autobuses/alias/:alias, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/autobuses/:id, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/autobuses/salidas/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/autobuses/status/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/autobuses/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mInstitucionesController {/instituciones}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/instituciones, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/instituciones, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/instituciones/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/instituciones/nombre/:nombre, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/instituciones/:id, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/instituciones/status/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/instituciones/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mDisponibilidadServiciosController {/disponibilidad-servicios}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/disponibilidad-servicios, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/disponibilidad-servicios/disponibles, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/disponibilidad-servicios/servicio/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/disponibilidad-servicios/institucion/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/disponibilidad-servicios/autobus/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/disponibilidad-servicios/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/disponibilidad-servicios, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/disponibilidad-servicios/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mConductoresController {/conductores}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/conductores, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/conductores, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/conductores/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/conductores/salidas/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/conductores/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/conductores/status/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/conductores/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mLicenciasController {/licencias}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/licencias, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/licencias, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/licencias/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/licencias/conductor/:conductor_id/vigente, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/licencias/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/licencias/status/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/licencias/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25176  - [39m19/08/2026, 1:14:14 a.m. [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +211ms[39m
+catalogo-service escuchando en http://localhost:5002
+Scalar docs en http://localhost:5002/docs
+OpenAPI JSON en http://localhost:5002/api-json
+{"level":30,"time":1787123744038,"pid":25176,"hostname":"Salems","req":{"id":1,"method":"GET","url":"/health","query":{},"params":{"path":["health"]},"headers":{"user-agent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; es-MX) WindowsPowerShell/5.1.26100.9168","host":"localhost:5002","connection":"Keep-Alive"},"remoteAddress":"::1","remotePort":59325},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"44","etag":"W/\"2c-Id5uEkyP2ydreiZeCodaUXJAmRE\""}},"responseTime":10,"msg":"request completed"}
+[2J[3J[H[[90m1:22:37 a.m.[0m] File change detected. Starting incremental compilation...
+

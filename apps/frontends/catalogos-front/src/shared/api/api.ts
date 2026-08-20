@@ -8,6 +8,13 @@ export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: env.api_url,
+    prepareHeaders: (headers) => {
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("nexoroute.accessToken");
+        if (token) headers.set("Authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
     timeout: 10000, // 10 segundos, pero serán 30 en producción
   }),
   endpoints: () => ({}),

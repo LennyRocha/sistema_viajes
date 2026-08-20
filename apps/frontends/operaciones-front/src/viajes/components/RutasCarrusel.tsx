@@ -24,6 +24,10 @@ const GOOGLE_MAPS_API_KEY =
 
 const DEFAULT_VIAJE_IMAGE = "/imagen_defecto_viajes.jpg";
 
+const hasUsableGoogleMapsKey =
+  GOOGLE_MAPS_API_KEY.trim().length > 20 &&
+  !GOOGLE_MAPS_API_KEY.toLowerCase().includes("tu_api_key");
+
 export default function RutasCarrusel({
   disabledFunction,
   router,
@@ -35,6 +39,7 @@ export default function RutasCarrusel({
   const [isLoading, setIsLoading] = React.useState(true);
   const [isError, setIsError] = React.useState(false);
   const getImageUrl = async (placeId) => {
+    if (!hasUsableGoogleMapsKey) return DEFAULT_VIAJE_IMAGE;
     try {
       const res = await fetch(
         `https://places.googleapis.com/v1/places/${placeId}`,
@@ -61,7 +66,10 @@ export default function RutasCarrusel({
   const fetchRutas = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${API_URL}/rutas`);
+      const token = localStorage.getItem("nexoroute.accessToken");
+      const res = await fetch(`${API_URL}/rutas`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       if (!res.ok) {
         setRutas([]);
         return;

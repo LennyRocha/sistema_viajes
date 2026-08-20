@@ -19,6 +19,80 @@ async function bootstrap() {
   // El navegador habla con el gateway, no con el micro.
   app.enableCors({ origin: '*' });
 
+  const publicPrefixes = [
+    '/auth/login',
+    '/auth/register',
+    '/auth/refresh',
+    '/auth/logout',
+    '/auth/jwks.json',
+    '/health',
+    '/operaciones/health',
+    '/docs',
+    '/api-json',
+  ];
+  const privilegeForRequest = (pathname: string, method: string) => {
+    if (pathname.startsWith('/usuarios')) {
+      if (method === 'GET') return 'usuarios:consultar';
+      if (method === 'POST') return 'usuarios:crear';
+      if (method === 'PATCH') return 'usuarios:editar';
+      if (pathname.includes('/status/')) return 'usuarios:estado';
+      if (method === 'DELETE') return 'usuarios:eliminar';
+    }
+    if (pathname.startsWith('/rutas')) {
+      if (method === 'GET') return 'calendario:consultar';
+      if (method === 'POST') return 'ruta:crear';
+      return 'viaje:editar';
+    }
+    if (pathname.startsWith('/viajes-base')) {
+      if (method === 'GET') return 'calendario:consultar';
+      if (method === 'POST') return 'viaje:abrir';
+      return 'viaje:editar';
+    }
+    if (pathname.startsWith('/salidas')) {
+      if (method === 'GET') return 'salida:consultar';
+      if (method === 'POST') return 'viaje:abrir';
+      if (method === 'DELETE') return 'salida:cancelar';
+      return 'salida:reasignar';
+    }
+    if (pathname.startsWith('/conductores') && method === 'GET') return 'conductores:consultar';
+    if (pathname.startsWith('/autobuses') && method === 'GET') return 'autobus:consultar';
+    if (pathname.startsWith('/dashboard')) return 'calendario:consultar';
+    return undefined;
+  };
+
+  app.use(async (request: any, response: any, next: any) => {
+    const pathname = request.path as string;
+    if (publicPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+      next();
+      return;
+    }
+    const authorization = request.headers.authorization;
+    if (!authorization?.startsWith('Bearer ')) {
+      response.status(401).json({ statusCode: 401, message: 'Bearer token requerido' });
+      return;
+    }
+    try {
+      const introspection = await fetch(`${target_four}/auth/introspect`, {
+        headers: { authorization },
+      });
+      if (!introspection.ok) {
+        response.status(401).json({ statusCode: 401, message: 'Access token invalido' });
+        return;
+      }
+      const claims = await introspection.json() as { roles?: string[]; privileges?: string[] };
+      const required = privilegeForRequest(pathname, request.method);
+      const isAdmin = claims.roles?.includes('ROLE_ADMIN');
+      const hasPrivilege = required && claims.privileges?.includes(required);
+      if (required && !isAdmin && !hasPrivilege) {
+        response.status(403).json({ statusCode: 403, message: 'Privilegio insuficiente', required });
+        return;
+      }
+      next();
+    } catch {
+      response.status(503).json({ statusCode: 503, message: 'Auth service no disponible' });
+    }
+  });
+
   // Reverse proxy: se monta en la raiz con pathFilter para conservar la ruta
   // completa (ej. /tasks/123 llega igual al micro). Las rutas que no cumplen el
   // filtro (/, /health) pasan de largo (next) y las atiende Nest.
@@ -33,8 +107,6 @@ async function bootstrap() {
     '/licencias',
     '/docs',
     '/api-json',
-    '/usuarios',
-    '/auth',
     '/dashboard',
   ];
   app.use(
@@ -43,6 +115,18 @@ async function bootstrap() {
       changeOrigin: true,
       pathFilter: (pathname) =>
         PROXIED_PREFIXES.some(
+          (p) => pathname === p || pathname.startsWith(`${p}/`),
+        ),
+    }),
+  );
+
+  const AUTH_PREFIXES = ['/auth', '/usuarios', '/roles', '/privilegios'];
+  app.use(
+    createProxyMiddleware({
+      target: target_four,
+      changeOrigin: true,
+      pathFilter: (pathname) =>
+        AUTH_PREFIXES.some(
           (p) => pathname === p || pathname.startsWith(`${p}/`),
         ),
     }),

@@ -40,11 +40,20 @@ export class ConductoresService {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
+  private internalHeaders(extra: Record<string, string> = {}) {
+    return {
+      ...extra,
+      'x-internal-service-token': process.env.INTERNAL_SERVICE_TOKEN ?? '',
+    };
+  }
+
   private async getUsuariosMap(): Promise<Map<number, any>> {
     const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001';
 
     try {
-      const response = await fetch(`${AUTH_SERVICE_URL}/usuarios`);
+      const response = await fetch(`${AUTH_SERVICE_URL}/usuarios`, {
+        headers: this.internalHeaders(),
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -123,7 +132,7 @@ export class ConductoresService {
 
       const response = await fetch(`${AUTH_SERVICE_URL}/usuarios`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.internalHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payloadUsuario),
       });
 
@@ -150,6 +159,7 @@ export class ConductoresService {
       try {
         const existingResponse = await fetch(
           `${AUTH_SERVICE_URL}/usuarios/curp/${encodeURIComponent(conductorData.curp)}`,
+          { headers: this.internalHeaders() },
         );
 
         if (!existingResponse.ok) {
@@ -193,6 +203,7 @@ export class ConductoresService {
       try {
         const rollbackResponse = await fetch(`${AUTH_SERVICE_URL}/usuarios/${userId}`, {
           method: 'DELETE',
+          headers: this.internalHeaders(),
         });
 
         if (!rollbackResponse.ok) {
@@ -517,7 +528,9 @@ export class ConductoresService {
     );
 
     const previousUser = existing.usuario_id
-      ? await fetch(`${AUTH_SERVICE_URL}/usuarios/${existing.usuario_id}`)
+      ? await fetch(`${AUTH_SERVICE_URL}/usuarios/${existing.usuario_id}`, {
+          headers: this.internalHeaders(),
+        })
         .then(async (response) => {
           if (!response.ok) return null;
           return response.json();
@@ -529,7 +542,7 @@ export class ConductoresService {
       if (Object.keys(usuarioPayload).length > 0 && existing.usuario_id) {
         const userResponse = await fetch(`${AUTH_SERVICE_URL}/usuarios/${existing.usuario_id}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: this.internalHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify(usuarioPayload),
         });
 
@@ -572,7 +585,7 @@ export class ConductoresService {
         try {
           await fetch(`${AUTH_SERVICE_URL}/usuarios/${existing.usuario_id}`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: this.internalHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(previousUser),
           });
         } catch (rollbackError) {
@@ -713,6 +726,7 @@ export class ConductoresService {
     try {
       const response = await fetch(
         `${process.env.AUTH_SERVICE_URL}/usuarios/${conductor.usuario_id}`,
+        { headers: this.internalHeaders() },
       );
 
       if (!response.ok) {

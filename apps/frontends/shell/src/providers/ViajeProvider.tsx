@@ -66,7 +66,10 @@ export function SalidaProvider({
 
   const fetchSalida = useCallback(async (id: number) => {
     if (!id) return;
-    const res = await fetch(`${gatewayUrl}/salidas/${id}`);
+    const token = localStorage.getItem("nexoroute.accessToken");
+    const res = await fetch(`${gatewayUrl}/salidas/${id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
     if (!res.ok) {
       throw new Error("Error fetching salida");
     }
