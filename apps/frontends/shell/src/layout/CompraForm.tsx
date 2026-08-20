@@ -81,6 +81,7 @@ import Asiento from "../core/types/Asiento";
 import { estadosDeMexico } from "../utils/estadosDeMexico";
 import { customFormatDate } from "../utils/customFormatDate";
 import { AsientoEstado } from "../core/types/AsientoEstado";
+import { getNearestDateByDay } from "../utils/getNearestDay";
 
 const steps = [
   "Asientos",
@@ -195,6 +196,7 @@ export default function CompraForm() {
   const {
     getSalidaId,
     fetchSalida,
+    fetchAsientos,
     cleanSalida,
     pasajeros,
   } = useSalida();
@@ -215,20 +217,36 @@ export default function CompraForm() {
     setPasajero,
   } = useSetCompra();
 
+  const [redirecting, setRedirecting] =
+    React.useState(false);
+
   const fetchOrRedirect = async () => {
     const id = getSalidaId();
 
     if (id !== null) {
       try {
         const data: any = await fetchSalida(id);
+        const asientos: any = await fetchAsientos(id);
         setSalidaData(data);
         setField("salidaId", data.id);
-        if (data.autobus) {
-          setPlantillaBus({
-            idTipoBus: data.autobus.tipoAutobus.id,
-            asientos: data.autobus.asientos || [],
-          });
-        }
+        const asientosOcupados =
+          asientos.length === 0
+            ? data.asientos
+            : data.asientos.map((asiento: any) => {
+                const ocupado = asientos.some(
+                  (a: any) => a.id === asiento.id,
+                );
+                return {
+                  ...asiento,
+                  estado: ocupado
+                    ? AsientoEstado.SOLD
+                    : AsientoEstado.AVAILABLE,
+                };
+              });
+        setPlantillaBus({
+          idTipoBus: data.tipoAutobus.id,
+          asientos: asientosOcupados,
+        });
         setField(
           "asientos",
           Array.from({ length: pasajeros }, () => ({
@@ -243,8 +261,11 @@ export default function CompraForm() {
             (data.precio * pasajeros * 1.16).toFixed(2),
           );
         }
-      } catch {
+      } catch (err) {
+        console.error(err);
+        setRedirecting(true);
         router.replace("/");
+        return;
       } finally {
         setLoading(false);
       }
@@ -295,9 +316,13 @@ export default function CompraForm() {
     });
   }, [formData.asientos]);
 
+  const hasFetchedRef = React.useRef(false);
+
   React.useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+
     fetchOrRedirect();
-    return () => cleanSalida();
   }, []);
 
   const handleNext = () => {
@@ -331,13 +356,14 @@ export default function CompraForm() {
       rutas: salidaData?.precios?.rutas || [],
       duracion:
         salidaData?.horario_configuracion?.duracionMin,
-      hora_inicio:
-        salidaData?.horario_configuracion?.inicio?.hora ??
-        "",
-      fecha_inicio: customFormatDate(
-        salidaData?.horario_configuracion?.inicio?.fecha ??
-          "",
-      ),
+      hora_inicio: salidaData?.config?.inicio?.hora ?? "",
+      fecha_inicio: salidaData?.config?.dia
+        ? customFormatDate(
+            getNearestDateByDay(salidaData?.config?.dia)
+              .toISOString()
+              .split("T")[0],
+          )
+        : customFormatDate(salidaData?.config?.fecha ?? ""),
     } as CompraSummaryProps;
   }, [salidaData, pasajeros]);
 
@@ -449,6 +475,8 @@ export default function CompraForm() {
     ),
   };
 
+  const ready = !loading && !redirecting && !!salidaData;
+
   return (
     <>
       <Header isFetching={loading} />
@@ -476,7 +504,7 @@ export default function CompraForm() {
           </Stepper>
         )}
 
-        {loading ? (
+        {!ready ? (
           <Backdrop
             sx={(theme) => ({
               color: theme.palette.text.primary,

@@ -11,6 +11,7 @@ type ViajeProviderValues = {
   addSalidaId: (id: number) => void;
   addPasajeros: (count: number) => void;
   fetchSalida: (id: number) => Promise<void>;
+  fetchAsientos: (salidaId: number) => Promise<void>;
   fetchSalidas: (params?: string) => Promise<void>;
 };
 
@@ -73,6 +74,20 @@ export function SalidaProvider({
     return res.json();
   }, []);
 
+  const fetchAsientos = useCallback(
+    async (salidaId: number) => {
+      if (!salidaId) return;
+      const res = await fetch(
+        `${gatewayUrl}/compras/asientos/${salidaId}`,
+      );
+      if (!res.ok) {
+        throw new Error("Error fetching asientos");
+      }
+      return res.json();
+    },
+    [],
+  );
+
   const fetchSalidas = async (params?: string) => {
     const res = await fetch(
       params
@@ -96,6 +111,7 @@ export function SalidaProvider({
       addSalidaId,
       fetchSalida,
       fetchSalidas,
+      fetchAsientos,
     }),
     [
       getSalidaId,
@@ -106,6 +122,7 @@ export function SalidaProvider({
       addSalidaId,
       fetchSalida,
       fetchSalidas,
+      fetchAsientos,
     ],
   );
 
