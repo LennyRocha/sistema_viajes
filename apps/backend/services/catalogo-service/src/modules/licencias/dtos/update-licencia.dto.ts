@@ -1,11 +1,14 @@
 import {
   IsBoolean,
   IsDateString,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
 } from 'class-validator';
+import { LICENSE_CATEGORIES, MEXICAN_STATES } from '../licencia-options';
 
 export class UpdateLicenciaDto {
   @IsOptional()
@@ -13,14 +16,14 @@ export class UpdateLicenciaDto {
   conductor_id?: number;
 
   @IsOptional()
-  @MaxLength(30, {
-    message: 'El número de licencia no puede exceder los 30 caracteres',
+  @Matches(/^\d{8,12}$/, {
+    message: 'El numero de licencia debe contener entre 8 y 12 digitos',
   })
   numero_licencia?: string;
 
   @IsOptional()
-  @MaxLength(20, {
-    message: 'La categoría no puede exceder los 20 caracteres',
+  @IsIn(LICENSE_CATEGORIES, {
+    message: 'La categoria de licencia no es valida',
   })
   categoria?: string;
 
@@ -39,8 +42,8 @@ export class UpdateLicenciaDto {
   fecha_vencimiento?: Date;
 
   @IsOptional()
-  @MaxLength(100, {
-    message: 'El estado emisor no puede exceder los 100 caracteres',
+  @IsIn(MEXICAN_STATES, {
+    message: 'El estado emisor no es valido',
   })
   estado_emisor?: string;
 

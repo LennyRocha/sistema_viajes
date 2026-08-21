@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import React from "react";
+import { authenticatedFetch } from "@nexoroute/commons";
 import { CenteredDiv } from "@nexoroute/commons";
 import {
   ConfirmationNumber,
@@ -67,9 +68,9 @@ export default function RutasCarrusel({
     setIsLoading(true);
     try {
       const token = localStorage.getItem("nexoroute.accessToken");
-      const res = await fetch(`${API_URL}/rutas`, {
+      const res = await authenticatedFetch(`${API_URL}/rutas`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
+      }, API_URL);
       if (!res.ok) {
         setRutas([]);
         return;

@@ -85,7 +85,7 @@ export default function NuevoUsuario({
               size="small"
               type="date"
               fullWidth
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
             <TextField
               select
@@ -125,12 +125,11 @@ export default function NuevoUsuario({
           </PaperBlock>
 
           <FormButtonsRow
-            showCancelButton
-            showSubmitButton
-            cancelButtonText="Cancelar"
-            submitButtonText="Guardar"
-            onCancel={() => navigationFunction("/usuarios")}
-            onSubmit={() => console.log("Guardar usuario")}
+            hasRequiredFields
+            resetText="Cancelar"
+            submitText="Guardar"
+            onResetClick={() => navigationFunction("/usuarios")}
+            onSubmitClick={() => console.log("Guardar usuario")}
           />
         </Box>
       </Box>

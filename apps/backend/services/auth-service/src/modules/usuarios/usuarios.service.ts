@@ -6,14 +6,29 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
-import { Usuario } from './usuario.entity';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { CreateUsuarioDto } from './dtos/create-usuario.dto';
 import { UpdateUsuarioDto } from './dtos/update-usuario.dto';
 import { ArgonPasswordHasher } from 'src/infra/crypto/argon-password.hasher';
-import { Prisma } from 'generated/prisma/edge';
 
-const LIST_CACHE_KEY = 'usuarios:list';
+const LIST_CACHE_KEY = 'usuarios:list:v2:roles';
+
+export interface UsuarioListItem {
+  id: number;
+  nombres: string;
+  apellido_paterno: string;
+  apellido_materno: string;
+  curp: string;
+  fecha_nacimiento: Date | string;
+  telefono: string;
+  email: string;
+  foto_perfil: string;
+  foto_base64: string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  estatus: boolean;
+  roles: string[];
+}
 
 @Injectable()
 export class UsuariosService {
@@ -89,7 +104,7 @@ export class UsuariosService {
 
     // 1) ¿está en caché?
     try {
-      const cached = await this.redis.get<Usuario[]>(LIST_CACHE_KEY);
+      const cached = await this.redis.get<UsuarioListItem[]>(LIST_CACHE_KEY);
       if (cached) {
         this.logger.debug(
           {
@@ -111,22 +126,28 @@ export class UsuariosService {
       );
     }
 
-    const where: Prisma.UsuarioWhereInput = active
-      ? {
-        estatus: true,
-      }
-      : {};
-
     // 2) no está → base de datos
-    const users = await this.prisma.usuario.findMany({
+    const usersFromDatabase = await this.prisma.usuario.findMany({
       orderBy: { createdAt: 'desc' },
-      where,
       omit: { contra: true },
       include: {
         refreshTokens: false,
         passwordResetCodes: false,
+        roles: {
+          where: { role: { estatus: true } },
+          select: { role: { select: { nombre: true } } },
+        },
       },
     });
+
+    const users: UsuarioListItem[] = usersFromDatabase.map(
+      ({ roles, ...user }) => ({
+        ...user,
+        roles: roles
+          .map(({ role }) => role.nombre)
+          .sort((left, right) => left.localeCompare(right)),
+      }),
+    );
 
     // 3) guarda para la próxima (1 hora = 3600 segundos)
     try {
@@ -148,7 +169,7 @@ export class UsuariosService {
       },
       'Usuarios  obtenidos desde base de datos y guardadas en caché',
     );
-    return users.map((user) => this.sanitizeUser(user));
+    return active ? users.filter((user) => user.estatus) : users;
   }
 
   async findOne(id: number) {

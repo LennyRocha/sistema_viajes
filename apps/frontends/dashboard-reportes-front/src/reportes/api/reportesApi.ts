@@ -2,6 +2,7 @@ import type {
   ActividadReporteFilters,
   ActividadReporteResponse,
 } from "../types/ActividadReporte";
+import { authenticatedFetch } from "@nexoroute/commons";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -39,12 +40,13 @@ export async function getActividadReporte({
     typeof window === "undefined"
       ? null
       : localStorage.getItem("nexoroute.accessToken");
-  const response = await fetch(
+  const response = await authenticatedFetch(
     `${API_URL}/reportes/actividad?${params.toString()}`,
     {
       signal,
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     },
+    API_URL,
   );
 
   if (!response.ok) throw new Error(await readError(response));

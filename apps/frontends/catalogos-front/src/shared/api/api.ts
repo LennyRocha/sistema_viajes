@@ -3,11 +3,13 @@ import {
   fetchBaseQuery,
 } from "@reduxjs/toolkit/query/react";
 import { env } from "../../../config/env";
+import { authenticatedFetch } from "@nexoroute/commons";
 
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: env.api_url,
+    fetchFn: (input, init) => authenticatedFetch(input, init, env.api_url),
     prepareHeaders: (headers) => {
       if (typeof window !== "undefined") {
         const token = localStorage.getItem("nexoroute.accessToken");
