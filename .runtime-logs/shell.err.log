@@ -71,3 +71,160 @@ https://developers.google.com/maps/documentation/javascript/error-messages#inval
 [browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
 [browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
 [browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+[browser] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+[browser] THREE.WebGLProgram: Program Info Log: (210,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision
+(209,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision
+(210,82-106): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision
+(209,37-61): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision
+(210,82-106): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision
+
+
+ 
+[browser] WebGL context lost, preventing default. (webpack-internal:///./src/tipos_autobus/components/Vehiculo3D.tsx:106:25)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+[browser] WebGL context lost, preventing default. (webpack-internal:///./src/tipos_autobus/components/Vehiculo3D.tsx:106:25)
+[browser] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+[browser] THREE.WebGLProgram: Program Info Log: (210,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision
+(209,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision
+(210,82-106): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision
+(209,37-61): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision
+(210,82-106): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision
+
+
+ 
+⨯ ./src/app/signup/page.tsx:5:1
+Module not found: Can't resolve '@mui/icons-material/CheckCircleOutline'
+  3 | import { FormEvent, useState } from 'react';
+  4 | import { Alert, Box, Button, CircularProgress, Container, LinearProgress, Paper, Stack, Tex...
+> 5 | import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+    | ^
+  6 | import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+  7 | import { useRouter } from 'next/navigation';
+  8 |
+
+https://nextjs.org/docs/messages/module-not-found
+[browser] ./src/app/signup/page.tsx:5:1
+Module not found: Can't resolve '@mui/icons-material/CheckCircleOutline'
+  3 | import { FormEvent, useState } from 'react';
+  4 | import { Alert, Box, Button, CircularProgress, Container, LinearProgress, Paper, Stack, Tex...
+> 5 | import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+    | ^
+  6 | import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+  7 | import { useRouter } from 'next/navigation';
+  8 |
+
+https://nextjs.org/docs/messages/module-not-found 
+[browser] ./src/app/signup/page.tsx:5:1
+Module not found: Can't resolve '@mui/icons-material/CheckCircleOutline'
+  3 | import { FormEvent, useState } from 'react';
+  4 | import { Alert, Box, Button, CircularProgress, Container, LinearProgress, Paper, Stack, Tex...
+> 5 | import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+    | ^
+  6 | import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+  7 | import { useRouter } from 'next/navigation';
+  8 |
+
+https://nextjs.org/docs/messages/module-not-found 
+[Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+⨯ unhandledRejection: [Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+⨯ unhandledRejection:  [Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOSPC: no space left on device, write
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOSPC: no space left on device, write
+⨯ [Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+⨯ [Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+⨯ [Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+⨯ [Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+⨯ [Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[Error: ENOSPC: no space left on device, write] {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+npm notice
+npm notice New minor version of npm available! 11.9.0 -> 11.19.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.19.0
+npm notice To update run: npm install -g npm@11.19.0
+npm notice

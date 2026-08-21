@@ -149,6 +149,7 @@ AUTH_SERVICE_URL=http://localhost:5001
 CATALOGO_SERVICE_URL=http://localhost:5002
 OPERACIONES_SERVICE_URL=http://localhost:5003
 DASHBOARD_SERVICE_URL=http://localhost:5004
+INTERNAL_SERVICE_TOKEN=cambia-este-token-interno
 ```
 
 ### apps/backend/services/auth-service/.env
@@ -157,7 +158,8 @@ El servicio de autenticacion usa RS256. En desarrollo, si no se configuran
 rutas de llaves, genera un par efimero en memoria; en produccion deben
 configurarse `JWT_PRIVATE_KEY_PATH` y `JWT_PUBLIC_KEY_PATH` con llaves PEM
 PKCS8/SPKI. `INTERNAL_SERVICE_TOKEN` es exclusivo para llamadas servicio a
-servicio desde catalogo.
+servicio y debe coincidir en gateway, auth-service, catalogo-service y
+record-service.
 
 Variables relevantes:
 
@@ -169,11 +171,12 @@ JWT_REFRESH_TTL_SECONDS=604800
 JWT_ISSUER=nexoroute-auth
 JWT_AUDIENCE=nexoroute-api
 INTERNAL_SERVICE_TOKEN=cambia-este-token-interno
+RECORD_SERVICE_URL=http://localhost:5004
 ```
 
 Endpoints disponibles por el gateway:
 
-- `POST /auth/register`: registro publico, asigna `ROLE_CONDUCTOR`.
+- `POST /auth/register`: registro publico de clientes, asigna `ROLE_CLIENTE`.
 - `POST /auth/login`: access token RS256 y refresh token opaco.
 - `POST /auth/refresh`: rotacion de refresh token.
 - `POST /auth/logout`: revoca la familia de refresh y el access token actual.
@@ -199,6 +202,7 @@ REDIS_URL="redis://localhost:6379"
 GATEWAY_URL="http://localhost:5000"
 AUTH_SERVICE_URL="http://localhost:5001"
 OPERACIONES_SERVICE_URL="http://localhost:5003"
+INTERNAL_SERVICE_TOKEN="cambia-este-token-interno"
 JSON_BODY_LIMIT=10mb
 ```
 
@@ -218,7 +222,21 @@ DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=dash
 REDIS_URL="redis://localhost:6379"
 PORT=5004
 GATEWAY_URL="http://localhost:5000"
+INTERNAL_SERVICE_TOKEN="cambia-este-token-interno"
 ```
+
+### Reportes de actividad
+
+`Reportes` es el unico modulo visible de auditoria y esta reservado para
+`ROLE_ADMIN` mediante el privilegio `bitacora:consultar`. Registra inicios de
+sesion exitosos y fallidos, registros de clientes, cierres de sesion, refresh
+tokens rechazados, accesos sin permiso y operaciones administrativas de
+escritura. Nunca almacena contrasenas, JWT, refresh tokens ni cookies.
+
+- `GET /reportes/actividad`: consulta paginada con filtros por usuario, evento,
+  categoria, resultado y fecha.
+- `POST /internal/reportes/actividad`: recepcion interna protegida por
+  `INTERNAL_SERVICE_TOKEN`.
 
 El modulo de Viajes usa `operaciones-service`. Si `gateway` esta prendido pero
 `operaciones-service` no esta en `5003`, el frontend puede mostrar errores 504.

@@ -15,6 +15,8 @@ export default function Page() {
         remote="catalogos/HistorialModule"
         exportName="HistorialIndex"
         skeletonVariant="table"
+        requiredPrivileges={["historial:consultar"]}
+        allowedRoles={["ROLE_ADMIN"]}
       />
     </MainLayout>
   );

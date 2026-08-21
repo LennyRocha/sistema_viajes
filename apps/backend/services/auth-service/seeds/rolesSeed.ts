@@ -15,4 +15,8 @@ export const rolesSeeds = [
     nombre: 'ROLE_CONDUCTOR',
     descripcion: 'Consulta viajes asignados.',
   },
+  {
+    nombre: 'ROLE_CLIENTE',
+    descripcion: 'Consulta viajes disponibles y gestiona sus compras.',
+  },
 ];

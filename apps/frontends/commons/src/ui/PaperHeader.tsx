@@ -15,6 +15,7 @@ interface PaperHeaderProps {
   buttonTitle?: string;
   paperProps?: React.ComponentProps<typeof MotionPaper>;
   isLoading?: boolean;
+  buttonDisabled?: boolean;
 }
 
 export default function PaperHeader({
@@ -27,6 +28,7 @@ export default function PaperHeader({
   buttonTitle,
   paperProps = {},
   isLoading = false,
+  buttonDisabled = false,
 }: Readonly<PaperHeaderProps>) {
   return (
     <Box
@@ -127,6 +129,7 @@ export default function PaperHeader({
             onClick={onButtonClick}
             startIcon={leftIcon}
             loading={isLoading}
+            disabled={buttonDisabled}
             size="medium"
             sx={{
               "@media (max-width: 640px)": {

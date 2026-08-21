@@ -15,6 +15,7 @@ export default function Page() {
         remote="auth/UsuariosModule"
         exportName="NuevoUsuario"
         skeletonVariant="form"
+        requiredPrivileges={["usuarios:crear"]}
       />
     </MainLayout>
   );

@@ -15,6 +15,8 @@ export default function Page() {
         remote="operaciones/ViajesModule"
         exportName="ViajesIndex"
         skeletonVariant="table"
+        requiredPrivileges={["viaje-base:consultar"]}
+        allowedRoles={["ROLE_ADMIN", "ROLE_SUPERVISOR"]}
       />
     </MainLayout>
   );

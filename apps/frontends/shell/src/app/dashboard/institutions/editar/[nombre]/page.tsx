@@ -23,6 +23,7 @@ export default function Page({ params }: Readonly<Props>) {
         remote="catalogos/InstitucionesModule"
         exportName="EditarInstitucion"
         skeletonVariant="form"
+        requiredPrivileges={["catalogo:administrar"]}
         params={{ institucionNombre: nombre }}
       />
     </MainLayout>

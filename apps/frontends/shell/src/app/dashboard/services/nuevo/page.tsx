@@ -14,6 +14,7 @@ export default function Page() {
         remote="catalogos/ServiciosModule"
         exportName="NuevoServicio"
         skeletonVariant="form"
+        requiredPrivileges={["servicio:crear"]}
       />
     </MainLayout>
   );

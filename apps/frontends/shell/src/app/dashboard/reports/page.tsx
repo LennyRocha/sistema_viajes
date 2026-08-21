@@ -1,19 +1,23 @@
+import FederatedPage from "@/src/adapters/FederatedPage";
 import MainLayout from "@/src/layout/MainLayout";
 import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
-import React from "react";
-
-type Props = {};
 
 export const metadata: Metadata = {
-  title: "Reportes de viajes | Nexoroute",
+  title: "Reportes de actividad | Nexoroute",
   description:
-    "Panel de consulta y gestión de reportes de viajes, con opciones para filtrar por fecha, destino y estado del viaje.",
+    "Consulta administrativa de autenticación, seguridad y operaciones del sistema.",
 };
 
-export default function page({}: Props) {
+export default function Page() {
   return (
     <MainLayout>
-      <div>page Reportes</div>
+      <FederatedPage
+        remote="dashboard-reportes/ReportesModule"
+        exportName="ReportesActividadIndex"
+        skeletonVariant="table"
+        requiredPrivileges={["bitacora:consultar"]}
+        allowedRoles={["ROLE_ADMIN"]}
+      />
     </MainLayout>
   );
 }

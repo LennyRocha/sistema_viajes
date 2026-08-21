@@ -23,6 +23,8 @@ export default function Page({ params }: Readonly<Props>) {
         remote="catalogos/AutobusesModule"
         exportName="EditarAutobus"
         skeletonVariant="form"
+        requiredPrivileges={["autobus:editar"]}
+        allowedRoles={["ROLE_ADMIN"]}
         params={{ codigo_interno }}
       />
     </MainLayout>

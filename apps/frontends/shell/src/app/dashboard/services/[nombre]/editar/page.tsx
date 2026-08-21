@@ -23,6 +23,7 @@ export default function Page({ params }: Readonly<Props>) {
         remote="catalogos/ServiciosModule"
         exportName="EditarServicio"
         skeletonVariant="form"
+        requiredPrivileges={["servicio:editar"]}
         params={{ servicioName: nombre }}
       />
     </MainLayout>

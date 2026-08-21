@@ -7,11 +7,12 @@ import {
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
+  Matches,
   IsStrongPassword,
   IsString,
+  Length,
   MaxLength,
 } from 'class-validator';
-import { IsCURP } from '@commons/decorators';
 import { Type } from 'class-transformer';
 
 export class CreateUsuarioDto {
@@ -49,10 +50,9 @@ export class CreateUsuarioDto {
     example: 'TRUJ010101HDFGZM09',
   })
   @IsNotEmpty({ message: 'La CURP del usuario es obligatoria' })
-  @MaxLength(18, {
-    message: 'La CURP del usuario no puede exceder los 18 caracteres',
+  @Length(18, 18, {
+    message: 'La CURP del usuario debe contener exactamente 18 caracteres',
   })
-  @IsCURP({ message: 'La CURP del usuario debe ser válida' })
   curp!: string;
   @ApiProperty({
     description: 'La fecha de nacimiento del usuario',
@@ -69,8 +69,11 @@ export class CreateUsuarioDto {
     example: '5555555555',
   })
   @IsNotEmpty({ message: 'El teléfono del usuario es obligatorio' })
-  @MaxLength(15, {
-    message: 'El teléfono del usuario no puede exceder los 15 caracteres',
+  @MaxLength(10, {
+    message: 'El teléfono del usuario no puede exceder los 10 dígitos',
+  })
+  @Matches(/^\d{10}$/, {
+    message: 'El teléfono del usuario debe contener exactamente 10 dígitos',
   })
   @IsPhoneNumber('MX', {
     message: 'El teléfono del usuario debe ser un número válido',

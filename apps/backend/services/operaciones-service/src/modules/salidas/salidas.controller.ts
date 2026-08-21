@@ -1,12 +1,14 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   HttpCode,
   Param,
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -35,15 +37,22 @@ export class SalidasController {
 
   @Get()
   @ApiOperation({ summary: 'Listar salidas' })
-  findAll() {
-    return this.salidas.findAll();
+  findAll(
+    @Query('conductorId', new DefaultValuePipe(0), ParseIntPipe)
+    conductorId: number,
+  ) {
+    return this.salidas.findAll(conductorId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener salida por id' })
   @ApiParam({ name: 'id', example: 1 })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.salidas.findOne(id);
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('conductorId', new DefaultValuePipe(0), ParseIntPipe)
+    conductorId: number,
+  ) {
+    return this.salidas.findOne(id, conductorId);
   }
 
   @Patch(':id')

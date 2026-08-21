@@ -15,6 +15,7 @@ export default function Page() {
         remote="operaciones/ViajesModule"
         exportName="NuevoViaje"
         skeletonVariant="form"
+        requiredPrivileges={["viaje-base:crear"]}
       />
     </MainLayout>
   );

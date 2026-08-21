@@ -14,6 +14,8 @@ export default function Page() {
         remote="catalogos/ConductoresModule"
         exportName="NuevoConductor"
         skeletonVariant="form"
+        requiredPrivileges={["conductores:crear"]}
+        allowedRoles={["ROLE_ADMIN"]}
       />
     </MainLayout>
   );

@@ -6,6 +6,7 @@ import {
   CommonPageProps,
   HandleResponseError,
   EmptyState,
+  hasPrivilege,
 } from "@nexoroute/commons";
 import React from "react";
 import {
@@ -48,6 +49,9 @@ export default function AutobusesIndexPage({
   userPrivileges = [],
   userRoles = [],
 }: Readonly<Props>) {
+  const canCreate = hasPrivilege(userPrivileges, userRoles, "autobus:crear");
+  const canEdit = hasPrivilege(userPrivileges, userRoles, "autobus:editar");
+  const canDelete = hasPrivilege(userPrivileges, userRoles, "autobus:eliminar");
   const [active, setActive] =
     React.useState<boolean>(false);
 
@@ -146,6 +150,7 @@ export default function AutobusesIndexPage({
           navigationFunction("/dashboard/buses/nuevo")
         }
         buttonTitle="Nuevo"
+        buttonDisabled={!canCreate}
         leftIcon={<Add />}
         isLoading={
           query.isLoading ||
@@ -160,11 +165,11 @@ export default function AutobusesIndexPage({
           variant="no-data"
           title="No hay autobuses disponibles"
           description="Actualmente no hay autobuses disponibles para mostrar. Por favor, agregue un nuevo autobús para continuar."
-          action={{
+          action={canCreate ? {
             label: "Agregar autobús",
             onClick: () =>
               navigationFunction("/dashboard/buses/nuevo"),
-          }}
+          } : undefined}
           imageSize={{
             width: 200,
             height: 200,
@@ -183,12 +188,12 @@ export default function AutobusesIndexPage({
             institucionesQuery.isLoading ||
             serviciosQuery.isLoading
           }
-          onEditClick={(row) =>
+          onEditClick={canEdit ? (row) =>
             navigationFunction(
               `/dashboard/buses/editar/${row.codigo_interno}`,
             )
-          }
-          onToggleActiveClick={(row) =>
+          : undefined}
+          onToggleActiveClick={canDelete ? (row) =>
             showDialog({
               title: "¿Cambiar estado del autobús?",
               content: (
@@ -211,7 +216,7 @@ export default function AutobusesIndexPage({
               onClose: () => {},
               isLoading: isLoading,
               submitOnEnter: true,
-            })
+            }) : undefined
           }
           onInfoClick={(row) =>
             openSidebar({
