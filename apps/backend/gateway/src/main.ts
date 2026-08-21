@@ -358,6 +358,7 @@ async function bootstrap() {
     '/calendario-viajes',
     '/compras',
     '/compradores',
+    '/pagos',
   ];
   app.use(
     createProxyMiddleware({
