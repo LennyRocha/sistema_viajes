@@ -18,7 +18,6 @@ import {
   OptionsDrawer,
   NavSidebarContent,
   DrawerOptionsMenu,
-  NotificationsButton,
 } from "@nexoroute/commons";
 import { useSidebar } from "../providers/SidebarProvider";
 import ListLinks from "../core/constants/ListLinks";
@@ -93,11 +92,6 @@ export default function MainLayout({
   React.useEffect(() => {
     sidebar.hideSidebar();
   }, [pathname]);
-  // TODO:; Usar showSidebar de useSidebar enviando la vista de notificaciones como children del sidebar, y pasarle el onClick de NotificationsButton a showSidebar
-  const handleNotificationsClick = () =>
-    alert("Debería abrir las notificaciones");
-  //TODO: Obtener el número de notificaciones no leídas desde el contexto o estado global
-  const notificationsCount = 5;
   const sidebarRef = React.useRef<HTMLDivElement>(null);
   if (!sessionResolved || !sessionUser || !isOperationalUser) return null;
 
@@ -153,10 +147,6 @@ export default function MainLayout({
                 DrawerMenuHandlers.onCerrarSesionClick
               }
             />
-            <NotificationsButton
-              onClick={handleNotificationsClick}
-              notificationsCount={notificationsCount}
-            />
           </Box>
         </AppBar>
       )}
@@ -164,11 +154,6 @@ export default function MainLayout({
         {/* Sidebar de navegación */}
         <aside className="left_sidebar">
           <NavSidebarContent
-            notificationsProps={{
-              onNotificationsClick:
-                handleNotificationsClick,
-              notificationsCount,
-            }}
             user={userData}
             LinkComponent={NextLinkForCommons as any}
             pathname={pathname}

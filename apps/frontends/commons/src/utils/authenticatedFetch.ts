@@ -82,6 +82,7 @@ function sendRequest(
   return fetch(requestInput, withAccessToken(input, init, accessToken));
 }
 
+
 export async function authenticatedFetch(
   input: RequestInfo | URL,
   init?: RequestInit,

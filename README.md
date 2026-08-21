@@ -185,13 +185,21 @@ Endpoints disponibles por el gateway:
 - `GET /auth/jwks.json`: llave publica para verificadores RS256.
 - `GET /roles` y `GET /privilegios`: catalogos protegidos.
 
-Cuenta administrativa por defecto creada por migracion:
+Credenciales demo creadas por migracion:
 
 ```txt
-Email: admin@nexoroute.local
-Password: Admin123!
-Rol: ROLE_ADMIN
+Password compartido: Admin123!
+
+admin@nexoroute.local       ROLE_ADMIN
+operador@nexoroute.local    ROLE_OPERADOR
+supervisor@nexoroute.local  ROLE_SUPERVISOR
+conductor@nexoroute.local   ROLE_CONDUCTOR
+cliente@nexoroute.local     ROLE_CLIENTE
 ```
+
+Los seeds de `catalogo-service` sincronizan instituciones, tipos de autobus,
+servicios, disponibilidades, unidades demo y un conductor demo ligado a
+`conductor@nexoroute.local` cuando ese usuario ya existe en `auth.Usuario`.
 
 ```env
 DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=auth&options=--search_path%3Dauth"
@@ -212,7 +220,6 @@ GATEWAY_URL="http://localhost:5000"
 AUTH_SERVICE_URL="http://localhost:5001"
 OPERACIONES_SERVICE_URL="http://localhost:5003"
 INTERNAL_SERVICE_TOKEN="cambia-este-token-interno"
-INTERNAL_SERVICE_TOKEN=cambia-este-token-interno
 JSON_BODY_LIMIT=10mb
 ```
 
@@ -235,9 +242,9 @@ GATEWAY_URL="http://localhost:5000"
 INTERNAL_SERVICE_TOKEN="cambia-este-token-interno"
 ```
 
-### Reportes de actividad
+### Bitácora de actividad
 
-`Reportes` es el unico modulo visible de auditoria y esta reservado para
+`Bitácora` es el unico modulo visible de auditoria y esta reservado para
 `ROLE_ADMIN` mediante el privilegio `bitacora:consultar`. Registra inicios de
 sesion exitosos y fallidos, registros de clientes, cierres de sesion, refresh
 tokens rechazados, accesos sin permiso y operaciones administrativas de

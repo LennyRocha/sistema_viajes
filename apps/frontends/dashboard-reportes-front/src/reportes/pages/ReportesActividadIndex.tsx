@@ -149,14 +149,14 @@ export default function ReportesActividadIndex({
         rolActual="Rol actual"
         breads={[
           {
-            nombre: "Reportes",
+            nombre: "Bitácora",
             href: "/dashboard/reports",
             disabled: true,
           },
         ]}
       />
       <PaperHeader
-        title="Reportes"
+        title="Bitácora"
         subtitle="Actividad de autenticación, seguridad y operaciones administrativas"
         iconname="assessment"
         showButton
