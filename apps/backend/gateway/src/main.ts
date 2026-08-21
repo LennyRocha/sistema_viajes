@@ -385,6 +385,7 @@ async function bootstrap() {
     '/compras',
     '/compradores',
     '/pagos',
+    '/alexa',
   ];
   app.use(
     createProxyMiddleware({
