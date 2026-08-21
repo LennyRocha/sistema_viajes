@@ -26,7 +26,8 @@ import { ArrowBack } from "@mui/icons-material";
 
 export default function ViajesList() {
   const router = useRouter();
-  const { addSalidaId, addPasajeros } = useSalida();
+  const { addSalidaId, addSalidaConfig, addPasajeros } =
+    useSalida();
   const params = useSearchParams();
   const pasajeros = params.get("pasajeros");
   const [loading, setLoading] = React.useState(true);
@@ -47,8 +48,7 @@ export default function ViajesList() {
         params.toString(),
       );
       setData(salidas);
-    } catch (error) {
-      console.error(error);
+    } catch {
       snack.error({
         message: "Ocurrio un error al obtener las salidas",
         duration: 3000,
@@ -67,9 +67,11 @@ export default function ViajesList() {
   const goToCompra = (
     salida: number,
     pasajeros: number,
+    salidaConfig: any,
   ) => {
     addSalidaId(salida);
     addPasajeros(pasajeros);
+    addSalidaConfig(salidaConfig);
     router.push("/compra-tus-boletos");
   };
 
@@ -80,7 +82,7 @@ export default function ViajesList() {
 
   const handleClickOpen = (salida: any) => {
     setCurrKey(salida.id);
-    setSelectedServices(salida.autobus.servicios);
+    setSelectedServices(salida.amenidades);
     setOpen(true);
   };
 
@@ -152,7 +154,7 @@ export default function ViajesList() {
             }}
           />
         ) : (
-          data.map((salida, idx) => (
+          /*data.map((salida, idx) => (
             <SalidaCard
               key={salida.id}
               salida={salida}
@@ -165,7 +167,13 @@ export default function ViajesList() {
               }
               openDetailsDialog={handleClickOpen}
             />
-          ))
+          ))*/
+          <CardsMapper
+            data={data}
+            goToCompra={goToCompra}
+            pasajeros={pasajeros}
+            handleClickOpen={handleClickOpen}
+          />
         )}
       </Box>
       <SalidaDialog
@@ -246,4 +254,97 @@ const Header = () => {
       </Box>
     </MotionPaper>
   );
+};
+
+const CardsMapper = ({
+  data,
+  pasajeros,
+  goToCompra,
+  handleClickOpen,
+}: {
+  data: any[];
+  pasajeros: string | null;
+  goToCompra: (
+    id: number,
+    pasajeros: number,
+    salida: any,
+  ) => void;
+  handleClickOpen: (salida: any) => void;
+}) => {
+  type salidaTipo = "UNICA" | "RECURRENTE" | "ESPECIAL";
+  let list: any[] = [];
+  data.forEach((d: any) => {
+    const tipo: salidaTipo = d.tipoSalida;
+    if (tipo === "UNICA") {
+      const salidaUnica = {
+        ...d,
+        config: {
+          inicio: {
+            hora: d.horario_configuracion.inicio.hora,
+          },
+          finCalculado: {
+            hora: d.horario_configuracion.finCalculado.hora,
+          },
+          fecha: d.horario_configuracion.inicio.fecha,
+        },
+      };
+      list.push(salidaUnica);
+    } else if (tipo === "RECURRENTE") {
+      const dias = d.horario_configuracion.dias;
+      dias.forEach((dia: any) => {
+        const horarios = dia.horarios;
+        horarios.forEach((h: any) => {
+          const salidaRecurrente = {
+            ...d,
+            config: {
+              inicio: {
+                hora: d.horaInicio,
+              },
+              finCalculado: {
+                hora: d.horaFinEstimada,
+              },
+              dia: dia.dia,
+            },
+          };
+          list.push(salidaRecurrente);
+        });
+      });
+    } else {
+      const ocurrencias =
+        d.horario_configuracion.ocurrencias;
+      ocurrencias.forEach((o: any) => {
+        const salidaEspecial = {
+          ...d,
+          config: {
+            inicio: {
+              hora: o.horaInicio,
+            },
+            finCalculado: {
+              hora: o.finCalculado.hora,
+            },
+            fecha: o.fecha,
+          },
+        };
+        list.push(salidaEspecial);
+      });
+    }
+  });
+
+  return list.map((salida, idx) => (
+    <SalidaCard
+      key={idx + 1}
+      salida={salida}
+      idx={idx}
+      onClick={(salida) =>
+        goToCompra(
+          salida.id,
+          pasajeros && Number(pasajeros) !== 0
+            ? Number(pasajeros)
+            : 1,
+          salida.config,
+        )
+      }
+      openDetailsDialog={handleClickOpen}
+    />
+  ));
 };

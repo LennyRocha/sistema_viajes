@@ -4,7 +4,7 @@ export interface Compra {
   publicId?: string;
   salidaId: number;
   compradorId?: number;
-  comprador?: Comprador;
+  comprador: Comprador;
   pasajeros: number;
   asientos: Pasajero[];
   fechaCompra?: Date;

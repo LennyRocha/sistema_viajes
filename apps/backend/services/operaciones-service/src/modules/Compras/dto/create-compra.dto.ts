@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 import {
   ArrayMinSize,
   ArrayUnique,
@@ -6,32 +6,56 @@ import {
   IsInt,
   IsPositive,
   IsString,
-} from 'class-validator';
+} from "class-validator";
+import { Pasajero } from "../types/asiento-compra";
 
 export class CreateCompraDto {
-  @ApiProperty({ example: 5, description: 'Id de la salida a comprar' })
+  @ApiProperty({
+    example: 5,
+    description: "Id de la salida a comprar",
+  })
   @IsInt()
   @IsPositive()
   salidaId!: number;
 
-  @ApiProperty({ example: 12, description: 'Id del comprador' })
+  @ApiProperty({
+    example: 12,
+    description: "Id del comprador",
+  })
   @IsInt()
   @IsPositive()
   compradorId!: number;
 
-  @ApiProperty({ example: 2, description: 'Cantidad de pasajeros' })
+  @ApiProperty({
+    example: 2,
+    description: "Cantidad de pasajeros",
+  })
   @IsInt()
   @IsPositive()
   pasajeros!: number;
 
   @ApiProperty({
-    example: ['12A', '12B'],
-    description: 'Ids de asiento elegidos, deben existir en el layout de la salida',
+    example: ["12A", "12B"],
+    description:
+      "Ids de asiento elegidos, deben existir en el layout de la salida",
     type: [String],
   })
   @IsArray()
   @ArrayMinSize(1)
   @ArrayUnique()
-  @IsString({ each: true })
-  asientos!: string[];
+  asientos!: Pasajero[];
+
+  @ApiProperty({
+    example: "2024-06-15",
+    description: "Fecha de salida",
+  })
+  @IsString()
+  fechaSalida!: string;
+
+  @ApiProperty({
+    example: "14:30",
+    description: "Hora de salida",
+  })
+  @IsString()
+  horaSalida!: string;
 }
