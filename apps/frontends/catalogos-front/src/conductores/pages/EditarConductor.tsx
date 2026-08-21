@@ -21,9 +21,11 @@ import {
 import {
   useGetConductorByIdQuery,
   usePatchConductorMutation,
+  useUploadConductorImageMutation,
 } from "../api/conductorApi";
 
 import { useGetInstitucionesQuery } from "../../instituciones/api/institucionesApi";
+import { persistConductorImage } from "../utils/imageUpload";
 
 interface EditarConductorProps extends CommonPageProps {
   id?: string;
@@ -56,6 +58,8 @@ export default function EditarConductor({
 
   const [patchConductor, { isLoading }] =
     usePatchConductorMutation();
+  const [uploadImage, { isLoading: isUploading }] =
+    useUploadConductorImageMutation();
 
   useEffect(() => {
     if (!conductor) return;
@@ -151,9 +155,18 @@ export default function EditarConductor({
     setErrors({});
 
     try {
+      const fotoPerfil = result.data.foto_perfil
+        ? await persistConductorImage(
+            result.data.foto_perfil,
+            "profiles",
+            uploadImage,
+          )
+        : undefined;
+
       await patchConductor({
         id: conductorId,
         ...(result.data as UpdateConductorSchema),
+        ...(fotoPerfil ? { foto_perfil: fotoPerfil } : {}),
       }).unwrap();
 
       snack?.success?.({ message: "Conductor actualizado correctamente" });
@@ -222,7 +235,7 @@ export default function EditarConductor({
         errors={errors}
         instituciones={instituciones ?? []}
         loadingInstituciones={loadingInstituciones}
-        loading={isLoading}
+        loading={isLoading || isUploading}
         showLicencia={false}
         onChange={handleChange}
         onLicenciaChange={handleLicenciaChange}

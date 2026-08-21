@@ -13,8 +13,6 @@ type Props = {
   LinkComponent: React.ElementType;
   pathname?: string;
   drawerCallbacks: {
-    onMiPerfilClick: () => void;
-    onAjustesClick: () => void;
     onCerrarSesionClick: () => void;
   };
 };

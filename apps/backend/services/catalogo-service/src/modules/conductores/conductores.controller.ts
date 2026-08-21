@@ -11,16 +11,41 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ConductoresService } from './conductores.service';
 import { CreateConductorDto } from './dtos/create-conductor.dto';
 import { UpdateConductorDto } from './dtos/update-conductor.dto';
+import {
+  ImageStorageService,
+  UploadedImage,
+} from './image-storage.service';
 
 @ApiTags('conductores')
 @Controller('conductores')
 export class ConductoresController {
-  constructor(private readonly conductores: ConductoresService) { }
+  constructor(
+    private readonly conductores: ConductoresService,
+    private readonly imageStorage: ImageStorageService,
+  ) { }
+
+  @Post('images')
+  @HttpCode(201)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
+  @ApiOperation({ summary: 'Subir imagen de conductor o licencia' })
+  uploadImage(
+    @UploadedFile() file: UploadedImage | undefined,
+    @Body('category') category?: string,
+  ) {
+    return this.imageStorage.upload(file, category);
+  }
 
   @Post()
   @HttpCode(201)
