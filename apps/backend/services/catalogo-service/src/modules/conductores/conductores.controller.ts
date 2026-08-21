@@ -48,6 +48,12 @@ export class ConductoresController {
     return this.conductores.findOne(id);
   }
 
+  @Get('usuario/:usuarioId')
+  @ApiOperation({ summary: 'Obtener conductor por usuario' })
+  findByUsuarioId(@Param('usuarioId', ParseIntPipe) usuarioId: number) {
+    return this.conductores.findByUsuarioId(usuarioId);
+  }
+
   @Get('/salidas/:id')
   @ApiOperation({
     summary: 'Obtener conductor para módulo de salidas',

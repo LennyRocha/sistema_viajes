@@ -1,6 +1,10 @@
 "use client";
 
-import { PaperBlock, PaperHeader } from "@nexoroute/commons";
+import {
+  hasAnyPrivilege,
+  PaperBlock,
+  PaperHeader,
+} from "@nexoroute/commons";
 import {
   Box,
   Button,
@@ -15,7 +19,18 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import MapIcon from "@mui/icons-material/Map";
 import RouteIcon from "@mui/icons-material/Route";
 import TimelineIcon from "@mui/icons-material/Timeline";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import PersonIcon from "@mui/icons-material/Person";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import RoomServiceIcon from "@mui/icons-material/RoomService";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+type SessionUser = {
+  roles?: string[];
+  privileges?: string[];
+};
 
 const modules = [
   {
@@ -24,6 +39,8 @@ const modules = [
     href: "/dashboard/trips",
     icon: <AltRouteIcon />,
     accent: "#1f618d",
+    privileges: ["viaje-base:consultar"],
+    allowedRoles: ["ROLE_ADMIN", "ROLE_SUPERVISOR"],
   },
   {
     title: "Rutas",
@@ -31,6 +48,8 @@ const modules = [
     href: "/dashboard/routes",
     icon: <RouteIcon />,
     accent: "#2f855a",
+    privileges: ["ruta:consultar"],
+    allowedRoles: ["ROLE_ADMIN", "ROLE_SUPERVISOR"],
   },
   {
     title: "Autobuses",
@@ -38,6 +57,26 @@ const modules = [
     href: "/dashboard/buses",
     icon: <DirectionsBusIcon />,
     accent: "#b7791f",
+    privileges: ["autobus:consultar"],
+    allowedRoles: ["ROLE_ADMIN", "ROLE_SUPERVISOR"],
+  },
+  {
+    title: "Conductores",
+    description: "Consulta el personal conductor y sus datos operativos.",
+    href: "/dashboard/conductores",
+    icon: <PersonIcon />,
+    accent: "#0f766e",
+    privileges: ["conductores:consultar"],
+    allowedRoles: ["ROLE_ADMIN", "ROLE_SUPERVISOR"],
+  },
+  {
+    title: "Servicios",
+    description: "Administra los servicios adicionales disponibles para las unidades.",
+    href: "/dashboard/services",
+    icon: <RoomServiceIcon />,
+    accent: "#9f1239",
+    privileges: ["servicio:consultar"],
+    allowedRoles: ["ROLE_ADMIN"],
   },
   {
     title: "Instituciones",
@@ -45,28 +84,110 @@ const modules = [
     href: "/dashboard/institutions",
     icon: <GroupsIcon />,
     accent: "#6b46c1",
+    privileges: ["catalogo:administrar"],
+    allowedRoles: ["ROLE_ADMIN"],
+  },
+  {
+    title: "Salidas",
+    description: "Consulta las salidas programadas y su estado operativo.",
+    href: "/dashboard/salidas",
+    icon: <EventAvailableIcon />,
+    accent: "#c2410c",
+    privileges: ["salida:consultar", "salida:consultar-propias"],
+    allowedRoles: [
+      "ROLE_ADMIN",
+      "ROLE_OPERADOR",
+      "ROLE_SUPERVISOR",
+      "ROLE_CONDUCTOR",
+    ],
+  },
+  {
+    title: "Calendario",
+    description: "Visualiza las salidas programadas en el calendario.",
+    href: "/dashboard/calendar",
+    icon: <CalendarMonthIcon />,
+    accent: "#0369a1",
+    privileges: ["calendario:consultar", "calendario:consultar-propio"],
+    allowedRoles: [
+      "ROLE_ADMIN",
+      "ROLE_OPERADOR",
+      "ROLE_SUPERVISOR",
+      "ROLE_CONDUCTOR",
+    ],
+  },
+  {
+    title: "Reportes",
+    description: "Revisa indicadores y reportes de la operacion.",
+    href: "/dashboard/reports",
+    icon: <AssessmentIcon />,
+    accent: "#475569",
+    privileges: ["reportes:consultar"],
+    allowedRoles: ["ROLE_ADMIN", "ROLE_SUPERVISOR"],
   },
 ];
 
 export default function DashboardHomeClient() {
   const router = useRouter();
+  const [sessionUser, setSessionUser] = useState<SessionUser>({});
+  const [sessionLoaded, setSessionLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      setSessionUser(
+        JSON.parse(localStorage.getItem("nexoroute.user") || "{}"),
+      );
+    } catch {
+      setSessionUser({});
+    }
+    setSessionLoaded(true);
+  }, []);
+
+  const roles = sessionUser.roles ?? [];
+  const privileges = sessionUser.privileges ?? [];
+  const isAdmin = roles.includes("ROLE_ADMIN");
+  const isOperator = roles.includes("ROLE_OPERADOR");
+  const showSystemStatus = isAdmin || roles.includes("ROLE_SUPERVISOR");
+  const visibleModules = modules.filter(
+    (module) =>
+      (isAdmin || module.allowedRoles.some((role) => roles.includes(role))) &&
+      hasAnyPrivilege(privileges, roles, module.privileges),
+  );
+  const primaryAction = isAdmin
+    ? {
+        title: "Crear viaje",
+        href: "/dashboard/trips/nuevo",
+      }
+    : isOperator
+      ? {
+          title: "Programar salida",
+          href: "/dashboard/salidas/programacion",
+        }
+      : null;
+
+  if (!sessionLoaded) {
+    return null;
+  }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <PaperHeader
         title="Panel operativo"
-        subtitle="Vista central para coordinar rutas, viajes base, unidades y catalogos del sistema"
+        subtitle="Accesos disponibles para tu rol dentro del sistema"
         iconname="dashboard"
-        showButton
-        buttonTitle="Crear viaje"
+        showButton={Boolean(primaryAction)}
+        buttonTitle={primaryAction?.title}
         leftIcon={<AltRouteIcon />}
-        onButtonClick={() => router.push("/dashboard/trips/nuevo")}
+        onButtonClick={
+          primaryAction ? () => router.push(primaryAction.href) : undefined
+        }
       />
 
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.35fr) minmax(320px, 0.65fr)" },
+          gridTemplateColumns: showSystemStatus
+            ? { xs: "1fr", lg: "minmax(0, 1.35fr) minmax(320px, 0.65fr)" }
+            : "1fr",
           gap: 2,
           alignItems: "stretch",
         }}
@@ -79,10 +200,9 @@ export default function DashboardHomeClient() {
             gap: 1.5,
           }}
         >
-          {modules.map((module) => (
+          {visibleModules.map((module) => (
             <Box
               key={module.title}
-              // ELIMINADO: component="button" -> Ahora se renderiza como div y evita el Hydration Error
               onClick={() => router.push(module.href)}
               sx={{
                 textAlign: "left",
@@ -125,7 +245,6 @@ export default function DashboardHomeClient() {
               <Typography variant="body2" color="text.secondary">
                 {module.description}
               </Typography>
-              {/* Este es el botón interno que causaba conflicto al estar dentro de otro botón */}
               <Button variant="outlined" size="small" sx={{ alignSelf: "flex-start" }}>
                 Abrir modulo
               </Button>
@@ -133,7 +252,7 @@ export default function DashboardHomeClient() {
           ))}
         </PaperBlock>
 
-        <PaperBlock
+        {showSystemStatus && <PaperBlock
           title="Estado del sistema"
           subtitle="Lectura rapida para operar sin entrar modulo por modulo"
           contentWrapperSx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
@@ -177,7 +296,7 @@ export default function DashboardHomeClient() {
           >
             Revisar viajes
           </Button>
-        </PaperBlock>
+        </PaperBlock>}
       </Box>
     </Box>
   );

@@ -6,6 +6,7 @@ import {
   Simplify,
   EmptyState,
   HandleResponseError,
+  hasPrivilege,
 } from "@nexoroute/commons";
 import React from "react";
 import {
@@ -42,7 +43,11 @@ export default function ServiciosIndex({
   pathname,
   router,
   userPrivileges = [],
+  userRoles = [],
 }: Readonly<Props>) {
+  const canCreate = hasPrivilege(userPrivileges, userRoles, "servicio:crear");
+  const canEdit = hasPrivilege(userPrivileges, userRoles, "servicio:editar");
+  const canDelete = hasPrivilege(userPrivileges, userRoles, "servicio:eliminar");
   const dispatchSidebar = (servicio: ServicioExterno) =>
     openSidebar({
       title: `Propiedades de: ${servicio.nombre}`,
@@ -98,6 +103,7 @@ export default function ServiciosIndex({
           navigationFunction("/dashboard/services/nuevo")
         }
         buttonTitle="Nuevo"
+        buttonDisabled={!canCreate}
         leftIcon={<Add />}
         isLoading={query.isLoading || query.isFetching}
       />
@@ -106,13 +112,13 @@ export default function ServiciosIndex({
           variant="no-data"
           title="No hay servicios disponibles"
           description="Actualmente no hay servicios disponibles para mostrar. Por favor, agregue un nuevo servicio para continuar."
-          action={{
+          action={canCreate ? {
             label: "Agregar servicio",
             onClick: () =>
               navigationFunction(
                 "/dashboard/services/nuevo",
               ),
-          }}
+          } : undefined}
           imageSize={{
             width: 200,
             height: 200,
@@ -125,12 +131,12 @@ export default function ServiciosIndex({
           columnas={columnas}
           data={list}
           isLoading={query.isLoading || query.isFetching}
-          onEditClick={(row) =>
+          onEditClick={canEdit ? (row) =>
             navigationFunction(
               `/dashboard/services/${row.slug}/editar`,
             )
-          }
-          onToggleActiveClick={(row) =>
+          : undefined}
+          onToggleActiveClick={canDelete ? (row) =>
             showDialog({
               title: "¿Cambiar estado del servicio?",
               content: (
@@ -151,7 +157,7 @@ export default function ServiciosIndex({
               onClose: () => {},
               isLoading: isLoading,
               submitOnEnter: true,
-            })
+            }) : undefined
           }
           subHeaderComponent={
             <SubheaderComponent

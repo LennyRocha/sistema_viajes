@@ -6,6 +6,8 @@ export default interface SidebarUserData {
     icon: string;
     href: string;
     privilege?: string;
+    privileges?: string[];
+    allowedRoles?: string[];
   }[];
   img: string;
 }

@@ -56,4 +56,13 @@ export const privilegiosSeeds = [
   { nombre: 'parada:editar', descripcion: 'Modificar una parada.' },
   { nombre: 'parada:eliminar', descripcion: 'Retirar una parada.' },
   { nombre: 'reportes:consultar', descripcion: 'Consultar reportes operativos.' },
+  { nombre: 'bitacora:consultar', descripcion: 'Consultar la bitacora administrativa.' },
+  { nombre: 'historial:consultar', descripcion: 'Consultar el historial operativo.' },
+  { nombre: 'catalogo:consultar', descripcion: 'Consultar catalogos auxiliares.' },
+  { nombre: 'catalogo:administrar', descripcion: 'Administrar catalogos auxiliares.' },
+  { nombre: 'configuracion:consultar', descripcion: 'Consultar configuraciones operativas.' },
+  { nombre: 'configuracion:administrar', descripcion: 'Administrar configuraciones operativas.' },
+  { nombre: 'servicio:consultar', descripcion: 'Consultar servicios adicionales.' },
+  { nombre: 'salida:consultar-propias', descripcion: 'Consultar solo las salidas asignadas.' },
+  { nombre: 'calendario:consultar-propio', descripcion: 'Consultar solo el calendario asignado.' },
 ];

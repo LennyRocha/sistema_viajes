@@ -6,6 +6,7 @@ import {
   CommonPageProps,
   PaperBlock,
   PaperHeader,
+  hasPrivilege,
 } from "@nexoroute/commons";
 import AddIcon from "@mui/icons-material/Add";
 import AltRouteIcon from "@mui/icons-material/AltRoute";
@@ -201,7 +202,12 @@ export default function ViajesIndex({
   openSidebar,
   snack,
   showDialog,
+  userPrivileges = [],
+  userRoles = [],
 }: Readonly<Props>) {
+  const canCreate = hasPrivilege(userPrivileges, userRoles, "viaje-base:crear");
+  const canEdit = hasPrivilege(userPrivileges, userRoles, "viaje-base:editar");
+  const canDelete = hasPrivilege(userPrivileges, userRoles, "viaje-base:eliminar");
   const {
     viajes: viajesData,
     rutas: rutasData,
@@ -399,6 +405,7 @@ export default function ViajesIndex({
         showButton
         onButtonClick={() => navigationFunction("/dashboard/trips/nuevo")}
         buttonTitle="Nuevo viaje"
+        buttonDisabled={!canCreate}
         leftIcon={<AddIcon />}
       />
 
@@ -424,6 +431,7 @@ export default function ViajesIndex({
         >
           <Button
             variant="contained"
+            disabled={!canCreate}
             startIcon={<AddIcon />}
             onClick={() => navigationFunction("/dashboard/trips/nuevo")}
           >
@@ -671,7 +679,7 @@ export default function ViajesIndex({
                           <InfoIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Editar">
+                      {canEdit && <Tooltip title="Editar">
                         <IconButton
                           size="small"
                           onClick={(event) => {
@@ -681,8 +689,8 @@ export default function ViajesIndex({
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
-                      </Tooltip>
-                      <Tooltip
+                      </Tooltip>}
+                      {canDelete && <Tooltip
                         title={viaje.estatus ? "Desactivar viaje base" : "Activar viaje base"}
                       >
                         <Box
@@ -696,7 +704,7 @@ export default function ViajesIndex({
                             onChange={() => openStatusDialog(viaje)}
                           />
                         </Box>
-                      </Tooltip>
+                      </Tooltip>}
                     </Stack>
                   </Box>
                 </Box>

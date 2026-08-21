@@ -14,6 +14,7 @@ export default function Page() {
         remote="catalogos/InstitucionesModule"
         exportName="NuevaInstitucion"
         skeletonVariant="form"
+        requiredPrivileges={["catalogo:administrar"]}
       />
     </MainLayout>
   );

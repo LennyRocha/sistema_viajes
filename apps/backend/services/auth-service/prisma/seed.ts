@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { PrismaClient } from '../generated/prisma';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { privilegiosSeeds } from '../seeds/privilegiosSeed';
@@ -8,27 +9,27 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log('🌱 Iniciando seed...');
+  console.log('Iniciando sincronizacion de roles y privilegios...');
 
-  // Limpieza opcional (útil en dev para reseedar sin duplicar)
-  await prisma.userRole.deleteMany();
-  await prisma.rolePrivilege.deleteMany();
-  await prisma.rol.deleteMany();
-  await prisma.privilegio.deleteMany();
-
-  //Reestablecer secuencias de IDs para evitar conflictos con seeds
-  await prisma.$executeRawUnsafe(`
-    TRUNCATE TABLE "auth"."UserRole", "auth"."RolePrivilege",
-      "auth"."Rol", "auth"."Privilegio" RESTART IDENTITY CASCADE;
-`);
-
-  // Inserción de datos de prueba
-  const roles = await prisma.rol.createMany({
-    data: rolesSeeds,
-  });
-  const privilegios = await prisma.privilegio.createMany({
-    data: privilegiosSeeds,
-  });
+  // Este seed conserva las asignaciones existentes entre usuarios y roles.
+  await Promise.all(
+    rolesSeeds.map((role) =>
+      prisma.rol.upsert({
+        where: { nombre: role.nombre },
+        update: { descripcion: role.descripcion, estatus: true },
+        create: role,
+      }),
+    ),
+  );
+  await Promise.all(
+    privilegiosSeeds.map((privilege) =>
+      prisma.privilegio.upsert({
+        where: { nombre: privilege.nombre },
+        update: { descripcion: privilege.descripcion, estatus: true },
+        create: privilege,
+      }),
+    ),
+  );
 
   const rolesDb = await prisma.rol.findMany({ select: { id: true, nombre: true } });
   const privilegesDb = await prisma.privilegio.findMany({ select: { id: true, nombre: true } });
@@ -41,10 +42,13 @@ async function main() {
       return privilegeId ? [{ roleId: role.id, privilegeId }] : [];
     });
   });
-  await prisma.rolePrivilege.createMany({ data: links, skipDuplicates: true });
+  await prisma.$transaction([
+    prisma.rolePrivilege.deleteMany(),
+    prisma.rolePrivilege.createMany({ data: links, skipDuplicates: true }),
+  ]);
 
   console.log(
-    `✅ Seed completado: ${roles.count + privilegios.count} registros creados`,
+    `Permisos sincronizados: ${links.length} relaciones; usuarios conservados.`,
   );
 }
 

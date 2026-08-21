@@ -28,7 +28,14 @@ export default function LoginPage() {
       localStorage.setItem('nexoroute.accessToken', data.accessToken);
       localStorage.setItem('nexoroute.refreshToken', data.refreshToken);
       localStorage.setItem('nexoroute.user', JSON.stringify(data.user));
-      router.push('/dashboard');
+      const operationalRoles = [
+        'ROLE_ADMIN',
+        'ROLE_OPERADOR',
+        'ROLE_SUPERVISOR',
+        'ROLE_CONDUCTOR',
+      ];
+      const roles = Array.isArray(data.user?.roles) ? data.user.roles : [];
+      router.push(roles.some((role: string) => operationalRoles.includes(role)) ? '/dashboard' : '/');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No fue posible iniciar sesion');
     } finally {

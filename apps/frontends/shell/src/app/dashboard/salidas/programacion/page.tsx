@@ -15,6 +15,8 @@ export default function Page() {
         remote="operaciones/SalidasModule"
         exportName="ProgramacionSalidas"
         skeletonVariant="form"
+        requiredPrivileges={["viaje:abrir"]}
+        allowedRoles={["ROLE_ADMIN", "ROLE_OPERADOR"]}
       />
     </MainLayout>
   );

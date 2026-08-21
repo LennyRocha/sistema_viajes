@@ -308,8 +308,9 @@ export class SalidasService {
     return salida;
   }
 
-  async findAll() {
+  async findAll(conductorId = 0) {
     const salidas = await this.prisma.salida.findMany({
+      where: conductorId ? { conductorId } : undefined,
       orderBy: {
         createdAt: "desc",
       },
@@ -440,7 +441,7 @@ export class SalidasService {
 
   async findOne(id: number) {
     const salida = await this.prisma.salida.findUnique({
-      where: { id },
+      where: { id, ...(conductorId ? { conductorId } : {}) },
       include: {
         viaje: {
           include: {

@@ -25,6 +25,8 @@ export default function Page({
         remote="catalogos/ConductoresModule"
         exportName="EditarConductor"
         skeletonVariant="form"
+        requiredPrivileges={["conductores:editar"]}
+        allowedRoles={["ROLE_ADMIN"]}
         params={{ id }}
       />
     </MainLayout>

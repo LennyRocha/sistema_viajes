@@ -15,6 +15,8 @@ export default function Page() {
         remote="auth/UsuariosModule"
         exportName="UsuariosIndex"
         skeletonVariant="table"
+        requiredPrivileges={["usuarios:consultar"]}
+        allowedRoles={["ROLE_ADMIN"]}
       />
     </MainLayout>
   );

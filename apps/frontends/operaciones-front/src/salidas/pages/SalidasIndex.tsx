@@ -6,6 +6,7 @@ import {
   CommonPageProps,
   PaperBlock,
   PaperHeader,
+  hasPrivilege,
 } from "@nexoroute/commons";
 import CancelIcon from "@mui/icons-material/Cancel";
 import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
@@ -63,7 +64,16 @@ function formatDateTime(value?: Record<string, any> | string | null) {
   return JSON.stringify(value);
 }
 
-export default function SalidasIndex({ snack, navigationFunction }: Readonly<Props>) {
+export default function SalidasIndex({
+  snack,
+  navigationFunction,
+  userPrivileges = [],
+  userRoles = [],
+}: Readonly<Props>) {
+  const canCreate = hasPrivilege(userPrivileges, userRoles, "viaje:abrir");
+  const canReassign = hasPrivilege(userPrivileges, userRoles, "salida:reasignar");
+  const canCancel = hasPrivilege(userPrivileges, userRoles, "salida:cancelar");
+  const isConductor = userRoles.includes("ROLE_CONDUCTOR");
   const [salidas, setSalidas] = React.useState<SalidaDetalle[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
@@ -173,6 +183,7 @@ export default function SalidasIndex({ snack, navigationFunction }: Readonly<Pro
         showButton
         onButtonClick={() => navigationFunction?.("/dashboard/salidas/programacion")}
         buttonTitle="Programar salida"
+        buttonDisabled={!canCreate}
       />
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: 2, mb: 2 }}>
@@ -199,10 +210,19 @@ export default function SalidasIndex({ snack, navigationFunction }: Readonly<Pro
           </Stack>
         </PaperBlock>
       ) : salidas.length === 0 ? (
-        <PaperBlock title="Sin salidas" subtitle="Todavía no hay salidas registradas">
-          <Button variant="contained" onClick={() => navigationFunction?.("/dashboard/salidas/programacion")}>
-            Programar primera salida
-          </Button>
+        <PaperBlock
+          title={isConductor ? "Sin salidas asignadas" : "Sin salidas"}
+          subtitle={
+            isConductor
+              ? "No tienes salidas asignadas actualmente"
+              : "Todavía no hay salidas registradas"
+          }
+        >
+          {canCreate ? (
+            <Button variant="contained" onClick={() => navigationFunction?.("/dashboard/salidas/programacion")}>
+              Programar primera salida
+            </Button>
+          ) : null}
         </PaperBlock>
       ) : (
         <Stack spacing={2}>
@@ -287,14 +307,14 @@ export default function SalidasIndex({ snack, navigationFunction }: Readonly<Pro
                 </Box>
 
                 <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 2 }}>
-                  <Button
+                  {canReassign && <Button
                     variant="outlined"
                     onClick={() => openReassign(salida)}
                     disabled={salida.estadoSalida === "CANCELADO"}
                   >
                     Reasignar
-                  </Button>
-                  <Button
+                  </Button>}
+                  {canCancel && <Button
                     variant="outlined"
                     color="error"
                     startIcon={<CancelIcon />}
@@ -302,7 +322,7 @@ export default function SalidasIndex({ snack, navigationFunction }: Readonly<Pro
                     onClick={() => void handleCancel(salida.id)}
                   >
                     {cancelingId === salida.id ? "Cancelando..." : "Cancelar salida"}
-                  </Button>
+                  </Button>}
                 </Box>
               </Box>
             </PaperBlock>

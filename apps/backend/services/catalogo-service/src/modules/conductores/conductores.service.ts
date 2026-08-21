@@ -662,6 +662,17 @@ export class ConductoresService {
     return this.mapConductorResponse(conductor, usuario);
   }
 
+  async findByUsuarioId(usuarioId: number) {
+    const conductor = await this.prisma.conductor.findUnique({
+      where: { usuario_id: usuarioId },
+      select: { id: true, usuario_id: true, estatus: true },
+    });
+    if (!conductor || !conductor.estatus) {
+      throw new NotFoundException(`El usuario ${usuarioId} no tiene conductor activo`);
+    }
+    return conductor;
+  }
+
   async update(id: number, dto: UpdateConductorDto) {
     this.logger.info(
       {

@@ -22,7 +22,7 @@ import {
 } from "@nexoroute/commons";
 import { useSidebar } from "../providers/SidebarProvider";
 import ListLinks from "../core/constants/ListLinks";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import NextLinkForCommons from "../adapters/NextLinkForCommons";
 import DrawerMenuHandlers from "../core/constants/DrawerMenuHandlers";
 
@@ -32,6 +32,7 @@ export default function MainLayout({
   readonly children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const isLargeScreen = useMediaQuery("(max-width:1024px)");
   const [leftDrawerOpen, setLeftDrawerOpen] =
     React.useState<boolean>(false);
@@ -39,21 +40,48 @@ export default function MainLayout({
   const closeLeftDrawer = () => setLeftDrawerOpen(false);
   const sidebar = useSidebar();
   const [sessionUser, setSessionUser] = React.useState<any>(null);
+  const [sessionResolved, setSessionResolved] = React.useState(false);
   React.useEffect(() => {
     try {
       const stored = localStorage.getItem("nexoroute.user");
       setSessionUser(stored ? JSON.parse(stored) : null);
     } catch {
       setSessionUser(null);
+    } finally {
+      setSessionResolved(true);
     }
   }, []);
   const userRoles = Array.isArray(sessionUser?.roles) ? sessionUser.roles : [];
   const userPrivileges = Array.isArray(sessionUser?.privileges) ? sessionUser.privileges : [];
-  const canSee = (privilege?: string) => !privilege || userRoles.includes("ROLE_ADMIN") || userPrivileges.includes(privilege);
+  const operationalRoles = [
+    "ROLE_ADMIN",
+    "ROLE_OPERADOR",
+    "ROLE_SUPERVISOR",
+    "ROLE_CONDUCTOR",
+  ];
+  const isOperationalUser = userRoles.some((role: string) => operationalRoles.includes(role));
+  React.useEffect(() => {
+    if (!sessionResolved) return;
+    if (!sessionUser) {
+      router.replace("/login");
+      return;
+    }
+    if (!isOperationalUser) {
+      router.replace("/");
+    }
+  }, [isOperationalUser, router, sessionResolved, sessionUser]);
+  const canSee = (link: (typeof ListLinks)[number]) => {
+    if (userRoles.includes("ROLE_ADMIN")) return true;
+    if (link.allowedRoles && !link.allowedRoles.some((role) => userRoles.includes(role))) {
+      return false;
+    }
+    const privileges = link.privileges ?? (link.privilege ? [link.privilege] : []);
+    return privileges.length === 0 || privileges.some((privilege) => userPrivileges.includes(privilege));
+  };
   const userData = {
     name: `${sessionUser?.nombres ?? ""} ${sessionUser?.apellido_paterno ?? ""}`.trim() || "Usuario",
     role: userRoles.join(", ") || "Sin rol",
-    links: ListLinks.filter((link) => canSee(link.privilege)),
+    links: ListLinks.filter(canSee),
     img: sessionUser?.foto_perfil || "/assets/placeholder.png",
   };
   React.useEffect(() => {
@@ -71,6 +99,8 @@ export default function MainLayout({
   //TODO: Obtener el número de notificaciones no leídas desde el contexto o estado global
   const notificationsCount = 5;
   const sidebarRef = React.useRef<HTMLDivElement>(null);
+  if (!sessionResolved || !sessionUser || !isOperationalUser) return null;
+
   return (
     <main id="layout_main">
       {/* Header */}

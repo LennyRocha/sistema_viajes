@@ -15,6 +15,13 @@ export default function Page() {
         remote="operaciones/SalidasModule"
         exportName="SalidasIndex"
         skeletonVariant="table"
+        requiredPrivileges={["salida:consultar", "salida:consultar-propias"]}
+        allowedRoles={[
+          "ROLE_ADMIN",
+          "ROLE_OPERADOR",
+          "ROLE_SUPERVISOR",
+          "ROLE_CONDUCTOR",
+        ]}
       />
     </MainLayout>
   );

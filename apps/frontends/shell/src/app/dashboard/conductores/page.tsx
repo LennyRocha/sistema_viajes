@@ -15,6 +15,8 @@ export default function Page() {
         remote="catalogos/ConductoresModule"
         exportName="ConductoresIndex"
         skeletonVariant="table"
+        requiredPrivileges={["conductores:consultar"]}
+        allowedRoles={["ROLE_ADMIN", "ROLE_SUPERVISOR"]}
       />
     </MainLayout>
   );

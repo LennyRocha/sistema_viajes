@@ -11,6 +11,10 @@ import { RedisTokenDenylist } from '../../redis/redis-token.denylist';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
 import { AccessTokenClaims } from '../usuarios/types/auth-user.entity';
+import {
+  ReportActivityPublisher,
+  type ReportRequestContext,
+} from './report-activity.publisher';
 
 const hashRefreshToken = (token: string) =>
   createHash('sha256').update(token).digest('hex');
@@ -26,14 +30,38 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly signer: JoseTokenSigner,
     private readonly denylist: RedisTokenDenylist,
+    private readonly activity: ReportActivityPublisher,
   ) {}
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto, context: ReportRequestContext = {}) {
     try {
-      const { roleNames: _roleNames, ...publicRegistration } = dto;
-      const user = await this.users.create(publicRegistration, 'ROLE_CONDUCTOR');
-      return this.issueTokens(user.id);
+      const user = await this.users.create(dto, 'ROLE_CLIENTE');
+      const session = await this.issueTokens(user.id);
+      this.activity.record({
+        ...context,
+        evento: 'REGISTRO_CLIENTE',
+        categoria: 'AUTENTICACION',
+        accion: 'Registrar cuenta de cliente',
+        modulo: 'Auth',
+        resultado: 'EXITO',
+        severidad: 'INFO',
+        usuarioId: session.user.id,
+        email: session.user.email,
+        roles: session.user.roles,
+      });
+      return session;
     } catch (error) {
+      this.activity.record({
+        ...context,
+        evento: 'REGISTRO_CLIENTE',
+        categoria: 'AUTENTICACION',
+        accion: 'Registrar cuenta de cliente',
+        modulo: 'Auth',
+        resultado: 'FALLO',
+        severidad: 'ADVERTENCIA',
+        email: dto.email,
+        mensaje: this.errorMessage(error),
+      });
       if ((error as { code?: string }).code === 'P2002') {
         throw new ConflictException('El correo, CURP o telefono ya esta registrado');
       }
@@ -41,51 +69,121 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto) {
-    const user = await this.users.login(dto.email, dto.password);
-    return this.issueTokens(user.id);
+  async login(dto: LoginDto, context: ReportRequestContext = {}) {
+    try {
+      const user = await this.users.login(dto.email, dto.password);
+      const session = await this.issueTokens(user.id);
+      this.activity.record({
+        ...context,
+        evento: 'INICIO_SESION',
+        categoria: 'AUTENTICACION',
+        accion: 'Iniciar sesion',
+        modulo: 'Auth',
+        resultado: 'EXITO',
+        severidad: 'INFO',
+        usuarioId: session.user.id,
+        email: session.user.email,
+        roles: session.user.roles,
+      });
+      return session;
+    } catch (error) {
+      this.activity.record({
+        ...context,
+        evento: 'INICIO_SESION',
+        categoria: 'AUTENTICACION',
+        accion: 'Iniciar sesion',
+        modulo: 'Auth',
+        resultado: 'FALLO',
+        severidad: 'ADVERTENCIA',
+        email: dto.email,
+        mensaje: 'Credenciales rechazadas',
+      });
+      throw error;
+    }
   }
 
-  async refresh(rawRefreshToken: string) {
-    const tokenHash = hashRefreshToken(rawRefreshToken);
-    const stored = await this.prisma.refreshToken.findUnique({
-      where: { tokenHash },
-    });
-    if (!stored) throw new UnauthorizedException('Refresh token invalido');
+  async refresh(rawRefreshToken: string, context: ReportRequestContext = {}) {
+    let usuarioId: number | undefined;
+    try {
+      const tokenHash = hashRefreshToken(rawRefreshToken);
+      const stored = await this.prisma.refreshToken.findUnique({
+        where: { tokenHash },
+      });
+      if (!stored) throw new UnauthorizedException('Refresh token invalido');
+      usuarioId = stored.userId;
 
-    const expired = stored.expiresAt.getTime() <= Date.now();
-    if (stored.usedAt || stored.revokedAt || expired) {
-      if (stored.usedAt || stored.revokedAt) await this.revokeFamily(stored.familyId);
-      throw new UnauthorizedException('Refresh token expirado o revocado');
-    }
+      const expired = stored.expiresAt.getTime() <= Date.now();
+      if (stored.usedAt || stored.revokedAt || expired) {
+        if (stored.usedAt || stored.revokedAt) await this.revokeFamily(stored.familyId);
+        throw new UnauthorizedException('Refresh token expirado o revocado');
+      }
 
-    const updated = await this.prisma.refreshToken.updateMany({
-      where: { id: stored.id, usedAt: null, revokedAt: null },
-      data: { usedAt: new Date() },
-    });
-    if (updated.count !== 1) {
-      await this.revokeFamily(stored.familyId);
-      throw new UnauthorizedException('Refresh token reutilizado');
+      const updated = await this.prisma.refreshToken.updateMany({
+        where: { id: stored.id, usedAt: null, revokedAt: null },
+        data: { usedAt: new Date() },
+      });
+      if (updated.count !== 1) {
+        await this.revokeFamily(stored.familyId);
+        throw new UnauthorizedException('Refresh token reutilizado');
+      }
+      return this.issueTokens(stored.userId, stored.familyId);
+    } catch (error) {
+      this.activity.record({
+        ...context,
+        evento: 'REFRESH_RECHAZADO',
+        categoria: 'SEGURIDAD',
+        accion: 'Renovar sesion',
+        modulo: 'Auth',
+        resultado: 'DENEGADO',
+        severidad: 'ADVERTENCIA',
+        usuarioId,
+        mensaje: this.errorMessage(error),
+      });
+      throw error;
     }
-    return this.issueTokens(stored.userId, stored.familyId);
   }
 
-  async logout(refreshToken?: string, accessToken?: string) {
+  async logout(
+    refreshToken?: string,
+    accessToken?: string,
+    context: ReportRequestContext = {},
+  ) {
+    let usuarioId: number | undefined;
+    let email: string | undefined;
+    let roles: string[] | undefined;
     if (refreshToken) {
       const stored = await this.prisma.refreshToken.findUnique({
         where: { tokenHash: hashRefreshToken(refreshToken) },
       });
-      if (stored) await this.revokeFamily(stored.familyId);
+      if (stored) {
+        usuarioId = stored.userId;
+        await this.revokeFamily(stored.familyId);
+      }
     }
 
     if (accessToken) {
       try {
         const claims = await this.signer.verifyAccess(accessToken);
+        usuarioId = Number(claims.sub);
+        email = claims.email;
+        roles = claims.roles;
         await this.denylist.revoke(claims.jti, new Date(claims.exp * 1000));
       } catch {
         // Logout es idempotente: un access token ya expirado no debe bloquearlo.
       }
     }
+    this.activity.record({
+      ...context,
+      evento: 'CIERRE_SESION',
+      categoria: 'AUTENTICACION',
+      accion: 'Cerrar sesion',
+      modulo: 'Auth',
+      resultado: 'EXITO',
+      severidad: 'INFO',
+      usuarioId,
+      email,
+      roles,
+    });
     return { loggedOut: true };
   }
 
@@ -131,5 +229,9 @@ export class AuthService {
       where: { familyId, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+  }
+
+  private errorMessage(error: unknown) {
+    return error instanceof Error ? error.message.slice(0, 500) : 'Error no identificado';
   }
 }

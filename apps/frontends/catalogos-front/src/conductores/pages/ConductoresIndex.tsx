@@ -4,6 +4,7 @@ import {
   Breadcrumb,
   Tabla,
   CommonPageProps,
+  hasPrivilege,
 } from "@nexoroute/commons";
 import React, { useMemo, useState } from "react";
 import { Add, FilterList } from "@mui/icons-material";
@@ -23,7 +24,12 @@ export default function ConductoresIndex({
   showDialog,
   snack,
   userPrivileges = [],
+  userRoles = [],
 }: Readonly<CommonPageProps>) {
+  const canCreate = hasPrivilege(userPrivileges, userRoles, "conductores:crear");
+  const canEdit = hasPrivilege(userPrivileges, userRoles, "conductores:editar");
+  const canDelete = hasPrivilege(userPrivileges, userRoles, "conductores:eliminar");
+  const columnas = buildConductoresColumns();
   const [searchCurp, setSearchCurp] = useState("");
   const [searchNombre, setSearchNombre] = useState("");
   const [selectedLicenciaConductor, setSelectedLicenciaConductor] =
@@ -98,6 +104,7 @@ export default function ConductoresIndex({
         showButton
         onButtonClick={() => navigationFunction("/dashboard/conductores/nuevo")}
         buttonTitle="Nuevo"
+        buttonDisabled={!canCreate}
         leftIcon={<Add />}
       />
       <Tabla<Conductor>
@@ -106,16 +113,16 @@ export default function ConductoresIndex({
         columnas={columnas}
         data={filteredConductores}
         isLoading={isLoading || isFetching}
-        onEditClick={(row) =>
+        onEditClick={canEdit ? (row) =>
           navigationFunction(`/dashboard/conductores/editar/${row.id}`)
-        }
+        : undefined}
         onInfoClick={(row) =>
           openSidebar({
             title: "Detalles del Conductor",
             children: <ConductorDetails row={row} />,
           })
         }
-        onToggleActiveClick={handleToggleActive}
+        onToggleActiveClick={canDelete ? handleToggleActive : undefined}
         subHeaderComponent={
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField

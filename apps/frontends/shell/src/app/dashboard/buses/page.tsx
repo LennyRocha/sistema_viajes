@@ -15,6 +15,8 @@ export default function Page() {
         remote="catalogos/AutobusesModule"
         exportName="AutobusesIndex"
         skeletonVariant="table"
+        requiredPrivileges={["autobus:consultar"]}
+        allowedRoles={["ROLE_ADMIN", "ROLE_SUPERVISOR"]}
       />
     </MainLayout>
   );

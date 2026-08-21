@@ -7,6 +7,7 @@ import { RedisTokenDenylist } from '../../redis/redis-token.denylist';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { PrivilegesGuard } from './guards/privileges.guard';
+import { ReportActivityPublisher } from './report-activity.publisher';
 
 @Module({
   imports: [UsuariosModule],
@@ -18,6 +19,7 @@ import { PrivilegesGuard } from './guards/privileges.guard';
     JwtAuthGuard,
     RolesGuard,
     PrivilegesGuard,
+    ReportActivityPublisher,
   ],
   exports: [JoseTokenSigner, RedisTokenDenylist, JwtAuthGuard, RolesGuard, PrivilegesGuard],
 })

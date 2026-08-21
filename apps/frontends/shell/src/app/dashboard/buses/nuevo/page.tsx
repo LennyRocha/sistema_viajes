@@ -14,6 +14,8 @@ const Page = () => {
         remote="catalogos/AutobusesModule"
         exportName="NuevoAutobus"
         skeletonVariant="form"
+        requiredPrivileges={["autobus:crear"]}
+        allowedRoles={["ROLE_ADMIN"]}
       />
     </MainLayout>
   );

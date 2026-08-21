@@ -12,6 +12,7 @@ module.exports = {
                     filename: "static/chunks/remoteEntry.js",
                     exposes: {
                         "./HistorialModule": "./src/historial/pages",
+                        "./ReportesModule": "./src/reportes/pages",
                     },
                     shared,
                     extraOptions: {

@@ -15,6 +15,8 @@ export default function Page() {
         remote="catalogos/ServiciosModule"
         exportName="ServiciosIndex"
         skeletonVariant="table"
+        requiredPrivileges={["servicio:consultar"]}
+        allowedRoles={["ROLE_ADMIN"]}
       />
     </MainLayout>
   );

@@ -6,6 +6,7 @@ import {
   CommonPageProps,
   PaperBlock,
   PaperHeader,
+  hasPrivilege,
 } from "@nexoroute/commons";
 import AltRouteIcon from "@mui/icons-material/AltRoute";
 import AddIcon from "@mui/icons-material/Add";
@@ -55,7 +56,15 @@ const SORT_OPTIONS: Array<{ value: CatalogSortOption; label: string }> = [
   { value: "name_desc", label: "Nombre Z-A" },
 ];
 
-export default function RutasIndex({ snack, showDialog }: Readonly<Props>) {
+export default function RutasIndex({
+  snack,
+  showDialog,
+  userPrivileges = [],
+  userRoles = [],
+}: Readonly<Props>) {
+  const canCreate = hasPrivilege(userPrivileges, userRoles, "ruta:crear");
+  const canEdit = hasPrivilege(userPrivileges, userRoles, "ruta:editar");
+  const canDelete = hasPrivilege(userPrivileges, userRoles, "ruta:eliminar");
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] =
     React.useState<CatalogStatusFilter>("all");
@@ -345,7 +354,7 @@ export default function RutasIndex({ snack, showDialog }: Readonly<Props>) {
                       backgroundColor: "rgba(255,255,255,0.62)",
                     }}
                   >
-                    <Tooltip title="Editar ruta">
+                    {canEdit && <Tooltip title="Editar ruta">
                       <IconButton
                         size="small"
                         onClick={(event) => {
@@ -356,8 +365,8 @@ export default function RutasIndex({ snack, showDialog }: Readonly<Props>) {
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
-                    </Tooltip>
-                    <Tooltip title={route.estatus ? "Desactivar ruta" : "Activar ruta"}>
+                    </Tooltip>}
+                    {canDelete && <Tooltip title={route.estatus ? "Desactivar ruta" : "Activar ruta"}>
                       <Box
                         onClick={(event) => event.stopPropagation()}
                         sx={{ display: "flex", justifyContent: "center" }}
@@ -369,7 +378,7 @@ export default function RutasIndex({ snack, showDialog }: Readonly<Props>) {
                           onChange={() => openStatusDialog(route)}
                         />
                       </Box>
-                    </Tooltip>
+                    </Tooltip>}
                   </Stack>
                 </Box>
               </Box>
@@ -386,6 +395,7 @@ export default function RutasIndex({ snack, showDialog }: Readonly<Props>) {
           )}
           <Button
             variant="contained"
+            disabled={!canCreate}
             startIcon={<AddIcon />}
             onClick={() => {
               setEditingRoute(null);

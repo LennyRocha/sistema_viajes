@@ -23,6 +23,7 @@ export default function Page({ params }: Readonly<Props>) {
         remote="catalogos/DisponibilidadModule"
         exportName="DisponibilidadIndex"
         skeletonVariant="table"
+        requiredPrivileges={["servicio:editar"]}
         params={{ servicioName: nombre, servicio: nombre }}
       />
     </MainLayout>

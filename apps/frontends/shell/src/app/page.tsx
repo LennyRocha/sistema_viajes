@@ -50,12 +50,20 @@ const VehiculoCards = dynamic(
       const mod = await loadRemote<Record<string, any>>(
         "catalogos/AutobusesModule",
       );
-      return {
-        default: mod![
-          "VehiculoCardsPage"
-        ] as React.ComponentType<any>,
-      };
-    } catch {
+      const Component = mod?.[
+        "VehiculoCardsPage"
+      ] as React.ComponentType<any> | undefined;
+      if (!Component) {
+        throw new Error(
+          `catalogos/AutobusesModule no expone VehiculoCardsPage. Exportaciones: ${Object.keys(mod ?? {}).join(", ") || "ninguna"}`,
+        );
+      }
+      return { default: Component };
+    } catch (error) {
+      console.error(
+        "[Inicio] No se pudo cargar VehiculoCardsPage desde catalogos/AutobusesModule",
+        error,
+      );
       return {
         default: () => (
           <Alert severity="error">
@@ -84,12 +92,20 @@ const ServicioCards = dynamic(
       const mod = await loadRemote<Record<string, any>>(
         "catalogos/ServiciosModule",
       );
-      return {
-        default: mod![
-          "ServiciosCardPage"
-        ] as React.ComponentType<any>,
-      };
-    } catch {
+      const Component = mod?.[
+        "ServiciosCardPage"
+      ] as React.ComponentType<any> | undefined;
+      if (!Component) {
+        throw new Error(
+          `catalogos/ServiciosModule no expone ServiciosCardPage. Exportaciones: ${Object.keys(mod ?? {}).join(", ") || "ninguna"}`,
+        );
+      }
+      return { default: Component };
+    } catch (error) {
+      console.error(
+        "[Inicio] No se pudo cargar ServiciosCardPage desde catalogos/ServiciosModule",
+        error,
+      );
       return {
         default: () => (
           <Alert severity="error">
@@ -118,12 +134,20 @@ const RutasCarrusel = dynamic(
       const mod = await loadRemote<Record<string, any>>(
         "operaciones/ViajesModule",
       );
-      return {
-        default: mod![
-          "RutasCarrusel"
-        ] as React.ComponentType<any>,
-      };
-    } catch {
+      const Component = mod?.[
+        "RutasCarrusel"
+      ] as React.ComponentType<any> | undefined;
+      if (!Component) {
+        throw new Error(
+          `operaciones/ViajesModule no expone RutasCarrusel. Exportaciones: ${Object.keys(mod ?? {}).join(", ") || "ninguna"}`,
+        );
+      }
+      return { default: Component };
+    } catch (error) {
+      console.error(
+        "[Inicio] No se pudo cargar RutasCarrusel desde operaciones/ViajesModule",
+        error,
+      );
       return {
         default: () => (
           <Alert severity="error">

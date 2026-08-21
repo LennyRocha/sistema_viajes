@@ -23,6 +23,7 @@ export default function Page({ params }: Readonly<Props>) {
         remote="operaciones/ViajesModule"
         exportName="EditarViaje"
         skeletonVariant="form"
+        requiredPrivileges={["viaje-base:editar"]}
         params={{ viajeId: id }}
       />
     </MainLayout>

@@ -15,6 +15,8 @@ export default function Page() {
         remote="catalogos/InstitucionesModule"
         exportName="InstitucionesIndex"
         skeletonVariant="table"
+        requiredPrivileges={["catalogo:administrar"]}
+        allowedRoles={["ROLE_ADMIN"]}
       />
     </MainLayout>
   );

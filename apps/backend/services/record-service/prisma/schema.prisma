@@ -24,3 +24,37 @@ model Reporte {
 
   @@schema("dashboard")
 }
+
+model ActividadReporte {
+  id Int @id @default(autoincrement())
+
+  fecha      DateTime @default(now())
+  evento     String   @db.VarChar(60)
+  categoria  String   @db.VarChar(40)
+  accion     String   @db.VarChar(80)
+  modulo     String   @db.VarChar(60)
+  resultado  String   @db.VarChar(20)
+  severidad  String   @db.VarChar(20)
+
+  usuarioId Int?
+  email     String?  @db.VarChar(150)
+  roles     String[] @default([])
+
+  ip        String? @db.VarChar(64)
+  userAgent String? @db.VarChar(500)
+  metodo    String? @db.VarChar(10)
+  ruta      String? @db.VarChar(255)
+
+  recurso   String? @db.VarChar(80)
+  recursoId String? @db.VarChar(100)
+  mensaje   String? @db.VarChar(500)
+  detalles  Json?
+  requestId String? @db.VarChar(100)
+
+  @@index([fecha])
+  @@index([usuarioId])
+  @@index([categoria])
+  @@index([resultado])
+  @@index([modulo])
+  @@schema("dashboard")
+}
