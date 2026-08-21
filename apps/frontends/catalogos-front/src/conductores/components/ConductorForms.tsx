@@ -14,6 +14,10 @@ import { PaperBlock } from "@nexoroute/commons";
 import { FormState } from "../types/ConductorForm";
 import Institucion from "../../instituciones/types/Institucion";
 import CalendarDateField from "./CalendarDateField";
+import {
+  LICENSE_CATEGORIES,
+  MEXICAN_STATES,
+} from "../data/licenseOptions";
 
 interface ConductorFormProps {
   form: FormState;
@@ -241,9 +245,12 @@ export default function ConductorForm({
             <LabeledTextField
               fieldLabel="CURP"
               value={form.curp}
-              onChange={onChange("curp")}
+              onChange={(event) =>
+                onValueChange("curp", event.target.value.toUpperCase().slice(0, 18))
+              }
               error={!!errors.curp}
               helperText={errors.curp}
+              slotProps={{ htmlInput: { maxLength: 18 } }}
             />
             <CalendarDateField
               label="Fecha de nacimiento"
@@ -303,17 +310,36 @@ export default function ConductorForm({
               <LabeledTextField
                 fieldLabel="Numero de licencia"
                 value={form.licencia.numero_licencia}
-                onChange={onLicenciaChange("numero_licencia")}
+                onChange={(event) =>
+                  onLicenciaValueChange(
+                    "numero_licencia",
+                    event.target.value.replace(/\D/g, "").slice(0, 12),
+                  )
+                }
                 error={!!errors["licencia.numero_licencia"]}
                 helperText={errors["licencia.numero_licencia"]}
+                slotProps={{
+                  htmlInput: {
+                    inputMode: "numeric",
+                    maxLength: 12,
+                    pattern: "[0-9]*",
+                  },
+                }}
               />
               <LabeledTextField
+                select
                 fieldLabel="Categoria"
                 value={form.licencia.categoria}
                 onChange={onLicenciaChange("categoria")}
                 error={!!errors["licencia.categoria"]}
                 helperText={errors["licencia.categoria"]}
-              />
+              >
+                {LICENSE_CATEGORIES.map((category) => (
+                  <MenuItem key={category.value} value={category.value}>
+                    {category.label}
+                  </MenuItem>
+                ))}
+              </LabeledTextField>
               <CalendarDateField
                 label="Fecha de expedicion"
                 value={form.licencia.fecha_expedicion}
@@ -329,12 +355,19 @@ export default function ConductorForm({
                 helperText={errors["licencia.fecha_vencimiento"]}
               />
               <LabeledTextField
+                select
                 fieldLabel="Estado emisor"
                 value={form.licencia.estado_emisor}
                 onChange={onLicenciaChange("estado_emisor")}
                 error={!!errors["licencia.estado_emisor"]}
                 helperText={errors["licencia.estado_emisor"]}
-              />
+              >
+                {MEXICAN_STATES.map((state) => (
+                  <MenuItem key={state} value={state}>
+                    {state}
+                  </MenuItem>
+                ))}
+              </LabeledTextField>
               <ImageUploadField
                 label="Imagen de licencia"
                 value={form.licencia.imagen_licencia}

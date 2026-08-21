@@ -7,6 +7,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  MenuItem,
   Stack,
   Tab,
   Tabs,
@@ -23,6 +24,10 @@ import {
   useRenewLicenciaVigenteByConductorMutation,
 } from "../api/licenciaApi";
 import CalendarDateField from "./CalendarDateField";
+import {
+  LICENSE_CATEGORIES,
+  MEXICAN_STATES,
+} from "../data/licenseOptions";
 
 type LicenciaFormState = {
   numero_licencia: string;
@@ -215,19 +220,34 @@ export default function LicenciaGestionDialog({
                 <TextField
                   label="Numero de licencia"
                   value={form.numero_licencia}
-                  onChange={handleChange("numero_licencia")}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      numero_licencia: event.target.value.replace(/\D/g, "").slice(0, 12),
+                    }))
+                  }
                   error={!!errors.numero_licencia}
                   helperText={errors.numero_licencia}
                   fullWidth
+                  slotProps={{
+                    htmlInput: { inputMode: "numeric", maxLength: 12, pattern: "[0-9]*" },
+                  }}
                 />
                 <TextField
+                  select
                   label="Categoria"
                   value={form.categoria}
                   onChange={handleChange("categoria")}
                   error={!!errors.categoria}
                   helperText={errors.categoria}
                   fullWidth
-                />
+                >
+                  {LICENSE_CATEGORIES.map((category) => (
+                    <MenuItem key={category.value} value={category.value}>
+                      {category.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
                 <CalendarDateField
                   label="Fecha de expedicion"
                   value={form.fecha_expedicion}
@@ -243,13 +263,20 @@ export default function LicenciaGestionDialog({
                   helperText={errors.fecha_vencimiento}
                 />
                 <TextField
+                  select
                   label="Estado emisor"
                   value={form.estado_emisor}
                   onChange={handleChange("estado_emisor")}
                   error={!!errors.estado_emisor}
                   helperText={errors.estado_emisor}
                   fullWidth
-                />
+                >
+                  {MEXICAN_STATES.map((state) => (
+                    <MenuItem key={state} value={state}>
+                      {state}
+                    </MenuItem>
+                  ))}
+                </TextField>
                 <TextField
                   label="Imagen de licencia"
                   value={form.imagen_licencia}

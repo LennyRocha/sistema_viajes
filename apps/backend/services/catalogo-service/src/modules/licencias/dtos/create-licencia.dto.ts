@@ -1,25 +1,28 @@
 import {
   IsBoolean,
   IsDateString,
+  IsIn,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
 } from 'class-validator';
+import { LICENSE_CATEGORIES, MEXICAN_STATES } from '../licencia-options';
 
 export class CreateLicenciaDto {
 
 
   @IsNotEmpty({ message: 'El número de licencia es obligatorio' })
-  @MaxLength(30, {
-    message: 'El número de licencia no puede exceder los 30 caracteres',
+  @Matches(/^\d{8,12}$/, {
+    message: 'El numero de licencia debe contener entre 8 y 12 digitos',
   })
   numero_licencia!: string;
 
   @IsNotEmpty({ message: 'La categoría de la licencia es obligatoria' })
-  @MaxLength(20, {
-    message: 'La categoría no puede exceder los 20 caracteres',
+  @IsIn(LICENSE_CATEGORIES, {
+    message: 'La categoria de licencia no es valida',
   })
   categoria!: string;
 
@@ -38,8 +41,8 @@ export class CreateLicenciaDto {
   fecha_vencimiento!: Date;
 
   @IsNotEmpty({ message: 'El estado emisor es obligatorio' })
-  @MaxLength(100, {
-    message: 'El estado emisor no puede exceder los 100 caracteres',
+  @IsIn(MEXICAN_STATES, {
+    message: 'El estado emisor no es valido',
   })
   estado_emisor!: string;
 

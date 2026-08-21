@@ -40,8 +40,15 @@ export class SalidasController {
 
   @Get()
   @ApiOperation({ summary: "Listar salidas" })
-  findAll() {
-    return this.salidas.findAll();
+  findAll(
+    @Query(
+      "conductorId",
+      new DefaultValuePipe(0),
+      ParseIntPipe,
+    )
+    conductorId: number,
+  ) {
+    return this.salidas.findAll(conductorId);
   }
 
   @Get("buscar")
@@ -84,8 +91,16 @@ export class SalidasController {
   @Get(":id")
   @ApiOperation({ summary: "Obtener salida por id" })
   @ApiParam({ name: "id", example: 1 })
-  findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.salidas.findOne(id);
+  findOne(
+    @Param("id", ParseIntPipe) id: number,
+    @Query(
+      "conductorId",
+      new DefaultValuePipe(0),
+      ParseIntPipe,
+    )
+    conductorId: number,
+  ) {
+    return this.salidas.findOne(id, conductorId);
   }
 
   @Patch(":id")

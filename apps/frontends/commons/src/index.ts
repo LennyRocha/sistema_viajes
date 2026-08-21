@@ -42,6 +42,7 @@ export {
 export { default as getYearsList } from "./utils/getYearsList";
 export { type Simplify } from "./utils/simplify";
 export { hasPrivilege, hasAnyPrivilege } from "./utils/permissions";
+export { authenticatedFetch } from "./utils/authenticatedFetch";
 
 export { GridColDef } from "@mui/x-data-grid";
 
