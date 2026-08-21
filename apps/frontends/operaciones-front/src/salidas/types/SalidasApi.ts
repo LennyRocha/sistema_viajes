@@ -144,6 +144,30 @@ export type SalidaDetalle = {
   lugarLlegada: Record<string, any> | null;
   precio: number | null;
   precios: Record<string, any>;
+  institucion?: {
+    id?: number | null;
+    nombre?: string | null;
+    imagen_url?: string | null;
+  } | null;
+  amenidades?: Array<{
+    id?: number | null;
+    nombre?: string | null;
+    descripcion?: string | null;
+    icono_nombre?: string | null;
+    activo?: boolean;
+    config_servicio?: Record<string, any> | null;
+  }> | null;
+  tipoAutobus?: TipoAutobusResumen | null;
+  capacidadTotal?: number | null;
+  asientosDisponibles?: number | null;
+  asientos?: Array<{
+    id: string;
+    x: number;
+    y: number;
+    label: string;
+    estado?: string;
+    ocupado?: boolean;
+  }>;
   autobus: {
     id: number;
     alias?: string;
