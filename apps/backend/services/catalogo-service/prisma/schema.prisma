@@ -36,7 +36,7 @@ model Licencia {
   conductor    Conductor @relation(fields: [conductor_id], references: [id], onDelete: Cascade)
 
   numero_licencia   String   @db.VarChar(30)
-  categoria         String   @db.VarChar(20)
+  categoria         String   @db.VarChar(50)
   fecha_expedicion  DateTime @db.Date
   fecha_vencimiento DateTime @db.Date
   estado_emisor     String   @db.VarChar(100)
