@@ -215,7 +215,8 @@ export default function CompraForm() {
   const [loading, setLoading] = React.useState(true);
   const [salidaData, setSalidaData] =
     React.useState<any>(null);
-
+  const [asientosOcupados, setAsientosOcupados] =
+    React.useState([]);
   const [plantillaBus, setPlantillaBus] = React.useState<{
     idTipoBus: number;
     asientos: Asiento[];
@@ -243,7 +244,7 @@ export default function CompraForm() {
           ...data,
           config,
         });
-        console.log(asientos.map((a: any) => a.asiento));
+        setAsientosOcupados(asientos);
         setField("salidaId", data.id);
         const asientosOcupados =
           asientos.length === 0
@@ -252,12 +253,6 @@ export default function CompraForm() {
                 const ocupado = asientos.some(
                   (a: Pasajero) =>
                     a.asiento?.id === asiento.id,
-                );
-                console.log(
-                  "ocupado",
-                  ocupado,
-                  asiento,
-                  asientos,
                 );
                 return {
                   ...asiento,
@@ -278,12 +273,10 @@ export default function CompraForm() {
             asiento: null,
           })),
         );
-        if (data.precio) {
-          setField(
-            "monto",
-            (data.precio * pasajeros * 1.16).toFixed(2),
-          );
-        }
+        setField(
+          "monto",
+          (data.precio * pasajeros * 1.16).toFixed(2),
+        );
       } catch {
         setRedirecting(true);
         router.replace("/");
@@ -296,7 +289,7 @@ export default function CompraForm() {
     }
   };
 
-  /*React.useEffect(() => {
+  React.useEffect(() => {
     if (!formData.asientos.length || !plantillaBus) return;
 
     setPlantillaBus((prev) => {
@@ -306,8 +299,26 @@ export default function CompraForm() {
 
       const updatedAsientos = prev.asientos.map(
         (asiento) => {
+          const esDeOtraCompra = asientosOcupados.some(
+            (ocupado: Pasajero) =>
+              ocupado.asiento?.id === asiento.id,
+          );
+
+          // Los asientos ocupados por otra compra nunca deben
+          // recalcularse como SELECTED/AVAILABLE.
+          if (esDeOtraCompra) {
+            const seat = asientosOcupados.find(
+              (ocupado: Pasajero) =>
+                ocupado.asiento?.id === asiento.id,
+            ) as any;
+
+            hasChanges = true;
+
+            return seat.asiento;
+          }
+
           const isSelected = formData.asientos.some(
-            (pasajero) =>
+            (pasajero: Pasajero) =>
               pasajero?.asiento?.id === asiento.id,
           );
 
@@ -317,10 +328,7 @@ export default function CompraForm() {
 
           if (asiento.estado !== nuevoEstado) {
             hasChanges = true;
-            return {
-              ...asiento,
-              estado: nuevoEstado,
-            };
+            return { ...asiento, estado: nuevoEstado };
           }
 
           return asiento;
@@ -336,7 +344,7 @@ export default function CompraForm() {
         asientos: updatedAsientos,
       };
     });
-  }, [formData.asientos]);*/
+  }, [formData.asientos, asientosOcupados]);
 
   const hasFetchedRef = React.useRef(false);
 
@@ -454,6 +462,8 @@ export default function CompraForm() {
         "¡Compra realizada!, boleto QR generado correctamente.",
       duration: 3000,
     });
+
+    router.replace("/");
   };
 
   const postCompra = async () => {
@@ -504,8 +514,7 @@ export default function CompraForm() {
       } else {
         await processQR(codigoCompra);
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       snack.error({
         message:
           "Ocurrió un error al procesar la compra. Por favor, inténtalo de nuevo.",

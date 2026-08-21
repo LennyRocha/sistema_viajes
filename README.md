@@ -184,6 +184,14 @@ Endpoints disponibles por el gateway:
 - `GET /auth/jwks.json`: llave publica para verificadores RS256.
 - `GET /roles` y `GET /privilegios`: catalogos protegidos.
 
+Cuenta administrativa por defecto creada por migracion:
+
+```txt
+Email: admin@nexoroute.local
+Password: Admin123!
+Rol: ROLE_ADMIN
+```
+
 ```env
 DATABASE_URL="postgresql://postgres:root@localhost:5437/catalogos_db?schema=auth&options=--search_path%3Dauth"
 REDIS_URL="redis://localhost:6379"

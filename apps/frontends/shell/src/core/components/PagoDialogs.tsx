@@ -151,7 +151,16 @@ const OXXOSummary = ({
   monto,
 }: Readonly<{ codigo: string; monto: number }>) => {
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        gap: 1,
+        width: "100%",
+      }}
+    >
       <Typography
         variant="body2"
         align="center"
@@ -188,7 +197,7 @@ const OXXOSummary = ({
         format="CODE128"
         displayValue
       />
-    </>
+    </Box>
   );
 };
 
@@ -197,7 +206,16 @@ const TransferenciaSummary = ({
   monto,
 }: Readonly<{ codigo: string; monto: number }>) => {
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        gap: 1,
+        width: "100%",
+      }}
+    >
       <Typography
         variant="body2"
         align="center"
@@ -222,6 +240,6 @@ const TransferenciaSummary = ({
         <b>Referencia:</b>
         {codigo} <br />
       </Typography>
-    </>
+    </Box>
   );
 };

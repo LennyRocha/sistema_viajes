@@ -157,19 +157,6 @@ export default function RutasCarrusel({
                   width: "fit-content",
                 }}
               >
-                <Tooltip title="Simular viaje">
-                  <IconButton
-                    color="default"
-                    aria-label={`simulate route ${item.nombre}`}
-                    onClick={() =>
-                      router.push(
-                        `/simular_viaje/${slugify(item.nombre, { lower: true })}`,
-                      )
-                    }
-                  >
-                    <Map />
-                  </IconButton>
-                </Tooltip>
                 <Tooltip title="Ver viajes">
                   <IconButton
                     color="default"
