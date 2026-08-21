@@ -15,6 +15,7 @@ import { ComprasModule } from "./modules/Compras/compras.module";
 import { PagosModule } from "./modules/pagos/pagos.module";
 import { CompradorModule } from "./modules/comprador/comprador.module";
 import { CalendarioViajesModule } from "./modules/calendario-viajes/calendario-viajes.module";
+import { AlexaModule } from "./modules/alexa/alexa.module";
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { CalendarioViajesModule } from "./modules/calendario-viajes/calendario-v
     ComprasModule,
     PagosModule,
     CompradorModule,
-    CalendarioViajesModule
+    CalendarioViajesModule,
+    AlexaModule,
   ],
   providers: [
     {

@@ -45,7 +45,31 @@ export class SalidasService {
       return null;
     }
 
-    return precios.rutas.reduce((acc, num) => acc + num.precio, 0)
+    const data = precios as PreciosSalida & {
+      moneda?: string;
+      rutas?: Array<{ precio?: number | string }>;
+    };
+
+    if (Array.isArray(data.rutas)) {
+      return data.rutas.reduce((acc, ruta) => {
+        const precio = Number(ruta?.precio ?? 0);
+        return acc + (Number.isFinite(precio) ? precio : 0);
+      }, 0);
+    }
+
+    if (Array.isArray(data.preciosRuta)) {
+      return data.preciosRuta.reduce((acc, ruta) => {
+        const precio = Number(ruta?.precioRuta ?? 0);
+        return acc + (Number.isFinite(precio) ? precio : 0);
+      }, 0);
+    }
+
+    if (data.precioBase !== undefined) {
+      const precioBase = Number(data.precioBase);
+      return Number.isFinite(precioBase) ? precioBase : null;
+    }
+
+    return null;
   }
 
   public async getAsientosOcupados(
@@ -439,7 +463,7 @@ export class SalidasService {
     return list;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, conductorId = 0) {
     const salida = await this.prisma.salida.findUnique({
       where: { id, ...(conductorId ? { conductorId } : {}) },
       include: {
