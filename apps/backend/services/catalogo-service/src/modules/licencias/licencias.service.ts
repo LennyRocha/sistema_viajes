@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -9,6 +9,7 @@ import { ConductoresService } from '../conductores/conductores.service';
 import { CACHE_KEY as CONDUCTOR_CACHE_KEY } from '../conductores/conductores.service';
 
 import { CreateLicenciaAloneDto } from './dtos/create-licencia-alone.dto';
+import { RenewLicenciaDto } from './dtos/renew-licencia.dto';
 import { UpdateLicenciaDto } from './dtos/update-licencia.dto';
 
 const LIST_CACHE_KEY = (conductor_id = 0) =>
@@ -173,6 +174,77 @@ export class LicenciasService {
         `El conductor ${conductor_id} no tiene una licencia vigente`,
       );
     }
+
+    return licencia;
+  }
+
+  /**
+   * UPDATE VIGENTE BY CONDUCTOR
+   */
+  async updateVigenteByConductor(conductor_id: number, dto: UpdateLicenciaDto) {
+    this.logger.info({ conductor_id }, 'Actualizando licencia vigente del conductor');
+
+    const licencia = await this.findVigenteByConductor(conductor_id);
+    const { conductor_id: _ignoredConductorId, ...licenciaPayload } = dto;
+
+    return this.update(licencia.id, {
+      ...licenciaPayload,
+      conductor_id,
+      vigente: true,
+    });
+  }
+
+  /**
+   * RENEW VIGENTE BY CONDUCTOR
+   */
+  async renewVigenteByConductor(conductor_id: number, dto: RenewLicenciaDto) {
+    this.logger.info({ conductor_id }, 'Renovando licencia vigente del conductor');
+
+    const conductor = await this.conductores.findOne(conductor_id);
+    const current = await this.findVigenteByConductor(conductor_id);
+    const fechaExpedicion = new Date(dto.fecha_expedicion);
+    const fechaVencimiento = new Date(dto.fecha_vencimiento);
+
+    if (fechaVencimiento <= fechaExpedicion) {
+      throw new BadRequestException(
+        'La fecha de vencimiento debe ser posterior a la fecha de expedición',
+      );
+    }
+
+    const licencia = await this.prisma.$transaction(async (tx) => {
+      await tx.licencia.update({
+        where: { id: current.id },
+        data: { vigente: false },
+      });
+
+      return tx.licencia.create({
+        data: {
+          conductor_id,
+          numero_licencia: (dto.numero_licencia ?? current.numero_licencia)
+            .trim()
+            .replace(/\s+/g, '')
+            .toUpperCase(),
+          categoria: (dto.categoria ?? current.categoria).trim().toUpperCase(),
+          fecha_expedicion: fechaExpedicion,
+          fecha_vencimiento: fechaVencimiento,
+          estado_emisor: dto.estado_emisor
+            ? this.normalizeText(dto.estado_emisor)
+            : current.estado_emisor,
+          imagen_licencia: dto.imagen_licencia.trim(),
+          vigente: true,
+        },
+      });
+    });
+
+    await this.invalidateCaches(conductor_id, conductor.institucion_id);
+
+    this.logger.info(
+      {
+        previousLicenciaId: current.id,
+        licenciaId: licencia.id,
+      },
+      'Licencia renovada',
+    );
 
     return licencia;
   }

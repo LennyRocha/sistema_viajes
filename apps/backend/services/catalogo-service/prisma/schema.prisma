@@ -35,7 +35,7 @@ model Licencia {
   conductor_id Int
   conductor    Conductor @relation(fields: [conductor_id], references: [id], onDelete: Cascade)
 
-  numero_licencia   String   @unique @db.VarChar(30)
+  numero_licencia   String   @db.VarChar(30)
   categoria         String   @db.VarChar(20)
   fecha_expedicion  DateTime @db.Date
   fecha_vencimiento DateTime @db.Date
@@ -48,6 +48,8 @@ model Licencia {
   updatedAt DateTime @updatedAt
 
   @@index([conductor_id])
+  @@index([numero_licencia])
+  @@index([conductor_id, vigente])
 }
 
 model Autobus {

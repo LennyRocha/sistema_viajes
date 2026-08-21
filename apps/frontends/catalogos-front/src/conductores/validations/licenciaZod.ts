@@ -57,5 +57,25 @@ export const licenciaSchema = licenciaBaseSchema.extend({
   }),
 });
 
+export const renewLicenciaSchema = licenciaBaseSchema
+  .omit({
+    vigente: true,
+  })
+  .partial({
+    numero_licencia: true,
+    categoria: true,
+    estado_emisor: true,
+  })
+  .refine(
+    (value) =>
+      new Date(value.fecha_vencimiento).getTime() >
+      new Date(value.fecha_expedicion).getTime(),
+    {
+      message: "La fecha de vencimiento debe ser posterior a la expedición",
+      path: ["fecha_vencimiento"],
+    },
+  );
+
 export type LicenciaSchema = z.infer<typeof licenciaSchema>;
 export type LicenciaBaseSchema = z.infer<typeof licenciaBaseSchema>;
+export type RenewLicenciaSchema = z.infer<typeof renewLicenciaSchema>;
