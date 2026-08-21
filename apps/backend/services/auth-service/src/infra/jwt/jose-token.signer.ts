@@ -8,8 +8,8 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { generateKeyPair, randomUUID } from 'node:crypto';
 import { promisify } from 'node:util';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import {
   calculateJwkThumbprint,
   exportJWK,
@@ -46,6 +46,16 @@ export class JoseTokenSigner implements TokenSignerPort, OnModuleInit {
         publicExponent: 0x10001,
         privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
         publicKeyEncoding: { type: 'spki', format: 'pem' },
+      });
+      mkdirSync(dirname(privatePath), { recursive: true });
+      mkdirSync(dirname(publicPath), { recursive: true });
+      writeFileSync(privatePath, generated.privateKey, {
+        encoding: 'utf8',
+        mode: 0o600,
+      });
+      writeFileSync(publicPath, generated.publicKey, {
+        encoding: 'utf8',
+        mode: 0o644,
       });
       this.privateKey = await importPKCS8(generated.privateKey, 'RS256');
       this.publicKey = await importSPKI(generated.publicKey, 'RS256');

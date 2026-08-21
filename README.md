@@ -155,9 +155,10 @@ INTERNAL_SERVICE_TOKEN=cambia-este-token-interno
 ### apps/backend/services/auth-service/.env
 
 El servicio de autenticacion usa RS256. En desarrollo, si no se configuran
-rutas de llaves, genera un par efimero en memoria; en produccion deben
-configurarse `JWT_PRIVATE_KEY_PATH` y `JWT_PUBLIC_KEY_PATH` con llaves PEM
-PKCS8/SPKI. `INTERNAL_SERVICE_TOKEN` es exclusivo para llamadas servicio a
+rutas de llaves, genera el par PEM en `apps/backend/keys` la primera vez y lo
+reutiliza en los siguientes reinicios. En produccion deben configurarse
+`JWT_PRIVATE_KEY_PATH` y `JWT_PUBLIC_KEY_PATH` con llaves PEM PKCS8/SPKI.
+`INTERNAL_SERVICE_TOKEN` es exclusivo para llamadas servicio a
 servicio y debe coincidir en gateway, auth-service, catalogo-service y
 record-service.
 
