@@ -39,6 +39,14 @@ export class InstitucionesController {
     return this.instituciones.findAll(active);
   }
 
+  @ApiOperation({
+    summary: 'Listar todas las instituciones para la página de about',
+  })
+  @Get('public')
+  findAllPublic() {
+    return this.instituciones.findAllPublic();
+  }
+
   @ApiOperation({ summary: 'Obtener institución por id' })
   @ApiParam({ name: 'id', example: '1' })
   @Get(':id')

@@ -123,6 +123,79 @@ export class InstitucionesService {
     return instituciones;
   }
 
+  async findAllPublic() {
+    this.logger.debug('Obteniendo todas las instituciones');
+
+    // 1) ¿está en caché?
+    try {
+      const cached = await this.redis.get<Institucion[]>(LIST_CACHE_KEY);
+      if (cached) {
+        this.logger.debug(
+          {
+            key: LIST_CACHE_KEY,
+            source: 'caché',
+            count: cached.length,
+          },
+          'Instituciones obtenidas desde caché',
+        );
+        return cached
+          .filter((i) => i.estatus)
+          .map((i: Institucion) => ({
+            nombre: i.nombre,
+            descripcion: i.descripcion,
+            imagen_url: i.imagen_url,
+            slug: i.slug,
+          }));
+      }
+    } catch (error) {
+      this.logger.error(
+        {
+          key: LIST_CACHE_KEY,
+          err: error,
+        },
+        'Error al obtener instituciones desde caché',
+      );
+    }
+
+    const where: Prisma.InstitucionWhereInput = {
+      estatus: true,
+    };
+
+    // 2) no está → base de datos
+    const instituciones = await this.prisma.institucion.findMany({
+      orderBy: { createdAt: 'desc' },
+      where,
+      select: {
+        nombre: true,
+        descripcion: true,
+        imagen_url: true,
+        slug: true,
+      },
+    });
+
+    // 3) guarda para la próxima (1 hora = 3600 segundos)
+    try {
+      await this.redis.set(LIST_CACHE_KEY, instituciones, 60 * 60); // 1 hora
+    } catch (error) {
+      this.logger.error(
+        {
+          key: LIST_CACHE_KEY,
+          err: error,
+        },
+        'Error al guardar instituciones en caché',
+      );
+    }
+
+    this.logger.debug(
+      {
+        source: 'database',
+        count: instituciones.length,
+      },
+      'Instituciones obtenidas desde base de datos y guardadas en caché',
+    );
+    return instituciones;
+  }
+
   async findOne(id: number) {
     this.logger.debug({ id }, 'Obteniendo institución por ID');
 
