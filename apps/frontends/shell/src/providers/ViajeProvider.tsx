@@ -11,7 +11,10 @@ type ViajeProviderValues = {
   addSalidaId: (id: number) => void;
   addPasajeros: (count: number) => void;
   fetchSalida: (id: number) => Promise<void>;
+  fetchAsientos: (salidaId: number) => Promise<void>;
   fetchSalidas: (params?: string) => Promise<void>;
+  addSalidaConfig: (config: any) => void;
+  getSalidaConfig: () => void;
 };
 
 type SalidaProviderProps = {
@@ -32,8 +35,16 @@ export function SalidaProvider({
       : null;
   };
 
+  const getSalidaConfig = () => {
+    const salidaConfigStr =
+      sessionStorage.getItem("salidaConfig");
+    return salidaConfigStr
+      ? JSON.parse(salidaConfigStr)
+      : null;
+  };
+
   const [pasajeros, setPasajeros] =
-    React.useState<number>(0);
+    React.useState<number>(1);
 
   const gatewayUrl =
     process.env.NEXT_PUBLIC_API_GATEWAY ??
@@ -42,7 +53,8 @@ export function SalidaProvider({
   const cleanSalida = () => {
     sessionStorage.removeItem("salidaId");
     sessionStorage.removeItem("pasajeros");
-    setPasajeros(0);
+    sessionStorage.removeItem("salidaConfig");
+    setPasajeros(1);
   };
 
   React.useEffect(() => {
@@ -57,6 +69,13 @@ export function SalidaProvider({
 
   const addSalidaId = (id: number) => {
     sessionStorage.setItem("salidaId", id.toString());
+  };
+
+  const addSalidaConfig = (config: any) => {
+    sessionStorage.setItem(
+      "salidaConfig",
+      JSON.stringify(config),
+    );
   };
 
   const addPasajeros = (count: number) => {
@@ -75,6 +94,20 @@ export function SalidaProvider({
     }
     return res.json();
   }, []);
+
+  const fetchAsientos = useCallback(
+    async (salidaId: number) => {
+      if (!salidaId) return;
+      const res = await fetch(
+        `${gatewayUrl}/compras/asientos/${salidaId}`,
+      );
+      if (!res.ok) {
+        throw new Error("Error fetching asientos");
+      }
+      return res.json();
+    },
+    [],
+  );
 
   const fetchSalidas = async (params?: string) => {
     const res = await fetch(
@@ -99,6 +132,9 @@ export function SalidaProvider({
       addSalidaId,
       fetchSalida,
       fetchSalidas,
+      fetchAsientos,
+      addSalidaConfig,
+      getSalidaConfig,
     }),
     [
       getSalidaId,
@@ -109,6 +145,9 @@ export function SalidaProvider({
       addSalidaId,
       fetchSalida,
       fetchSalidas,
+      fetchAsientos,
+      addSalidaConfig,
+      getSalidaConfig,
     ],
   );
 

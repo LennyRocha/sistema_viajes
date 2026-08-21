@@ -138,6 +138,8 @@ async function bootstrap() {
     '/viajes-base',
     '/rutas',
     '/salidas',
+    '/compras',
+    '/compradores',
   ];
   app.use(
     createProxyMiddleware({

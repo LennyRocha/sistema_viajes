@@ -36,8 +36,7 @@ model Ruta {
   createdBy        String?  @db.VarChar(50)
   updatedBy        String?  @db.VarChar(50)
 
-  viajes  ViajeBaseRuta[]
-  
+  viajes ViajeBaseRuta[]
 
   @@schema("operaciones")
 }
@@ -161,11 +160,13 @@ model Compra {
   fechaCompra DateTime @default(now())
   monto       Decimal  @db.Decimal(10, 2)
 
-
   codigo String @unique @db.VarChar(20)
 
   estado   EstadoCompra @default(PENDIENTE)
-  expiraEn DateTime?    // límite para completar el pago; libera la reserva de asientos si se vence
+  expiraEn DateTime? // límite para completar el pago; libera la reserva de asientos si se vence
+
+  fechaSalida String?
+  horaSalida  String?
 
   pagos Pago[]
 
@@ -200,8 +201,7 @@ model Pago {
 
   monto      Decimal    @db.Decimal(10, 2)
   estado     EstadoPago @default(PENDIENTE)
-  referencia String?    @db.VarChar(150) // id de transacción de la pasarela
-  respuesta  Json?       // payload crudo de la pasarela, para trazabilidad/debug
+  referencia String?    @db.VarChar(150)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

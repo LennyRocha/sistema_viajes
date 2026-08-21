@@ -501,6 +501,27 @@ export class AutobusesService {
         modelo: true,
         estatus: true,
         asientos: true,
+        servicios: {
+          where: { servicio: { estatus: true } },
+          select: {
+            servicio: true,
+          },
+        },
+        tipoAutobus: {
+          select: {
+            id: true,
+            nombre: true,
+            descripcion: true,
+          },
+        },
+        institucion: {
+          select: {
+            id: true,
+            nombre: true,
+            imagen_url: true,
+            descripcion: true,
+          },
+        },
       },
     });
 
@@ -516,6 +537,9 @@ export class AutobusesService {
       nombre: `${autobus.alias} (${autobus.codigo_interno})`,
       marca: autobus.marca,
       modelo: autobus.modelo,
+      institucion: autobus.institucion,
+      tipoAutobus: autobus.tipoAutobus,
+      servicios: autobus.servicios.map((s) => s.servicio),
       asientos: autobus.asientos,
     };
   }
