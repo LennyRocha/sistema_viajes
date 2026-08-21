@@ -512,6 +512,13 @@ export default function CompraForm() {
           compraId: compra.id,
         });
       } else {
+        const payload: PagoPayload = {
+          compraId: pagoDialog.compraId!,
+          metodoPagoId: pagoDialog.metodoPagoId,
+          monto: formData.monto,
+          referencia: pagoDialog.codigo,
+        };
+        await realizarPago(payload);
         await processQR(codigoCompra);
       }
     } catch {
