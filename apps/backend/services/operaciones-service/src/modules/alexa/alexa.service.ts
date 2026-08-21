@@ -24,7 +24,8 @@ import { ComprarBoletoAlexaDto } from "./dto/comprar-boleto-alexa.dto";
 import { RegistrarSalidaAlexaDto } from "./dto/registrar-salida-alexa.dto";
 
 const TOKEN_PREFIX = "alexa:ott:";
-const TOKEN_TTL_SECONDS = 120;
+const TOKEN_TTL_HOURS = 2;
+const TOKEN_TTL_SECONDS = TOKEN_TTL_HOURS * 60 * 60;
 
 type CatalogoBus = {
   id: number;
@@ -52,7 +53,7 @@ export class AlexaService {
     private readonly logger: PinoLogger,
   ) {}
 
-  async createOneTimeToken(secret: string) {
+  async createToken(secret: string) {
     const expectedSecret = process.env.ALEXA_SHARED_SECRET;
 
     if (!expectedSecret) {
@@ -260,7 +261,6 @@ export class AlexaService {
       );
     }
 
-    await this.redis.del(key);
   }
 
   private normalizeText(value: string) {

@@ -40,6 +40,76 @@ export class SalidasService {
     return catalogoService;
   }
 
+  private normalizeText(value: string) {
+    return value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+  }
+
+  private getPlaceField(
+    place: unknown,
+    field: "placeId" | "nombre" | "direccion",
+  ) {
+    if (
+      typeof place !== "object" ||
+      place === null ||
+      Array.isArray(place)
+    ) {
+      return "";
+    }
+
+    const value = (place as Record<string, unknown>)[field];
+    return typeof value === "string" ? value : "";
+  }
+
+  private matchesTextFilter(
+    candidate: string,
+    expected: string,
+  ) {
+    const normalizedCandidate = this.normalizeText(candidate);
+    const normalizedExpected = this.normalizeText(expected);
+
+    if (!normalizedCandidate || !normalizedExpected) {
+      return false;
+    }
+
+    return (
+      normalizedCandidate === normalizedExpected ||
+      normalizedCandidate.includes(normalizedExpected) ||
+      normalizedExpected.includes(normalizedCandidate)
+    );
+  }
+
+  private extractSearchTokens(value: string) {
+    return this.normalizeText(value)
+      .split(/[^a-z0-9]+/)
+      .map((token) => token.trim())
+      .filter((token) => token.length >= 3);
+  }
+
+  private matchesKeywordSearch(
+    values: Array<string | null | undefined>,
+    expected: string,
+  ) {
+    const haystack = this.normalizeText(
+      values.filter(Boolean).join(" "),
+    );
+
+    if (!haystack) {
+      return false;
+    }
+
+    const tokens = this.extractSearchTokens(expected);
+    if (tokens.length === 0) {
+      return this.matchesTextFilter(haystack, expected);
+    }
+
+    return tokens.every((token) => haystack.includes(token));
+  }
+
   public getSalidaPrice(precios: any): number | null {
     if (!precios || typeof precios !== "object") {
       return null;
@@ -405,59 +475,56 @@ export class SalidasService {
 
     if (fromId) {
       list = list.filter((salida) => {
-        const origen = salida.viajeBase?.rutas[0]?.origen;
-
-        if (
-          typeof origen !== "object" ||
-          origen === null ||
-          Array.isArray(origen)
-        ) {
-          return false;
-        }
-
-        return (
-          (origen as Record<string, unknown>).placeId ===
-          fromId
+        const rutas = salida.viajeBase?.rutas ?? [];
+        return rutas.some(
+          (ruta) =>
+            this.getPlaceField(ruta?.origen, "placeId") ===
+            fromId,
         );
       });
     }
 
     if (toId) {
       list = list.filter((salida) => {
-        const origen =
-          salida.viajeBase?.rutas[
-            salida.viajeBase.rutas.length - 1
-          ]?.origen;
-
-        if (
-          typeof origen !== "object" ||
-          origen === null ||
-          Array.isArray(origen)
-        ) {
-          return false;
-        }
-
-        return (
-          (origen as Record<string, unknown>).placeId ===
-          toId
+        const rutas = salida.viajeBase?.rutas ?? [];
+        return rutas.some(
+          (ruta) =>
+            this.getPlaceField(ruta?.destino, "placeId") ===
+            toId,
         );
       });
     }
 
     if (from && !fromId) {
-      list = list.filter(
-        (salida) =>
-          salida.viajeBase?.rutas[0]?.nombre === from,
-      );
+      list = list.filter((salida) => {
+        const rutas = salida.viajeBase?.rutas ?? [];
+        return rutas.some((ruta) =>
+          this.matchesKeywordSearch(
+            [
+              ruta?.nombre ?? "",
+              this.getPlaceField(ruta?.origen, "nombre"),
+              this.getPlaceField(ruta?.origen, "direccion"),
+            ],
+            from,
+          ),
+        );
+      });
     }
 
     if (to && !toId) {
-      list = list.filter(
-        (salida) =>
-          salida.viajeBase?.rutas[
-            salida.viajeBase.rutas.length - 1
-          ]?.nombre === to,
-      );
+      list = list.filter((salida) => {
+        const rutas = salida.viajeBase?.rutas ?? [];
+        return rutas.some((ruta) =>
+          this.matchesKeywordSearch(
+            [
+              ruta?.nombre ?? "",
+              this.getPlaceField(ruta?.destino, "nombre"),
+              this.getPlaceField(ruta?.destino, "direccion"),
+            ],
+            to,
+          ),
+        );
+      });
     }
 
     return list;

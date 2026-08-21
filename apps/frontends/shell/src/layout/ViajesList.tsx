@@ -116,6 +116,16 @@ export default function ViajesList() {
     setSelectedServices([]);
   };
 
+  React.useEffect(() => {
+    if (!loading && data.length === 0) {
+      snack.warning({
+        message:
+          "No se encontraron salidas con los filtros proporcionados",
+        duration: 3000,
+      });
+    }
+  }, [data, loading]);
+
   if (loading)
     return (
       <Backdrop

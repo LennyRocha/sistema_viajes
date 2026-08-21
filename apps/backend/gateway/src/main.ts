@@ -86,6 +86,7 @@ async function bootstrap() {
     '/operaciones/health',
     '/docs',
     '/api-json',
+    '/instituciones/public',
   ];
   const publicReadPrefixes = [
     '/rutas',
@@ -128,12 +129,15 @@ async function bootstrap() {
       if (method === 'DELETE') return ['viaje-base:eliminar'];
     }
     if (pathname.startsWith('/salidas')) {
-      if (method === 'GET') return ['salida:consultar', 'salida:consultar-propias'];
+      if (method === 'GET')
+        return ['salida:consultar', 'salida:consultar-propias'];
       if (method === 'POST') return ['viaje:abrir'];
-      if (method === 'PATCH' && pathname.endsWith('/cancelar')) return ['salida:cancelar'];
+      if (method === 'PATCH' && pathname.endsWith('/cancelar'))
+        return ['salida:cancelar'];
       if (method === 'PATCH') return ['salida:reasignar'];
     }
-    if (pathname.startsWith('/calendario-viajes')) return ['calendario:consultar'];
+    if (pathname.startsWith('/calendario-viajes'))
+      return ['calendario:consultar'];
     if (pathname.startsWith('/autobuses')) {
       if (method === 'GET') return ['autobus:consultar'];
       if (method === 'POST') return ['autobus:crear'];
@@ -158,7 +162,9 @@ async function bootstrap() {
       pathname.startsWith('/disponibilidad-servicios') ||
       pathname.startsWith('/licencias')
     ) {
-      return method === 'GET' ? ['catalogo:consultar'] : ['catalogo:administrar'];
+      return method === 'GET'
+        ? ['catalogo:consultar']
+        : ['catalogo:administrar'];
     }
     if (pathname.startsWith('/roles')) return ['roles:consultar'];
     if (pathname.startsWith('/privilegios')) return ['privilegios:consultar'];
@@ -204,7 +210,9 @@ async function bootstrap() {
         severidad: 'ADVERTENCIA',
         mensaje: 'La solicitud no incluyo un Bearer token',
       });
-      response.status(401).json({ statusCode: 401, message: 'Bearer token requerido' });
+      response
+        .status(401)
+        .json({ statusCode: 401, message: 'Bearer token requerido' });
       return;
     }
     try {
@@ -222,13 +230,17 @@ async function bootstrap() {
           severidad: 'ADVERTENCIA',
           mensaje: 'El access token fue rechazado',
         });
-        response.status(401).json({ statusCode: 401, message: 'Access token invalido' });
+        response
+          .status(401)
+          .json({ statusCode: 401, message: 'Access token invalido' });
         return;
       }
-      const claims = await introspection.json() as GatewayClaims;
+      const claims = (await introspection.json()) as GatewayClaims;
       const required = privilegeForRequest(pathname, request.method);
       const isAdmin = claims.roles?.includes('ROLE_ADMIN');
-      const hasPrivilege = required.some((privilege) => claims.privileges?.includes(privilege));
+      const hasPrivilege = required.some((privilege) =>
+        claims.privileges?.includes(privilege),
+      );
       if (required.length > 0 && !isAdmin && !hasPrivilege) {
         recordActivity({
           ...requestMetadata(request),
@@ -244,12 +256,18 @@ async function bootstrap() {
           mensaje: 'El usuario no cuenta con el privilegio requerido',
           detalles: { privilegiosRequeridos: required },
         });
-        response.status(403).json({ statusCode: 403, message: 'Privilegio insuficiente', required });
+        response.status(403).json({
+          statusCode: 403,
+          message: 'Privilegio insuficiente',
+          required,
+        });
         return;
       }
 
       const canReadAllSalidas = claims.privileges?.includes('salida:consultar');
-      const canReadOwnSalidas = claims.privileges?.includes('salida:consultar-propias');
+      const canReadOwnSalidas = claims.privileges?.includes(
+        'salida:consultar-propias',
+      );
       if (
         !isAdmin &&
         !canReadAllSalidas &&
@@ -268,7 +286,8 @@ async function bootstrap() {
           `${target_one}/conductores/usuario/${claims.sub}`,
         );
         if (!conductorResponse.ok) {
-          const isSalidasCollection = pathname === '/salidas' || pathname === '/salidas/';
+          const isSalidasCollection =
+            pathname === '/salidas' || pathname === '/salidas/';
           if (conductorResponse.status === 404 && isSalidasCollection) {
             response.status(200).json([]);
             return;
@@ -282,7 +301,7 @@ async function bootstrap() {
           });
           return;
         }
-        const conductor = await conductorResponse.json() as { id: number };
+        const conductor = (await conductorResponse.json()) as { id: number };
         const requestUrl = new URL(request.originalUrl, 'http://localhost');
         requestUrl.searchParams.set('conductorId', String(conductor.id));
         request.url = `${requestUrl.pathname}${requestUrl.search}`;
@@ -316,7 +335,9 @@ async function bootstrap() {
       }
       next();
     } catch {
-      response.status(503).json({ statusCode: 503, message: 'Auth service no disponible' });
+      response
+        .status(503)
+        .json({ statusCode: 503, message: 'Auth service no disponible' });
     }
   });
 
