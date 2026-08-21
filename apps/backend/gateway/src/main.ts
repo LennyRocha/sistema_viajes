@@ -139,13 +139,17 @@ async function bootstrap() {
     if (pathname.startsWith('/calendario-viajes'))
       return ['calendario:consultar'];
     if (pathname.startsWith('/autobuses')) {
-      if (method === 'GET') return ['autobus:consultar'];
+      if (method === 'GET') {
+        return ['autobus:consultar', 'viaje:abrir', 'salida:reasignar'];
+      }
       if (method === 'POST') return ['autobus:crear'];
       if (method === 'PATCH') return ['autobus:editar'];
       if (method === 'DELETE') return ['autobus:eliminar'];
     }
     if (pathname.startsWith('/conductores')) {
-      if (method === 'GET') return ['conductores:consultar'];
+      if (method === 'GET') {
+        return ['conductores:consultar', 'viaje:abrir', 'salida:reasignar'];
+      }
       if (method === 'POST') return ['conductores:crear'];
       if (method === 'PATCH') return ['conductores:editar'];
       if (method === 'DELETE') return ['conductores:eliminar'];

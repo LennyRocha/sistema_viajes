@@ -140,6 +140,18 @@ export function getSalidas() {
   return request<SalidaDetalle[]>("/salidas");
 }
 
+export function getActiveAutobuses(institucionId?: number) {
+  return request<AutobusResumen[]>(
+    withParams("/autobuses", { active: true, institucion: institucionId }),
+  );
+}
+
+export function getActiveConductores(institucionId?: number) {
+  return request<ConductorResumen[]>(
+    withParams("/conductores", { active: true, institucion: institucionId }),
+  );
+}
+
 export function getSalida(id: number) {
   return request<SalidaDetalle>(`/salidas/${id}`);
 }

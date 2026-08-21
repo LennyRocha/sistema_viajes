@@ -158,6 +158,11 @@ export type SalidaDetalle = {
     config_servicio?: Record<string, any> | null;
   }> | null;
   tipoAutobus?: TipoAutobusResumen | null;
+  conductor?: {
+    id: number;
+    nombre: string;
+    estatus?: boolean;
+  } | null;
   capacidadTotal?: number | null;
   asientosDisponibles?: number | null;
   asientos?: Array<{

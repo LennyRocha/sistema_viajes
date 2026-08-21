@@ -24,6 +24,7 @@
     "prisma:seed": "prisma db seed"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1114.0",
     "@commons/contracts": "workspace:*",
     "@commons/decorators": "workspace:*",
     "@commons/filters": "workspace:*",
