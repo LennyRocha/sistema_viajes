@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import {
-  IsDecimal,
   IsInt,
+  IsDecimal,
   IsNotEmpty,
   IsPositive,
   IsString,
@@ -13,7 +13,6 @@ export class CreatePagoDto {
     description: "Monto del pago",
   })
   @IsDecimal()
-  @IsPositive()
   @IsNotEmpty()
   monto!: number;
 
