@@ -1,7 +1,8 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { Alert, Box, Button, CircularProgress, Container, Paper, TextField, Typography } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Alert, Button, CircularProgress, Container, IconButton, Paper, Stack, TextField, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
@@ -46,7 +47,12 @@ export default function LoginPage() {
   return (
     <Container maxWidth="sm" sx={{ py: { xs: 5, md: 10 } }}>
       <Paper component="form" onSubmit={submit} sx={{ p: { xs: 3, md: 5 } }} elevation={4}>
-        <Typography variant="h4" component="h1" gutterBottom>Iniciar sesion</Typography>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1 }}>
+          <IconButton aria-label="Volver al inicio" onClick={() => router.push('/')} edge="start">
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h4" component="h1">Iniciar sesion</Typography>
+        </Stack>
         <Typography color="text.secondary" sx={{ mb: 3 }}>Accede a tu cuenta de Nexoroute.</Typography>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <TextField label="Correo electronico" type="email" value={email} onChange={(event) => setEmail(event.target.value)} fullWidth required sx={{ mb: 2 }} />

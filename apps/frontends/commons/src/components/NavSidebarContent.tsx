@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import DynamicIcon from "../icons/DynamicIcon";
 import DrawerOptionsMenu from "../drawers/DrawerOptionsMenu";
-import NotificationsButton from "../drawers/NotificationsButton";
 import SidebarUserData from "../types/SidebarUserData";
 import { ElementType } from "react";
 
@@ -26,10 +25,6 @@ type Props = {
     onAjustesClick: () => void;
     onCerrarSesionClick: () => void;
   };
-  notificationsProps?: {
-    notificationsCount?: number;
-    onNotificationsClick?: () => void;
-  };
 };
 
 export default function NavSidebarContent({
@@ -42,7 +37,6 @@ export default function NavSidebarContent({
     onAjustesClick: () => {},
     onCerrarSesionClick: () => {},
   },
-  notificationsProps,
 }: Readonly<Props>) {
   const isActive = (path?: string, href?: string) =>
     path === href || path?.startsWith(href + "/");
@@ -82,15 +76,6 @@ export default function NavSidebarContent({
               width: "fit-content",
             }}
           >
-            <NotificationsButton
-              onClick={
-                notificationsProps?.onNotificationsClick ||
-                (() => {})
-              }
-              notificationsCount={
-                notificationsProps?.notificationsCount
-              }
-            />
             <DrawerOptionsMenu
               onMiPerfilClick={
                 drawerCallbacks?.onMiPerfilClick

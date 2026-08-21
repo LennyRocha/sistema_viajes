@@ -116,13 +116,13 @@ const modules = [
     ],
   },
   {
-    title: "Reportes",
-    description: "Revisa indicadores y reportes de la operacion.",
+    title: "Bitácora",
+    description: "Revisa actividad administrativa y eventos de seguridad.",
     href: "/dashboard/reports",
     icon: <AssessmentIcon />,
     accent: "#475569",
-    privileges: ["reportes:consultar"],
-    allowedRoles: ["ROLE_ADMIN", "ROLE_SUPERVISOR"],
+    privileges: ["bitacora:consultar"],
+    allowedRoles: ["ROLE_ADMIN"],
   },
 ];
 
