@@ -22,17 +22,17 @@ export class AlexaController {
   @Post("auth/token")
   @HttpCode(200)
   @ApiOperation({
-    summary: "Emitir token efimero de un solo uso para Alexa",
+    summary: "Emitir token temporal para Alexa",
   })
   createToken(@Body() dto: CreateAlexaTokenDto) {
-    return this.alexa.createOneTimeToken(dto.secret);
+    return this.alexa.createToken(dto.secret);
   }
 
   @Get("viajes/buscar")
   @ApiHeader({
     name: "x-alexa-token",
     required: true,
-    description: "Token efimero de un solo uso",
+    description: "Token temporal valido hasta su expiracion",
   })
   @ApiOperation({
     summary: "Buscar viajes para el intent de Alexa",
@@ -48,7 +48,7 @@ export class AlexaController {
   @ApiHeader({
     name: "x-alexa-token",
     required: true,
-    description: "Token efimero de un solo uso",
+    description: "Token temporal valido hasta su expiracion",
   })
   @ApiOperation({
     summary: "Registrar salida desde Alexa",
@@ -64,7 +64,7 @@ export class AlexaController {
   @ApiHeader({
     name: "x-alexa-token",
     required: true,
-    description: "Token efimero de un solo uso",
+    description: "Token temporal valido hasta su expiracion",
   })
   @ApiOperation({
     summary: "Comprar boleto desde Alexa",
