@@ -36,8 +36,7 @@ model Ruta {
   createdBy        String?  @db.VarChar(50)
   updatedBy        String?  @db.VarChar(50)
 
-  viajes  ViajeBaseRuta[]
-  boletos Compra[]
+  viajes ViajeBaseRuta[]
 
   @@schema("operaciones")
 }
@@ -120,6 +119,9 @@ model Salida {
 
   precios Json
 
+  capacidadTotal Int
+  asientosLayout Json
+
   boletos Compra[]
 
   createdAt DateTime @default(now())
@@ -128,6 +130,14 @@ model Salida {
   updatedBy String?  @db.VarChar(50)
 
   estatus Boolean @default(false)
+
+  @@schema("operaciones")
+}
+
+enum EstadoCompra {
+  PENDIENTE
+  CONFIRMADA
+  CANCELADA
 
   @@schema("operaciones")
 }
@@ -149,13 +159,16 @@ model Compra {
 
   fechaCompra DateTime @default(now())
   monto       Decimal  @db.Decimal(10, 2)
-  rutaId      Int
-  ruta        Ruta     @relation(fields: [rutaId], references: [id])
 
   codigo String @unique @db.VarChar(20)
 
-  metodoPagoId Int
-  metodoPago   MetodoPago @relation(fields: [metodoPagoId], references: [id])
+  estado   EstadoCompra @default(PENDIENTE)
+  expiraEn DateTime? // límite para completar el pago; libera la reserva de asientos si se vence
+
+  fechaSalida String?
+  horaSalida  String?
+
+  pagos Pago[]
 
   //Al momento de escanear el QR code, se debe marcar como abordado, y no permitir que se vuelva a escanear, para evitar duplicidad de abordaje.
   abordado Boolean @default(false)
@@ -165,6 +178,35 @@ model Compra {
 
   @@unique([salidaId, compradorId, fechaCompra])
   @@index([compradorId, salidaId, fechaCompra])
+  @@index([salidaId, estado])
+  @@schema("operaciones")
+}
+
+enum EstadoPago {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+  REEMBOLSADO
+
+  @@schema("operaciones")
+}
+
+model Pago {
+  id       Int    @id @default(autoincrement())
+  compraId Int
+  compra   Compra @relation(fields: [compraId], references: [id])
+
+  metodoPagoId Int
+  metodoPago   MetodoPago @relation(fields: [metodoPagoId], references: [id])
+
+  monto      Decimal    @db.Decimal(10, 2)
+  estado     EstadoPago @default(PENDIENTE)
+  referencia String?    @db.VarChar(150)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([compraId, estado])
   @@schema("operaciones")
 }
 
@@ -176,7 +218,7 @@ model MetodoPago {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  compras   Compra[]
+  pagos     Pago[]
 
   @@index([nombre])
   @@schema("operaciones")

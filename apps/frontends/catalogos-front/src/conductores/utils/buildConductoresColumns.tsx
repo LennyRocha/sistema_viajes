@@ -1,9 +1,12 @@
 import React from "react";
 import Conductor from "../types/Conductor";
 import { GridColDef } from "@nexoroute/commons";
-import { Chip } from "@mui/material";
+import { Badge } from "@mui/icons-material";
+import { Chip, IconButton, Tooltip } from "@mui/material";
 
-const buildConductoresColumns = () => {
+const buildConductoresColumns = (
+  onGestionLicencia?: (row: Conductor) => void,
+) => {
   const columnas: GridColDef<Conductor>[] = [
     {
       field: "nombres",
@@ -37,6 +40,27 @@ const buildConductoresColumns = () => {
       sortable: false,
       disableColumnMenu: true,
       valueGetter: (_, row) => row.licencia?.numero_licencia ?? "Sin licencia",
+    },
+    {
+      field: "gestion_licencia",
+      headerName: "Gestion",
+      width: 92,
+      sortable: false,
+      disableColumnMenu: true,
+      resizable: false,
+      renderCell: (params) => (
+        <Tooltip title="Gestionar licencia">
+          <span>
+            <IconButton
+              aria-label="Gestionar licencia"
+              size="small"
+              onClick={() => onGestionLicencia?.(params.row)}
+            >
+              <Badge />
+            </IconButton>
+          </span>
+        </Tooltip>
+      ),
     },
     {
       field: "estatus",

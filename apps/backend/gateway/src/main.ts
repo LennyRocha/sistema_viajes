@@ -114,6 +114,7 @@ async function bootstrap() {
       if (method === 'PATCH' && pathname.endsWith('/cancelar')) return ['salida:cancelar'];
       if (method === 'PATCH') return ['salida:reasignar'];
     }
+    if (pathname.startsWith('/calendario-viajes')) return 'calendario:consultar';
     if (pathname.startsWith('/autobuses')) {
       if (method === 'GET') return ['autobus:consultar'];
       if (method === 'POST') return ['autobus:crear'];
@@ -354,6 +355,9 @@ async function bootstrap() {
     '/viajes-base',
     '/rutas',
     '/salidas',
+    '/calendario-viajes',
+    '/compras',
+    '/compradores',
   ];
   app.use(
     createProxyMiddleware({
@@ -363,6 +367,24 @@ async function bootstrap() {
         OPERACIONES_PREFIXES.some(
           (p) => pathname === p || pathname.startsWith(`${p}/`),
         ),
+      on: {
+        error: (error, _request, response) => {
+          const res = response as any;
+
+          if (res.headersSent) return;
+
+          res.writeHead(503, { 'Content-Type': 'application/json' });
+          res.end(
+            JSON.stringify({
+              statusCode: 503,
+              message:
+                'operaciones-service no disponible. Levanta el backend en el puerto 5003.',
+              target: target_two,
+              error: error.message,
+            }),
+          );
+        },
+      },
     }),
   );
 

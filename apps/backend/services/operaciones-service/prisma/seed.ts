@@ -42,6 +42,7 @@ async function main() {
         "Distancia maxima para considerar conectadas dos rutas consecutivas.",
     },
   });
+  await prisma.pago.deleteMany({});
   await prisma.metodoPago.deleteMany({});
   await prisma.$executeRawUnsafe(`
     TRUNCATE TABLE "MetodoPago" RESTART IDENTITY CASCADE;

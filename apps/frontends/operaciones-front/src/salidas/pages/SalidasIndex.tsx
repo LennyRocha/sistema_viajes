@@ -234,7 +234,14 @@ export default function SalidasIndex({
               paperProps={{ sx: { p: 0 } }}
             >
               <Box sx={{ p: 2 }}>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { xs: "flex-start", md: "center" } }}>
+                <Stack
+                  direction={{ xs: "column", md: "row" }}
+                  spacing={2}
+                  sx={{
+                    justifyContent: "space-between",
+                    alignItems: { xs: "flex-start", md: "center" },
+                  }}
+                >
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 900, mb: 0.5 }}>
                       {salida.viajeBase?.nombre || "Viaje base"}

@@ -53,7 +53,7 @@ export class MetodosPagoService {
     const metodosPago =
       await this.prisma.metodoPago.findMany({
         orderBy: { createdAt: "desc" },
-        include: { compras: true },
+        include: { pagos: true },
       });
 
     // 3) guarda para la próxima (10 días)
@@ -92,7 +92,7 @@ export class MetodosPagoService {
     const metodoPago =
       await this.prisma.metodoPago.findUnique({
         where: { id },
-        include: { compras: true },
+        include: { pagos: true },
       });
 
     if (!metodoPago) {

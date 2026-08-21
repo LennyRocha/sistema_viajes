@@ -3,15 +3,17 @@ import {
   NotFoundException,
   BadRequestException,
 } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
+import { Prisma } from "generated/prisma";
 import { PrismaService } from "src/prisma/prisma.service";
 import { RedisService } from "src/redis/redis.service";
 
 import { CreateSalidaDto } from "./dtos/create-salida.dto";
 import { UpdateSalidaDto } from "./dtos/update-salida.dto";
 import { EstadoSalida } from "./types/estado-salida";
+import { AutobusSalidaResponse } from "./types/autobus-salida";
+import { PreciosSalida } from "./types/precios-salida";
 
 @Injectable()
 export class SalidasService {
@@ -38,101 +40,60 @@ export class SalidasService {
     return catalogoService;
   }
 
-  private async getAutobusSalidaData(autobusId: number) {
-    const catalogoService = this.requireCatalogoService();
-
-    try {
-      const response = await fetch(
-        `${catalogoService}/autobuses/${autobusId}`,
-      );
-
-      if (!response.ok) {
-        return null;
-      }
-
-      return (await response.json()) as {
-        id: number;
-        alias?: string;
-        marca?: string;
-        modelo?: string;
-        codigo_interno?: string;
-        institucion?: {
-          id?: number | null;
-          imagen_url?: string | null;
-          nombre?: string;
-        } | null;
-        asientos?: Array<{
-          id: string;
-          x: number;
-          y: number;
-          label: string;
-          estado: any;
-        }>;
-        servicios?: Array<{
-          id?: number;
-          activo?: boolean;
-          config_servicio?: Record<string, any>;
-          servicio?: {
-            id?: number;
-            nombre?: string;
-            descripcion?: string | null;
-            icono_nombre?: string;
-          } | null;
-        }>;
-        tipoAutobus?: {
-          id: number;
-          nombre: string;
-          descripcion: string;
-          linea: string;
-          capacidad: number;
-        };
-      };
-    } catch (error) {
-      this.logger.warn(
-        { autobusId, err: error },
-        "No fue posible obtener el detalle del autobús para la salida",
-      );
-      return null;
-    }
-  }
-
-  private getSalidaPrice(precios: unknown) {
+  public getSalidaPrice(precios: any): number | null {
     if (!precios || typeof precios !== "object") {
       return null;
     }
 
-    const priceObject = precios as Record<string, any>;
+    return precios.rutas.reduce((acc, num) => acc + num.precio, 0)
+  }
 
-    if (Array.isArray(priceObject.rutas)) {
-      return priceObject.rutas.reduce(
-        (
-          total: number,
-          ruta: { precio?: number | string },
-        ) => total + Number(ruta.precio || 0),
-        0,
-      );
+  public async getAsientosOcupados(
+    salidaId: number,
+  ): Promise<Set<string>> {
+    const compras = await this.prisma.compra.findMany({
+      where: {
+        salidaId,
+        OR: [
+          { estado: "CONFIRMADA" },
+          {
+            estado: "PENDIENTE",
+            expiraEn: { gt: new Date() },
+          },
+        ],
+      },
+      select: { asientos: true },
+    });
+
+    const ocupados = new Set<string>();
+    for (const compra of compras) {
+      const asientos = compra.asientos as string[] | null;
+      (asientos ?? []).forEach((id) => ocupados.add(id));
     }
-
-    return priceObject.precio ?? priceObject.total ?? null;
+    return ocupados;
   }
 
   private async mapSalida(salida: any) {
-    const [autobus, viaje] = await Promise.all([
-      this.getAutobusSalidaData(salida.autobusId),
+    const [viaje, asientosOcupados] = await Promise.all([
       this.prisma.viajeBase.findUnique({
         where: { id: salida.viajeBaseId },
         include: {
           rutas: {
-            include: {
-              ruta: true,
-            },
-            orderBy: {
-              orden: "asc",
-            },
+            include: { ruta: true },
+            orderBy: { orden: "asc" },
           },
         },
       }),
+      this.getAsientosOcupados(salida.id),
     ]);
+
+    const catalogoService = this.requireCatalogoService();
+
+    const bus: any = await fetch(
+      `${catalogoService}/autobuses/salidas/${salida.autobusId}`,
+    );
+
+    const busData = await bus.json();
 
     const orderedRoutes = [...(viaje?.rutas ?? [])].sort(
       (a, b) => a.orden - b.orden,
@@ -150,6 +111,14 @@ export class SalidasService {
           >)
         : {};
 
+    const layout = (salida.asientosLayout ?? []) as Array<{
+      id: string;
+      x: number;
+      y: number;
+      label: string;
+      estado: any;
+    }>;
+
     return {
       id: salida.id,
       autobusId: salida.autobusId,
@@ -165,50 +134,20 @@ export class SalidasService {
       lugarLlegada: lastRoute?.destino ?? null,
       precio: this.getSalidaPrice(salida.precios),
       precios: salida.precios,
-      autobus: autobus
-        ? {
-            id: autobus.id,
-            alias: autobus.alias,
-            marca: autobus.marca,
-            modelo: autobus.modelo,
-            codigo_interno: autobus.codigo_interno,
-            institucion: autobus.institucion
-              ? {
-                  id: autobus.institucion.id ?? null,
-                  nombre:
-                    autobus.institucion.nombre ?? null,
-                  imagen_url:
-                    autobus.institucion.imagen_url ?? null,
-                }
-              : null,
-            asientos: (autobus.asientos ?? []).map(
-              (asiento) => ({
-                id: asiento.id,
-                x: asiento.x,
-                y: asiento.y,
-                label: asiento.label,
-                estado: asiento.estado,
-              }),
-            ),
-            servicios: (autobus.servicios ?? []).map(
-              (servicio) => ({
-                id:
-                  servicio?.servicio?.id ??
-                  servicio?.id ??
-                  null,
-                nombre: servicio?.servicio?.nombre ?? null,
-                descripcion:
-                  servicio?.servicio?.descripcion ?? null,
-                icono_nombre:
-                  servicio?.servicio?.icono_nombre ?? null,
-                activo: servicio?.activo ?? true,
-                config_servicio:
-                  servicio?.config_servicio ?? null,
-              }),
-            ),
-            tipoAutobus: autobus.tipoAutobus,
-          }
-        : null,
+      institucion: busData?.institucion ?? null,
+      amenidades: busData?.servicios ?? null,
+      tipoAutobus: busData?.tipoAutobus ?? null,
+      capacidadTotal: salida.capacidadTotal,
+      asientosDisponibles:
+        salida.capacidadTotal - asientosOcupados.size,
+      asientos: layout.map((asiento) => ({
+        id: asiento.id,
+        x: asiento.x,
+        y: asiento.y,
+        label: asiento.label,
+        estado: asiento.estado,
+        ocupado: asientosOcupados.has(asiento.id),
+      })),
       viajeBase: viaje
         ? {
             id: viaje.id,
@@ -314,10 +253,19 @@ export class SalidasService {
       );
     }
 
-    await Promise.all([
+    const [, autobusData] = await Promise.all([
       conductorResponse.json(),
-      autobusResponse.json(),
+      autobusResponse.json() as Promise<AutobusSalidaResponse>,
     ]);
+
+    const asientosLayout = autobusData.asientos ?? [];
+    const capacidadTotal = asientosLayout.length;
+
+    if (capacidadTotal <= 0) {
+      throw new BadRequestException(
+        "El autobus seleccionad no tiene asientos configurados",
+      );
+    }
 
     const salida = await this.prisma.$transaction(
       async (tx) => {
@@ -331,6 +279,8 @@ export class SalidasService {
             tipoSalida: dto.tipoSalida,
             estadoSalida: dto.estadoSalida,
             precios: dto.precios,
+            capacidadTotal,
+            asientosLayout,
             estatus: false,
           },
         });
@@ -382,7 +332,114 @@ export class SalidasService {
     );
   }
 
-  async findOne(id: number, conductorId = 0) {
+  async findSalidas(
+    from?: string,
+    to?: string,
+    fromId?: string,
+    toId?: string,
+    fechaIda?: string,
+    fechaVuelta?: string,
+    pasajeros: number = 1,
+  ) {
+    const where: Prisma.SalidaWhereInput = {};
+
+    if (fechaIda) {
+      where.horario_configuracion = {
+        path: ["inicio", "fecha"],
+        equals: fechaIda,
+      };
+    }
+
+    if (fechaVuelta) {
+      where.horario_configuracion = {
+        path: ["finCalculado", "fecha"],
+        equals: fechaVuelta,
+      };
+    }
+
+    const salidas = await this.prisma.salida.findMany({
+      where,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        viaje: {
+          include: {
+            rutas: {
+              include: {
+                ruta: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    let list = await Promise.all(
+      salidas.map((salida) => this.mapSalida(salida)),
+    );
+
+    if (fromId) {
+      list = list.filter((salida) => {
+        const origen = salida.viajeBase?.rutas[0]?.origen;
+
+        if (
+          typeof origen !== "object" ||
+          origen === null ||
+          Array.isArray(origen)
+        ) {
+          return false;
+        }
+
+        return (
+          (origen as Record<string, unknown>).placeId ===
+          fromId
+        );
+      });
+    }
+
+    if (toId) {
+      list = list.filter((salida) => {
+        const origen =
+          salida.viajeBase?.rutas[
+            salida.viajeBase.rutas.length - 1
+          ]?.origen;
+
+        if (
+          typeof origen !== "object" ||
+          origen === null ||
+          Array.isArray(origen)
+        ) {
+          return false;
+        }
+
+        return (
+          (origen as Record<string, unknown>).placeId ===
+          toId
+        );
+      });
+    }
+
+    if (from && !fromId) {
+      list = list.filter(
+        (salida) =>
+          salida.viajeBase?.rutas[0]?.nombre === from,
+      );
+    }
+
+    if (to && !toId) {
+      list = list.filter(
+        (salida) =>
+          salida.viajeBase?.rutas[
+            salida.viajeBase.rutas.length - 1
+          ]?.nombre === to,
+      );
+    }
+
+    return list;
+  }
+
+  async findOne(id: number) {
     const salida = await this.prisma.salida.findUnique({
       where: { id, ...(conductorId ? { conductorId } : {}) },
       include: {
@@ -414,7 +471,33 @@ export class SalidasService {
       throw new NotFoundException(`Salida ${id} no existe`);
     }
 
+    let capacidadTotal: number | undefined;
+    let asientosLayout:
+      | AutobusSalidaResponse["asientos"]
+      | undefined;
+
     if (dto.autobusId) {
+      const comprasActivas = await this.prisma.compra.count(
+        {
+          where: {
+            salidaId: id,
+            OR: [
+              { estado: "CONFIRMADA" },
+              {
+                estado: "PENDIENTE",
+                expiraEn: { gt: new Date() },
+              },
+            ],
+          },
+        },
+      );
+
+      if (comprasActivas > 0) {
+        throw new BadRequestException(
+          "No se puede reasignar el autobús: la salida ya tiene compras activas",
+        );
+      }
+
       const catalogoService = this.requireCatalogoService();
       const response = await fetch(
         `${catalogoService}/autobuses/salidas/${dto.autobusId}`,
@@ -423,6 +506,17 @@ export class SalidasService {
       if (!response.ok) {
         throw new BadRequestException(
           "El autobús seleccionado no existe",
+        );
+      }
+
+      const autobusData =
+        (await response.json()) as AutobusSalidaResponse;
+      asientosLayout = autobusData.asientos ?? [];
+      capacidadTotal = asientosLayout.length;
+
+      if (capacidadTotal <= 0) {
+        throw new BadRequestException(
+          "El autobús seleccionado no tiene asientos configurados",
         );
       }
     }
@@ -445,6 +539,15 @@ export class SalidasService {
       data: {
         ...(dto.autobusId !== undefined
           ? { autobusId: dto.autobusId }
+          : {}),
+        ...(capacidadTotal !== undefined
+          ? { capacidadTotal }
+          : {}),
+        ...(asientosLayout !== undefined
+          ? {
+              asientosLayout:
+                asientosLayout as unknown as Prisma.InputJsonValue,
+            }
           : {}),
         ...(dto.conductorId !== undefined
           ? { conductorId: dto.conductorId }

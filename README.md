@@ -203,6 +203,7 @@ GATEWAY_URL="http://localhost:5000"
 AUTH_SERVICE_URL="http://localhost:5001"
 OPERACIONES_SERVICE_URL="http://localhost:5003"
 INTERNAL_SERVICE_TOKEN="cambia-este-token-interno"
+INTERNAL_SERVICE_TOKEN=cambia-este-token-interno
 JSON_BODY_LIMIT=10mb
 ```
 

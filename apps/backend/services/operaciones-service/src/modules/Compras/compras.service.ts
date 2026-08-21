@@ -1,0 +1,336 @@
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { randomBytes } from "crypto";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
+
+import { PrismaService } from "src/prisma/prisma.service";
+import { RedisService } from "src/redis/redis.service";
+import { SalidasService } from "../salidas/salidas.service";
+import { EstadoCompra } from "./types/estado-compra";
+import { EstadoSalida } from "./types/estado-salida";
+import { CreateCompraDto } from "./dto/create-compra.dto";
+import { Prisma } from "generated/prisma";
+import {
+  AsientoEstado,
+  Pasajero,
+} from "./types/asiento-compra";
+
+const RESERVA_MINUTOS = 15;
+
+@Injectable()
+export class ComprasService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+    private readonly salidasService: SalidasService,
+    @InjectPinoLogger(ComprasService.name)
+    private readonly logger: PinoLogger,
+  ) {}
+
+  private generarCodigo(): string {
+    return `BC-${randomBytes(4).toString("hex").toUpperCase()}`;
+  }
+
+  async create(dto: CreateCompraDto) {
+    this.logger.info(
+      {
+        salidaId: dto.salidaId,
+        compradorId: dto.compradorId,
+        fechaSalida: dto.fechaSalida,
+        horaSalida: dto.horaSalida,
+      },
+      "Creando compra",
+    );
+
+    if (dto.asientos.length !== dto.pasajeros) {
+      throw new BadRequestException(
+        "La cantidad de asientos no coincide con la cantidad de pasajeros",
+      );
+    }
+
+    const salida = await this.prisma.salida.findUnique({
+      where: { id: dto.salidaId },
+    });
+
+    if (!salida) {
+      throw new NotFoundException(
+        `Salida ${dto.salidaId} no existe`,
+      );
+    }
+
+    if (salida.estadoSalida !== EstadoSalida.PROGRAMADO) {
+      throw new BadRequestException(
+        "La salida no admite compras en su estado actual",
+      );
+    }
+
+    const comprador =
+      await this.prisma.comprador.findUnique({
+        where: { id: dto.compradorId },
+      });
+
+    if (!comprador) {
+      throw new NotFoundException(
+        `Comprador ${dto.compradorId} no existe`,
+      );
+    }
+
+    const layout = (salida.asientosLayout ?? []) as Array<{
+      id: string;
+    }>;
+    const idsValidos = new Set(layout.map((a) => a.id));
+
+    const asientosInvalidos = dto.asientos.filter(
+      (id) => !idsValidos.has(id.asiento.id),
+    );
+    if (asientosInvalidos.length > 0) {
+      throw new BadRequestException(
+        `Los asientos ${asientosInvalidos.join(", ")} no existen en esta salida`,
+      );
+    }
+
+    const ocupados =
+      await this.salidasService.getAsientosOcupados(
+        dto.salidaId,
+      );
+    const yaOcupados = dto.asientos.filter((id) =>
+      ocupados.has(id.asiento.id),
+    );
+
+    if (yaOcupados.length > 0) {
+      throw new BadRequestException(
+        `Los asientos ${yaOcupados.join(", ")} ya no están disponibles`,
+      );
+    }
+
+    const precioUnitario =
+      this.salidasService.getSalidaPrice(salida.precios);
+
+    if (precioUnitario === null) {
+      throw new BadRequestException(
+        "No fue posible calcular el monto: la salida no tiene un precio configurado",
+      );
+    }
+
+    const monto = precioUnitario * dto.pasajeros;
+
+    const expiraEn = new Date(
+      Date.now() + RESERVA_MINUTOS * 60 * 1000,
+    );
+
+    const compra = await this.prisma.$transaction(
+      async (tx) => {
+        return tx.compra.create({
+          data: {
+            salidaId: dto.salidaId,
+            compradorId: dto.compradorId,
+            pasajeros: dto.pasajeros,
+            asientos:
+              dto.asientos as unknown as Prisma.InputJsonArray,
+            monto,
+            codigo: this.generarCodigo(),
+            estado: EstadoCompra.PENDIENTE,
+            fechaSalida: dto.fechaSalida,
+            horaSalida: dto.horaSalida,
+            expiraEn,
+          },
+        });
+      },
+    );
+
+    try {
+      await this.redis.del("salidas:list");
+    } catch (error) {
+      this.logger.error(
+        { err: error },
+        "Error al limpiar caché",
+      );
+    }
+
+    this.logger.info(
+      { compraId: compra.id },
+      "Compra creada correctamente",
+    );
+
+    return compra;
+  }
+
+  async findAll() {
+    return this.prisma.compra.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async findOne(id: number) {
+    const compra = await this.prisma.compra.findUnique({
+      where: { id },
+    });
+
+    if (!compra) {
+      throw new NotFoundException(`Compra ${id} no existe`);
+    }
+
+    return compra;
+  }
+
+  async findByCodigo(codigo: string) {
+    const compra = await this.prisma.compra.findUnique({
+      where: { codigo },
+    });
+
+    if (!compra) {
+      throw new NotFoundException(
+        `Compra con código ${codigo} no existe`,
+      );
+    }
+
+    return compra;
+  }
+
+  async abordar(codigo: string) {
+    const compra = await this.prisma.compra.findUnique({
+      where: { codigo },
+    });
+
+    if (!compra) {
+      throw new NotFoundException(
+        `Compra con código ${codigo} no existe`,
+      );
+    }
+
+    if (compra.estado !== EstadoCompra.CONFIRMADA) {
+      throw new BadRequestException(
+        `No se puede abordar con compra que no está confirmada`,
+      );
+    }
+
+    return this.prisma.compra.update({
+      where: { codigo },
+      data: {
+        abordado: true,
+      },
+    });
+  }
+
+  async confirmar(id: number) {
+    const compra = await this.prisma.compra.findUnique({
+      where: { id },
+    });
+    if (!compra) {
+      throw new NotFoundException(`Compra ${id} no existe`);
+    }
+
+    if (compra.estado !== EstadoCompra.PENDIENTE) {
+      throw new BadRequestException(
+        `No se puede confirmar una compra que no está pendiente`,
+      );
+    }
+
+    const asientos =
+      compra?.asientos as unknown as Pasajero[];
+    const nuevosEstados = asientos.map((p) => ({
+      ...p,
+      asiento: {
+        ...p.asiento,
+        estado: AsientoEstado.SOLD,
+      },
+    }));
+
+    return this.prisma.compra.update({
+      where: { id },
+      data: {
+        estado: EstadoCompra.CONFIRMADA,
+        asientos:
+          nuevosEstados as unknown as Prisma.InputJsonArray,
+      },
+    });
+  }
+
+  async confirmarPorCodigo(codigo: string) {
+    const compra = await this.prisma.compra.findUnique({
+      where: { codigo },
+    });
+    if (!compra) {
+      throw new NotFoundException(
+        `Compra ${codigo} no existe`,
+      );
+    }
+
+    if (compra.estado !== EstadoCompra.PENDIENTE) {
+      throw new BadRequestException(
+        `No se puede confirmar una compra que no está pendiente`,
+      );
+    }
+
+    const asientos =
+      compra?.asientos as unknown as Pasajero[];
+    const nuevosEstados = asientos.map((p) => ({
+      ...p,
+      asiento: {
+        ...p.asiento,
+        estado: AsientoEstado.SOLD,
+      },
+    }));
+
+    return this.prisma.compra.update({
+      where: { codigo },
+      data: {
+        estado: EstadoCompra.CONFIRMADA,
+        asientos:
+          nuevosEstados as unknown as Prisma.InputJsonArray,
+      },
+    });
+  }
+
+  async cancel(id: number) {
+    const compra = await this.prisma.compra.findUnique({
+      where: { id },
+    });
+
+    if (!compra) {
+      throw new NotFoundException(`Compra ${id} no existe`);
+    }
+
+    if (compra.estado === EstadoCompra.CONFIRMADA) {
+      throw new BadRequestException(
+        "No se puede cancelar una compra ya confirmada",
+      );
+    }
+
+    //Desocupar los asientos reservados por esta compra
+    const asientos =
+      compra?.asientos as unknown as Pasajero[];
+    const nuevosEstados = asientos.map((p) => ({
+      ...p,
+      asiento: {
+        ...p.asiento,
+        estado: AsientoEstado.AVAILABLE,
+      },
+    }));
+
+    return this.prisma.compra.update({
+      where: { id },
+      data: {
+        estado: EstadoCompra.CANCELADA,
+        asientos:
+          nuevosEstados as unknown as Prisma.InputJsonArray,
+      },
+    });
+  }
+
+  async getAsientosOcupados(salidaId: number) {
+    const compras = await this.prisma.compra.findMany({
+      where: {
+        salidaId,
+        estado: {
+          not: EstadoCompra.CANCELADA,
+        },
+      },
+      select: { asientos: true },
+    });
+    return compras.flatMap((c: any) => c.asientos);
+  }
+}

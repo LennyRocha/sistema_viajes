@@ -48,6 +48,13 @@ export function mapRutaApi(ruta: RutaApi): RutaBase {
 }
 
 export function mapViajeApi(viaje: ViajeBaseApi): ViajeBase {
+  const configRutas =
+    viaje.config_rutas ??
+    viaje.rutas.map((item) => ({
+      id_ruta: item.rutaId,
+      estado: "solo-ida" as const,
+    }));
+
   return {
     id: viaje.id,
     nombre: viaje.nombre,
@@ -58,6 +65,7 @@ export function mapViajeApi(viaje: ViajeBaseApi): ViajeBase {
     imagenUrl: isGoogleStreetViewImage(viaje.imagenUrl) ? undefined : viaje.imagenUrl,
     imagenBase64: viaje.imagenBase64 || undefined,
     imagenStorage: viaje.imagenStorage,
+    config_rutas: configRutas,
     estatus: viaje.estatus,
     servicios: [],
     rutas: viaje.rutas.map((item) => ({

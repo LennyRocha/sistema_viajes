@@ -1,7 +1,10 @@
 // api/licenciaApi.ts
 import { api } from "../../shared/api/api";
 import Licencia from "../types/Licencia";
-import { LicenciaSchema } from "../validations/licenciaZod";
+import {
+  LicenciaSchema,
+  RenewLicenciaSchema,
+} from "../validations/licenciaZod";
 
 interface GetLicenciasParams {
   vigente?: boolean;
@@ -50,6 +53,30 @@ export const licenciaApi = api.injectEndpoints({
       invalidatesTags: ["Licencia", "Conductor"],
     }),
 
+    patchLicenciaVigenteByConductor: builder.mutation<
+      Licencia,
+      Partial<LicenciaSchema> & { conductor_id: number }
+    >({
+      query: ({ conductor_id, ...body }) => ({
+        url: `/licencias/conductor/${conductor_id}/vigente`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Licencia", "Conductor"],
+    }),
+
+    renewLicenciaVigenteByConductor: builder.mutation<
+      Licencia,
+      RenewLicenciaSchema & { conductor_id: number }
+    >({
+      query: ({ conductor_id, ...body }) => ({
+        url: `/licencias/conductor/${conductor_id}/renovar`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Licencia", "Conductor"],
+    }),
+
     changeStatusLicencia: builder.mutation<void, { id: number }>({
       query: ({ id }: { id: number }) => ({
         url: `/licencias/status/${id}`,
@@ -74,6 +101,8 @@ export const {
   useGetLicenciaVigenteByConductorQuery,
   useCreateLicenciaMutation,
   usePatchLicenciaMutation,
+  usePatchLicenciaVigenteByConductorMutation,
+  useRenewLicenciaVigenteByConductorMutation,
   useChangeStatusLicenciaMutation,
   useRemoveLicenciaMutation,
 } = licenciaApi;

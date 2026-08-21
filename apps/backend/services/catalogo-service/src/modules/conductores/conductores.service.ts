@@ -22,6 +22,22 @@ export const CACHE_KEY = (institucion = 0) =>
     ? 'conductores:list:all'
     : `conductores:list:institucion:${institucion}`;
 
+type UsuarioUpdatePayload = {
+  nombres?: string;
+  apellido_paterno?: string;
+  apellido_materno?: string;
+  curp?: string;
+  fecha_nacimiento?: string;
+  telefono?: string;
+  email?: string;
+  foto_perfil?: string;
+};
+
+type UsuarioStatusSyncResult = {
+  changed: boolean;
+  previousStatus: boolean;
+};
+
 @Injectable()
 export class ConductoresService {
   constructor(
@@ -47,36 +63,190 @@ export class ConductoresService {
     };
   }
 
-  private async getUsuariosMap(): Promise<Map<number, any>> {
+  private buildUsuarioUpdatePayload(
+    source: Record<string, any>,
+    options: { includeEmptyStrings?: boolean } = {},
+  ): UsuarioUpdatePayload {
+    const allowedFields = [
+      'nombres',
+      'apellido_paterno',
+      'apellido_materno',
+      'curp',
+      'fecha_nacimiento',
+      'telefono',
+      'email',
+      'foto_perfil',
+    ];
+
+    return Object.fromEntries(
+      Object.entries(source)
+        .filter(([key, value]) => {
+          if (!allowedFields.includes(key)) return false;
+          if (value === undefined || value === null) return false;
+          if (!options.includeEmptyStrings && value === '') return false;
+          return true;
+        })
+        .map(([key, value]) => {
+          if (key === 'fecha_nacimiento' && value) {
+            return [key, new Date(value).toISOString()];
+          }
+
+          return [key, value];
+        }),
+    );
+  }
+
+  private async getUsuariosMap(userIds: number[] = []): Promise<Map<number, any>> {
     const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001';
+    const internalToken = process.env.INTERNAL_SERVICE_TOKEN;
+
+    if (!internalToken) {
+      this.logger.error(
+        'INTERNAL_SERVICE_TOKEN no está configurado en catalogo-service; no es posible hidratar usuarios de conductores',
+      );
+      return new Map();
+    }
+
+    const uniqueUserIds = [...new Set(userIds.filter((id) => Number.isInteger(id) && id > 0))];
 
     try {
-      const response = await fetch(`${AUTH_SERVICE_URL}/usuarios`, {
-        headers: this.internalHeaders(),
-      });
+      if (uniqueUserIds.length === 0) {
+        const response = await fetch(`${AUTH_SERVICE_URL}/usuarios`, {
+          headers: this.internalHeaders(),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        this.logger.warn(
-          {
-            status: response.status,
-            error: errorData,
-          },
-          'No fue posible obtener los usuarios desde auth_service',
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          this.logger.warn(
+            {
+              status: response.status,
+              error: errorData,
+            },
+            'No fue posible obtener los usuarios desde auth_service',
+          );
+          return new Map();
+        }
+
+        const usuarios = await response.json();
+        return new Map(
+          (Array.isArray(usuarios) ? usuarios : []).map((usuario) => [usuario.id, usuario]),
         );
-        return new Map();
       }
 
-      const usuarios = await response.json();
-      return new Map((Array.isArray(usuarios) ? usuarios : []).map((usuario) => [usuario.id, usuario]));
+      const usuarios = await Promise.all(
+        uniqueUserIds.map(async (userId) => {
+          try {
+            const response = await fetch(`${AUTH_SERVICE_URL}/usuarios/${userId}`, {
+              headers: this.internalHeaders(),
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              this.logger.warn(
+                {
+                  userId,
+                  status: response.status,
+                  error: errorData,
+                },
+                'No fue posible obtener un usuario específico desde auth_service',
+              );
+              return null;
+            }
+
+            return await response.json();
+          } catch (error) {
+            this.logger.warn(
+              {
+                userId,
+                err: error,
+              },
+              'Error de comunicación con auth_service al obtener un usuario específico',
+            );
+            return null;
+          }
+        }),
+      );
+
+      return new Map(
+        usuarios
+          .filter((usuario): usuario is Record<string, any> => Boolean(usuario?.id))
+          .map((usuario) => [usuario.id, usuario]),
+      );
     } catch (error) {
       this.logger.warn(
         {
           err: error,
+          requestedUserIds: uniqueUserIds,
         },
-        'Error de comunicación con auth_service al obtener todos los usuarios',
+        'Error de comunicación con auth_service al obtener usuarios de conductores',
       );
       return new Map();
+    }
+  }
+
+  private async getUsuarioById(userId: number) {
+    const usuariosMap = await this.getUsuariosMap([userId]);
+    return usuariosMap.get(userId) ?? null;
+  }
+
+  private async setUsuarioStatus(
+    userId: number,
+    targetStatus: boolean,
+  ): Promise<UsuarioStatusSyncResult> {
+    const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001';
+    const usuario = await this.getUsuarioById(userId);
+
+    if (!usuario) {
+      throw new BadRequestException(
+        `No fue posible obtener el usuario ${userId} para sincronizar su estatus`,
+      );
+    }
+
+    const previousStatus = usuario.estatus !== false;
+    if (previousStatus === targetStatus) {
+      return { changed: false, previousStatus };
+    }
+
+    const response = await fetch(`${AUTH_SERVICE_URL}/usuarios/status/${userId}`, {
+      method: 'DELETE',
+      headers: this.internalHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      this.logger.error(
+        {
+          userId,
+          targetStatus,
+          status: response.status,
+          error: errorData,
+        },
+        'No fue posible sincronizar el estatus del usuario en auth_service',
+      );
+      throw new BadRequestException(
+        `No fue posible sincronizar el estatus del usuario ${userId}`,
+      );
+    }
+
+    return { changed: true, previousStatus };
+  }
+
+  private async rollbackUsuarioStatus(
+    userId: number,
+    statusChange: UsuarioStatusSyncResult,
+  ) {
+    if (!statusChange.changed) return;
+
+    try {
+      await this.setUsuarioStatus(userId, statusChange.previousStatus);
+    } catch (error) {
+      this.logger.error(
+        {
+          userId,
+          err: error,
+        },
+        'No se pudo restaurar el estatus del usuario tras un fallo en conductor',
+      );
     }
   }
 
@@ -326,7 +496,7 @@ export class ConductoresService {
         await this.redis.get<Conductor[]>(cacheKey);
 
       if (cached && process.env.CONDUCTORES_CACHE === 'true') {
-        const usuariosMap = await this.getUsuariosMap();
+        const usuariosMap = await this.getUsuariosMap(cached.map((c) => c.usuario_id));
 
         this.logger.debug(
           {
@@ -406,7 +576,7 @@ export class ConductoresService {
       'Conductores obtenidos desde base de datos',
     );
 
-    const usuariosMap = await this.getUsuariosMap();
+    const usuariosMap = await this.getUsuariosMap(conductores.map((c) => c.usuario_id));
 
     const mapped = conductores.map((c) => {
       const usuario = usuariosMap.get(c.usuario_id);
@@ -487,7 +657,7 @@ export class ConductoresService {
       'Conductor encontrado',
     );
 
-    const usuariosMap = await this.getUsuariosMap();
+    const usuariosMap = await this.getUsuariosMap([conductor.usuario_id]);
     const usuario = usuariosMap.get(conductor.usuario_id);
     return this.mapConductorResponse(conductor, usuario);
   }
@@ -514,39 +684,13 @@ export class ConductoresService {
     const existing = await this.findOne(id);
     const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001';
 
-    const usuarioPayload = Object.fromEntries(
-      Object.entries(dto)
-        .filter(([key, value]) => {
-          if (value === undefined || value === null || value === '') return false;
-
-          return [
-            'nombres',
-            'apellido_paterno',
-            'apellido_materno',
-            'curp',
-            'fecha_nacimiento',
-            'telefono',
-            'email',
-            'foto_perfil',
-          ].includes(key);
-        })
-        .map(([key, value]) => {
-          if (key === 'fecha_nacimiento' && typeof value === 'string') {
-            return [key, new Date(value).toISOString()];
-          }
-          return [key, value];
-        }),
-    );
+    const usuarioPayload = this.buildUsuarioUpdatePayload(dto);
 
     const previousUser = existing.usuario_id
-      ? await fetch(`${AUTH_SERVICE_URL}/usuarios/${existing.usuario_id}`, {
-          headers: this.internalHeaders(),
-        })
-        .then(async (response) => {
-          if (!response.ok) return null;
-          return response.json();
-        })
-        .catch(() => null)
+      ? await this.getUsuarioById(existing.usuario_id)
+      : null;
+    const rollbackUsuarioPayload = previousUser
+      ? this.buildUsuarioUpdatePayload(previousUser, { includeEmptyStrings: true })
       : null;
 
     try {
@@ -592,13 +736,25 @@ export class ConductoresService {
 
       return this.findOne(conductor.id);
     } catch (error) {
-      if (previousUser && existing.usuario_id) {
+      if (rollbackUsuarioPayload && existing.usuario_id) {
         try {
-          await fetch(`${AUTH_SERVICE_URL}/usuarios/${existing.usuario_id}`, {
+          const rollbackResponse = await fetch(`${AUTH_SERVICE_URL}/usuarios/${existing.usuario_id}`, {
             method: 'PATCH',
             headers: this.internalHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify(previousUser),
+            body: JSON.stringify(rollbackUsuarioPayload),
           });
+
+          if (!rollbackResponse.ok) {
+            const rollbackError = await rollbackResponse.json().catch(() => ({}));
+            this.logger.warn(
+              {
+                userId: existing.usuario_id,
+                status: rollbackResponse.status,
+                error: rollbackError,
+              },
+              'Auth_service rechazó el rollback de datos del usuario',
+            );
+          }
         } catch (rollbackError) {
           this.logger.warn(
             { userId: existing.usuario_id, err: rollbackError },
@@ -628,14 +784,21 @@ export class ConductoresService {
     this.logger.debug({ id }, 'Cambiando estado de conductor');
 
     const existing = await this.findOne(id); // 404 si no existe
+    const newStatus = !existing.estatus;
+    const usuarioStatusChange = await this.setUsuarioStatus(existing.usuario_id, newStatus);
 
-    await this.prisma.conductor.update({
-      where: { id },
-      data: { estatus: !existing.estatus },
-    });
+    try {
+      await this.prisma.conductor.update({
+        where: { id },
+        data: { estatus: newStatus },
+      });
+    } catch (error) {
+      await this.rollbackUsuarioStatus(existing.usuario_id, usuarioStatusChange);
+      throw error;
+    }
 
     this.logger.info(
-      { id, newStatus: !existing.estatus },
+      { id, newStatus },
       'Estado de conductor cambiado',
     );
 
@@ -664,15 +827,25 @@ export class ConductoresService {
   }
 
   /**
-   * REMOVE (eliminación permanente)
+   * REMOVE (baja lógica)
    */
   async remove(id: number) {
-    this.logger.debug({ id }, 'Eliminando conductor permanentemente');
+    this.logger.debug({ id }, 'Eliminando conductor');
 
     const existing = await this.findOne(id); // 404 si no existe
+    const usuarioStatusChange = await this.setUsuarioStatus(existing.usuario_id, false);
 
-    await this.prisma.conductor.delete({ where: { id } });
-    this.logger.info({ id }, 'Conductor eliminado permanentemente');
+    try {
+      await this.prisma.conductor.update({
+        where: { id },
+        data: { estatus: false },
+      });
+    } catch (error) {
+      await this.rollbackUsuarioStatus(existing.usuario_id, usuarioStatusChange);
+      throw error;
+    }
+
+    this.logger.info({ id }, 'Conductor dado de baja lógicamente');
 
     try {
       await Promise.all([
@@ -728,27 +901,18 @@ export class ConductoresService {
       );
     }
 
-    let usuario: {
-      nombres: string;
-      apellido_paterno: string;
-      apellido_materno: string;
-    };
+    const usuariosMap = await this.getUsuariosMap([conductor.usuario_id]);
+    const usuario = usuariosMap.get(conductor.usuario_id) as
+      | {
+          nombres: string;
+          apellido_paterno: string;
+          apellido_materno: string;
+        }
+      | undefined;
 
-    try {
-      const response = await fetch(
-        `${process.env.AUTH_SERVICE_URL}/usuarios/${conductor.usuario_id}`,
-        { headers: this.internalHeaders() },
-      );
-
-      if (!response.ok) {
-        throw new Error();
-      }
-
-      usuario = await response.json();
-    } catch (error) {
+    if (!usuario) {
       this.logger.error(
         {
-          err: error,
           usuario_id: conductor.usuario_id,
         },
         'No fue posible obtener la información del usuario',
