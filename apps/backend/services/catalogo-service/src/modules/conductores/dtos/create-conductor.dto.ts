@@ -1,6 +1,8 @@
 import {
   IsDateString,
   IsNotEmpty,
+  Length,
+  Matches,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
@@ -31,8 +33,11 @@ export class CreateConductorDto {
   apellido_materno!: string;
 
   @IsNotEmpty({ message: 'La CURP es obligatoria' })
-  @MaxLength(18, {
-    message: 'La CURP debe contener 18 caracteres',
+  @Length(18, 18, {
+    message: 'La CURP debe contener exactamente 18 caracteres',
+  })
+  @Matches(/^[A-Za-z0-9]+$/, {
+    message: 'La CURP solo puede contener letras y numeros',
   })
   curp!: string;
 

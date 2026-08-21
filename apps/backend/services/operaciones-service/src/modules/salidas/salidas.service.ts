@@ -439,8 +439,8 @@ export class SalidasService {
     return list;
   }
 
-  async findOne(id: number) {
-    const salida = await this.prisma.salida.findUnique({
+  async findOne(id: number, conductorId = 0) {
+    const salida = await this.prisma.salida.findFirst({
       where: { id, ...(conductorId ? { conductorId } : {}) },
       include: {
         viaje: {

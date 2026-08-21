@@ -1,5 +1,6 @@
 "use client";
 import React, { useCallback } from "react";
+import { authenticatedFetch } from "@nexoroute/commons";
 
 type ViajeProviderValues = {
   getSalidaId: () => number | null;
@@ -86,9 +87,9 @@ export function SalidaProvider({
   const fetchSalida = useCallback(async (id: number) => {
     if (!id) return;
     const token = localStorage.getItem("nexoroute.accessToken");
-    const res = await fetch(`${gatewayUrl}/salidas/${id}`, {
+    const res = await authenticatedFetch(`${gatewayUrl}/salidas/${id}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    });
+    }, gatewayUrl);
     if (!res.ok) {
       throw new Error("Error fetching salida");
     }

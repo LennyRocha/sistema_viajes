@@ -1,5 +1,7 @@
 "use client";
 
+import { authenticatedFetch } from "@nexoroute/commons";
+
 import {
   CalendarioMesFilters,
   CalendarioMesResponse,
@@ -38,12 +40,12 @@ async function request<T>(path: string): Promise<T> {
 
   let response: Response;
   try {
-    response = await fetch(`${API_URL}${path}`, {
+    response = await authenticatedFetch(`${API_URL}${path}`, {
       headers: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-    });
+    }, API_URL);
   } catch {
     throw new Error(
       `No se pudo conectar con el gateway (${API_URL}). Revisa que este corriendo en el puerto 5000.`,

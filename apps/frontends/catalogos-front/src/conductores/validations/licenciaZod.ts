@@ -1,24 +1,17 @@
 import { z } from "zod";
+import { LICENSE_CATEGORIES, MEXICAN_STATES } from "../data/licenseOptions";
 
 // Campos propios de la licencia, sin conductor_id
 // (se reusa anidado dentro de conductorZod.ts para el registro conjunto)
 export const licenciaBaseSchema = z.object({
   numero_licencia: z
     .string()
-    .min(1, {
-      message: "El número de licencia es obligatorio",
-    })
-    .max(30, {
-      message: "El número de licencia no puede exceder los 30 caracteres",
+    .regex(/^\d{8,12}$/, {
+      message: "El numero de licencia debe contener entre 8 y 12 digitos",
     }),
-  categoria: z
-    .string()
-    .min(1, {
-      message: "La categoría de la licencia es obligatoria",
-    })
-    .max(20, {
-      message: "La categoría no puede exceder los 20 caracteres",
-    }),
+  categoria: z.enum(LICENSE_CATEGORIES.map(({ value }) => value) as [string, ...string[]], {
+    message: "Selecciona una categoria de licencia",
+  }),
   fecha_expedicion: z
     .string()
     .min(1, {
@@ -31,14 +24,9 @@ export const licenciaBaseSchema = z.object({
       message: "La fecha de vencimiento es obligatoria",
     })
     .transform((val) => new Date(val).toISOString()),
-  estado_emisor: z
-    .string()
-    .min(1, {
-      message: "El estado emisor es obligatorio",
-    })
-    .max(100, {
-      message: "El estado emisor no puede exceder los 100 caracteres",
-    }),
+  estado_emisor: z.enum(MEXICAN_STATES, {
+    message: "Selecciona el estado emisor",
+  }),
   imagen_licencia: z
     .string()
     .min(1, {

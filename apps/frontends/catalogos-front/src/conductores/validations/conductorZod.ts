@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { licenciaBaseSchema } from "./licenciaZod";
 
-const CURP_REGEX =
-  /^[A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM](AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/;
+const CURP_REGEX = /^[A-Z0-9]{18}$/;
 
 export const conductorSchema = z.object({
   nombres: z
@@ -35,11 +34,11 @@ export const conductorSchema = z.object({
     .min(1, {
       message: "La CURP es obligatoria",
     })
-    .max(18, {
-      message: "La CURP no puede exceder los 18 caracteres",
+    .length(18, {
+      message: "La CURP debe contener exactamente 18 caracteres",
     })
     .refine((value) => CURP_REGEX.test(value.toUpperCase()), {
-      message: "La CURP no tiene un formato válido",
+      message: "La CURP solo puede contener letras y numeros",
     }),
   fecha_nacimiento: z
     .string()

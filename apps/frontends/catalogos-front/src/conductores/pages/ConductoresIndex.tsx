@@ -29,7 +29,6 @@ export default function ConductoresIndex({
   const canCreate = hasPrivilege(userPrivileges, userRoles, "conductores:crear");
   const canEdit = hasPrivilege(userPrivileges, userRoles, "conductores:editar");
   const canDelete = hasPrivilege(userPrivileges, userRoles, "conductores:eliminar");
-  const columnas = buildConductoresColumns();
   const [searchCurp, setSearchCurp] = useState("");
   const [searchNombre, setSearchNombre] = useState("");
   const [selectedLicenciaConductor, setSelectedLicenciaConductor] =

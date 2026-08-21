@@ -1,5 +1,7 @@
 "use client";
 
+import { authenticatedFetch } from "@nexoroute/commons";
+
 import {
   AutobusResumen,
   ConductorResumen,
@@ -41,14 +43,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("nexoroute.accessToken") : null;
 
   try {
-    response = await fetch(`${API_URL}${path}`, {
+    response = await authenticatedFetch(`${API_URL}${path}`, {
       ...init,
       headers: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(init?.headers || {}),
       },
-    });
+    }, API_URL);
   } catch {
     throw new Error(
       `No se pudo conectar con el gateway (${API_URL}). Revisa que este corriendo en el puerto 5000.`,
