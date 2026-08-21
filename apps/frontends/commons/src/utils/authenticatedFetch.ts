@@ -61,11 +61,25 @@ async function refreshAccessToken(
   return authWindow.__nexorouteRefreshPromise;
 }
 
-function withAccessToken(init: RequestInit | undefined, accessToken: string | null) {
-  const headers = new Headers(init?.headers);
+function withAccessToken(
+  input: RequestInfo | URL,
+  init: RequestInit | undefined,
+  accessToken: string | null,
+) {
+  const headers = new Headers(input instanceof Request ? input.headers : undefined);
+  new Headers(init?.headers).forEach((value, key) => headers.set(key, value));
   if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
   else headers.delete("Authorization");
   return { ...init, headers };
+}
+
+function sendRequest(
+  input: RequestInfo | URL,
+  init: RequestInit | undefined,
+  accessToken: string | null,
+) {
+  const requestInput = input instanceof Request ? input.clone() : input;
+  return fetch(requestInput, withAccessToken(input, init, accessToken));
 }
 
 export async function authenticatedFetch(
@@ -76,12 +90,12 @@ export async function authenticatedFetch(
   if (typeof window === "undefined") return fetch(input, init);
 
   const rejectedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
-  let response = await fetch(input, withAccessToken(init, rejectedAccessToken));
+  let response = await sendRequest(input, init, rejectedAccessToken);
   if (response.status !== 401) return response;
 
   const renewedAccessToken = await refreshAccessToken(apiUrl, rejectedAccessToken);
   if (renewedAccessToken) {
-    response = await fetch(input, withAccessToken(init, renewedAccessToken));
+    response = await sendRequest(input, init, renewedAccessToken);
     return response;
   }
 

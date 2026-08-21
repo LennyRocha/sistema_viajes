@@ -1,0 +1,1 @@
+ALTER TABLE "Licencia" ALTER COLUMN "categoria" TYPE VARCHAR(50);
