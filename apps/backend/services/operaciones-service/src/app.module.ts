@@ -14,6 +14,7 @@ import { MetodosPagoModule } from "./modules/metodos-pago/metodo.module";
 import { ComprasModule } from "./modules/Compras/compras.module";
 import { PagosModule } from "./modules/pagos/pagos.module";
 import { CompradorModule } from "./modules/comprador/comprador.module";
+import { CalendarioViajesModule } from "./modules/calendario-viajes/calendario-viajes.module";
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { CompradorModule } from "./modules/comprador/comprador.module";
     MetodosPagoModule,
     ComprasModule,
     PagosModule,
-    CompradorModule
+    CompradorModule,
+    CalendarioViajesModule
   ],
   providers: [
     {

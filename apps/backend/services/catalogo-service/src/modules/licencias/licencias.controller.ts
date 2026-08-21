@@ -14,6 +14,7 @@ import {
 import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { LicenciasService } from './licencias.service';
 import { CreateLicenciaAloneDto } from './dtos/create-licencia-alone.dto';
+import { RenewLicenciaDto } from './dtos/renew-licencia.dto';
 import { UpdateLicenciaDto } from './dtos/update-licencia.dto';
 
 @ApiTags('licencias')
@@ -42,13 +43,6 @@ export class LicenciasController {
     return this.licencias.findAll(vigenteFilter, conductor);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Obtener licencia por id' })
-  @ApiParam({ name: 'id', example: '1' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.licencias.findOne(id);
-  }
-
   @Get('/conductor/:conductor_id/vigente')
   @ApiOperation({ summary: 'Obtener la licencia vigente de un conductor' })
   @ApiParam({ name: 'conductor_id', example: '1' })
@@ -56,6 +50,34 @@ export class LicenciasController {
     @Param('conductor_id', ParseIntPipe) conductor_id: number,
   ) {
     return this.licencias.findVigenteByConductor(conductor_id);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener licencia por id' })
+  @ApiParam({ name: 'id', example: '1' })
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.licencias.findOne(id);
+  }
+
+  @Post('/conductor/:conductor_id/renovar')
+  @HttpCode(201)
+  @ApiOperation({ summary: 'Renovar la licencia vigente de un conductor' })
+  @ApiParam({ name: 'conductor_id', example: '1' })
+  renewVigenteByConductor(
+    @Param('conductor_id', ParseIntPipe) conductor_id: number,
+    @Body() dto: RenewLicenciaDto,
+  ) {
+    return this.licencias.renewVigenteByConductor(conductor_id, dto);
+  }
+
+  @Patch('/conductor/:conductor_id/vigente')
+  @ApiOperation({ summary: 'Actualizar la licencia vigente de un conductor' })
+  @ApiParam({ name: 'conductor_id', example: '1' })
+  updateVigenteByConductor(
+    @Param('conductor_id', ParseIntPipe) conductor_id: number,
+    @Body() dto: UpdateLicenciaDto,
+  ) {
+    return this.licencias.updateVigenteByConductor(conductor_id, dto);
   }
 
   @Patch(':id')

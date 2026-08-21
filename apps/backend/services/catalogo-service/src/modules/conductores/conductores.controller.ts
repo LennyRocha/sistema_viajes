@@ -82,7 +82,7 @@ export class ConductoresController {
 
   @Delete(':id')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Eliminar conductor' })
+  @ApiOperation({ summary: 'Dar de baja lógica a un conductor' })
   @ApiParam({ name: 'id', example: '1' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.conductores.remove(id);
