@@ -3,7 +3,7 @@ import MainLayout from "@/src/layout/MainLayout";
 import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 
 export const metadata: Metadata = {
-  title: "Reportes de actividad | Nexoroute",
+  title: "Bitácora de actividad | Nexoroute",
   description:
     "Consulta administrativa de autenticación, seguridad y operaciones del sistema.",
 };

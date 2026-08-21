@@ -70,17 +70,10 @@ const ListLinks: NavigationLink[] = [
     allowedRoles: ["ROLE_ADMIN", "ROLE_OPERADOR", "ROLE_SUPERVISOR", "ROLE_CONDUCTOR"],
   },
   {
-    name: "Reportes",
+    name: "Bitácora",
     href: "/dashboard/reports",
     icon: "assessment",
     privilege: "bitacora:consultar",
-    allowedRoles: ["ROLE_ADMIN"],
-  },
-  {
-    name: "Historial",
-    href: "/dashboard/history",
-    icon: "history",
-    privilege: "historial:consultar",
     allowedRoles: ["ROLE_ADMIN"],
   },
   {
