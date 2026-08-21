@@ -88,7 +88,12 @@ async function bootstrap() {
     '/api-json',
     '/instituciones/public',
   ];
-  const publicReadPrefixes = ['/rutas', '/tipos-autobus', '/servicios'];
+  const publicReadPrefixes = [
+    '/rutas',
+    '/tipos-autobus',
+    '/servicios',
+    '/salidas',
+  ];
   const privilegeForRequest = (pathname: string, method: string): string[] => {
     if (pathname.startsWith('/usuarios')) {
       if (method === 'GET') return ['usuarios:consultar'];
@@ -233,13 +238,11 @@ async function bootstrap() {
           mensaje: 'El usuario no cuenta con el privilegio requerido',
           detalles: { privilegiosRequeridos: required },
         });
-        response
-          .status(403)
-          .json({
-            statusCode: 403,
-            message: 'Privilegio insuficiente',
-            required,
-          });
+        response.status(403).json({
+          statusCode: 403,
+          message: 'Privilegio insuficiente',
+          required,
+        });
         return;
       }
 

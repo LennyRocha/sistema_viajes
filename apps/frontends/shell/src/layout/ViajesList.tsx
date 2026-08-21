@@ -33,14 +33,7 @@ export default function ViajesList() {
   const [loading, setLoading] = React.useState(true);
   const [data, setData] = React.useState<any[]>([]);
   const { fetchSalidas } = useSalida();
-  function throwSnack() {
-    snack.warning({
-      message:
-        "No se encontraron salidas con los filtros proporcionados",
-      duration: 3000,
-    });
-    setData([]);
-  }
+
   const doFetchSalidas = async () => {
     setLoading(true);
     try {
@@ -92,6 +85,16 @@ export default function ViajesList() {
     setSelectedServices([]);
   };
 
+  React.useEffect(() => {
+    if (!loading && data.length === 0) {
+      snack.warning({
+        message:
+          "No se encontraron salidas con los filtros proporcionados",
+        duration: 3000,
+      });
+    }
+  }, [data, loading]);
+
   if (loading)
     return (
       <Backdrop
@@ -104,10 +107,6 @@ export default function ViajesList() {
         <CircularProgress color="inherit" />
       </Backdrop>
     );
-
-  if (data.length === 0) {
-    throwSnack();
-  }
 
   return (
     <Box
