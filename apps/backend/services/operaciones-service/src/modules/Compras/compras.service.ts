@@ -180,7 +180,15 @@ export class ComprasService {
     const compra = await this.prisma.compra.findUnique({
       where: { codigo },
       include: {
-        pagos: true,
+        pagos: {
+          select: {
+            metodoPago: true,
+            monto: true,
+            estado: true,
+            createdAt: true,
+            updatedAt: true,
+          }
+        },
         comprador: true,
         salida: true,
       },
