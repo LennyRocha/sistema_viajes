@@ -70,4 +70,18 @@ export class ComprasController {
   cancel(@Param("id", ParseIntPipe) id: number) {
     return this.compras.cancel(id);
   }
+
+  @Patch("abordar/:codigo")
+  @ApiOperation({ summary: "Marcar compra como abordada" })
+  @ApiParam({ name: "codigo", example: 1 })
+  abordar(@Param("codigo", ParseIntPipe) codigo: string) {
+    return this.compras.abordar(codigo);
+  }
+
+  @Patch("confirmar/:codigo")
+  @ApiOperation({ summary: "Confirmar por código" })
+  @ApiParam({ name: "codigo", example: 1 })
+  confirmar(@Param("codigo", ParseIntPipe) codigo: string) {
+    return this.compras.confirmarPorCodigo(codigo);
+  }
 }

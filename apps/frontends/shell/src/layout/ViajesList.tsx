@@ -26,7 +26,8 @@ import { ArrowBack } from "@mui/icons-material";
 
 export default function ViajesList() {
   const router = useRouter();
-  const { addSalidaId, addPasajeros } = useSalida();
+  const { addSalidaId, addSalidaConfig, addPasajeros } =
+    useSalida();
   const params = useSearchParams();
   const pasajeros = params.get("pasajeros");
   const [loading, setLoading] = React.useState(true);
@@ -47,8 +48,7 @@ export default function ViajesList() {
         params.toString(),
       );
       setData(salidas);
-    } catch (error) {
-      console.error(error);
+    } catch {
       snack.error({
         message: "Ocurrio un error al obtener las salidas",
         duration: 3000,
@@ -67,9 +67,11 @@ export default function ViajesList() {
   const goToCompra = (
     salida: number,
     pasajeros: number,
+    salidaConfig: any,
   ) => {
     addSalidaId(salida);
     addPasajeros(pasajeros);
+    addSalidaConfig(salidaConfig);
     router.push("/compra-tus-boletos");
   };
 
@@ -262,7 +264,11 @@ const CardsMapper = ({
 }: {
   data: any[];
   pasajeros: string | null;
-  goToCompra: (id: number, pasajeros: number) => void;
+  goToCompra: (
+    id: number,
+    pasajeros: number,
+    salida: any,
+  ) => void;
   handleClickOpen: (salida: any) => void;
 }) => {
   type salidaTipo = "UNICA" | "RECURRENTE" | "ESPECIAL";
@@ -326,13 +332,16 @@ const CardsMapper = ({
 
   return list.map((salida, idx) => (
     <SalidaCard
-      key={ idx + 1}
+      key={idx + 1}
       salida={salida}
       idx={idx}
       onClick={(salida) =>
         goToCompra(
           salida.id,
-          pasajeros ? Number(pasajeros) : 1,
+          pasajeros && Number(pasajeros) !== 0
+            ? Number(pasajeros)
+            : 1,
+          salida.config,
         )
       }
       openDetailsDialog={handleClickOpen}

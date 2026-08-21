@@ -5,12 +5,10 @@ import {
   Alert,
   Backdrop,
   Box,
-  Button,
   CircularProgress,
   Grid,
   IconButton,
   MenuItem,
-  MobileStepper,
   Step,
   StepLabel,
   Stepper,
@@ -37,8 +35,6 @@ import {
 } from "motion/react";
 import {
   AccountBalanceOutlined,
-  ChevronLeft,
-  ChevronRight,
   CreditCard,
   PaymentsOutlined,
   Schedule,
@@ -82,6 +78,20 @@ import { estadosDeMexico } from "../utils/estadosDeMexico";
 import { customFormatDate } from "../utils/customFormatDate";
 import { AsientoEstado } from "../core/types/AsientoEstado";
 import { getNearestDateByDay } from "../utils/getNearestDay";
+import {
+  downloadQrCode,
+  generateQrDataUrl,
+} from "../utils/QRCode";
+import QrConfirmationDialog from "../core/components/QRDialog";
+import useComprador from "../core/hooks/useComprador";
+import useCompra from "../core/hooks/useCompra";
+import { useCountdown } from "../core/hooks/useContador";
+import {
+  PagoDialog,
+  PagoExpiradoDialog,
+} from "../core/components/PagoDialogs";
+import usePagos from "../core/hooks/usePago";
+import { PagoPayload } from "../core/types/Pago";
 
 const steps = [
   "Asientos",
@@ -199,6 +209,7 @@ export default function CompraForm() {
     fetchAsientos,
     cleanSalida,
     pasajeros,
+    getSalidaConfig,
   } = useSalida();
 
   const [loading, setLoading] = React.useState(true);
@@ -222,24 +233,36 @@ export default function CompraForm() {
 
   const fetchOrRedirect = async () => {
     const id = getSalidaId();
+    const config = getSalidaConfig();
 
     if (id !== null) {
       try {
         const data: any = await fetchSalida(id);
         const asientos: any = await fetchAsientos(id);
-        setSalidaData(data);
+        setSalidaData({
+          ...data,
+          config,
+        });
+        console.log(asientos.map((a: any) => a.asiento));
         setField("salidaId", data.id);
         const asientosOcupados =
           asientos.length === 0
             ? data.asientos
-            : data.asientos.map((asiento: any) => {
+            : data.asientos.map((asiento: Asiento) => {
                 const ocupado = asientos.some(
-                  (a: any) => a.id === asiento.id,
+                  (a: Pasajero) =>
+                    a.asiento?.id === asiento.id,
+                );
+                console.log(
+                  "ocupado",
+                  ocupado,
+                  asiento,
+                  asientos,
                 );
                 return {
                   ...asiento,
                   estado: ocupado
-                    ? AsientoEstado.SOLD
+                    ? asiento.estado // AsientoEstado.SOLD o AsientoEstado.RESERVED según la respuesta del backend
                     : AsientoEstado.AVAILABLE,
                 };
               });
@@ -261,8 +284,7 @@ export default function CompraForm() {
             (data.precio * pasajeros * 1.16).toFixed(2),
           );
         }
-      } catch (err) {
-        console.error(err);
+      } catch {
         setRedirecting(true);
         router.replace("/");
         return;
@@ -274,7 +296,7 @@ export default function CompraForm() {
     }
   };
 
-  React.useEffect(() => {
+  /*React.useEffect(() => {
     if (!formData.asientos.length || !plantillaBus) return;
 
     setPlantillaBus((prev) => {
@@ -314,7 +336,7 @@ export default function CompraForm() {
         asientos: updatedAsientos,
       };
     });
-  }, [formData.asientos]);
+  }, [formData.asientos]);*/
 
   const hasFetchedRef = React.useRef(false);
 
@@ -323,6 +345,7 @@ export default function CompraForm() {
     hasFetchedRef.current = true;
 
     fetchOrRedirect();
+    return () => cleanSalida();
   }, []);
 
   const handleNext = () => {
@@ -370,29 +393,117 @@ export default function CompraForm() {
   const [loadingCompra, setLoadingCompra] =
     React.useState(false);
 
+  const [loadingPago, setLoadingPago] =
+    React.useState(false);
+
+  const [compraExitosa, setCompraExitosa] =
+    React.useState(false);
+
+  const [qrDialog, setQrDialog] = React.useState<{
+    open: boolean;
+    codigo: string;
+    qrDataUrl: string;
+  }>({ open: false, codigo: "", qrDataUrl: "" });
+
+  const [pagoDialog, setPagoDialog] = React.useState<{
+    open: boolean;
+    codigo: string;
+    metodoPagoId: number;
+    compraId?: number;
+  }>({
+    open: false,
+    codigo: "",
+    metodoPagoId: 0,
+    compraId: undefined,
+  });
+
+  const [pagoCanceladoDialog, setPagoCanceladoDialog] =
+    React.useState<{
+      open: boolean;
+    }>({
+      open: false,
+    });
+
+  const [expiraEn, setExpiraEn] = React.useState<
+    string | null
+  >(null);
+
+  const { formatted: tiempoRestante, expirado } =
+    useCountdown(expiraEn);
+
+  const { findOrCreate } = useComprador();
+  const { createCompra } = useCompra();
+  const { realizarPago } = usePagos();
+
+  const processQR = async (codigoCompra: string) => {
+    const qrDataUrl = await generateQrDataUrl(codigoCompra);
+
+    await downloadQrCode(
+      codigoCompra,
+      `boleto-${codigoCompra}.png`,
+    );
+
+    setQrDialog({
+      open: true,
+      codigo: codigoCompra,
+      qrDataUrl,
+    });
+
+    snack.success({
+      message:
+        "¡Compra realizada!, boleto QR generado correctamente.",
+      duration: 3000,
+    });
+  };
+
   const postCompra = async () => {
     setLoadingCompra(true);
     const payload = {
-      ...formData,
-      monto: Number.parseFloat(
-        Number(formData.monto).toFixed(2),
-      ),
+      salidaId: formData.salidaId,
+      pasajeros: pasajeros,
       asientos: formData.asientos.map((pasajero) => ({
         ...pasajero,
         asiento: {
           ...pasajero.asiento,
-          estado: AsientoEstado.SOLD,
+          estado: AsientoEstado.RESERVED,
         },
       })),
+      fechaSalida: salidaData?.config?.dia
+        ? getNearestDateByDay(salidaData?.config?.dia)
+            .toISOString()
+            .split("T")[0]
+        : (salidaData?.config?.fecha ?? ""),
+      horaSalida: props.hora_inicio,
+      compradorId: 0,
     };
     try {
-      // Aquí iría la lógica para enviar la compra al backend
-      console.log("Confirmar compra", payload);
-      snack.success({
-        message:
-          "¡Compra realizada!, revisa tu correo electrónico para más detalles.",
-        duration: 3000,
-      });
+      const comprador = await findOrCreate(
+        formData.comprador,
+      );
+
+      payload.compradorId = comprador.id;
+
+      const compra = await createCompra(payload as any);
+
+      setCompraExitosa(true);
+
+      const codigoCompra = compra.codigo;
+
+      setExpiraEn(compra.expiraEn);
+
+      if (
+        formData.metodoPagoId === 2 ||
+        formData.metodoPagoId === 3
+      ) {
+        setPagoDialog({
+          open: true,
+          codigo: codigoCompra,
+          metodoPagoId: formData.metodoPagoId,
+          compraId: compra.id,
+        });
+      } else {
+        await processQR(codigoCompra);
+      }
     } catch (error) {
       console.error(error);
       snack.error({
@@ -400,6 +511,10 @@ export default function CompraForm() {
           "Ocurrió un error al procesar la compra. Por favor, inténtalo de nuevo.",
         duration: 3000,
       });
+      setCompraExitosa(false);
+      setTimeout(() => {
+        router.replace("/");
+      }, 3000);
     } finally {
       setLoadingCompra(false);
     }
@@ -475,11 +590,27 @@ export default function CompraForm() {
     ),
   };
 
+  React.useEffect(() => {
+    if (!expiraEn || !expirado || !pagoDialog.open) return;
+
+    setPagoDialog((prev) => ({
+      ...prev,
+      open: false,
+    }));
+
+    setPagoCanceladoDialog({
+      open: true,
+    });
+  }, [expirado, expiraEn, pagoDialog]);
+
   const ready = !loading && !redirecting && !!salidaData;
 
   return (
     <>
-      <Header isFetching={loading} />
+      <Header
+        isFetching={loading}
+        compraExitosa={compraExitosa}
+      />
       <Box
         component="main"
         sx={{
@@ -537,6 +668,65 @@ export default function CompraForm() {
             </AnimatePresence>
           </Box>
         )}
+        <QrConfirmationDialog
+          open={qrDialog.open}
+          onClose={() => {
+            setQrDialog((prev) => ({
+              ...prev,
+              open: false,
+            }));
+            router.replace("/");
+          }}
+          codigo={qrDialog.codigo}
+          qrDataUrl={qrDialog.qrDataUrl}
+        />
+        <PagoDialog
+          open={pagoDialog.open}
+          onClose={() => {
+            setPagoDialog((prev) => ({
+              ...prev,
+              open: false,
+            }));
+            router.replace("/");
+          }}
+          codigo={pagoDialog.codigo}
+          metodoPagoId={pagoDialog.metodoPagoId}
+          onYaPague={async () => {
+            setLoadingPago(true);
+            try {
+              const payload: PagoPayload = {
+                compraId: pagoDialog.compraId!,
+                metodoPagoId: pagoDialog.metodoPagoId,
+                monto: formData.monto,
+                referencia: pagoDialog.codigo,
+              };
+              await realizarPago(payload);
+              setPagoDialog((prev) => ({
+                ...prev,
+                open: false,
+              }));
+              await processQR(pagoDialog.codigo);
+            } catch (error) {
+              console.error(error);
+              snack.error({
+                message:
+                  "Ocurrió un error al verificar el pago. Por favor, inténtalo de nuevo.",
+                duration: 3000,
+              });
+            } finally {
+              setLoadingPago(false);
+            }
+          }}
+          pagoLoading={loadingPago}
+          tiempoRestante={tiempoRestante}
+        />
+        <PagoExpiradoDialog
+          open={pagoCanceladoDialog.open}
+          onClose={() => {
+            setPagoCanceladoDialog({ open: false });
+            router.replace("/");
+          }}
+        />
       </Box>
     </>
   );
@@ -573,8 +763,10 @@ const AnimatedStep = forwardRef<
 
 const Header = ({
   isFetching,
+  compraExitosa,
 }: {
   isFetching: boolean;
+  compraExitosa: boolean;
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -630,7 +822,9 @@ const Header = ({
             </Typography>
           </Box>
         </Box>
-        {!isFetching && <TimerText />}
+        {!isFetching && (
+          <TimerText compraExitosa={compraExitosa} />
+        )}
       </Box>
     </MotionPaper>
   );
@@ -1678,7 +1872,11 @@ const Step5 = ({
   );
 };
 
-const TimerText = () => {
+const TimerText = ({
+  compraExitosa,
+}: {
+  compraExitosa: boolean;
+}) => {
   const theme = useTheme();
   const router = useRouter();
 
@@ -1690,13 +1888,15 @@ const TimerText = () => {
         if (prev <= 1) {
           clearInterval(timer);
 
-          router.replace("/");
+          if (!compraExitosa) {
+            router.replace("/");
 
-          snack.warning({
-            message:
-              "Se agotó el tiempo para completar la compra.",
-            duration: 2500,
-          });
+            snack.warning({
+              message:
+                "Se agotó el tiempo para completar la compra.",
+              duration: 2500,
+            });
+          }
 
           return 0;
         }
@@ -1706,7 +1906,7 @@ const TimerText = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [router]);
+  }, [router, compraExitosa]);
 
   const minutes = Math.floor(remaining / 60);
   const seconds = remaining % 60;

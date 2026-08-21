@@ -16,5 +16,6 @@ import { SalidasModule } from '../salidas/salidas.module';
     ],
     controllers: [ComprasController],
     providers: [ComprasService, ComprasExpiracionService],
+    exports: [ComprasService],
 })
 export class ComprasModule {}

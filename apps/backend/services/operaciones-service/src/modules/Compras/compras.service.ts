@@ -12,6 +12,11 @@ import { SalidasService } from "../salidas/salidas.service";
 import { EstadoCompra } from "./types/estado-compra";
 import { EstadoSalida } from "./types/estado-salida";
 import { CreateCompraDto } from "./dto/create-compra.dto";
+import { Prisma } from "generated/prisma";
+import {
+  AsientoEstado,
+  Pasajero,
+} from "./types/asiento-compra";
 
 const RESERVA_MINUTOS = 15;
 
@@ -34,6 +39,8 @@ export class ComprasService {
       {
         salidaId: dto.salidaId,
         compradorId: dto.compradorId,
+        fechaSalida: dto.fechaSalida,
+        horaSalida: dto.horaSalida,
       },
       "Creando compra",
     );
@@ -77,7 +84,7 @@ export class ComprasService {
     const idsValidos = new Set(layout.map((a) => a.id));
 
     const asientosInvalidos = dto.asientos.filter(
-      (id) => !idsValidos.has(id),
+      (id) => !idsValidos.has(id.asiento.id),
     );
     if (asientosInvalidos.length > 0) {
       throw new BadRequestException(
@@ -90,7 +97,7 @@ export class ComprasService {
         dto.salidaId,
       );
     const yaOcupados = dto.asientos.filter((id) =>
-      ocupados.has(id),
+      ocupados.has(id.asiento.id),
     );
 
     if (yaOcupados.length > 0) {
@@ -121,10 +128,13 @@ export class ComprasService {
             salidaId: dto.salidaId,
             compradorId: dto.compradorId,
             pasajeros: dto.pasajeros,
-            asientos: dto.asientos,
+            asientos:
+              dto.asientos as unknown as Prisma.InputJsonArray,
             monto,
             codigo: this.generarCodigo(),
             estado: EstadoCompra.PENDIENTE,
+            fechaSalida: dto.fechaSalida,
+            horaSalida: dto.horaSalida,
             expiraEn,
           },
         });
@@ -180,6 +190,101 @@ export class ComprasService {
     return compra;
   }
 
+  async abordar(codigo: string) {
+    const compra = await this.prisma.compra.findUnique({
+      where: { codigo },
+    });
+
+    if (!compra) {
+      throw new NotFoundException(
+        `Compra con código ${codigo} no existe`,
+      );
+    }
+
+    if (compra.estado !== EstadoCompra.CONFIRMADA) {
+      throw new BadRequestException(
+        `No se puede abordar con compra que no está confirmada`,
+      );
+    }
+
+    return this.prisma.compra.update({
+      where: { codigo },
+      data: {
+        abordado: true,
+      },
+    });
+  }
+
+  async confirmar(id: number) {
+    const compra = await this.prisma.compra.findUnique({
+      where: { id },
+    });
+    if (!compra) {
+      throw new NotFoundException(`Compra ${id} no existe`);
+    }
+
+    if (compra.estado !== EstadoCompra.PENDIENTE) {
+      throw new BadRequestException(
+        `No se puede confirmar una compra que no está pendiente`,
+      );
+    }
+
+    const asientos =
+      compra?.asientos as unknown as Pasajero[];
+    const nuevosEstados = asientos.map((p) => ({
+      ...p,
+      asiento: {
+        ...p.asiento,
+        estado: AsientoEstado.SOLD,
+      },
+    }));
+
+    return this.prisma.compra.update({
+      where: { id },
+      data: {
+        estado: EstadoCompra.CONFIRMADA,
+        asientos:
+          nuevosEstados as unknown as Prisma.InputJsonArray,
+      },
+    });
+  }
+
+  async confirmarPorCodigo(codigo: string) {
+    const compra = await this.prisma.compra.findUnique({
+      where: { codigo },
+    });
+    if (!compra) {
+      throw new NotFoundException(
+        `Compra ${codigo} no existe`,
+      );
+    }
+
+    if (compra.estado !== EstadoCompra.PENDIENTE) {
+      throw new BadRequestException(
+        `No se puede confirmar una compra que no está pendiente`,
+      );
+    }
+
+    const asientos =
+      compra?.asientos as unknown as Pasajero[];
+    const nuevosEstados = asientos.map((p) => ({
+      ...p,
+      asiento: {
+        ...p.asiento,
+        estado: AsientoEstado.SOLD,
+      },
+    }));
+
+    return this.prisma.compra.update({
+      where: { codigo },
+      data: {
+        estado: EstadoCompra.CONFIRMADA,
+        asientos:
+          nuevosEstados as unknown as Prisma.InputJsonArray,
+      },
+    });
+  }
+
   async cancel(id: number) {
     const compra = await this.prisma.compra.findUnique({
       where: { id },
@@ -195,9 +300,24 @@ export class ComprasService {
       );
     }
 
+    //Desocupar los asientos reservados por esta compra
+    const asientos =
+      compra?.asientos as unknown as Pasajero[];
+    const nuevosEstados = asientos.map((p) => ({
+      ...p,
+      asiento: {
+        ...p.asiento,
+        estado: AsientoEstado.AVAILABLE,
+      },
+    }));
+
     return this.prisma.compra.update({
       where: { id },
-      data: { estado: EstadoCompra.CANCELADA },
+      data: {
+        estado: EstadoCompra.CANCELADA,
+        asientos:
+          nuevosEstados as unknown as Prisma.InputJsonArray,
+      },
     });
   }
 
@@ -205,10 +325,12 @@ export class ComprasService {
     const compras = await this.prisma.compra.findMany({
       where: {
         salidaId,
-        estado: EstadoCompra.CONFIRMADA,
+        estado: {
+          not: EstadoCompra.CANCELADA,
+        },
       },
       select: { asientos: true },
     });
-    return compras;
+    return compras.flatMap((c: any) => c.asientos);
   }
 }
