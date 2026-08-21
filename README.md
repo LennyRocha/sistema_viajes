@@ -167,7 +167,7 @@ Variables relevantes:
 ```env
 JWT_PRIVATE_KEY_PATH=../../keys/jwt_private.pem
 JWT_PUBLIC_KEY_PATH=../../keys/jwt_public.pem
-JWT_ACCESS_TTL_SECONDS=900
+JWT_ACCESS_TTL_SECONDS=3600
 JWT_REFRESH_TTL_SECONDS=604800
 JWT_ISSUER=nexoroute-auth
 JWT_AUDIENCE=nexoroute-api

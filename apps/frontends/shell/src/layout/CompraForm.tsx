@@ -207,12 +207,12 @@ export default function CompraForm() {
     getSalidaId,
     fetchSalida,
     fetchAsientos,
-    cleanSalida,
     pasajeros,
     getSalidaConfig,
   } = useSalida();
 
   const [loading, setLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState("");
   const [salidaData, setSalidaData] =
     React.useState<any>(null);
   const [asientosOcupados, setAsientosOcupados] =
@@ -226,18 +226,44 @@ export default function CompraForm() {
     formData,
     setField,
     setCompradorField,
+    prefillComprador,
     setPasajero,
   } = useSetCompra();
 
-  const [redirecting, setRedirecting] =
-    React.useState(false);
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem("nexoroute.user");
+    if (!storedUser) return;
 
-  const fetchOrRedirect = async () => {
-    const id = getSalidaId();
+    try {
+      const user = JSON.parse(storedUser);
+      const roles = Array.isArray(user?.roles) ? user.roles : [];
+      if (!roles.includes("ROLE_CLIENTE")) return;
+
+      prefillComprador({
+        nombres: user.nombres,
+        apellido_paterno: user.apellido_paterno,
+        apellido_materno: user.apellido_materno,
+        email: user.email,
+        telefono: user.telefono,
+      });
+    } catch {
+      // Una sesion local corrupta no debe bloquear el formulario de compra.
+    }
+  }, []);
+
+  const fetchSelectedSalida = async () => {
+    const storedId = getSalidaId();
+    const queryId = Number(
+      new URLSearchParams(window.location.search).get("salidaId"),
+    );
+    const id =
+      storedId ??
+      (Number.isInteger(queryId) && queryId > 0 ? queryId : null);
     const config = getSalidaConfig();
 
     if (id !== null) {
       try {
+        setLoadError("");
         const data: any = await fetchSalida(id);
         const asientos: any = await fetchAsientos(id);
         setSalidaData({
@@ -278,14 +304,15 @@ export default function CompraForm() {
           (data.precio * pasajeros * 1.16).toFixed(2),
         );
       } catch {
-        setRedirecting(true);
-        router.replace("/");
-        return;
+        setLoadError(
+          "No fue posible cargar la salida seleccionada. Regresa e intenta nuevamente.",
+        );
       } finally {
         setLoading(false);
       }
     } else {
-      router.replace("/");
+      setLoadError("No hay un viaje seleccionado.");
+      setLoading(false);
     }
   };
 
@@ -352,8 +379,7 @@ export default function CompraForm() {
     if (hasFetchedRef.current) return;
     hasFetchedRef.current = true;
 
-    fetchOrRedirect();
-    return () => cleanSalida();
+    fetchSelectedSalida();
   }, []);
 
   const handleNext = () => {
@@ -612,7 +638,7 @@ export default function CompraForm() {
     });
   }, [expirado, expiraEn, pagoDialog]);
 
-  const ready = !loading && !redirecting && !!salidaData;
+  const ready = !loading && !!salidaData;
 
   return (
     <>
@@ -644,7 +670,9 @@ export default function CompraForm() {
           </Stepper>
         )}
 
-        {!ready ? (
+        {loadError ? (
+          <Alert severity="error">{loadError}</Alert>
+        ) : !ready ? (
           <Backdrop
             sx={(theme) => ({
               color: theme.palette.text.primary,

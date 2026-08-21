@@ -24,15 +24,26 @@ import { DateField } from "@mui/x-date-pickers/DateField";
 import dayjs from "dayjs";
 import { PlaceSuggestion } from "../types/PlaceSuggestions";
 
+type SearchParamsState = {
+  from: string;
+  to: string;
+  fromId: string;
+  toId: string;
+  fechaIda: Date;
+  fechaVuelta?: Date;
+  pasajeros: number | string;
+};
+
 const Buscador = ({
   toBottom = false,
 }: {
   toBottom?: boolean;
 }) => {
-  const day = new Date().getDay() || 0;
-  const month = new Date().getMonth() || 0;
-  const year = new Date().getFullYear() || 0;
-  const [searchParams, setSearchParams] = React.useState({
+  const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+  const [searchParams, setSearchParams] = React.useState<SearchParamsState>({
     from: "",
     to: "",
     fromId: "",
@@ -43,7 +54,7 @@ const Buscador = ({
   });
   const addParam = (
     key: keyof typeof searchParams,
-    value: string,
+    value: string | number | Date,
   ) => {
     setSearchParams((prev) => {
       return {
@@ -72,7 +83,7 @@ const Buscador = ({
     } else {
       addParam(
         "fechaVuelta",
-        new Date(year, month, day + 2).toISOString(),
+        new Date(year, month, day + 2),
       );
     }
     setTab(newValue);
@@ -446,10 +457,15 @@ const Buscador = ({
           label="Fecha de ida"
           variant="outlined"
           format="DD/MM/YYYY"
-          defaultValue={dayjs(
+          value={dayjs(
             getParam("fechaIda") ??
               new Date(year, month, day),
           )}
+          onChange={(value) => {
+            if (value?.isValid()) {
+              addParam("fechaIda", value.toDate());
+            }
+          }}
           size="small"
           sx={{ flex: 1 }}
           endAdornment={<CalendarToday />}
@@ -459,10 +475,15 @@ const Buscador = ({
             label="Fecha de vuelta"
             variant="outlined"
             format="DD/MM/YYYY"
-            defaultValue={dayjs(
+            value={dayjs(
               getParam("fechaVuelta") ??
                 new Date(year, month, day + 2),
             )}
+            onChange={(value) => {
+              if (value?.isValid()) {
+                addParam("fechaVuelta", value.toDate());
+              }
+            }}
             size="small"
             sx={{ flex: 1 }}
             endAdornment={<CalendarToday />}
@@ -493,7 +514,7 @@ const Buscador = ({
           sx={{ flex: 1 }}
           onClick={() =>
             push(
-              `viajes/${shapeParams()?.toString ? "?" + shapeParams()?.toString() : ""}`,
+              `/viajes?${shapeParams().toString()}`,
             )
           }
         >

@@ -27,7 +27,7 @@ export function SnackBox() {
   const [, force] = React.useReducer((x) => x + 1, 0);
 
   React.useEffect(() => {
-    subscribe(force);
+    return subscribe(force);
   }, []);
 
   const snacks = getSnacks();

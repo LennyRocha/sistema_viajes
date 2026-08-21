@@ -87,7 +87,26 @@ async function bootstrap() {
     '/docs',
     '/api-json',
   ];
-  const publicReadPrefixes = ['/rutas', '/tipos-autobus', '/servicios'];
+  const publicReadPrefixes = [
+    '/rutas',
+    '/tipos-autobus',
+    '/servicios',
+    '/salidas/buscar',
+  ];
+  const isPublicPurchaseRequest = (pathname: string, method: string) => {
+    if (method === 'GET') {
+      return (
+        /^\/salidas\/\d+$/.test(pathname) ||
+        /^\/compras\/asientos\/\d+$/.test(pathname) ||
+        /^\/compras\/codigo\/[^/]+$/.test(pathname)
+      );
+    }
+
+    return (
+      method === 'POST' &&
+      ['/compradores', '/compras', '/pagos'].includes(pathname)
+    );
+  };
   const privilegeForRequest = (pathname: string, method: string): string[] => {
     if (pathname.startsWith('/usuarios')) {
       if (method === 'GET') return ['usuarios:consultar'];
@@ -165,7 +184,11 @@ async function bootstrap() {
       publicReadPrefixes.some(
         (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
       );
-    if (isPublicPrefix || isPublicCatalogRead) {
+    if (
+      isPublicPrefix ||
+      isPublicCatalogRead ||
+      isPublicPurchaseRequest(pathname, request.method)
+    ) {
       next();
       return;
     }

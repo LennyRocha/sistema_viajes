@@ -27,7 +27,7 @@ export class JoseTokenSigner implements TokenSignerPort, OnModuleInit {
   private publicKey!: KeyLike;
   private kid!: string;
   private publicJwk!: Record<string, unknown>;
-  private accessTtlSec = Number(process.env.JWT_ACCESS_TTL_SECONDS ?? 900);
+  private accessTtlSec = Number(process.env.JWT_ACCESS_TTL_SECONDS ?? 3600);
   private issuer = process.env.JWT_ISSUER ?? 'nest-auth-demo';
   private audience = process.env.JWT_AUDIENCE ?? 'nest-demo-api';
 
