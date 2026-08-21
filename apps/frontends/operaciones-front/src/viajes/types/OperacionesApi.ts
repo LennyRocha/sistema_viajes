@@ -1,4 +1,5 @@
 import GeoPoint from "./GeoPoint";
+import { RutaTipo } from "./RutaTipo";
 
 export type CatalogStatusFilter = "all" | "active" | "inactive";
 export type CatalogSortOption = "recent" | "oldest" | "name_asc" | "name_desc";
@@ -53,6 +54,7 @@ export type ViajeBaseApi = {
   estatus: boolean;
   createdAt?: string;
   updatedAt?: string;
+  config_rutas?: RutaTipo[];
   rutas: ViajeBaseRutaApi[];
 };
 
@@ -103,6 +105,7 @@ export type CreateViajeBaseBody = {
   imagenBase64?: string;
   imagenStorage?: string;
   estatus?: boolean;
+  config_rutas?: RutaTipo[];
   rutas: Array<{
     rutaId: number;
     orden: number;

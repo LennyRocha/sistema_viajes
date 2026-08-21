@@ -10,6 +10,7 @@ import { Add, FilterList } from "@mui/icons-material";
 import { Alert, Box, IconButton, TextField } from "@mui/material";
 import buildConductoresColumns from "../utils/buildConductoresColumns";
 import ConductorDetails from "../components/ConductorDetails";
+import LicenciaGestionDialog from "../components/LicenciaGestionDialog";
 import Conductor from "../types/Conductor";
 import {
   useGetConductoresQuery,
@@ -23,9 +24,14 @@ export default function ConductoresIndex({
   snack,
   userPrivileges = [],
 }: Readonly<CommonPageProps>) {
-  const columnas = buildConductoresColumns();
   const [searchCurp, setSearchCurp] = useState("");
   const [searchNombre, setSearchNombre] = useState("");
+  const [selectedLicenciaConductor, setSelectedLicenciaConductor] =
+    useState<Conductor | null>(null);
+  const columnas = useMemo(
+    () => buildConductoresColumns((row) => setSelectedLicenciaConductor(row)),
+    [],
+  );
 
   const {
     data: conductores,
@@ -149,6 +155,13 @@ export default function ConductoresIndex({
           Aún no hay conductores registrados en el sistema.
         </Alert>
       )}
+      <LicenciaGestionDialog
+        open={Boolean(selectedLicenciaConductor)}
+        conductor={selectedLicenciaConductor}
+        onClose={() => setSelectedLicenciaConductor(null)}
+        onSuccess={(message) => snack?.success?.({ message })}
+        onError={(message) => snack?.error?.({ message })}
+      />
     </>
   );
 }

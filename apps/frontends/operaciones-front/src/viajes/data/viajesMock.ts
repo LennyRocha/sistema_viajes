@@ -143,6 +143,7 @@ export const viajesBase: ViajeBase[] = [
     duracionCalculadaMin: 42,
     margenMin: 8,
     duracionTotalMin: 50,
+    config_rutas: [{ id_ruta: 1, estado: "solo-ida" }],
     estatus: true,
   },
   {
@@ -155,6 +156,10 @@ export const viajesBase: ViajeBase[] = [
     duracionCalculadaMin: 74,
     margenMin: 10,
     duracionTotalMin: 84,
+    config_rutas: [
+      { id_ruta: 2, estado: "solo-ida" },
+      { id_ruta: 3, estado: "solo-ida" },
+    ],
     estatus: true,
   },
   {
@@ -167,6 +172,7 @@ export const viajesBase: ViajeBase[] = [
     duracionCalculadaMin: 39,
     margenMin: 15,
     duracionTotalMin: 54,
+    config_rutas: [{ id_ruta: 3, estado: "solo-ida" }],
     estatus: false,
   },
   {
@@ -178,6 +184,10 @@ export const viajesBase: ViajeBase[] = [
     duracionCalculadaMin: 73,
     margenMin: 12,
     duracionTotalMin: 85,
+    config_rutas: [
+      { id_ruta: 1, estado: "solo-ida" },
+      { id_ruta: 4, estado: "solo-ida" },
+    ],
     estatus: true,
   },
 ];

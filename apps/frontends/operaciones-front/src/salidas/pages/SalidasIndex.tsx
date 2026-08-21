@@ -193,7 +193,7 @@ export default function SalidasIndex({ snack, navigationFunction }: Readonly<Pro
 
       {loading ? (
         <PaperBlock title="Cargando salidas" subtitle="Consultando información activa">
-          <Stack direction="row" spacing={1.5} alignItems="center">
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
             <CircularProgress size={22} />
             <Typography>Cargando...</Typography>
           </Stack>
@@ -214,7 +214,14 @@ export default function SalidasIndex({ snack, navigationFunction }: Readonly<Pro
               paperProps={{ sx: { p: 0 } }}
             >
               <Box sx={{ p: 2 }}>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems={{ xs: "flex-start", md: "center" }}>
+                <Stack
+                  direction={{ xs: "column", md: "row" }}
+                  spacing={2}
+                  sx={{
+                    justifyContent: "space-between",
+                    alignItems: { xs: "flex-start", md: "center" },
+                  }}
+                >
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 900, mb: 0.5 }}>
                       {salida.viajeBase?.nombre || "Viaje base"}
@@ -235,19 +242,19 @@ export default function SalidasIndex({ snack, navigationFunction }: Readonly<Pro
 
                 <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" }, gap: 2 }}>
                   <Stack spacing={1.5}>
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                       <DirectionsBusIcon color="action" fontSize="small" />
                       <Typography>
                         Autobús: {salida.autobus?.alias || salida.autobusId} · {salida.autobus?.modelo || "Sin modelo"}
                       </Typography>
                     </Stack>
 
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                       <PersonIcon color="action" fontSize="small" />
                       <Typography>Conductor: #{salida.conductorId}</Typography>
                     </Stack>
 
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                       <RouteIcon color="action" fontSize="small" />
                       <Typography>
                         Tipo: {salida.tipoSalida}
@@ -256,21 +263,21 @@ export default function SalidasIndex({ snack, navigationFunction }: Readonly<Pro
                   </Stack>
 
                   <Stack spacing={1.5}>
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                       <EventAvailableIcon color="action" fontSize="small" />
                       <Typography>
                         Hora: {salida.horaSalida || "Sin hora"}
                       </Typography>
                     </Stack>
 
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                       <LocationOnIcon color="action" fontSize="small" />
                       <Typography>
                         Salida: {salida.lugarSalida ? JSON.stringify(salida.lugarSalida) : "Sin lugar"}
                       </Typography>
                     </Stack>
 
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                       <LocationOnIcon color="action" fontSize="small" />
                       <Typography>
                         Llegada: {salida.lugarLlegada ? JSON.stringify(salida.lugarLlegada) : "Sin lugar"}
@@ -325,7 +332,7 @@ export default function SalidasIndex({ snack, navigationFunction }: Readonly<Pro
               }
               fullWidth
             />
-            <Stack direction="row" spacing={1} justifyContent="flex-end">
+            <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
               <Button onClick={() => setReassignOpen(false)}>Cancelar</Button>
               <Button variant="contained" onClick={() => void handleReassign()}>
                 Guardar reasignación
