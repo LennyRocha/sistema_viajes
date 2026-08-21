@@ -114,7 +114,7 @@ async function bootstrap() {
       if (method === 'PATCH' && pathname.endsWith('/cancelar')) return ['salida:cancelar'];
       if (method === 'PATCH') return ['salida:reasignar'];
     }
-    if (pathname.startsWith('/calendario-viajes')) return 'calendario:consultar';
+    if (pathname.startsWith('/calendario-viajes')) return ['calendario:consultar'];
     if (pathname.startsWith('/autobuses')) {
       if (method === 'GET') return ['autobus:consultar'];
       if (method === 'POST') return ['autobus:crear'];
