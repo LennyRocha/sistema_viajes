@@ -32,7 +32,10 @@ interface ConductorFormProps {
   onLicenciaChange: (
     field: keyof FormState["licencia"],
   ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onValueChange: (field: keyof FormState, value: string) => void;
+  onValueChange: (
+    field: keyof FormState,
+    value: string,
+  ) => void;
   onLicenciaValueChange: (
     field: keyof FormState["licencia"],
     value: string,
@@ -48,7 +51,10 @@ function readImageAsBase64(file: File) {
       const image = new Image();
       image.onload = () => {
         const maxSize = 960;
-        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const scale = Math.min(
+          1,
+          maxSize / Math.max(image.width, image.height),
+        );
         const canvas = document.createElement("canvas");
         canvas.width = Math.round(image.width * scale);
         canvas.height = Math.round(image.height * scale);
@@ -59,13 +65,21 @@ function readImageAsBase64(file: File) {
           return;
         }
 
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        context.drawImage(
+          image,
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        );
         resolve(canvas.toDataURL("image/jpeg", 0.82));
       };
-      image.onerror = () => reject(new Error("No se pudo procesar la imagen"));
+      image.onerror = () =>
+        reject(new Error("No se pudo procesar la imagen"));
       image.src = String(reader.result);
     };
-    reader.onerror = () => reject(new Error("No se pudo leer la imagen"));
+    reader.onerror = () =>
+      reject(new Error("No se pudo leer la imagen"));
     reader.readAsDataURL(file);
   });
 }
@@ -81,7 +95,13 @@ function LabeledTextField({
   }
 >) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 0.75,
+      }}
+    >
       <Typography variant="body2" sx={{ fontWeight: 850 }}>
         {fieldLabel}
       </Typography>
@@ -106,10 +126,10 @@ function ImageUploadField({
   onValueChange: (value: string) => void;
 }>) {
   const storesImagesAsBase64 =
-    (
-      process.env.NEXT_PUBLIC_IMAGE_STORAGE_MODE ||
-      (process.env.NODE_ENV === "production" ? "url" : "base64")
-    ) === "base64";
+    (process.env.NEXT_PUBLIC_IMAGE_STORAGE_MODE ||
+      (process.env.NODE_ENV === "production"
+        ? "url"
+        : "base64")) === "base64";
 
   return (
     <Box
@@ -140,17 +160,33 @@ function ImageUploadField({
             component="img"
             src={value}
             alt={label}
-            sx={{ width: "100%", height: 148, objectFit: "cover" }}
+            sx={{
+              width: "100%",
+              height: 148,
+              objectFit: "cover",
+            }}
           />
         ) : (
-          <Stack spacing={0.75} sx={{ alignItems: "center", color: "text.secondary" }}>
+          <Stack
+            spacing={0.75}
+            sx={{
+              alignItems: "center",
+              color: "text.secondary",
+            }}
+          >
             <ImageIcon />
-            <Typography variant="caption">Sin imagen</Typography>
+            <Typography variant="caption">
+              Sin imagen
+            </Typography>
           </Stack>
         )}
       </Box>
       {storesImagesAsBase64 ? (
-        <Button component="label" variant="outlined" startIcon={<AddPhotoAlternateIcon />}>
+        <Button
+          component="label"
+          variant="outlined"
+          startIcon={<AddPhotoAlternateIcon />}
+        >
           Cargar imagen
           <input
             hidden
@@ -168,20 +204,20 @@ function ImageUploadField({
         <LabeledTextField
           fieldLabel="URL de imagen"
           value={value}
-          onChange={(event) => onValueChange(event.target.value)}
+          onChange={(event) =>
+            onValueChange(event.target.value)
+          }
           error={error}
           helperText="En produccion este campo recibira la URL generada por el servicio de imagenes."
         />
       )}
       {helperText && (
-        <Typography variant="caption" color={error ? "error" : "text.secondary"}>
+        <Typography
+          variant="caption"
+          color={error ? "error" : "text.secondary"}
+        >
           {helperText}
         </Typography>
-      )}
-      {storesImagesAsBase64 && (
-        <Alert severity="info" sx={{ py: 0.25 }}>
-          Local: se guarda base64 comprimido. Produccion: cambia a URL cuando se conecte AWS.
-        </Alert>
       )}
     </Box>
   );
@@ -213,11 +249,17 @@ export default function ConductorForm({
       }}
     >
       <Box sx={{ width: "100%", flex: 2 }}>
-        <PaperBlock title="Datos personales" subtitle="Informacion general del conductor">
+        <PaperBlock
+          title="Datos personales"
+          subtitle="Informacion general del conductor"
+        >
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(2,1fr)" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(2,1fr)",
+              },
               gap: 2,
             }}
           >
@@ -246,7 +288,12 @@ export default function ConductorForm({
               fieldLabel="CURP"
               value={form.curp}
               onChange={(event) =>
-                onValueChange("curp", event.target.value.toUpperCase().slice(0, 18))
+                onValueChange(
+                  "curp",
+                  event.target.value
+                    .toUpperCase()
+                    .slice(0, 18),
+                )
               }
               error={!!errors.curp}
               helperText={errors.curp}
@@ -255,16 +302,19 @@ export default function ConductorForm({
             <CalendarDateField
               label="Fecha de nacimiento"
               value={form.fecha_nacimiento}
-              onChange={(value) => onValueChange("fecha_nacimiento", value)}
+              onChange={(value) =>
+                onValueChange("fecha_nacimiento", value)
+              }
               error={!!errors.fecha_nacimiento}
               helperText={errors.fecha_nacimiento}
             />
             <LabeledTextField
               fieldLabel="Telefono"
-              value={form.telefono}
+              value={formatPhoneNumber(form.telefono)}
               onChange={onChange("telefono")}
               error={!!errors.telefono}
               helperText={errors.telefono}
+              slotProps={{ htmlInput: { maxLength: 13 } }}
             />
             <LabeledTextField
               fieldLabel="Correo electronico"
@@ -276,7 +326,9 @@ export default function ConductorForm({
             <ImageUploadField
               label="Foto de perfil"
               value={form.foto_perfil}
-              onValueChange={(value) => onValueChange("foto_perfil", value)}
+              onValueChange={(value) =>
+                onValueChange("foto_perfil", value)
+              }
               error={!!errors.foto_perfil}
               helperText={errors.foto_perfil}
             />
@@ -290,7 +342,10 @@ export default function ConductorForm({
               helperText={errors.institucion_id}
             >
               {instituciones.map((institucion) => (
-                <MenuItem key={institucion.id} value={institucion.id}>
+                <MenuItem
+                  key={institucion.id}
+                  value={institucion.id}
+                >
                   {institucion.nombre}
                 </MenuItem>
               ))}
@@ -299,11 +354,17 @@ export default function ConductorForm({
         </PaperBlock>
 
         {showLicencia && (
-          <PaperBlock title="Licencia de conducir" subtitle="Informacion de la licencia vigente">
+          <PaperBlock
+            title="Licencia de conducir"
+            subtitle="Informacion de la licencia vigente"
+          >
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "repeat(2,1fr)" },
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "repeat(2,1fr)",
+                },
                 gap: 2,
               }}
             >
@@ -313,11 +374,15 @@ export default function ConductorForm({
                 onChange={(event) =>
                   onLicenciaValueChange(
                     "numero_licencia",
-                    event.target.value.replace(/\D/g, "").slice(0, 12),
+                    event.target.value
+                      .replace(/\D/g, "")
+                      .slice(0, 12),
                   )
                 }
                 error={!!errors["licencia.numero_licencia"]}
-                helperText={errors["licencia.numero_licencia"]}
+                helperText={
+                  errors["licencia.numero_licencia"]
+                }
                 slotProps={{
                   htmlInput: {
                     inputMode: "numeric",
@@ -335,7 +400,10 @@ export default function ConductorForm({
                 helperText={errors["licencia.categoria"]}
               >
                 {LICENSE_CATEGORIES.map((category) => (
-                  <MenuItem key={category.value} value={category.value}>
+                  <MenuItem
+                    key={category.value}
+                    value={category.value}
+                  >
                     {category.label}
                   </MenuItem>
                 ))}
@@ -343,16 +411,34 @@ export default function ConductorForm({
               <CalendarDateField
                 label="Fecha de expedicion"
                 value={form.licencia.fecha_expedicion}
-                onChange={(value) => onLicenciaValueChange("fecha_expedicion", value)}
-                error={!!errors["licencia.fecha_expedicion"]}
-                helperText={errors["licencia.fecha_expedicion"]}
+                onChange={(value) =>
+                  onLicenciaValueChange(
+                    "fecha_expedicion",
+                    value,
+                  )
+                }
+                error={
+                  !!errors["licencia.fecha_expedicion"]
+                }
+                helperText={
+                  errors["licencia.fecha_expedicion"]
+                }
               />
               <CalendarDateField
                 label="Fecha de vencimiento"
                 value={form.licencia.fecha_vencimiento}
-                onChange={(value) => onLicenciaValueChange("fecha_vencimiento", value)}
-                error={!!errors["licencia.fecha_vencimiento"]}
-                helperText={errors["licencia.fecha_vencimiento"]}
+                onChange={(value) =>
+                  onLicenciaValueChange(
+                    "fecha_vencimiento",
+                    value,
+                  )
+                }
+                error={
+                  !!errors["licencia.fecha_vencimiento"]
+                }
+                helperText={
+                  errors["licencia.fecha_vencimiento"]
+                }
               />
               <LabeledTextField
                 select
@@ -360,7 +446,9 @@ export default function ConductorForm({
                 value={form.licencia.estado_emisor}
                 onChange={onLicenciaChange("estado_emisor")}
                 error={!!errors["licencia.estado_emisor"]}
-                helperText={errors["licencia.estado_emisor"]}
+                helperText={
+                  errors["licencia.estado_emisor"]
+                }
               >
                 {MEXICAN_STATES.map((state) => (
                   <MenuItem key={state} value={state}>
@@ -372,20 +460,36 @@ export default function ConductorForm({
                 label="Imagen de licencia"
                 value={form.licencia.imagen_licencia}
                 onValueChange={(value) =>
-                  onLicenciaValueChange("imagen_licencia", value)
+                  onLicenciaValueChange(
+                    "imagen_licencia",
+                    value,
+                  )
                 }
                 error={!!errors["licencia.imagen_licencia"]}
-                helperText={errors["licencia.imagen_licencia"]}
+                helperText={
+                  errors["licencia.imagen_licencia"]
+                }
               />
             </Box>
           </PaperBlock>
         )}
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 3 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 2,
+            mt: 3,
+          }}
+        >
           <Button variant="outlined" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button variant="contained" onClick={onSubmit} disabled={loading}>
+          <Button
+            variant="contained"
+            onClick={onSubmit}
+            disabled={loading}
+          >
             Guardar
           </Button>
         </Box>
@@ -393,3 +497,10 @@ export default function ConductorForm({
     </Box>
   );
 }
+
+const formatPhoneNumber = (value: string): string => {
+  return value
+    .replace(/\D/g, "") // Solo números
+    .slice(0, 10) // Máximo 10 dígitos (Teléfono)
+    .replace(/(\d{3})(?=\d)/g, "$1 ");
+};
