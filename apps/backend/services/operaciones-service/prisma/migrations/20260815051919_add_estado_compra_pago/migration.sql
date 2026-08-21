@@ -2,30 +2,41 @@
   Warnings:
 
   - You are about to drop the column `metodoPagoId` on the `Compra` table. All the data in the column will be lost.
-  - Added the required column `asientosLayout` to the `Salida` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `capacidadTotal` to the `Salida` table without a default value. This is not possible if the table is not empty.
+  - Existing `Salida` rows are initialized with an empty seat layout and zero capacity.
 
 */
 -- CreateEnum
-CREATE TYPE "EstadoCompra" AS ENUM ('PENDIENTE', 'CONFIRMADA', 'CANCELADA');
+DO $$
+BEGIN
+  CREATE TYPE "EstadoCompra" AS ENUM ('PENDIENTE', 'CONFIRMADA', 'CANCELADA');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "EstadoPago" AS ENUM ('PENDIENTE', 'APROBADO', 'RECHAZADO', 'REEMBOLSADO');
+DO $$
+BEGIN
+  CREATE TYPE "EstadoPago" AS ENUM ('PENDIENTE', 'APROBADO', 'RECHAZADO', 'REEMBOLSADO');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- DropForeignKey
-ALTER TABLE "Compra" DROP CONSTRAINT "Compra_metodoPagoId_fkey";
+ALTER TABLE "Compra" DROP CONSTRAINT IF EXISTS "Compra_metodoPagoId_fkey";
 
 -- AlterTable
-ALTER TABLE "Compra" DROP COLUMN "metodoPagoId",
-ADD COLUMN     "estado" "EstadoCompra" NOT NULL DEFAULT 'PENDIENTE',
-ADD COLUMN     "expiraEn" TIMESTAMP(3);
+ALTER TABLE "Compra" DROP COLUMN IF EXISTS "metodoPagoId",
+ADD COLUMN IF NOT EXISTS "estado" "EstadoCompra" NOT NULL DEFAULT 'PENDIENTE',
+ADD COLUMN IF NOT EXISTS "expiraEn" TIMESTAMP(3);
 
 -- AlterTable
-ALTER TABLE "Salida" ADD COLUMN     "asientosLayout" JSONB NOT NULL,
-ADD COLUMN     "capacidadTotal" INTEGER NOT NULL;
+ALTER TABLE "Salida" ADD COLUMN IF NOT EXISTS "asientosLayout" JSONB NOT NULL DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS "capacidadTotal" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "Salida" ALTER COLUMN "asientosLayout" DROP DEFAULT;
+ALTER TABLE "Salida" ALTER COLUMN "capacidadTotal" DROP DEFAULT;
 
 -- CreateTable
-CREATE TABLE "Pago" (
+CREATE TABLE IF NOT EXISTS "Pago" (
     "id" SERIAL NOT NULL,
     "compraId" INTEGER NOT NULL,
     "metodoPagoId" INTEGER NOT NULL,
@@ -40,13 +51,27 @@ CREATE TABLE "Pago" (
 );
 
 -- CreateIndex
-CREATE INDEX "Pago_compraId_estado_idx" ON "Pago"("compraId", "estado");
+CREATE INDEX IF NOT EXISTS "Pago_compraId_estado_idx" ON "Pago"("compraId", "estado");
 
 -- CreateIndex
-CREATE INDEX "Compra_salidaId_estado_idx" ON "Compra"("salidaId", "estado");
+CREATE INDEX IF NOT EXISTS "Compra_salidaId_estado_idx" ON "Compra"("salidaId", "estado");
 
 -- AddForeignKey
-ALTER TABLE "Pago" ADD CONSTRAINT "Pago_compraId_fkey" FOREIGN KEY ("compraId") REFERENCES "Compra"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'Pago_compraId_fkey'
+  ) THEN
+    ALTER TABLE "Pago" ADD CONSTRAINT "Pago_compraId_fkey" FOREIGN KEY ("compraId") REFERENCES "Compra"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Pago" ADD CONSTRAINT "Pago_metodoPagoId_fkey" FOREIGN KEY ("metodoPagoId") REFERENCES "MetodoPago"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'Pago_metodoPagoId_fkey'
+  ) THEN
+    ALTER TABLE "Pago" ADD CONSTRAINT "Pago_metodoPagoId_fkey" FOREIGN KEY ("metodoPagoId") REFERENCES "MetodoPago"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END $$;
