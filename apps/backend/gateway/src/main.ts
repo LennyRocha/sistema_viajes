@@ -56,6 +56,7 @@ async function bootstrap() {
     '/salidas',
     '/compras',
     '/compradores',
+    '/pagos',
   ];
   app.use(
     createProxyMiddleware({

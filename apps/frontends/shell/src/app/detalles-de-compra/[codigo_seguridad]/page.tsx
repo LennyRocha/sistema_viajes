@@ -1,3 +1,4 @@
+import CompraDetails from "@/src/layout/CompraDetails";
 import { Metadata } from "next";
 import React from "react";
 
@@ -15,9 +16,5 @@ export const metadata: Metadata = {
 
 export default function Page({ params }: Readonly<Props>) {
   const { codigo_seguridad } = React.use(params);
-  return (
-    <div>
-      page{codigo_seguridad ? ` - ${codigo_seguridad}` : ""}
-    </div>
-  );
+  return <CompraDetails codigo_compra={codigo_seguridad} />;
 }

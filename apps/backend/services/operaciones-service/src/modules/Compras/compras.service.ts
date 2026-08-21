@@ -179,6 +179,11 @@ export class ComprasService {
   async findByCodigo(codigo: string) {
     const compra = await this.prisma.compra.findUnique({
       where: { codigo },
+      include: {
+        pagos: true,
+        comprador: true,
+        salida: true,
+      },
     });
 
     if (!compra) {
