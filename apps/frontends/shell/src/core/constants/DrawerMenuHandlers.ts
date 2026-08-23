@@ -2,12 +2,6 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
 const DrawerMenuHandlers = {
-  onMiPerfilClick: () => {
-    console.log("Mi Perfil clicked");
-  },
-  onAjustesClick: () => {
-    console.log("Ajustes clicked");
-  },
   onCerrarSesionClick: () => {
     const accessToken = localStorage.getItem("nexoroute.accessToken");
     const refreshToken = localStorage.getItem("nexoroute.refreshToken");

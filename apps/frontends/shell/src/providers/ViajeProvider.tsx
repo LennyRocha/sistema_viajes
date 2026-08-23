@@ -114,7 +114,7 @@ export function SalidaProvider({
     const res = await fetch(
       params
         ? `${gatewayUrl}/salidas/buscar?${params}`
-        : `${gatewayUrl}/salidas`,
+        : `${gatewayUrl}/salidas/buscar`,
     );
     if (!res.ok) {
       throw new Error("Error fetching salidas");

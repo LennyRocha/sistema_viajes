@@ -26,6 +26,22 @@ const useSetCompra = () => {
     });
   };
 
+  const prefillComprador = (values: Partial<Comprador>) => {
+    setFormData((prev) => ({
+      ...prev,
+      comprador: {
+        ...prev.comprador,
+        nombres: prev.comprador.nombres || values.nombres || "",
+        apellido_paterno:
+          prev.comprador.apellido_paterno || values.apellido_paterno || "",
+        apellido_materno:
+          prev.comprador.apellido_materno || values.apellido_materno || "",
+        email: prev.comprador.email || values.email || "",
+        telefono: prev.comprador.telefono || values.telefono || "",
+      },
+    }));
+  };
+
   const setPasajero = (
     index: number,
     field: keyof Pasajero,
@@ -48,6 +64,7 @@ const useSetCompra = () => {
     formData,
     setField,
     setCompradorField,
+    prefillComprador,
     setPasajero,
   };
 };

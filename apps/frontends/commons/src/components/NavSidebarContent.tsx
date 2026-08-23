@@ -21,8 +21,6 @@ type Props = {
   pathname?: string;
   LinkComponent: ElementType;
   drawerCallbacks: {
-    onMiPerfilClick: () => void;
-    onAjustesClick: () => void;
     onCerrarSesionClick: () => void;
   };
 };
@@ -33,8 +31,6 @@ export default function NavSidebarContent({
   pathname,
   LinkComponent = "a",
   drawerCallbacks = {
-    onMiPerfilClick: () => {},
-    onAjustesClick: () => {},
     onCerrarSesionClick: () => {},
   },
 }: Readonly<Props>) {
@@ -77,12 +73,6 @@ export default function NavSidebarContent({
             }}
           >
             <DrawerOptionsMenu
-              onMiPerfilClick={
-                drawerCallbacks?.onMiPerfilClick
-              }
-              onAjustesClick={
-                drawerCallbacks?.onAjustesClick
-              }
               onCerrarSesionClick={
                 drawerCallbacks?.onCerrarSesionClick
               }
@@ -91,9 +81,9 @@ export default function NavSidebarContent({
         </Box>
       )}
       <Avatar
-        alt="profile picture"
+        alt={`Foto de ${user.name}`}
         sx={{ width: 120, height: 120, margin: "0 auto" }}
-        src="/assets/placeholder.png"
+        src={user.img || "/assets/placeholder.png"}
       />
       <Typography
         variant="h6"

@@ -30,32 +30,59 @@ export default function ViajesList() {
     useSalida();
   const params = useSearchParams();
   const pasajeros = params.get("pasajeros");
+  const searchQuery = params.toString();
   const [loading, setLoading] = React.useState(true);
   const [data, setData] = React.useState<any[]>([]);
+  const [loadFailed, setLoadFailed] = React.useState(false);
+  const notifiedEmptyQuery = React.useRef<string | null>(null);
   const { fetchSalidas } = useSalida();
 
-  const doFetchSalidas = async () => {
-    setLoading(true);
-    try {
-      const salidas: any = await fetchSalidas(
-        params.toString(),
-      );
-      setData(salidas);
-    } catch {
-      snack.error({
-        message: "Ocurrio un error al obtener las salidas",
-        duration: 3000,
-      });
-      setTimeout(() => {
-        router.replace("/");
-      }, 3000);
-    } finally {
-      setLoading(false);
-    }
-  };
   React.useEffect(() => {
-    doFetchSalidas();
-  }, [params]);
+    let active = true;
+
+    const loadSalidas = async () => {
+      setLoading(true);
+      setLoadFailed(false);
+      try {
+        const salidas: any = await fetchSalidas(searchQuery);
+        if (active) setData(Array.isArray(salidas) ? salidas : []);
+      } catch {
+        if (!active) return;
+        setLoadFailed(true);
+        setData([]);
+        snack.error({
+          message: "Ocurrio un error al obtener las salidas",
+          duration: 3000,
+        });
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    loadSalidas();
+
+    return () => {
+      active = false;
+    };
+  }, [searchQuery]);
+
+  React.useEffect(() => {
+    if (
+      loading ||
+      loadFailed ||
+      data.length > 0 ||
+      notifiedEmptyQuery.current === searchQuery
+    ) {
+      return;
+    }
+
+    notifiedEmptyQuery.current = searchQuery;
+    snack.warning({
+      message:
+        "No se encontraron salidas con los filtros proporcionados",
+      duration: 3000,
+    });
+  }, [data.length, loadFailed, loading, searchQuery]);
 
   const goToCompra = (
     salida: number,
@@ -65,7 +92,11 @@ export default function ViajesList() {
     addSalidaId(salida);
     addPasajeros(pasajeros);
     addSalidaConfig(salidaConfig);
-    router.push("/compra-tus-boletos");
+    const checkoutParams = new URLSearchParams({
+      salidaId: String(salida),
+      pasajeros: String(pasajeros),
+    });
+    router.push(`/compra-tus-boletos?${checkoutParams.toString()}`);
   };
 
   const [open, setOpen] = React.useState(false);

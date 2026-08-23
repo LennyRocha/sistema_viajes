@@ -92,8 +92,22 @@ async function bootstrap() {
     '/rutas',
     '/tipos-autobus',
     '/servicios',
-    '/salidas',
+    '/salidas/buscar',
   ];
+  const isPublicPurchaseRequest = (pathname: string, method: string) => {
+    if (method === 'GET') {
+      return (
+        /^\/salidas\/\d+$/.test(pathname) ||
+        /^\/compras\/asientos\/\d+$/.test(pathname) ||
+        /^\/compras\/codigo\/[^/]+$/.test(pathname)
+      );
+    }
+
+    return (
+      method === 'POST' &&
+      ['/compradores', '/compras', '/pagos'].includes(pathname)
+    );
+  };
   const privilegeForRequest = (pathname: string, method: string): string[] => {
     if (pathname.startsWith('/usuarios')) {
       if (method === 'GET') return ['usuarios:consultar'];
@@ -125,13 +139,17 @@ async function bootstrap() {
     if (pathname.startsWith('/calendario-viajes'))
       return ['calendario:consultar'];
     if (pathname.startsWith('/autobuses')) {
-      if (method === 'GET') return ['autobus:consultar'];
+      if (method === 'GET') {
+        return ['autobus:consultar', 'viaje:abrir', 'salida:reasignar'];
+      }
       if (method === 'POST') return ['autobus:crear'];
       if (method === 'PATCH') return ['autobus:editar'];
       if (method === 'DELETE') return ['autobus:eliminar'];
     }
     if (pathname.startsWith('/conductores')) {
-      if (method === 'GET') return ['conductores:consultar'];
+      if (method === 'GET') {
+        return ['conductores:consultar', 'viaje:abrir', 'salida:reasignar'];
+      }
       if (method === 'POST') return ['conductores:crear'];
       if (method === 'PATCH') return ['conductores:editar'];
       if (method === 'DELETE') return ['conductores:eliminar'];
@@ -176,7 +194,11 @@ async function bootstrap() {
       publicReadPrefixes.some(
         (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
       );
-    if (isPublicPrefix || isPublicCatalogRead) {
+    if (
+      isPublicPrefix ||
+      isPublicCatalogRead ||
+      isPublicPurchaseRequest(pathname, request.method)
+    ) {
       next();
       return;
     }

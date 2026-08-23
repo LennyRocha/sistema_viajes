@@ -18,8 +18,12 @@ import {
   ConductorSchema,
 } from "../validations/conductorZod";
 
-import { useCreateConductorMutation } from "../api/conductorApi";
+import {
+  useCreateConductorMutation,
+  useUploadConductorImageMutation,
+} from "../api/conductorApi";
 import { useGetInstitucionesQuery } from "../../instituciones/api/institucionesApi";
+import { persistConductorImage } from "../utils/imageUpload";
 
 interface NuevoConductorProps extends CommonPageProps {}
 
@@ -35,6 +39,8 @@ export default function NuevoConductor({
 
   const [createConductor, { isLoading: isSaving }] =
     useCreateConductorMutation();
+  const [uploadImage, { isLoading: isUploading }] =
+    useUploadConductorImageMutation();
 
   const handleChange =
     (field: keyof FormState) =>
@@ -110,10 +116,26 @@ export default function NuevoConductor({
     setErrors({});
 
     try {
-      console.log("Enviando...", result.data);
+      const [fotoPerfil, imagenLicencia] = await Promise.all([
+        persistConductorImage(result.data.foto_perfil, "profiles", uploadImage),
+        persistConductorImage(
+          result.data.licencia.imagen_licencia,
+          "licenses",
+          uploadImage,
+        ),
+      ]);
+
+      const persistedPayload: ConductorSchema = {
+        ...result.data,
+        foto_perfil: fotoPerfil,
+        licencia: {
+          ...result.data.licencia,
+          imagen_licencia: imagenLicencia,
+        },
+      };
 
       const response = await createConductor(
-        result.data as ConductorSchema
+        persistedPayload,
       ).unwrap();
 
       console.log("Respuesta:", response);
@@ -172,7 +194,7 @@ export default function NuevoConductor({
         errors={errors}
         instituciones={instituciones ?? []}
         loadingInstituciones={loadingInstituciones}
-        loading={isSaving}
+        loading={isSaving || isUploading}
         showLicencia
         onChange={handleChange}
         onLicenciaChange={handleLicenciaChange}

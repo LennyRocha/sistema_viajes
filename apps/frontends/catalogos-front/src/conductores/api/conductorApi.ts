@@ -2,6 +2,14 @@ import { api } from "../../shared/api/api";
 import Conductor from "../types/Conductor";
 import { ConductorSchema, UpdateConductorSchema } from "../validations/conductorZod";
 
+export type ConductorImageCategory = "profiles" | "licenses";
+
+type UploadConductorImageResponse = {
+  url: string;
+  key?: string;
+  storage: "s3" | "database";
+};
+
 export const conductorApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getConductores: builder.query<Conductor[], GetConductoresParams | void>({
@@ -30,6 +38,23 @@ export const conductorApi = api.injectEndpoints({
         body,
       }),
       invalidatesTags: ["Conductor"],
+    }),
+
+    uploadConductorImage: builder.mutation<
+      UploadConductorImageResponse,
+      { file: File; category: ConductorImageCategory }
+    >({
+      query: ({ file, category }) => {
+        const body = new FormData();
+        body.append("file", file);
+        body.append("category", category);
+
+        return {
+          url: "/conductores/images",
+          method: "POST",
+          body,
+        };
+      },
     }),
 
     patchConductor: builder.mutation<
@@ -66,6 +91,7 @@ export const {
   useGetConductoresQuery,
   useGetConductorByIdQuery,
   useCreateConductorMutation,
+  useUploadConductorImageMutation,
   usePatchConductorMutation,
   useChangeStatusConductorMutation,
   useRemoveConductorMutation,

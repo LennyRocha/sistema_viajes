@@ -2,7 +2,6 @@ import React from "react";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ImageIcon from "@mui/icons-material/Image";
 import {
-  Alert,
   Box,
   Button,
   MenuItem,
@@ -125,12 +124,6 @@ function ImageUploadField({
   helperText?: string;
   onValueChange: (value: string) => void;
 }>) {
-  const storesImagesAsBase64 =
-    (process.env.NEXT_PUBLIC_IMAGE_STORAGE_MODE ||
-      (process.env.NODE_ENV === "production"
-        ? "url"
-        : "base64")) === "base64";
-
   return (
     <Box
       sx={{
@@ -181,36 +174,24 @@ function ImageUploadField({
           </Stack>
         )}
       </Box>
-      {storesImagesAsBase64 ? (
-        <Button
-          component="label"
-          variant="outlined"
-          startIcon={<AddPhotoAlternateIcon />}
-        >
-          Cargar imagen
-          <input
-            hidden
-            accept="image/*"
-            type="file"
-            onChange={async (event) => {
-              const file = event.target.files?.[0];
-              if (!file) return;
-              onValueChange(await readImageAsBase64(file));
-              event.target.value = "";
-            }}
-          />
-        </Button>
-      ) : (
-        <LabeledTextField
-          fieldLabel="URL de imagen"
-          value={value}
-          onChange={(event) =>
-            onValueChange(event.target.value)
-          }
-          error={error}
-          helperText="En produccion este campo recibira la URL generada por el servicio de imagenes."
+      <Button
+        component="label"
+        variant="outlined"
+        startIcon={<AddPhotoAlternateIcon />}
+      >
+        Cargar imagen
+        <input
+          hidden
+          accept="image/jpeg,image/png,image/webp"
+          type="file"
+          onChange={async (event) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            onValueChange(await readImageAsBase64(file));
+            event.target.value = "";
+          }}
         />
-      )}
+      </Button>
       {helperText && (
         <Typography
           variant="caption"

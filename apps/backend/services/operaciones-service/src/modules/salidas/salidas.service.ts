@@ -183,11 +183,15 @@ export class SalidasService {
 
     const catalogoService = this.requireCatalogoService();
 
-    const bus: any = await fetch(
-      `${catalogoService}/autobuses/salidas/${salida.autobusId}`,
-    );
+    const [busResponse, conductorResponse] = await Promise.all([
+      fetch(`${catalogoService}/autobuses/salidas/${salida.autobusId}`),
+      fetch(`${catalogoService}/conductores/salidas/${salida.conductorId}`),
+    ]);
 
-    const busData = await bus.json();
+    const [busData, conductorData] = await Promise.all([
+      busResponse.json(),
+      conductorResponse.json(),
+    ]);
 
     const orderedRoutes = [...(viaje?.rutas ?? [])].sort(
       (a, b) => a.orden - b.orden,
@@ -231,6 +235,7 @@ export class SalidasService {
       institucion: busData?.institucion ?? null,
       amenidades: busData?.servicios ?? null,
       tipoAutobus: busData?.tipoAutobus ?? null,
+      conductor: conductorResponse.ok ? conductorData : null,
       capacidadTotal: salida.capacidadTotal,
       asientosDisponibles:
         salida.capacidadTotal - asientosOcupados.size,

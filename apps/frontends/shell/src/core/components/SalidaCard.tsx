@@ -151,6 +151,7 @@ const SalidaCard = ({
           sx={{
             display: "flex",
             flexDirection: "column",
+            alignItems: "center",
             gap: 1,
             minWidth: 140,
           }}
@@ -160,7 +161,9 @@ const SalidaCard = ({
             sx={{
               display: "flex",
               flexWrap: "wrap",
+              justifyContent: "center",
               gap: 1,
+              width: "100%",
             }}
           >
             {salida.amenidades

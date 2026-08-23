@@ -7,14 +7,10 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 
 interface DrawerOptionsMenuProps {
-  onMiPerfilClick: () => void;
-  onAjustesClick: () => void;
   onCerrarSesionClick: () => void;
 }
 
 export default function DrawerOptionsMenu({
-  onMiPerfilClick,
-  onAjustesClick,
   onCerrarSesionClick,
 }: Readonly<DrawerOptionsMenuProps>) {
   const id = React.useId();
@@ -57,22 +53,6 @@ export default function DrawerOptionsMenu({
           },
         }}
       >
-        <MenuItem
-          onClick={() => {
-            handleClose();
-            onMiPerfilClick();
-          }}
-        >
-          Mi Perfil
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleClose();
-            onAjustesClick();
-          }}
-        >
-          Ajustes
-        </MenuItem>
         <MenuItem
           onClick={() => {
             handleClose();

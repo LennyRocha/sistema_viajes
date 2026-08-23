@@ -36,13 +36,22 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { cancelSalida, getSalidas, updateSalida } from "../api/salidasHttp";
 import {
+  cancelSalida,
+  getActiveAutobuses,
+  getActiveConductores,
+  getSalidas,
+  updateSalida,
+} from "../api/salidasHttp";
+import {
+  AutobusResumen,
+  ConductorResumen,
   EstadoSalida,
   HorarioConfiguracionSalida,
   SalidaDetalle,
   TipoSalida,
 } from "../types/SalidasApi";
+import { fullDriverName } from "../utils/formatters";
 
 interface Props extends CommonPageProps {}
 
@@ -271,7 +280,7 @@ function getBusTitle(salida: SalidaDetalle) {
     bus?.alias ||
     bus?.codigo_interno ||
     [bus?.marca, bus?.modelo].filter(Boolean).join(" ") ||
-    `Autobus #${salida.autobusId}`
+    "Autobus sin nombre disponible"
   );
 }
 
@@ -282,6 +291,12 @@ function getBusSubtitle(salida: SalidaDetalle) {
     salida.tipoAutobus?.nombre ||
     "Modelo pendiente"
   );
+}
+
+function getBusOptionLabel(bus: AutobusResumen) {
+  const identity = bus.alias || bus.codigo_interno || "Autobus";
+  const model = [bus.marca, bus.modelo].filter(Boolean).join(" ");
+  return model ? `${identity} - ${model}` : identity;
 }
 
 function StatCard({
@@ -526,7 +541,7 @@ function SalidaCard({
             <InfoLine
               icon={<PersonIcon fontSize="small" />}
               label="Conductor"
-              value={`Conductor #${salida.conductorId}`}
+              value={salida.conductor?.nombre || "Conductor sin nombre disponible"}
             />
             <InfoLine
               icon={<LocationOnIcon fontSize="small" />}
@@ -647,6 +662,10 @@ export default function SalidasIndex({
   const [reassigningId, setReassigningId] = React.useState<number | null>(null);
   const [reassignData, setReassignData] = React.useState({ autobusId: "", conductorId: "" });
   const [reassignOpen, setReassignOpen] = React.useState(false);
+  const [reassignAutobuses, setReassignAutobuses] = React.useState<AutobusResumen[]>([]);
+  const [reassignConductores, setReassignConductores] = React.useState<ConductorResumen[]>([]);
+  const [reassignOptionsLoading, setReassignOptionsLoading] = React.useState(false);
+  const [reassignOptionsError, setReassignOptionsError] = React.useState("");
   const [estadoFilter, setEstadoFilter] = React.useState<EstadoSalida | "TODOS">("TODOS");
   const [tipoFilter, setTipoFilter] = React.useState<TipoSalida | "TODOS">("TODOS");
   const [search, setSearch] = React.useState("");
@@ -693,13 +712,35 @@ export default function SalidasIndex({
     [loadSalidas, snack],
   );
 
-  const openReassign = React.useCallback((salida: SalidaDetalle) => {
+  const openReassign = React.useCallback(async (salida: SalidaDetalle) => {
     setReassigningId(salida.id);
     setReassignData({
       autobusId: String(salida.autobusId ?? ""),
       conductorId: String(salida.conductorId ?? ""),
     });
     setReassignOpen(true);
+    setReassignOptionsLoading(true);
+    setReassignOptionsError("");
+    setReassignAutobuses([]);
+    setReassignConductores([]);
+
+    try {
+      const institucionId = salida.institucion?.id ?? undefined;
+      const [autobuses, conductores] = await Promise.all([
+        getActiveAutobuses(institucionId),
+        getActiveConductores(institucionId),
+      ]);
+      setReassignAutobuses(autobuses);
+      setReassignConductores(conductores);
+    } catch (err) {
+      setReassignOptionsError(
+        err instanceof Error
+          ? err.message
+          : "No se pudieron cargar autobuses y conductores.",
+      );
+    } finally {
+      setReassignOptionsLoading(false);
+    }
   }, []);
 
   const handleReassign = React.useCallback(async () => {
@@ -762,6 +803,9 @@ export default function SalidasIndex({
   const programadas = salidas.filter((s) => s.estadoSalida === "PROGRAMADO").length;
   const enCurso = salidas.filter((s) => s.estadoSalida === "EN_CURSO").length;
   const canceladas = salidas.filter((s) => s.estadoSalida === "CANCELADO").length;
+  const selectedReassignSalida = salidas.find(
+    (salida) => salida.id === reassigningId,
+  );
 
   return (
     <>
@@ -913,26 +957,76 @@ export default function SalidasIndex({
         <DialogContent>
           <Stack spacing={2} sx={{ pt: 1 }}>
             <TextField
-              label="Autobus ID"
-              type="number"
+              label="Autobus"
+              select
               value={reassignData.autobusId}
               onChange={(event) =>
                 setReassignData((prev) => ({ ...prev, autobusId: event.target.value }))
               }
+              disabled={reassignOptionsLoading}
               fullWidth
-            />
+            >
+              <MenuItem value="">Selecciona un autobus</MenuItem>
+              {reassignData.autobusId &&
+              !reassignAutobuses.some(
+                (bus) => String(bus.id) === reassignData.autobusId,
+              ) ? (
+                <MenuItem value={reassignData.autobusId}>
+                  {selectedReassignSalida
+                    ? `${getBusTitle(selectedReassignSalida)} (actual)`
+                    : "Autobus actual"}
+                </MenuItem>
+              ) : null}
+              {reassignAutobuses.map((bus) => (
+                <MenuItem key={bus.id} value={String(bus.id)}>
+                  {getBusOptionLabel(bus)}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
-              label="Conductor ID"
-              type="number"
+              label="Conductor"
+              select
               value={reassignData.conductorId}
               onChange={(event) =>
                 setReassignData((prev) => ({ ...prev, conductorId: event.target.value }))
               }
+              disabled={reassignOptionsLoading}
               fullWidth
-            />
+            >
+              <MenuItem value="">Selecciona un conductor</MenuItem>
+              {reassignData.conductorId &&
+              !reassignConductores.some(
+                (driver) => String(driver.id) === reassignData.conductorId,
+              ) ? (
+                <MenuItem value={reassignData.conductorId}>
+                  {selectedReassignSalida?.conductor?.nombre
+                    ? `${selectedReassignSalida.conductor.nombre} (actual)`
+                    : "Conductor actual"}
+                </MenuItem>
+              ) : null}
+              {reassignConductores.map((driver) => (
+                <MenuItem key={driver.id} value={String(driver.id)}>
+                  {fullDriverName(driver)}
+                </MenuItem>
+              ))}
+            </TextField>
+            {reassignOptionsLoading ? (
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <CircularProgress size={18} />
+                <Typography variant="body2">Cargando opciones...</Typography>
+              </Stack>
+            ) : null}
+            {reassignOptionsError ? (
+              <Alert severity="error">{reassignOptionsError}</Alert>
+            ) : null}
             <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
               <Button onClick={() => setReassignOpen(false)}>Cancelar</Button>
-              <Button variant="contained" startIcon={<PaymentsIcon />} onClick={() => void handleReassign()}>
+              <Button
+                variant="contained"
+                startIcon={<PaymentsIcon />}
+                disabled={reassignOptionsLoading || Boolean(reassignOptionsError)}
+                onClick={() => void handleReassign()}
+              >
                 Guardar reasignacion
               </Button>
             </Stack>

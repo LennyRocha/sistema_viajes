@@ -137,12 +137,6 @@ export default function MainLayout({
             sx={{ display: "inline-flex" }}
           >
             <DrawerOptionsMenu
-              onMiPerfilClick={
-                DrawerMenuHandlers.onMiPerfilClick
-              }
-              onAjustesClick={
-                DrawerMenuHandlers.onAjustesClick
-              }
               onCerrarSesionClick={
                 DrawerMenuHandlers.onCerrarSesionClick
               }
